@@ -33,10 +33,18 @@ import {
 } from 'meta/worlds';
 import {
   BALL_BOUNCE_DAMPING,
+  BALL_GRAVITY,
+  BALL_RADIUS_MIN,
+  BALL_RADIUS_MAX,
+  BALL_VX_MIN,
+  BALL_VX_MAX,
+  BALL_VY_INIT,
   BOUNDS,
   FLOOR_Y,
   FREEZE_FADE_MS,
   FREEZE_HOLD_MS,
+  START_Y,
+  TOTAL_ROUNDS,
 } from '../Constants';
 import { FallingObjRegistry } from '../LogRegistry';
 import { calcScore, getPrecision } from '../Shared/FallingObjUtils';
@@ -93,13 +101,19 @@ export class BallObj extends Component implements IFallingObj {
     this._initialized = true;
     this._launched    = false;
 
-    this._objId      = p.objId;
-    this._cx         = p.cx;
-    this._cy         = p.startY;
-    this._vx         = p.ballVx;
-    this._vy         = p.ballVy;
-    this._ay         = p.ballAy;
-    this._ballRadius = p.ballRadius;
+    this._objId = p.objId;
+    this._cx    = this._transform.worldPosition.x;
+    this._cy    = START_Y;
+    this._ay    = -BALL_GRAVITY;
+    this._vy    = BALL_VY_INIT;
+
+    // Difficulty scaling from round index
+    const vxScale    = 0.6 + (p.roundIndex / (TOTAL_ROUNDS - 1)) * 0.4;
+
+    // Per-object randomization
+    const vxSign     = Math.random() < 0.5 ? 1 : -1;
+    this._ballRadius = BALL_RADIUS_MIN + Math.random() * (BALL_RADIUS_MAX - BALL_RADIUS_MIN);
+    this._vx         = vxSign * (BALL_VX_MIN + Math.random() * (BALL_VX_MAX - BALL_VX_MIN)) * vxScale;
 
     this._applyTransform();
     FallingObjRegistry.get().register(this);
@@ -166,6 +180,7 @@ export class BallObj extends Component implements IFallingObj {
 
     if (this.getLowestY() <= FLOOR_Y) {
       EventService.sendLocally(Events.FallingObjHitFloor, {});
+      this._colorComp.color = Color.red;
       this._frozen = true;
       return;
     }

@@ -47,6 +47,17 @@ import {
   FREEZE_HOLD_MS,
   LOG_ACCEL,
   LOG_H,
+  LOG_W_MIN,
+  LOG_W_MAX,
+  MAX_ANGLE_DEG,
+  MAX_TORQUE_DEG,
+  MAX_PIVOT,
+  SPEED_BASE,
+  SPEED_INC_PER_ROUND,
+  START_Y,
+  TOTAL_ROUNDS,
+  VX_INIT_MIN,
+  VX_INIT_MAX,
 } from '../Constants';
 import { FallingObjRegistry } from '../LogRegistry';
 import { calcScore, getPrecision } from '../Shared/FallingObjUtils';
@@ -106,16 +117,24 @@ export class LogObj extends Component implements IFallingObj {
     this._initialized = true;
     this._launched    = false;
 
-    this._objId      = p.objId;
-    this._cx         = p.cx;
-    this._cy         = p.startY;
-    this._angle      = p.angle;
-    this._torque     = p.torque;
-    this._pivotShift = p.pivotShift;
-    this._logW       = p.logW;
-    this._speed      = p.speed;
-    this._vx         = p.vx;
-    this._bounce     = p.bounce;
+    this._objId  = p.objId;
+    this._cx     = this._transform.worldPosition.x;
+    this._cy     = START_Y;
+    this._bounce = p.config.bounce;
+
+    // Difficulty scaling from round index
+    const vxScale = 0.6 + (p.roundIndex / (TOTAL_ROUNDS - 1)) * 0.4;
+    this._speed   = SPEED_BASE + p.roundIndex * SPEED_INC_PER_ROUND;
+
+    // Per-object randomization
+    const angleSign  = Math.random() < 0.5 ? 1 : -1;
+    const torqueSign = Math.random() < 0.5 ? 1 : -1;
+    const vxSign     = Math.random() < 0.5 ? 1 : -1;
+    this._logW       = LOG_W_MIN + Math.random() * (LOG_W_MAX - LOG_W_MIN);
+    this._angle      = angleSign  * (Math.random() * MAX_ANGLE_DEG  * 0.8 + 8) * (Math.PI / 180);
+    this._torque     = torqueSign * (Math.random() * (MAX_TORQUE_DEG - 40) + 40) * (Math.PI / 180);
+    this._pivotShift = p.config.pivot ? (Math.random() * 2 - 1) * MAX_PIVOT : 0;
+    this._vx         = vxSign * (VX_INIT_MIN + Math.random() * (VX_INIT_MAX - VX_INIT_MIN)) * vxScale;
 
     this._applyTransform();
     FallingObjRegistry.get().register(this);
@@ -182,6 +201,7 @@ export class LogObj extends Component implements IFallingObj {
 
     if (this.getLowestY() <= FLOOR_Y) {
       EventService.sendLocally(Events.FallingObjHitFloor, {});
+      this._colorComp.color = Color.red;
       this._frozen = true;
       return;
     }

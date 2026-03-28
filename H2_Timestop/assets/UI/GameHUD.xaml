@@ -67,6 +67,26 @@
     </Page.Resources>
 
     <Grid>
+        <Grid x:Name="ScoreContainer" HorizontalAlignment="Center" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top" Margin="0,200,0,200">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+            <b:Interaction.Triggers>
+                <b:DataTrigger Binding="{Binding Path=scoreAnimating}" Value="True">
+                    <b:ControlStoryboardAction Storyboard="{StaticResource ScorePulseAnim}"/>
+                </b:DataTrigger>
+            </b:Interaction.Triggers>
+            <Grid>
+                <TextBlock Text="{Binding Path=score, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3,3,0,0" TextAlignment="Center" FontSize="150"/>
+                <TextBlock Text="{Binding Path=score, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" StrokeThickness="4" Foreground="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="150" Stroke="#FF2E2B1A"/>
+                <TextBlock Text="{Binding Path=score, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" CharacterSpacing="-20" TextAlignment="Center" FontSize="150"/>
+            </Grid>
+        </Grid>
         <Grid x:Name="CenterTextContainer" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Grid.Visibility>
                 <Binding Path="showCenterText">
@@ -97,56 +117,6 @@
         <!-- ═══════════════════════════════════════════════════════════════════
              SCORE DISPLAY - Top of screen, always visible
              ═══════════════════════════════════════════════════════════════════ -->
-        <Grid x:Name="ScoreContainer" 
-              HorizontalAlignment="Center"
-              RenderTransformOrigin="0.5,0.5" VerticalAlignment="Bottom" Margin="0,40,0,40">
-            <Grid.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </Grid.RenderTransform>
-
-            <!-- Score animation trigger -->
-            <b:Interaction.Triggers>
-                <b:DataTrigger Binding="{Binding Path=scoreAnimating}" Value="True">
-                    <b:ControlStoryboardAction Storyboard="{StaticResource ScorePulseAnim}"/>
-                </b:DataTrigger>
-            </b:Interaction.Triggers>
-
-            <!-- Score text with outline effect using layered TextBlocks -->
-            <Grid>
-                <!-- Shadow/outline layer (offset) -->
-                <TextBlock Text="{Binding Path=score, StringFormat=F0}"
-                           FontFamily="Roboto"
-                           FontWeight="Bold"
-                           Foreground="#40000000"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Margin="3,3,0,0" TextAlignment="Center" FontSize="150"/>
-                
-                <!-- Outline layer -->
-                <TextBlock Text="{Binding Path=score, StringFormat=F0}"
-                           FontFamily="Roboto"
-                           FontWeight="Bold"
-                           Stroke="#FF1A1A2E"
-                           StrokeThickness="4"
-                           Foreground="Transparent"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center" TextAlignment="Center" FontSize="150"/>
-                
-                <!-- Main score text -->
-                <TextBlock Text="{Binding Path=score, StringFormat=F0}"
-                           FontFamily="Roboto"
-                           FontWeight="Bold"
-                           Foreground="#FFFFFFFF"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           CharacterSpacing="-20" TextAlignment="Center" FontSize="150"/>
-            </Grid>
-        </Grid>
 
         <!-- ═══════════════════════════════════════════════════════════════════
              CENTER ANNOUNCEMENT TEXT - Middle of screen

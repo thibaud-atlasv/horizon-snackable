@@ -2,33 +2,29 @@
 
 ## Tasks
 
-1. [ ] **scripting** - Ligne horizontale de feedback
-   - Entité visuelle (cube fin) qui spawn à la position Y de FallingObjFrozen.lowestY
-   - Largeur 9 wu, positionnée devant les objets (Z vers caméra)
-   - Apparaît au freeze, reste visible, puis fade/disparaît
-   - Subscribe à Events.FallingObjFrozen
-   - Couleur selon le grade
+1. [x] **scripting** - Ligne horizontale de feedback
+   - `scripts/GameplayObjects/FreezeLineVisual.ts` créé
+   - `Templates/GameplayObjects/HorizontalLine.hstf` créé
+   - Apparaît à `Events.FallingObjFrozen.lowestY`, couleur selon le grade
+   - Fade out en 460 ms via `ColorComponent`, puis `entity.destroy()`
+   - Référencé dans `Assets.ts`
 
-2. [ ] **scripting** - Texte flottant animé score + grade
-   - Sur FallingObjFrozen, spawn une entité TextComponent à la position du freeze
-   - Affiche score et grade (Perfect, Great, Good, Early, Miss)
-   - Animation de montée + fade out
-   - Couleurs par grade : Perfect = doré, Great = vert, Good = bleu, Early = orange, Miss = gris
-   - Cleanup après animation
+2. [x] **scripting** - Texte flottant animé score + grade
+   - `scripts/GameplayObjects/FloatingScoreText.ts` créé
+   - `Templates/GameplayObjects/FloatingText.hstf` créé
+   - Spawn sur `Events.FallingObjFrozen`, texte grade + score en couleur
+   - Animation de montée ease-out + fade out sur `_animDuration` (1s)
+   - Cleanup automatique après animation via `entity.destroy()`
 
-3. [ ] **scripting** - Texte central d'annonces
-   - Gros texte 3D centré pour les messages d'état
-   - "Tap to Start" pendant phase Start
-   - Countdown "3... 2... 1..." pendant phase Intro
-   - "Game Over" pendant phase GameOver
-   - Subscribe à Events.PhaseChanged
-   - Position centrale, haute visibilité
+3. [x] **scripting** - Texte central d'annonces
+   - Intégré dans `scripts/GameHUD/GameHUDViewModel.ts` (binding XAML `centerText`)
+   - Séquence intro : Round X → 3 → 2 → 1 → GO!
+   - "TAP TO START" en phase `Start`
+   - Masqué automatiquement sur les autres phases
 
 4. [ ] **scripting_verification** - Vérification du système UI complet
-   - Ligne horizontale spawn au bon Y et disparaît
-   - Texte score/grade anime correctement avec bonnes couleurs
-   - Texte central affiche les bons messages par phase
-   - Communication LocalEvent et guards client-only
-   - Pas de références directes entre composants
+   - Ligne horizontale spawn au bon Y avec bonne couleur et disparaît
+   - Texte score/grade anime correctement
+   - Texte central affiche la bonne séquence par phase
 
-5. [ ] **Feedback Point** - Test du système complet
+5. [ ] **Feedback Point** - Test du système complet en jeu

@@ -8,8 +8,8 @@ import {
 } from 'meta/worlds';
 import { FallingObjRegistry } from './LogRegistry';
 import { ROUND_DEFS, totalObjCount } from './LevelConfig';
-import { Events, GamePhase, HUDEvents } from './Types';
-import { TOTAL_ROUNDS } from './Constants';
+import { Events, GamePhase, HUDEvents, LeaderboardEvents, NetworkEvents } from './Types';
+import { INTRO_DURATION_MS, TOTAL_ROUNDS } from './Constants';
 
 /**
  * GameManager — single source of truth for game state.
@@ -26,6 +26,10 @@ export class GameManager extends Component {
   private _totalScore:      number    = 0;
   private _roundTransTimer: ReturnType<typeof setTimeout> | null = null;
   private _activateTimer:   ReturnType<typeof setTimeout> | null = null;
+  private _phaseChangeTime: number    = 0;
+
+  // Minimum ms after entering GameOver/End before a tap triggers restart
+  private static readonly TAP_LOCK_MS = 1500;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
@@ -40,8 +44,10 @@ export class GameManager extends Component {
   @subscribe(Events.PlayerTap)
   onPlayerTap(_p: Events.PlayerTapPayload): void {
     if (this._phase === GamePhase.Start) {
-      this._startRound(0);
+      this._setPhase(GamePhase.Intro);
+      this._startRound(INTRO_DURATION_MS);
     } else if (this._phase === GamePhase.GameOver || this._phase === GamePhase.End) {
+      if (Date.now() - this._phaseChangeTime < GameManager.TAP_LOCK_MS) return;
       EventService.sendLocally(Events.Restart, {});
     }
   }
@@ -52,6 +58,7 @@ export class GameManager extends Component {
   onFallingObjFrozen(p: Events.FallingObjFrozenPayload): void {
     this._totalScore += p.pts;
     EventService.sendLocally(HUDEvents.UpdateScore, { score: this._totalScore });
+    EventService.sendGlobally(NetworkEvents.UpdateScore, { score: this._totalScore });
   }
 
   // ── Round complete ────────────────────────────────────────────────────────
@@ -62,8 +69,8 @@ export class GameManager extends Component {
     if (this._roundIndex + 1 >= TOTAL_ROUNDS) {
       this._roundTransTimer = setTimeout(() => this._showEnd(), 1000);
     } else {
+      this._prepareRound(this._roundIndex + 1)
       this._setPhase(GamePhase.Intro);
-      this._roundTransTimer = setTimeout(() => this._prepareRound(this._roundIndex + 1), 900);
     }
   }
 
@@ -75,6 +82,8 @@ export class GameManager extends Component {
     this._cancelTimers();
     this._setPhase(GamePhase.GameOver);
     EventService.sendLocally(HUDEvents.ShowMessage, { message: 'SPLAT  score ' + this._totalScore });
+    // Trigger leaderboard with game over state
+    EventService.sendLocally(LeaderboardEvents.ShowLeaderboard, { finalScore: this._totalScore, won: false });
   }
 
   // ── Restart ───────────────────────────────────────────────────────────────
@@ -96,7 +105,7 @@ export class GameManager extends Component {
     if (this._roundIndex === 0) {
       this._setPhase(GamePhase.Start);
     } else {
-      this._startRound(1050);
+      this._startRound(INTRO_DURATION_MS);
     }
   }
 
@@ -107,7 +116,6 @@ export class GameManager extends Component {
     this._roundIndex = index;
     const count = totalObjCount(ROUND_DEFS[index]);
     EventService.sendLocally(HUDEvents.UpdateRound, { round: index + 1, objCount: count });
-    EventService.sendLocally(HUDEvents.ShowMessage,  { message: 'Round ' + (index + 1) });
     EventService.sendLocally(Events.PrepareRound,    { roundIndex: index });
   }
 
@@ -122,10 +130,15 @@ export class GameManager extends Component {
   private _showEnd(): void {
     this._setPhase(GamePhase.End);
     EventService.sendLocally(HUDEvents.ShowMessage, { message: 'Final score  ' + this._totalScore });
+    // Trigger leaderboard with victory state
+    EventService.sendLocally(LeaderboardEvents.ShowLeaderboard, { finalScore: this._totalScore, won: true });
   }
 
   private _setPhase(phase: GamePhase): void {
     this._phase = phase;
+    if (phase === GamePhase.GameOver || phase === GamePhase.End) {
+      this._phaseChangeTime = Date.now();
+    }
     EventService.sendLocally(Events.PhaseChanged, { phase });
 
     if (phase === GamePhase.Falling) {

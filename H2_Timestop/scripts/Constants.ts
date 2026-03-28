@@ -23,11 +23,11 @@ export const PX_TO_WORLD = HEIGHT / 700;  // ≈ 0.02286  (1 HTML px → world u
 // ─── Gameplay Zones (world space, Y-up) ──────────────────────────────────────
 
 /** Y below which a log corner triggers game-over. */
-export const FLOOR_Y  = (350 - 633) * PX_TO_WORLD;  // ≈ -6.47
+export const FLOOR_Y  = -8.5;  // ≈ -6.47
 /** Y where ghost-preview logs are shown. */
-export const START_Y  = (350 - 58)  * PX_TO_WORLD;  // ≈  6.68
+export const START_Y  = 6.5;  // ≈  6.68
 /** Top of the scoring zone (logs above this score 0). */
-export const PLAY_TOP = (350 - 110) * PX_TO_WORLD;  // ≈  5.49
+export const PLAY_TOP = 3;  // ≈  5.49
 
 // ─── Log Dimensions ───────────────────────────────────────────────────────────
 
@@ -75,18 +75,18 @@ export const FREEZE_FADE_MS  = 460;   // duration of frozen log fade-out
 // ─── Scoring Thresholds ───────────────────────────────────────────────────────
 // d = 1 - precision (distance from perfect). 0 = touching floor, 1 = at PLAY_TOP.
 
-export const PERFECT_DIST = 0.035;
+export const PERFECT_DIST = 0.05;
 export const GREAT_DIST   = 0.13;
 export const GOOD_DIST    = 0.32;
 export const EARLY_DIST   = 0.6;
 
 export const SCORE_PERFECT = 1000;
-export const SCORE_GREAT   = 650;
+export const SCORE_GREAT   = 750;
 export const SCORE_GOOD    = 350;
 export const SCORE_EARLY   = 150;
 export const SCORE_MISS    = 30;
 /** Bonus: up to +250 pts based on precision (multiplied by precision 0–1). */
-export const SCORE_BONUS_MAX = 250;
+export const SCORE_BONUS_MAX = 350;
 
 // ─── Log Physics ──────────────────────────────────────────────────────────────
 
@@ -106,3 +106,8 @@ export const BALL_BOUNCE_DAMPING   = 0.88;  // vx retention factor on wall hit
 // ─── Rounds ───────────────────────────────────────────────────────────────────
 
 export const TOTAL_ROUNDS = 10;
+export const INTRO_DURATION_MS = 1200;
+
+// Leaderboards
+
+export const LEADERBOARD_API_NAME = 'totalscore';

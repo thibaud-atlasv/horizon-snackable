@@ -23,9 +23,8 @@ import {
 } from 'meta/worlds';
 import type { Maybe } from 'meta/worlds';
 import { Events, GamePhase, HUDEvents } from '../Types';
+import { INTRO_DURATION_MS } from '../Constants';
 
-// Countdown timing (ms)
-const COUNTDOWN_STEP_MS = 500;
 
 /**
  * ViewModel exposing reactive properties for HUD UI binding.
@@ -66,7 +65,6 @@ export class GameHUDViewModel extends Component {
     // Initialize with hidden center text
     this._viewModel.showCenterText = false;
     this._viewModel.score = 0;
-    console.log('[GameHUDViewModel] Initialized');
   }
 
   // ── Phase Changes ────────────────────────────────────────────────────────────
@@ -87,13 +85,9 @@ export class GameHUDViewModel extends Component {
       case GamePhase.Falling:
       case GamePhase.Clearing:
       case GamePhase.RoundEnd:
-        this._hideCenterText();
-        break;
       case GamePhase.GameOver:
-        this._showCenterText('GAME OVER', '#FF4444');
-        break;
       case GamePhase.End:
-        this._showCenterText('VICTORY!', '#FFD700');
+        this._hideCenterText();
         break;
     }
   }
@@ -104,16 +98,9 @@ export class GameHUDViewModel extends Component {
   onPrepareRound(p: Events.PrepareRoundPayload): void {
     if (NetworkingService.get().isServerContext()) return;
     this._currentRoundIndex = p.roundIndex;
-    console.log(`[GameHUDViewModel] PrepareRound roundIndex=${p.roundIndex}`);
   }
 
   // ── Score Updates ────────────────────────────────────────────────────────────
-
-  @subscribe(Events.FallingObjFrozen)
-  onFallingObjFrozen(p: Events.FallingObjFrozenPayload): void {
-    if (NetworkingService.get().isServerContext()) return;
-    // We don't track score here - HUDEvents.UpdateScore gives us the total
-  }
 
   @subscribe(HUDEvents.UpdateScore)
   onUpdateScore(payload: HUDEvents.UpdateScorePayload): void {
@@ -156,22 +143,20 @@ export class GameHUDViewModel extends Component {
   }
 
   private _startIntroSequence(): void {
-    // Show "WAVE X" first (X = roundIndex + 1)
-    const waveNum = this._currentRoundIndex + 1;
-    this._showCenterText(`3`, '#FFFFFF');
+    const steps = [
+      { text: '3', color: '#FFFFFF' },
+      { text: '2', color: '#FFFFFF' },
+      { text: '1', color: '#FFFFFF' },
+      { text: `Round ${this._currentRoundIndex + 1}`, color: '#FFFFFF' },
+    ];
+    const COUNTDOWN_STEP_MS = INTRO_DURATION_MS / steps.length;
 
-    this._countdownTimer = setTimeout(() => {
-      this._showCenterText(`2`, '#FFFFFF');
-
+    steps.forEach((step, i) => {
       this._countdownTimer = setTimeout(() => {
-        this._showCenterText(`1`, '#FFFFFF');
-
-        this._countdownTimer = setTimeout(() => {
-          this._showCenterText(`GO!`, '#FFFFFF');
-          this._countdownTimer = null;
-        }, COUNTDOWN_STEP_MS);
-      }, COUNTDOWN_STEP_MS);
-    }, COUNTDOWN_STEP_MS); // Show WAVE for 150ms before countdown
+        this._showCenterText(step.text, step.color);
+        if (i === steps.length - 1) this._countdownTimer = null;
+      }, i * COUNTDOWN_STEP_MS);
+    });
   }
 
   private _triggerScoreAnimation(): void {

@@ -17,7 +17,7 @@ import {
 import type { Entity, Maybe } from 'meta/worlds';
 import { Events, ScoreGrade } from '../Types';
 import { FREEZE_HOLD_MS, FREEZE_FADE_MS, WIDTH } from '../Constants';
-import { Primitives } from '../Assets';
+import { Assets } from '../Assets';
 
 /**
  * FreezeLineVisual — spawns a horizontal line when objects are frozen.
@@ -33,7 +33,7 @@ import { Primitives } from '../Assets';
 @component()
 export class FreezeLineVisual extends Component {
   // Template for the cube primitive
-  private readonly _cubeTemplate = Primitives.Cube;
+  private readonly _cubeTemplate = Assets.HorizontalLine;
 
   // Active lines being animated
   private readonly _activeLines: FreezeLineData[] = [];
@@ -61,7 +61,6 @@ export class FreezeLineVisual extends Component {
   onStart(): void {
     // Client-only execution
     if (NetworkingService.get().isServerContext()) return;
-    console.log('[FreezeLineVisual] Initialized');
   }
 
   @subscribe(Events.FallingObjFrozen)
@@ -69,7 +68,6 @@ export class FreezeLineVisual extends Component {
     // Client-only
     if (NetworkingService.get().isServerContext()) return;
 
-    console.log(`[FreezeLineVisual] Spawning line at Y=${payload.lowestY}, grade=${ScoreGrade[payload.grade]}`);
     this._spawnLine(payload.lowestY, payload.grade);
   }
 
@@ -135,7 +133,6 @@ export class FreezeLineVisual extends Component {
     };
 
     this._activeLines.push(lineData);
-    console.log(`[FreezeLineVisual] Line spawned, active count: ${this._activeLines.length}`);
   }
 
   private _updateLineAlpha(line: FreezeLineData, alpha: number): void {
@@ -148,7 +145,6 @@ export class FreezeLineVisual extends Component {
   private _destroyLine(line: FreezeLineData): void {
     if (line.entity && !line.entity.isDestroyed()) {
       line.entity.destroy();
-      console.log('[FreezeLineVisual] Line destroyed');
     }
   }
 }

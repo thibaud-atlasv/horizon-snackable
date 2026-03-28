@@ -19,7 +19,7 @@ import {
 } from 'meta/worlds';
 import type { Entity, Maybe, OnWorldUpdateEventPayload } from 'meta/worlds';
 import { Events, ScoreGrade } from '../Types';
-import { FloatingText } from '../Assets';
+import { Assets } from '../Assets';
 
 /**
  * FloatingScoreText — spawns animated score/grade text on freeze events.
@@ -38,7 +38,7 @@ import { FloatingText } from '../Assets';
 export class FloatingScoreText extends Component {
   // ── Template Reference ────────────────────────────────────────────────────
 
-  private _textTemplate: TemplateAsset = FloatingText;
+  private _textTemplate: TemplateAsset = Assets.FloatingText;
 
   // ── Tunable Properties ────────────────────────────────────────────────────
 
@@ -85,8 +85,6 @@ export class FloatingScoreText extends Component {
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
     this._worldService = WorldService.get();
-    console.log('[FloatingScoreText] Initialized');
-    
     this._colorComponent = this.entity.getChildrenWithComponent(ColorComponent)[0]?.getComponent(ColorComponent);
     this.updateColor(new Color(0,0,0,0));
   }
@@ -214,7 +212,6 @@ export class FloatingScoreText extends Component {
       elapsed: 0,
     });
 
-    console.log(`[FloatingScoreText] Spawned: "${text.replace('\n', ' ')}" at Y=${startPos.y.toFixed(2)}`);
   }
 }
 

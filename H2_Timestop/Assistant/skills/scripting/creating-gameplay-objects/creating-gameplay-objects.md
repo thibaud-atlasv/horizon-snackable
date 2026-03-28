@@ -7,6 +7,18 @@ local_tools:
   - template_gameplay_object
 ---
 
+# Project-Specific Rules (H2_Timestop)
+
+> **⚠️ READ FIRST — This overrides generic rules below**
+>
+> - This game is **client-only**. Always use `NetworkMode.LocalOnly` when spawning. Never use `NetworkMode.Networked`.
+> - There is **no server-owned object pattern** in this game — all objects are local.
+> - New **falling objects** (the core gameplay objects) must follow the 5-file extension checklist in `Assistant/skills/scripting/falling-objects/falling-objects.md`. Do not use `template_gameplay_object` for falling objects.
+> - All template assets must be registered in `Assets.ts`. No hardcoded `.hstf` paths in components.
+> - Visual-only spawned objects (freeze line, floating text) use `NetworkMode.LocalOnly` and self-destroy after their animation.
+
+---
+
 # Creating Gameplay Objects
 
 This contains essential guidelines to apply when creating any gameplay object that you want to add to the world. It should be used to compliment other skills that provide expert guidance on more specific gameplay object types (hazards, collectibles, etc.)

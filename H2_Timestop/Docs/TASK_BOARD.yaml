@@ -29,6 +29,20 @@ tasks:
       - name: Texte central impactant (Game Over, Tap to Start, Wave X, Countdown)
         status: done
 
+  - name: Leaderboard UI
+    status: done
+    summary: Leaderboard UI showing top 10 scores with player rank highlighting
+    files:
+      - scripts/Types.ts
+      - scripts/GameHUD/LeaderboardHUDViewModel.ts
+      - assets/UI/LeaderboardHUD.xaml
+      - scripts/GameManager.ts
+    subtasks:
+      - name: Create leaderboard XAML and ViewModel
+        status: done
+      - name: Verify implementation
+        status: done
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []

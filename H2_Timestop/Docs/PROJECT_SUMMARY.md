@@ -2,51 +2,51 @@
 
 ## Concept
 
-**TIME STOP** est un jeu d'arcade mobile portrait (Meta Horizon Worlds) pour un joueur.
+**TIME STOP** is a mobile portrait arcade game (Meta Horizon Worlds) for a single player.
 
-Des objets tombent du haut de l'écran avec rotation, dérive latérale et rebonds. Le joueur **tape l'écran** pour les figer en vol juste avant qu'ils touchent le sol. Plus l'objet est proche du sol au moment du tap, plus le score est élevé. Si un objet atteint le sol sans être figé, c'est **Game Over**.
+Objects fall from the top of the screen with rotation, lateral drift, and wall bounces. The player **taps the screen** to freeze them mid-air just before they hit the floor. The closer the object is to the floor at the moment of the tap, the higher the score. If an object reaches the floor without being frozen, it is **Game Over**.
 
-| Attribut | Valeur |
+| Attribute | Value |
 |---|---|
-| Feeling | Tension précision — timing sous pression, satisfaction du "perfect freeze" |
+| Feel | Precision tension — timing under pressure, satisfaction of the "perfect freeze" |
 | Session | ~3–5 minutes (10 rounds) |
-| Plateforme | Mobile portrait, solo, Meta Horizon Worlds |
-| Exécution | Client-only (`isServerContext()` guard partout) |
+| Platform | Mobile portrait, solo, Meta Horizon Worlds |
+| Execution | Client-only (`isServerContext()` guard everywhere) |
 
 ---
 
-## Boucle de jeu
+## Game Loop
 
 ```
 [Start]
   → TAP → [Intro] (round banner + ghost preview)
-         → objets activés un par un (1s d'intervalle)
-         → [Falling] TAP → score l'objet le plus bas → [Clearing] (280ms)
-                       └── tous figés ? → [RoundEnd] → prochain round
-                                       sinon → [Falling]
-  → dernier round terminé → [End] → TAP → restart
-  → objet touche FLOOR_Y → [GameOver] → TAP → restart
+         → objects activated one by one (1s interval)
+         → [Falling] TAP → scores the lowest object → [Clearing] (280ms)
+                       └── all frozen? → [RoundEnd] → next round
+                                       else → [Falling]
+  → last round complete → [End] → TAP → restart
+  → object touches FLOOR_Y → [GameOver] → TAP → restart
 ```
 
 ### Phases (`GamePhase`)
 
 | Phase | Description |
 |---|---|
-| `Start` | Écran titre, "Tap to start". Objets du round 0 déjà pré-spawnés en ghost. |
-| `Intro` | Bannière "Round N", objets visibles mais inactifs (ghost). Durée : 1050 ms. |
-| `Falling` | Objets actifs en chute. Tap accepté. Les objets sont activés un par un (1s entre chaque). |
-| `Clearing` | Pause de 280 ms après un freeze (objets physiquement arrêtés). |
-| `RoundEnd` | Transition entre rounds. |
-| `GameOver` | Un objet a touché `FLOOR_Y`. Affiche le score final. |
-| `End` | Les 10 rounds sont terminés. Affiche le score final. |
+| `Start` | Title screen, "Tap to start". Round 0 objects already pre-spawned as ghosts. |
+| `Intro` | "Round N" banner, objects visible but inactive (ghost). Duration: 1050 ms. |
+| `Falling` | Objects actively falling. Tap accepted. Objects are activated one by one (1s apart). |
+| `Clearing` | 280 ms pause after a freeze (objects physically stopped). |
+| `RoundEnd` | Transition between rounds. |
+| `GameOver` | An object reached `FLOOR_Y`. Displays final score. |
+| `End` | All 10 rounds complete. Displays final score. |
 
 ---
 
-## Système de score
+## Scoring System
 
-Le score d'un freeze est calculé sur la **précision** = fraction du trajet `PLAY_TOP → FLOOR_Y` parcouru (0 = au-dessus de la zone, 1 = au sol).
+The freeze score is based on **precision** = fraction of the `PLAY_TOP → FLOOR_Y` distance traveled (0 = above the zone, 1 = at the floor).
 
-| Grade | Seuil (distance au parfait) | Points de base | Bonus max |
+| Grade | Threshold (distance from perfect) | Base Points | Max Bonus |
 |---|---|---|---|
 | Perfect | ≤ 3.5 % | 1000 | +250 |
 | Great | ≤ 13 % | 650 | +250 |
@@ -54,28 +54,28 @@ Le score d'un freeze est calculé sur la **précision** = fraction du trajet `PL
 | Early | ≤ 60 % | 150 | +250 |
 | Miss | > 60 % | 30 | +250 |
 
-Le bonus est `precision × 250` (arrondi), cumulé au score de base. Le score total s'accumule sur les 10 rounds.
+The bonus is `precision × 250` (rounded), added to the base score. Total score accumulates over all 10 rounds.
 
 ---
 
-## Zones de jeu (Y-up, world units)
+## Play Area (Y-up, world units)
 
 ```
  6.68  ──  START_Y   (spawn / ghost preview)
- 5.49  ──  PLAY_TOP  (début de la zone de scoring)
-  ...     [zone de jeu active]
--6.47  ──  FLOOR_Y   (game-over si un coin d'objet descend en-dessous)
+ 5.49  ──  PLAY_TOP  (start of scoring zone)
+  ...     [active play zone]
+-6.47  ──  FLOOR_Y   (game-over if any corner of an object goes below)
 ```
 
-Play area : **9 × 16 world units**, centrée à l'origine.
+Play area: **9 × 16 world units**, centered at the origin.
 
 ---
 
-## Progression des rounds
+## Round Progression
 
-10 rounds avec difficulté croissante. Trois mécaniques s'introduisent progressivement :
+10 rounds with increasing difficulty. Three mechanics are introduced progressively:
 
-| Round | Objets | Rebond mur | Pivot excentré |
+| Round | Objects | Wall Bounce | Off-center Pivot |
 |---|---|---|---|
 | 1 | 1 | — | — |
 | 2 | 2 | — | — |
@@ -85,39 +85,39 @@ Play area : **9 × 16 world units**, centrée à l'origine.
 | 6–7 | 4 | ✓ | ✓ |
 | 8–10 | 5 | ✓ | ✓ |
 
-La vitesse de chute augmente de ~0.34 wu/s par round (base ~3.61 wu/s).
+Fall speed increases by ~0.34 wu/s per round (base ~3.61 wu/s).
 
 ---
 
-## Physique des objets (type Log)
+## Object Physics (Log type)
 
-Chaque objet Log est un rectangle plat (`logW × LOG_H × 0.1` world units), redimensionné dynamiquement via `TransformComponent.localScale`.
+Each Log object is a flat rectangle (`logW × LOG_H × 0.1` world units), dynamically resized via `TransformComponent.localScale`.
 
-| Paramètre | Plage | Détail |
+| Parameter | Range | Details |
 |---|---|---|
-| Largeur | 2.06 – 3.89 wu | Aléatoire à chaque spawn |
-| Vitesse de chute | 3.61 – 6.67 wu/s | Constante par objet, augmente par round |
-| Dérive horizontale (vx) | 1.03 – 2.74 wu/s | Signe indépendant de l'angle |
-| Angle initial | ±8 – 48 ° | Signe indépendant du torque |
-| Torque | ±40 – 220 °/s | Donne la rotation pendant la chute |
-| Pivot excentré | ±0 – 50 % de la demi-largeur | Rotation autour d'un point décalé (rounds 5+) |
+| Width | 2.06 – 3.89 wu | Random at each spawn |
+| Fall speed | 3.61 – 6.67 wu/s | Constant per object, increases per round |
+| Horizontal drift (vx) | 1.03 – 2.74 wu/s | Sign independent from angle |
+| Initial angle | ±8 – 48 ° | Sign independent from torque |
+| Torque | ±40 – 220 °/s | Drives rotation during fall |
+| Off-center pivot | ±0 – 50 % of half-width | Rotation around a shifted point (rounds 5+) |
 
-**Rebond mur :** correction de position + inversion de `vx` avec damping + kick de torque.
-- Hard bounce (rounds 3+) : `BOUNCE_KICK_FULL ≈ 1.03 wu/s`, `BOUNCE_TORQUE_ADD = 2.0 rad/s`
-- Soft deflection (rounds 1–2) : `BOUNCE_KICK_SOFT ≈ 0.57 wu/s`, `BOUNCE_TORQUE_ADD_SOFT = 0.8 rad/s`
+**Wall bounce:** position correction + `vx` inversion with damping + torque kick.
+- Hard bounce (rounds 3+): `BOUNCE_KICK_FULL ≈ 1.03 wu/s`, `BOUNCE_TORQUE_ADD = 2.0 rad/s`
+- Soft deflection (rounds 1–2): `BOUNCE_KICK_SOFT ≈ 0.57 wu/s`, `BOUNCE_TORQUE_ADD_SOFT = 0.8 rad/s`
 
-**Freeze → fade out :** 240 ms à pleine opacité, puis 460 ms de fondu via `ColorComponent` alpha → `entity.destroy()`.
+**Freeze → fade out:** 240 ms at full opacity, then 460 ms fade via `ColorComponent` alpha → `entity.destroy()`.
 
 ---
 
-## Système ghost (pré-visualisation)
+## Ghost System (Preview)
 
-Au début de chaque round, **tous les objets sont spawnés simultanément** en mode ghost :
-- Visibles à `START_Y`, dans leur position/angle/échelle de départ
-- Inactifs (pas enregistrés dans `FallingObjRegistry`, physique désactivée)
-- Quand la phase `Falling` commence, `GameManager` envoie `FallingObjActivate` un par un toutes les 1 seconde
+At the start of each round, **all objects are spawned simultaneously** in ghost mode:
+- Visible at `START_Y`, in their starting position/angle/scale
+- Inactive (not registered in `FallingObjRegistry`, physics disabled)
+- When the `Falling` phase begins, `GameManager` sends `FallingObjActivate` one by one every 1 second
 
-Le joueur peut donc **voir tous les objets à venir** avant que la chute ne démarre.
+The player can therefore **see all upcoming objects** before the fall begins.
 
 ---
 
@@ -125,35 +125,36 @@ Le joueur peut donc **voir tous les objets à venir** avant que la chute ne dém
 
 ### Communication
 
-Tous les composants communiquent exclusivement via `LocalEvent`. **Aucune référence directe entre composants.** L'état partagé passe par `FallingObjRegistry` (singleton) ou par les events.
+All components communicate exclusively via `LocalEvent`. **No direct references between components.** Shared state goes through `FallingObjRegistry` (singleton) or events.
 
-### Fichiers clés
+### Key Files
 
-| Fichier | Classe | Rôle |
+| File | Class | Role |
 |---|---|---|
-| `Scripts/Types.ts` | — | Enums, interfaces, tous les events et payloads |
-| `Scripts/Constants.ts` | — | Toutes les constantes numériques de gameplay |
-| `Scripts/LevelConfig.ts` | — | Définitions des rounds (`ROUND_DEFS`) |
-| `Scripts/Assets.ts` | — | `FallingObjTemplates` : template par `FallingObjType` |
-| `Scripts/GameManager.ts` | `GameManager` | Orchestration phases, score, restart, activation séquentielle |
-| `Scripts/InputManager.ts` | `InputManager` | Tap → score → freeze → phase Clearing/RoundComplete |
-| `Scripts/SpawnManager.ts` | `SpawnManager` | Spawn ghost + envoi `InitFallingObj` + `AllObjsSpawned` |
-| `Scripts/LogRegistry.ts` | `FallingObjRegistry` | Singleton : suivi des objets actifs (non-waiting) |
-| `Scripts/GameplayObjects/Log.ts` | `FallingObj` | Physique + lifecycle de chaque objet (dispatch par type) |
-| `Scripts/ClientSetup.ts` | `ClientSetup` | Caméra fixe + `FocusedInteraction` → `Events.PlayerTap` |
-| `Scripts/GameHUD/GameHUDViewModel.ts` | `GameHUDViewModel` | Gère le HUD 2D : score, annonces centrales (phases, countdown "3→2→1", "GAME OVER", "VICTORY!") |
-| `assets/UI/GameHUD.xaml` | — | XAML arcade-style HUD mobile : score en haut avec animation pulse, texte central dynamique avec animations pop-in |
-| `Scripts/CollisionManager.ts` | `CollisionManager` | AABB générique (disponible, non utilisé par la physique principale) |
-| `Scripts/GameplayObjects/FreezeLineVisual.ts` | `FreezeLineVisual` | Feedback visuel : ligne horizontale colorée à la position Y du freeze |
-| `Scripts/GameplayObjects/FloatingScoreText.ts` | `FloatingScoreText` | Feedback visuel : texte grade + score animé montant avec fade out |
+| `Scripts/Types.ts` | — | Enums, interfaces, all events and payloads |
+| `Scripts/Constants.ts` | — | All numeric gameplay constants |
+| `Scripts/LevelConfig.ts` | — | Round definitions (`ROUND_DEFS`) |
+| `Scripts/Assets.ts` | — | `FallingObjTemplates`: template per `FallingObjType` — **all template assets must be referenced here by path** |
+| `Scripts/GameManager.ts` | `GameManager` | Phase orchestration, score, restart, sequential activation |
+| `Scripts/InputManager.ts` | `InputManager` | Tap → score → freeze → Clearing/RoundComplete phase |
+| `Scripts/SpawnManager.ts` | `SpawnManager` | Ghost spawn + `InitFallingObj` + `AllObjsSpawned` dispatch |
+| `Scripts/LogRegistry.ts` | `FallingObjRegistry` | Singleton: tracks active (non-waiting) objects |
+| `Scripts/GameplayObjects/Log.ts` | `FallingObj` | Physics + lifecycle for each object (dispatched by type) |
+| `Scripts/ClientSetup.ts` | `ClientSetup` | Fixed camera + `FocusedInteraction` → `Events.PlayerTap` |
+| `Scripts/GameHUD/GameHUDViewModel.ts` | `GameHUDViewModel` | Manages the 2D HUD: score, central announcements (phases, "3→2→1" countdown, "GAME OVER", "VICTORY!") |
+| `Scripts/LeaderboardHUD/LeaderboardHUDViewModel.ts` | `LeaderboardHUDViewModel` | Manages the leaderboard overlay: top 5 with current player highlight, score submission to `LeaderboardsService`, integrated restart button |
+| `assets/UI/GameHUD.xaml` | — | Arcade-style mobile HUD: top score with pulse animation, dynamic central text with pop-in animations |
+| `assets/UI/LeaderboardHUD.xaml` | — | Arcade-style leaderboard overlay: "VICTORY!" or "GAME OVER" with dynamic color, player score and rank, top 5 leaderboard with player highlight and gold/silver/bronze medals |
+| `Scripts/CollisionManager.ts` | `CollisionManager` | Generic AABB (available, not used by main physics) |
+| `Scripts/GameplayObjects/FreezeLineVisual.ts` | `FreezeLineVisual` | Visual feedback: colored horizontal line at freeze Y position |
+| `Scripts/GameplayObjects/FloatingScoreText.ts` | `FloatingScoreText` | Visual feedback: grade + score text, animated upward with fade out |
 
-
-### Flow d'événements principal
+### Main Event Flow
 
 ```
 ClientSetup.onTouchStarted → Events.PlayerTap
-  → GameManager.onPlayerTap  (Start/GameOver/End : transition de phase)
-  → InputManager.onPlayerTap (Falling : score + freeze)
+  → GameManager.onPlayerTap  (Start/GameOver/End: phase transition)
+  → InputManager.onPlayerTap (Falling: score + freeze)
 
 SpawnManager.onPrepareRound → spawnTemplate × N → Events.InitFallingObj (ghost)
   → Events.AllObjsSpawned → GameManager.onAllObjsSpawned → startRound()
@@ -167,41 +168,78 @@ InputManager._handleTap → Events.FallingObjFreeze → FallingObj.onFreeze
   → Events.FallingObjFrozen → GameManager.onFallingObjFrozen (score)
                             → FreezeLineVisual.onFallingObjFrozen (spawn line)
   → (after RESUME_DELAY) → Events.PhaseChanged(Falling) or RoundComplete
+
+GameManager._showEnd/_onFallingObjHitFloor → HUDEvents.ShowLeaderboard
+  → LeaderboardHUDViewModel.onShowLeaderboard → fetch + display leaderboard
 ```
 
 ---
 
-## Système de types d'objets (extensible)
+## Leaderboard System
 
-`FallingObjType` (enum dans `Types.ts`) identifie chaque variante d'objet. Ajouter un nouveau type nécessite des modifications dans **5 endroits uniquement** :
+The leaderboard is displayed automatically at the end of each game (GameOver or End/Victory).
 
-1. **`Types.ts`** — nouvelle valeur dans `FallingObjType`
-2. **`Assets.ts`** — entrée dans `FallingObjTemplates`
-3. **`LevelConfig.ts`** — utiliser le nouveau type dans une `WaveObjDef`
-4. **`SpawnManager._buildObjConfig()`** — nouveau `case` de génération des paramètres
-5. **`FallingObj` (Log.ts)** — nouveaux `case` dans `_initTypePhysics`, `_tickTypePhysics`, `_applyTypeTransform`, et `getLowestY()` si le bounding volume diffère
+### Features
+
+| Feature | Description |
+|---|---|
+| Auto submission | Score submitted via `LeaderboardsService.updateEntryForPlayer()` |
+| Top 5 | Displays the top 5 scores with rank, name, and score |
+| Player highlight | Current player's row is highlighted in gold |
+| Medals | Top 3 colored: gold (1st), silver (2nd), bronze (3rd) |
+| Loading/Error | Loading and error states handled gracefully |
+| Restart button | Integrated "Tap to restart" button in the leaderboard overlay |
+
+### Events
+
+| Event | Payload | Role |
+|---|---|---|
+| `HUDEvents.ShowLeaderboard` | `playerScore`, `isVictory` | Triggers leaderboard display |
+| `HUDEvents.HideLeaderboard` | — | Hides the leaderboard |
+
+### Configuration
+
+The leaderboard API name is defined in `Constants.ts` as `LEADERBOARD_API_NAME` (default: `timestop_highscores`). This leaderboard must be configured in the Meta Horizon world settings.
 
 ---
 
 ## Templates
 
-| Template | Asset | Type | Description |
-|---|---|---|---|
-| `Templates/GameplayObjects/Log.hstf` | `FallingObjTemplates[FallingObjType.Log]` | Log | Cube scale 1 — redimensionné dynamiquement par `FallingObj` |
-| `Templates/GameplayObjects/FloatingText.hstf` | `FloatingScoreText._textTemplate` | Text | WorldTextComponent pour le texte flottant animé |
+All template assets **must be registered in `Scripts/Assets.ts`** using a `TemplateAsset` with the relative path to the `.hstf` file. No component should reference a template path directly.
+
+```typescript
+// Scripts/Assets.ts
+export const FallingObjTemplates = {
+  [FallingObjType.Log]: new TemplateAsset('../Templates/GameplayObjects/Log.hstf'),
+} as const;
+```
+
+| Template | Asset reference | Description |
+|---|---|---|
+| `Templates/GameplayObjects/Log.hstf` | `FallingObjTemplates[FallingObjType.Log]` | Cube scale 1 — dynamically resized by `FallingObj` |
+| `Templates/GameplayObjects/FloatingText.hstf` | `FloatingScoreText._textTemplate` | WorldTextComponent for animated floating text |
+| `Templates/GameplayObjects/HorizontalLine.hstf` | `FreezeLineVisual` template asset | Horizontal line for freeze visual feedback |
 
 ---
 
-## Points d'extension prioritaires
+## Extension Points
 
-| Fonctionnalité | Où intervenir |
+`FallingObjType` (enum in `Types.ts`) identifies each object variant. Adding a new type requires changes in **5 places only**:
+
+1. **`Types.ts`** — new value in `FallingObjType`
+2. **`Assets.ts`** — new entry in `FallingObjTemplates` with the `.hstf` path
+3. **`LevelConfig.ts`** — use the new type in a `WaveObjDef`
+4. **`SpawnManager._buildObjConfig()`** — new `case` for parameter generation
+5. **`FallingObj` (Log.ts)** — new `case` in `_initTypePhysics`, `_tickTypePhysics`, `_applyTypeTransform`, and `getLowestY()` if the bounding volume differs
+
+| Feature | Where to intervene |
 |---|---|
-| Nouvel objet tombant (ex: boule, pic) | `FallingObjType` + `Assets` + `LevelConfig` + `SpawnManager` + `FallingObj` |
-| Nouveau round / configuration wave | `LevelConfig.ts → ROUND_DEFS` |
-| Feedback visuel grade (texte flottant) | `FloatingScoreText` abonné à `Events.FallingObjFrozen` — affiche grade + score animé montant avec fade out |
-| Ligne de freeze (actif) | `FreezeLineVisual` abonné à `Events.FallingObjFrozen` — affiche une ligne colorée selon le grade pendant 240ms puis fade out 460ms |
-| Sons / audio | Nouveau composant abonné aux events `FallingObjFrozen`, `FallingObjHitFloor`, etc. |
-| Couleurs par type d'objet | `colorIdx` dans `InitFallingObjPayload` → appliquer dans `FallingObj._initTypePhysics` |
-| Effets spéciaux au freeze | Abonner un composant VFX à `Events.FallingObjFrozen` (le payload contient `lowestY`) |
-| HUD étendu (combo, timer) | Nouveau payload dans `HUDEvents` + handler dans `GameHUDViewModel` |
-| Obstacles statiques | Nouveau composant + `ICollider` + `CollisionManager` |
+| New falling object (e.g. ball, spike) | `FallingObjType` + `Assets` + `LevelConfig` + `SpawnManager` + `FallingObj` |
+| New round / wave configuration | `LevelConfig.ts → ROUND_DEFS` |
+| Grade visual feedback (floating text) | `FloatingScoreText` subscribed to `Events.FallingObjFrozen` |
+| Freeze line (active) | `FreezeLineVisual` subscribed to `Events.FallingObjFrozen` |
+| Sound / audio | New component subscribed to `FallingObjFrozen`, `FallingObjHitFloor`, etc. |
+| Colors per object type | `colorIdx` in `InitFallingObjPayload` → apply in `FallingObj._initTypePhysics` |
+| Special effects on freeze | Subscribe a VFX component to `Events.FallingObjFrozen` (payload contains `lowestY`) |
+| Extended HUD (combo, timer) | New payload in `HUDEvents` + handler in `GameHUDViewModel` |
+| Static obstacles | New component + `ICollider` + `CollisionManager` |

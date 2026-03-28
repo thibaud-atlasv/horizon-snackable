@@ -12,12 +12,18 @@ import { FallingObjType } from './Types';
  * FallingObjTemplates maps each FallingObjType to its entity template.
  * SpawnManager uses this record — no hardcoded template paths in gameplay scripts.
  */
-export const FallingObjTemplates: Record<FallingObjType, TemplateAsset> = {
-  [FallingObjType.Log]:  new TemplateAsset('../Templates/GameplayObjects/Log.hstf'),
-  [FallingObjType.Ball]: new TemplateAsset('../Templates/GameplayObjects/Ball.hstf'),
-};
 
-export const FloatingText : TemplateAsset = new TemplateAsset('../Templates/GameplayObjects/FloatingText.hstf');
-export const Primitives = {
-    Cube : new TemplateAsset('../Templates/Primitives/Cube.hstf'),
+
+export namespace Assets {
+  export const FallingObjTemplates: Record<FallingObjType, TemplateAsset> = {
+    [FallingObjType.Log]:  new TemplateAsset('../Templates/GameplayObjects/Log.hstf'),
+    [FallingObjType.Ball]: new TemplateAsset('../Templates/GameplayObjects/Ball.hstf'),
+  };
+
+  export const FloatingText : TemplateAsset = new TemplateAsset('../Templates/GameplayObjects/FloatingText.hstf');
+  export const HorizontalLine : TemplateAsset = new TemplateAsset('../Templates/GameplayObjects/HorizontalLine.hstf');
+
+  export const Primitives = {
+      Cube : new TemplateAsset('../Templates/Primitives/Cube.hstf'),
+  }
 }

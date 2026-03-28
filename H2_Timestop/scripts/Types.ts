@@ -1,6 +1,6 @@
-import { LocalEvent } from "meta/worlds";
+import { LocalEvent, NetworkEvent, serializable, type Maybe } from "meta/worlds";
 
-// ─── Primitive Types ──────────────────────────────────────────────────────────
+// ─── Primitive Types ────────────────────────────────────────────────────────────
 
 export type RGB = [r: number, g: number, b: number];
 
@@ -17,7 +17,7 @@ export interface ICollider {
   onCollision(other: ICollider): void;
 }
 
-// ─── Game Enums ───────────────────────────────────────────────────────────────
+// ─── Game Enums ─────────────────────────────────────────────────────────────────
 
 export enum GamePhase {
   Start    = 0,
@@ -43,7 +43,7 @@ export enum FallingObjType {
   Ball = 1,
 }
 
-// ─── Falling Object Interface ─────────────────────────────────────────────────
+// ─── Falling Object Interface ───────────────────────────────────────────────────
 // Contract used by FallingObjRegistry and InputManager.
 // Never hold a direct component reference — communicate through events only.
 
@@ -56,19 +56,36 @@ export interface IFallingObj {
   getLowestY(): number;
 }
 
-// ─── Events ───────────────────────────────────────────────────────────────────
+export type WaveObjDef = {
+  /** Object type — determines template and physics behaviour. */
+  type:   FallingObjType;
+  /** Number of objects of this type to spawn this round. */
+  count:  number;
+  /** Objects bounce hard off side walls (false = soft deflection). */
+  bounce: boolean;
+  /** Objects rotate around an off-center pivot. */
+  pivot:  boolean;
+};
+
+export type RoundConfig = {
+  /** Ordered list of object definitions for this round. */
+  objects: WaveObjDef[];
+};
+
+
+// ─── Events ─────────────────────────────────────────────────────────────────────
 // All payload fields MUST have default values.
 // Event string IDs are globally unique; always prefix with 'Ev'.
 
 export namespace Events {
 
-  // ── Phase ──────────────────────────────────────────────────────────────────
+  // ── Phase ──────────────────────────────────────────────────────────────────────
   export class PhaseChangedPayload {
     readonly phase: GamePhase = GamePhase.Start;
   }
   export const PhaseChanged = new LocalEvent<PhaseChangedPayload>('EvPhaseChanged', PhaseChangedPayload);
 
-  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  // ── Lifecycle ──────────────────────────────────────────────────────────────────
   export class RestartPayload {}
   export const Restart = new LocalEvent<RestartPayload>('EvRestart', RestartPayload);
 
@@ -77,38 +94,24 @@ export namespace Events {
   }
   export const PrepareRound = new LocalEvent<PrepareRoundPayload>('EvPrepareRound', PrepareRoundPayload);
 
-  // ── Object init (SpawnManager → FallingObj) ───────────────────────────────
-  // SpawnManager awaits each spawn then sends this to the newly-spawned entity.
+  // ── Object init (SpawnManager → FallingObj) ───────────────────────────────────
+  // SpawnManager sends positioning and structural config only.
+  // Each FallingObj component randomizes its own physics in onInitFallingObj.
   export class InitFallingObjPayload {
     readonly objId:      number         = 0;
-    readonly objType:    FallingObjType = FallingObjType.Log;
-    readonly cx:         number         = 0;
-    readonly startY:     number         = 0;
-    readonly ghost:      boolean        = false;
-    // Log-type physics (ignored for other types)
-    readonly angle:      number         = 0;
-    readonly torque:     number         = 0;
-    readonly pivotShift: number         = 0;
-    readonly logW:       number         = 1;
-    readonly speed:      number         = 3;
-    readonly vx:         number         = 0;
-    readonly bounce:     boolean        = false;
-    readonly colorIdx:   number         = 0;
-    // Ball-type physics (ignored for other types)
-    readonly ballRadius: number         = 0.5;
-    readonly ballVx:     number         = 0;    // initial horizontal velocity (wu/s)
-    readonly ballVy:     number         = 0;    // initial vertical velocity (wu/s, negative = downward)
-    readonly ballAy:     number         = -9.8; // gravity acceleration (wu/s²)
+    /** Round index — each object uses this to derive speed and difficulty scaling. */
+    readonly roundIndex: number         = 0;
+    readonly config : {[key: string]: any} = {};
   }
   export const InitFallingObj = new LocalEvent<InitFallingObjPayload>('EvInitFallingObj', InitFallingObjPayload);
 
-  // ── Object activation (SpawnManager → FallingObj, starts the fall) ────────
+  // ── Object activation (SpawnManager → FallingObj, starts the fall) ────────────
   export class FallingObjActivatePayload {
     readonly objId: number = 0;
   }
   export const FallingObjActivate = new LocalEvent<FallingObjActivatePayload>('EvFallingObjActivate', FallingObjActivatePayload);
 
-  // ── Object events (FallingObj → world) ────────────────────────────────────
+  // ── Object events (FallingObj → world) ────────────────────────────────────────
   export class FallingObjHitFloorPayload {}
   export const FallingObjHitFloor = new LocalEvent<FallingObjHitFloorPayload>('EvFallingObjHitFloor', FallingObjHitFloorPayload);
 
@@ -125,7 +128,7 @@ export namespace Events {
   }
   export const FallingObjFrozen = new LocalEvent<FallingObjFrozenPayload>('EvFallingObjFrozen', FallingObjFrozenPayload);
 
-  // ── Round events ──────────────────────────────────────────────────────────
+  // ── Round events ──────────────────────────────────────────────────────────────
   export class AllObjsSpawnedPayload {
     readonly roundIndex: number = 0;
     readonly objCount:   number = 0;
@@ -137,12 +140,47 @@ export namespace Events {
   }
   export const RoundComplete = new LocalEvent<RoundCompletePayload>('EvRoundComplete', RoundCompletePayload);
 
-  // ── Player tap (ClientSetup → world) ──────────────────────────────────────
+  // ── Player tap (ClientSetup → world) ──────────────────────────────────────────
   export class PlayerTapPayload {}
   export const PlayerTap = new LocalEvent<PlayerTapPayload>('EvPlayerTap', PlayerTapPayload);
 }
+// ─── Server Events (Network) ────────────────────────────────────────────────────
 
-// ─── HUD Events ───────────────────────────────────────────────────────────────
+
+export namespace NetworkEvents {
+  @serializable()
+  export class UpdateScorePayload {
+    readonly score:   number     = 0;
+  }
+  export const UpdateScore = new NetworkEvent<UpdateScorePayload>('EvUpdateScore', UpdateScorePayload);
+
+  @serializable()
+  export class UpdateLeaderboardEntryPayload {
+    readonly playerAlias: string = "";
+    public readonly rank: number = 0;
+    public readonly score: number = 0;
+  }
+  export const UpdateLeaderboardEntry = new NetworkEvent<UpdateLeaderboardEntryPayload>('EvUpdateLeaderboardEntry', UpdateLeaderboardEntryPayload);
+}
+
+
+// ─── Leaderboard Events ─────────────────────────────────────────────────────────
+
+export namespace LeaderboardEvents {
+
+  /** Payload to request showing the leaderboard. */
+  export class ShowLeaderboardPayload {
+    readonly finalScore: number = 0;
+    readonly won: boolean = false;
+  }
+  export const ShowLeaderboard = new LocalEvent<ShowLeaderboardPayload>('EvShowLeaderboard', ShowLeaderboardPayload);
+
+  /** Payload to hide the leaderboard. */
+  export class HideLeaderboardPayload {}
+  export const HideLeaderboard = new LocalEvent<HideLeaderboardPayload>('EvHideLeaderboard', HideLeaderboardPayload);
+}
+
+// ─── HUD Events ─────────────────────────────────────────────────────────────────
 
 export namespace HUDEvents {
 

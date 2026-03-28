@@ -4,6 +4,20 @@ summary: Plays sounds and music via AudioManager. Use when implementing audio pl
 include: as_needed
 ---
 
+# Project-Specific Rules (H2_Timestop)
+
+> - Audio is **not yet implemented** in this project. This skill describes the setup needed to add it.
+> - This game is **client-only** — all audio playback must run in client context only. Always guard with `isServerContext()`.
+> - Use `NetworkMode.LocalOnly` when spawning the `AudioInstance` template.
+> - Recommended event hooks for sounds:
+>   - Freeze sound → subscribe to `Events.FallingObjFrozen` (payload has `grade` and `lowestY`)
+>   - Floor hit → subscribe to `Events.FallingObjHitFloor`
+>   - Grade fanfare → subscribe to `HUDEvents.ShowGrade`
+>   - Tap → subscribe to `Events.PlayerTap`
+>   - Game over / victory → subscribe to `Events.PhaseChanged` and check `p.phase`
+
+---
+
 # Setup
 ### Step 1: Copy Script File
 

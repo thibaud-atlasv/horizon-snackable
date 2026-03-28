@@ -1,6 +1,6 @@
 ---
 name: architecture
-summary: Project structure, feature organization, and execution model
+summary: Project structure, execution model, event communication, singleton pattern
 include: always
 ---
 
@@ -8,54 +8,146 @@ include: always
 
 ## Execution Model
 
-All gameplay runs **locally on the client**. Server context is never used.
-Every component must guard against server execution at the top of `onStart`:
+**ALL gameplay is client-only.** Server context is never used for logic.
+
+Every `Component.onStart()` must guard at the top:
 
 ```typescript
 @subscribe(OnEntityStartEvent)
 onStart(): void {
   if (NetworkingService.get().isServerContext()) return;
-  // ...
+  // client-only code below
 }
 ```
 
-Spawned entities always use `NetworkMode.LocalOnly`.
+All spawned entities use `NetworkMode.LocalOnly` — no exceptions:
+
+```typescript
+await WorldService.get().spawnTemplate({
+  templateAsset: asset,
+  position: new Vec3(x, y, z),
+  rotation: Quaternion.identity,
+  scale: Vec3.one,
+  networkMode: NetworkMode.LocalOnly,
+});
+```
 
 ---
 
 ## Folder Structure
 
 ```
-Scripts/
-  Types.ts              ← enums, interfaces, events, payloads — no sibling imports
-  Constants.ts          ← BOUNDS, play-area dimensions — no sibling imports
-  CollisionManager.ts   ← generic AABB singleton (reuse as-is)
-  Assets.ts             ← all TemplateAsset references
-  ClientSetup.ts        ← camera + touch input init (runs everywhere)
-  GameManager.ts        ← lives, score, level progression, win/lose conditions
-  LevelConfig.ts        ← per-level tuning: layout, physics, colors, etc.
+scripts/
+  Types.ts                       ← ALL enums, interfaces, events, payloads — zero local imports
+  Constants.ts                   ← ALL numeric constants — zero local imports
+  Assets.ts                      ← ALL TemplateAsset references (one entry per .hstf)
+  ClientSetup.ts                 ← Fixed camera + FocusedInteraction → Events.PlayerTap
+  GameManager.ts                 ← Phase orchestration, score, restart, tap-to-restart delay
+  InputManager.ts                ← Tap → score → freeze → Clearing / RoundComplete
+  SpawnManager.ts                ← Ghost spawn + InitFallingObj dispatch + AllObjsSpawned
+  LevelConfig.ts                 ← ROUND_DEFS: per-round wave definitions and physics tuning
+  LogRegistry.ts                 ← FallingObjRegistry singleton — tracks active falling objects
+  CollisionManager.ts            ← Generic AABB singleton (available, not used by main physics)
   GameHUD/
-    GameHUDViewModel.ts ← XAML ViewModel, subscribes to HUDEvents only
+    GameHUDViewModel.ts          ← Score + center text (XAML ViewModel)
+    LeaderboardHUDViewModel.ts   ← Leaderboard overlay (XAML ViewModel, NetworkEvents)
   GameplayObjects/
-    [Object].ts         ← one component per file
-  Shared/               ← cross-feature utilities (add only when truly shared)
+    Log.ts                       ← FallingObj — Log type physics and lifecycle
+    BallObj.ts                   ← FallingObj — Ball type physics and lifecycle
+    FreezeLineVisual.ts          ← Visual feedback: colored line at freeze Y
+    FloatingScoreText.ts         ← Visual feedback: animated grade + score text
+  Shared/
+    FallingObjUtils.ts           ← getPrecision() pure utility (no SDK imports)
+
+Templates/
+  GameplayObjects/               ← .hstf entity templates — one per FallingObjType
+
+assets/
+  UI/
+    GameHUD.xaml                 ← Main HUD (score + center text)
+    LeaderboardHUD.xaml          ← Leaderboard overlay
 ```
 
+Rules:
 - One class per file. File name = class name.
-- `Types.ts` and `Constants.ts` must not import from other files in the same feature.
-- Cross-feature code goes in a `Shared/` folder at the `Scripts/` root.
+- `Types.ts` and `Constants.ts` must not import from any sibling file.
+- Cross-feature utilities go in `Shared/`.
+
+---
+
+## Template Asset Registration
+
+Every `.hstf` template **must** be registered in `Assets.ts` with its path. No component may reference a template path directly.
+
+```typescript
+// Assets.ts
+import { TemplateAsset } from 'meta/worlds';
+import { FallingObjType } from './Types';
+
+export const FallingObjTemplates: Record<FallingObjType, TemplateAsset> = {
+  [FallingObjType.Log]:  new TemplateAsset('../Templates/GameplayObjects/Log.hstf'),
+  [FallingObjType.Ball]: new TemplateAsset('../Templates/GameplayObjects/Ball.hstf'),
+} as const;
+
+export const Assets = {
+  FloatingText: new TemplateAsset('../Templates/GameplayObjects/FloatingText.hstf'),
+  FreezeLine:   new TemplateAsset('../Templates/GameplayObjects/HorizontalLine.hstf'),
+} as const;
+```
 
 ---
 
 ## Communication Pattern
 
-Components **do not hold references to each other**. They communicate exclusively via local events.
+Components **never hold references to each other**. All inter-component communication uses `LocalEvent` (or `NetworkEvent` for score sync with leaderboard).
 
-- Components subscribe to events with `@subscribe(Events.Foo)`.
-- Components dispatch events with `EventService.sendLocally(Events.Foo, payload)`.
-- This keeps every component independently testable and replaceable.
+```typescript
+// Dispatch
+EventService.sendLocally(Events.SomethingHappened, { value: 42 });
 
-Non-component managers (e.g. `CollisionManager`) use the lazy singleton pattern and are accessed via `Manager.get()`. They must implement `dispose()` to reset state on restart.
+// Subscribe
+@subscribe(Events.SomethingHappened)
+private onSomethingHappened(p: Events.SomethingHappenedPayload): void { … }
+```
+
+---
+
+## Singleton Managers
+
+Pure-logic managers (not Components) use the lazy singleton pattern:
+
+```typescript
+export class MyManager {
+  private static _instance: MyManager;
+  private constructor() {}
+
+  static get(): MyManager {
+    if (!MyManager._instance) MyManager._instance = new MyManager();
+    return MyManager._instance;
+  }
+
+  dispose(): void {
+    MyManager._instance = undefined!;
+  }
+}
+```
+
+Call `Manager.dispose()` on all singletons during restart (`Events.Restart`).
+
+---
+
+## Game Phase Flow
+
+```
+Start → (tap) → Intro (Round X, 3, 2, 1, GO!) → Falling → Clearing → RoundEnd
+                                                       ↑________________________↓
+                                                 (all frozen → next round or End)
+                                                 (object hits floor → GameOver)
+```
+
+`GameManager` owns all phase transitions. Only `InputManager` may also send `PhaseChanged` (Falling ↔ Clearing).
+
+After entering `GameOver` or `End`, taps are ignored for `TAP_LOCK_MS` (1500 ms) to prevent accidental restart.
 
 ---
 
@@ -63,7 +155,7 @@ Non-component managers (e.g. `CollisionManager`) use the lazy singleton pattern 
 
 | Scope | Location |
 |---|---|
-| Shared across multiple files | `Constants.ts` at feature root |
-| Specific to one component | `@property()` field on that component, tunable in the inspector |
+| Shared across multiple files | `Constants.ts` |
+| Single-component tuning | `@property()` on that component (inspector-editable) |
 
 Never hardcode a value that appears in more than one place.
