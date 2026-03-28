@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"D:\\\\Projects\\\\Albyon\\\\Horizon\\\\H2_Timestop\\\\Scripts\"\" 2>/dev/null && ls \"D:ProjectsAlbyonHorizonH2_TimestopAssistantskills\"\")"
+    ]
+  }
+}

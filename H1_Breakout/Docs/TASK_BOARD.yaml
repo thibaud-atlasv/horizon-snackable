@@ -1,0 +1,77 @@
+tasks:
+  - name: Fix Hearts Binding
+    status: done
+    summary: Fixed DataTriggers to reference correct heart names and control their own visibility
+    files: [Scripts/GameHUD/GameHUD.xaml]
+    subtasks:
+      - name: Fix DataTriggers in GameHUD.xaml
+        status: done
+      - name: Verify implementation
+        status: done
+  - name: HUD Hearts Display
+    status: done
+    summary: Lives displayed as red heart Path shapes in bottom-right corner, 1 per life
+    files: [Scripts/GameHUD/GameHUD.xaml]
+    subtasks:
+      - name: Update XAML with heart icons in bottom-right
+        status: done
+      - name: Verify implementation
+        status: done
+  - name: Game HUD UI System
+    status: done
+    summary: HUD with score, level, lives, and optional center text. ViewModel with event-based updates.
+    files: [Scripts/GameHUD/Types.ts, Scripts/GameHUD/GameHUDViewModel.ts, Scripts/GameHUD/GameHUD.xaml]
+    subtasks:
+      - name: Create GameHUDViewModel with reactive properties
+        status: done
+      - name: Create HUD UI layout and bind to ViewModel
+        status: done
+      - name: Verify implementation
+        status: done
+  - name: Explosive Brick Mesh
+    status: done
+    summary: Custom explosive brick mesh with cracks and glowing edges applied to template
+    files: [Models/Bricks/ExplosiveBrick/ExplosiveBrick_remeshed.glb, Templates/GameplayObjects/ExplosiveBrick.hstf]
+    subtasks:
+      - name: Generate explosive brick mesh
+        status: done
+      - name: Apply mesh to ExplosiveBrick.hstf template
+        status: done
+  - name: Explosive Brick
+    status: done
+    summary: ExplosiveBrick component and template created with chain reaction logic
+    files: [Scripts/GameplayObjects/ExplosiveBrick.ts, Templates/GameplayObjects/ExplosiveBrick.hstf]
+    subtasks:
+      - name: Create ExplosiveBrick component and template
+        status: done
+      - name: Add explosion VFX
+        status: done
+      - name: Add audio
+        status: done
+
+  - name: Big Paddle Power-Up
+    status: done
+    summary: Green crystal mesh hooked up, doubles paddle width for 10s
+    files: [Templates/GameplayObjects/PowerUp.hstf, Scripts/Paddle/PaddleEffects.ts]
+    subtasks:
+      - name: Hook up mesh and complete implementation
+        status: done
+      - name: Add audio
+        status: done
+
+  - name: Sticky Paddle Power-Up
+    status: done
+    summary: Orange honey droplet mesh hooked up, ball sticks to paddle until tap to release
+    files: [Templates/GameplayObjects/StickyPaddle.hstf, Scripts/Assets.ts, Scripts/Ball/Ball.ts]
+    subtasks:
+      - name: Hook up mesh and complete implementation
+        status: done
+      - name: Add audio
+        status: done
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding: []
+  failed_attempts: []
+
+notes: []

@@ -1,0 +1,43 @@
+tasks:
+  - name: UI Feedback System
+    status: done
+    summary: Système complet de feedback visuel UI pour le scoring
+    files:
+      - Scripts/GameplayObjects/FreezeLineVisual.ts
+      - Scripts/GameplayObjects/FloatingScoreText.ts
+      - Scripts/GameplayObjects/CentralAnnouncement.ts
+      - Templates/GameplayObjects/FloatingText.hstf
+    subtasks:
+      - name: Ligne horizontale dynamique de niveau
+        status: done
+      - name: Texte animé score + grade (Perfect, Great, etc.)
+        status: done
+      - name: Texte central countdown et game over
+        status: done
+
+  - name: Custom UI Mobile Style
+    status: done
+    summary: UI 2D XAML avec score permanent et annonces centrales style arcade mobile
+    files:
+      - Scripts/GameHUD/GameHUDViewModel.ts
+      - assets/UI/GameHUD.xaml
+    subtasks:
+      - name: Remplacer CentralAnnouncement par UI 2D
+        status: done
+      - name: Affichage score permanent
+        status: done
+      - name: Texte central impactant (Game Over, Tap to Start, Wave X, Countdown)
+        status: done
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding: []
+  failed_attempts: []
+
+notes:
+  - UI en 2D ou textes flottants 3D selon faisabilité
+  - Ligne horizontale montre le Y atteint au freeze
+  - Texte s'élève et fade out vers le haut
+  - Messages: Perfect, Great, Good, Too early, etc.
+  - Countdown central: 3...2...1
+  - Game Over / Tap to Start central

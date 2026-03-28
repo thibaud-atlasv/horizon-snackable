@@ -1,0 +1,15 @@
+{
+    "id": "26077407695273000",
+    "author": "thibaudalbyonsteam",
+    "name": "H1_Breakout",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.12.1"
+        }
+    ]
+}
