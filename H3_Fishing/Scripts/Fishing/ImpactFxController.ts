@@ -1,7 +1,4 @@
 import {
-  CameraComponent,
-  CameraMode,
-  CameraService,
   Color,
   ColorComponent,
   Component,
@@ -9,9 +6,6 @@ import {
   OnEntityStartEvent,
   OnWorldUpdateEvent,
   type OnWorldUpdateEventPayload,
-  Quaternion,
-  TransformComponent,
-  Vec3,
   component,
   property,
   subscribe,
@@ -20,78 +14,51 @@ import {
 } from 'meta/worlds';
 
 import { Events } from '../Types';
+import { GameCameraService } from './GameCameraService';
 
 // =============================================================================
 //  ImpactFxController
 //
-//  Plays a camera shake and a white flash on a 3D plane when the bait hits
-//  the ocean floor.
+//  Plays a camera shake followed by a white flash when the bait hits the floor.
+//  Camera shake is delegated to GameCameraService.
+//  Flash is driven by a ColorComponent on a 3D plane placed in front of the camera.
 //
-//  ── Listens ──────────────────────────────────────────────────────────────────
-//  Events.BaitHitBottom → triggers shake + flash
+//  ── Sequence ─────────────────────────────────────────────────────────────────
+//  BaitHitBottom → shake starts → shake ends → flash (alpha 1→0 fade)
 //
 //  ── Editor setup ─────────────────────────────────────────────────────────────
-//  Place on any persistent entity (e.g. the rod or a dedicated FX entity).
-//  - cameraAnchorEntity : entity whose world transform defines the camera's
-//                         resting position/rotation (same entity used in
-//                         ClientSetup to position the camera).
-//  - flashPlaneEntity   : 3D plane in front of the camera with a ColorComponent.
-//                         Set its base color to white in the editor; this
-//                         component controls the alpha channel only.
+//  Place on any persistent entity.
+//  - flashPlaneEntity : 3D plane in front of the camera with a ColorComponent.
+//                       Set its base color to white in the editor.
 // =============================================================================
 
 @component()
 export class ImpactFxController extends Component {
 
-  // Entity that defines the camera resting pose (position + rotation)
-  @property() cameraAnchorEntity?: Entity;
-
-  // 3D plane in front of the camera — must have a ColorComponent
   @property() flashPlaneEntity?: Entity;
 
-  // ── Derived from cameraAnchorEntity at start ──────────────────────────────────
-  private _cameraFov = 60;
-
-  // Shake settings
   @property() shakeDuration  = 0.35;
   @property() shakeAmplitude = 0.08;
-
-  // Flash settings
-  @property() flashDuration = 0.25;
+  @property() flashDuration  = 0.25;
 
   // ── State ────────────────────────────────────────────────────────────────────
-  private _shakeTimer      = 0;
-  // Counts down from shakeDuration; flash starts when it reaches 0
+  // Counts down from shakeDuration; flash starts only when it reaches 0
   private _flashDelayTimer = 0;
   private _flashTimer      = 0;
-
-  private _camBasePos!: Vec3;
-  private _camBaseRot!: Quaternion;
-  private _flashCc?: Maybe<ColorComponent> = null;
+  private _flashCc: Maybe<ColorComponent> = null;
 
   // ── Init ─────────────────────────────────────────────────────────────────────
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
-
-    const anchorTc = this.cameraAnchorEntity?.getComponent(TransformComponent);
-    if (anchorTc) {
-      this._camBasePos = anchorTc.worldPosition;
-      this._camBaseRot = anchorTc.worldRotation;
-    }
-    const camCc = this.cameraAnchorEntity?.getComponent(CameraComponent);
-    if (camCc) this._cameraFov = camCc.fieldOfView;
-
-    this._flashCc = this.flashPlaneEntity?.getComponent(ColorComponent);
-    // Start fully transparent
+    this._flashCc = this.flashPlaneEntity?.getComponent(ColorComponent) ?? null;
     if (this._flashCc) this._flashCc.color = new Color(1, 1, 1, 0);
   }
 
   // ── Trigger ───────────────────────────────────────────────────────────────────
   @subscribe(Events.BaitHitBottom)
   private _onBaitHitBottom(_p: Events.BaitHitBottomPayload): void {
-    this._shakeTimer      = this.shakeDuration;
-    // Flash starts only after the shake completes
+    GameCameraService.get().startShake(this.shakeDuration, this.shakeAmplitude);
     this._flashDelayTimer = this.shakeDuration;
     this._flashTimer      = 0;
   }
@@ -100,42 +67,10 @@ export class ImpactFxController extends Component {
   @subscribe(OnWorldUpdateEvent)
   private _onUpdate(p: OnWorldUpdateEventPayload): void {
     if (NetworkingService.get().isServerContext()) return;
-    const dt = p.deltaTime;
-
-    this._tickShake(dt);
-    this._tickFlash(dt);
+    this._tickFlash(p.deltaTime);
   }
 
   // ── Private ───────────────────────────────────────────────────────────────────
-  private _tickShake(dt: number): void {
-    if (this._shakeTimer <= 0) return;
-
-    this._shakeTimer -= dt;
-
-    if (this._shakeTimer <= 0) {
-      // Restore camera to its resting pose
-      CameraService.get().setCameraMode(CameraMode.Fixed, {
-        position: this._camBasePos,
-        rotation: this._camBaseRot,
-        duration: 0,
-        fov: this._cameraFov,
-      });
-      return;
-    }
-
-    // Amplitude decreases linearly as the shake fades out
-    const amp = this.shakeAmplitude * (this._shakeTimer / this.shakeDuration);
-    const ox   = (Math.random() * 2 - 1) * amp;
-    const oy   = (Math.random() * 2 - 1) * amp;
-
-    CameraService.get().setCameraMode(CameraMode.Fixed, {
-      position: new Vec3(this._camBasePos.x + ox, this._camBasePos.y + oy, this._camBasePos.z),
-      rotation: this._camBaseRot,
-      duration: 0,
-      fov: this._cameraFov,
-    });
-  }
-
   private _tickFlash(dt: number): void {
     if (!this._flashCc) return;
 

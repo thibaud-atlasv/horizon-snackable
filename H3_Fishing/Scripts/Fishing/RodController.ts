@@ -20,8 +20,8 @@ import {
 } from 'meta/worlds';
 
 import {
-  WATER_SURFACE_Y, WATER_BOTTOM_Y, HALF_W,
-  GRAVITY, MAX_LAUNCH_VX, MAX_LAUNCH_VY, WATER_DRAG,
+  WATER_SURFACE_Y, HALF_W,
+  GRAVITY, MIN_LAUNCH_VX, MAX_LAUNCH_VX, MAX_LAUNCH_VY, WATER_DRAG,
   REEL_BURST_ADD, REEL_BURST_MAX, REEL_BURST_DECAY,
   REEL_HOLD_DUR, REEL_TAP_JUMP, REEL_SINK_SPEED,
   COLOR_LINE, COLOR_LINE_WATER,
@@ -29,6 +29,7 @@ import {
 import { Events, GamePhase, HUDEvents } from '../Types';
 import { FishingService } from './FishingService';
 import { FishRegistry } from '../Fish/FishRegistry';
+import { ZoneProgressionService } from '../Fish/ZoneProgressionService';
 
 // =============================================================================
 //  RodController
@@ -135,7 +136,7 @@ export class RodController extends Component {
   // ── Cast ─────────────────────────────────────────────────────────────────────
   @subscribe(Events.CastReleased)
   private _onCastReleased(p: Events.CastReleasedPayload): void {
-    this._baitVX = p.chargeLevel * MAX_LAUNCH_VX;
+    this._baitVX = MIN_LAUNCH_VX + p.chargeLevel * (MAX_LAUNCH_VX - MIN_LAUNCH_VX);
     this._baitVY = MAX_LAUNCH_VY;
     this._baitX  = FishingService.get().tipX;
     this._baitY  = FishingService.get().tipY;
@@ -192,6 +193,7 @@ export class RodController extends Component {
       this._reelSinkSpeed = REEL_SINK_SPEED * hit.size;
       EventService.sendLocally(Events.FishHooked, {
         fishId:   hit.fishId,
+        defId:    hit.defId,
         fishX:    hit.worldX,
         fishY:    hit.worldY,
         fishSize: hit.size,
@@ -199,10 +201,10 @@ export class RodController extends Component {
       return;
     }
 
-    if (this._baitY <= WATER_BOTTOM_Y) {
+    if (this._baitY <= ZoneProgressionService.get().getFloorY()) {
       this._baitVX = 0;
       this._baitVY = 0;
-      this._moveBait(this._baitX, WATER_BOTTOM_Y);
+      this._moveBait(this._baitX, ZoneProgressionService.get().getFloorY());
       EventService.sendLocally(Events.BaitHitBottom, {});
     }
   }
@@ -218,12 +220,12 @@ export class RodController extends Component {
     }
 
     const netVel = this._reelBurstVel - this._reelSinkSpeed;
-    this._baitY  = Math.max(WATER_BOTTOM_Y + 0.1, Math.min(targetY, this._baitY + netVel * dt));
+    this._baitY  = Math.max(ZoneProgressionService.get().getFloorY() + 0.1, Math.min(targetY, this._baitY + netVel * dt));
     this._baitX += (FishingService.get().tipX - this._baitX) * 0.012;
     this._moveBait(this._baitX, this._baitY);
 
     const inst = FishRegistry.get().getInstance(this._hookedFishId);
-    if (inst) inst.setPosition(this._baitX, this._baitY - 0.3 * inst.size);
+    if (inst) inst.setPosition(this._baitX, this._baitY - 0.5 * inst.size);
 
     const remaining = targetY - this._baitY;
     const ratio = 1.0 - Math.max(0, remaining) / Math.max(0.01, this._reelTotalDist);
@@ -232,18 +234,6 @@ export class RodController extends Component {
     if (this._baitY >= targetY - 0.1) {
       EventService.sendLocally(Events.BaitSurfaced, { fishId: this._hookedFishId });
     }
-  }
-
-  // ── Restart ───────────────────────────────────────────────────────────────────
-  @subscribe(Events.Restart)
-  private _onRestart(_p: Events.RestartPayload): void {
-    const s = FishingService.get();
-    this._baitX        = s.idleX;
-    this._baitY        = s.idleY;
-    this._baitVX       = 0;
-    this._baitVY       = 0;
-    this._reelBurstVel = 0;
-    this._hookedFishId = -1;
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────

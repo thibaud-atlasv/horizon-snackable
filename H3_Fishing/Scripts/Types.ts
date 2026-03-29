@@ -1,4 +1,4 @@
-import { LocalEvent, TemplateAsset } from 'meta/worlds';
+import { LocalEvent, NetworkEvent, TemplateAsset, serializable } from 'meta/worlds';
 
 // ─── Game State ───────────────────────────────────────────────────────────────
 export enum GamePhase {
@@ -12,26 +12,24 @@ export enum GamePhase {
 }
 
 // ─── Fish ─────────────────────────────────────────────────────────────────────
-export type FishFamily = 'Solars' | 'Corals' | 'Greens' | 'Crystals' | 'Deeps' | 'Violets' | 'Ghosts' | 'Abyssals';
 export type FishRarity = 'common' | 'rare' | 'legendary';
 
 export interface RGB { r: number; g: number; b: number; }
 
 /**
- * Core definition of a catchable entity — registered in FishDefs.ts (or any def file).
- * Only contains gameplay-relevant data: identity, depth, rarity, template to spawn.
- * Visual and behavioral specifics live in the component attached to the template.
+ * Core definition of a catchable entity — registered in FishDefs.ts.
+ * Only contains gameplay-relevant data: identity, zone, rarity, template to spawn.
  */
 export interface IFishDef {
-  id           : number;
-  name         : string;
-  family       : FishFamily;
-  /** 0 = surface, 7 = sand */
-  waterLayerMin: number;
-  waterLayerMax: number;
-  rarity       : FishRarity;
-  /** Template spawned for this def — determines which component handles it. */
-  template     : TemplateAsset;
+  id       : number;
+  name     : string;
+  zone     : 1 | 2 | 3;
+  rarity   : FishRarity;
+  template : TemplateAsset;
+  sizeMin  : number;
+  sizeMax  : number;
+  speedMin : number;
+  speedMax : number;
 }
 
 /**
@@ -40,6 +38,7 @@ export interface IFishDef {
  */
 export interface IFishInstance {
   readonly fishId : number;
+  readonly defId  : number;
   readonly worldX : number;
   readonly worldY : number;
   readonly size   : number;
@@ -53,12 +52,13 @@ export interface IFishInstance {
 
 export namespace Events {
 
+  
+  export class GameStartedPayload { }
+  export const GameStarted = new LocalEvent<GameStartedPayload>('EvGameStarted', GameStartedPayload);
+
   // ── Phase ────────────────────────────────────────────────────────────────────
   export class PhaseChangedPayload { phase: GamePhase = GamePhase.Idle; }
   export const PhaseChanged = new LocalEvent<PhaseChangedPayload>('EvPhaseChanged', PhaseChangedPayload);
-
-  export class RestartPayload {}
-  export const Restart = new LocalEvent<RestartPayload>('EvRestart', RestartPayload);
 
   // ── Bait ─────────────────────────────────────────────────────────────────────
   export class BaitMovedPayload { x: number = 0; y: number = 0; }
@@ -72,13 +72,13 @@ export namespace Events {
    * Sent to a specific spawned fish entity to apply its def.
    * Usage: EventService.sendLocally(Events.InitFish, { defId, speedMultiplier }, { eventTarget: entity })
    */
-  export class InitFishPayload { defId: number = 0; speedMultiplier: number = 1.0; spawnX: number = 0; baseY: number = 0; }
+  export class InitFishPayload { defId: number = 0; speedMultiplier: number = 1.0; spawnX: number = 0; baseY: number = 0; speedMin: number = 0.8; speedMax: number = 2.0; }
   export const InitFish = new LocalEvent<InitFishPayload>('EvInitFish', InitFishPayload);
 
-  export class FishHookedPayload { fishId: number = 0; fishX: number = 0; fishY: number = 0; fishSize: number = 1; }
+  export class FishHookedPayload { fishId: number = 0; defId: number = 0; fishX: number = 0; fishY: number = 0; fishSize: number = 1; }
   export const FishHooked = new LocalEvent<FishHookedPayload>('EvFishHooked', FishHookedPayload);
 
-  export class FishCaughtPayload { fishId: number = 0; }
+  export class FishCaughtPayload { fishId: number = 0; defId: number = 0; }
   export const FishCaught = new LocalEvent<FishCaughtPayload>('EvFishCaught', FishCaughtPayload);
 
   export class CastReleasedPayload { chargeLevel: number = 0; }
@@ -87,9 +87,9 @@ export namespace Events {
   export class BaitSurfacedPayload { fishId: number = 0; }
   export const BaitSurfaced = new LocalEvent<BaitSurfacedPayload>('EvBaitSurfaced', BaitSurfacedPayload);
 
-  // ── Wave ─────────────────────────────────────────────────────────────────────
-  export class WaveStartPayload { waveIndex: number = 0; speedMultiplier: number = 1.0; }
-  export const WaveStart = new LocalEvent<WaveStartPayload>('EvWaveStart', WaveStartPayload);
+  // ── Zone ─────────────────────────────────────────────────────────────────────
+  export class ZoneUnlockedPayload { zone: number = 1; }
+  export const ZoneUnlocked = new LocalEvent<ZoneUnlockedPayload>('EvZoneUnlocked', ZoneUnlockedPayload);
 }
 
 // ─── HUD Events ───────────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ export namespace HUDEvents {
   export class UpdateGaugePayload { value: number = 0; mode: string = 'cast'; }
   export const UpdateGauge = new LocalEvent<UpdateGaugePayload>('EvHUDUpdateGauge', UpdateGaugePayload);
 
-  export class ShowCatchPayload { fishId: number = 0; isNew: boolean = false; catchCount: number = 0; }
+  export class ShowCatchPayload { defId: number = 0; isNew: boolean = false; catchCount: number = 0; }
   export const ShowCatch = new LocalEvent<ShowCatchPayload>('EvHUDShowCatch', ShowCatchPayload);
 
   export class HideCatchPayload {}
@@ -107,11 +107,50 @@ export namespace HUDEvents {
   export class NavigateCatchPayload { direction: number = 0; }
   export const NavigateCatch = new LocalEvent<NavigateCatchPayload>('EvHUDNavigateCatch', NavigateCatchPayload);
 
-  // Fired by a UI button to confirm and dismiss the catch display screen
   export class DismissCatchPayload {}
   export const DismissCatch = new LocalEvent<DismissCatchPayload>('EvHUDDismissCatch', DismissCatchPayload);
+
+  export class UpdateXPPayload { xp: number = 0; maxXp: number = 1000; }
+  export const UpdateXP = new LocalEvent<UpdateXPPayload>('EvHUDUpdateXP', UpdateXPPayload);
 }
 
-// ─── Server Events (Network) ──────────────────────────────────────────────────
-// Add @serializable() + NetworkEvent here when needed.
-export namespace NetworkEvents {}
+// ─── Network Events (server ↔ client) ────────────────────────────────────────
+// Payloads must be @serializable with readonly fields and a no-arg constructor.
+export namespace NetworkEvents {
+
+  /**
+   * Server → client: full player progression loaded from PlayerVariables.
+   * Arrays used because serializable payloads don't support Map/Set.
+   *   catchCounts[i] = number of times species catchDefIds[i] was caught.
+   */
+  @serializable()
+  export class ProgressDataPayload {
+    readonly catchDefIds   : readonly number[] = [];
+    readonly catchCounts   : readonly number[] = [];
+    readonly xp            : number            = 0;
+    readonly unlockedZones : number            = 1;
+  }
+  export const ProgressData = new NetworkEvent<ProgressDataPayload>('EvNetProgressData', ProgressDataPayload);
+
+  /**
+   * Client → server: notify the server that the client caught a fish.
+   * Server persists the updated collection.
+   */
+  @serializable()
+  export class ReportCatchPayload {
+    readonly defId : number = 0;
+  }
+  export const ReportCatch = new NetworkEvent<ReportCatchPayload>('EvNetReportCatch', ReportCatchPayload);
+}
+
+// ─── Local progression loaded event ──────────────────────────────────────────
+export namespace Events {
+  // Fired client-side once ProgressData arrives and local services are seeded.
+  export class ProgressLoadedPayload {
+    catchDefIds   : readonly number[] = [];
+    catchCounts   : readonly number[] = [];
+    xp            : number            = 0;
+    unlockedZones : number            = 1;
+  }
+  export const ProgressLoaded = new LocalEvent<ProgressLoadedPayload>('EvProgressLoaded', ProgressLoadedPayload);
+}

@@ -6,27 +6,28 @@ import {
   OnFocusedInteractionInputEndedEvent,
   OnFocusedInteractionInputStartedEvent,
   type OnFocusedInteractionInputEventPayload,
+  OnPlayerCreateEvent,
+  type OnPlayerCreateEventPayload,
   OnWorldUpdateEvent,
   type OnWorldUpdateEventPayload,
   component,
   subscribe,
+  PlayerService,
 } from 'meta/worlds';
 
-import {
-  PING_PONG_SPEED,
-  RESET_DELAY,
-  FISH_PER_WAVE, WAVE_SPEED_MAX, WAVE_SPEED_STEP,
-} from './Constants';
+import { PING_PONG_SPEED, RESET_DELAY } from './Constants';
 import { Events, HUDEvents, GamePhase } from './Types';
 import { FishRegistry } from './Fish/FishRegistry';
-import { FishSpawnService } from './Fish/FishSpawnService';
 import { FishCollectionService } from './Fish/FishCollectionService';
+import { FishSpawnService } from './Fish/FishSpawnService';
+import { PlayerProgressService } from './PlayerProgressService';
 
 // =============================================================================
 //  GameManager
 //
-//  Game rules layer: phase state machine, wave progression, catch logic.
+//  Game rules layer: phase state machine, catch logic.
 //  All bait physics and rod visuals live in RodController.
+//  Fish spawning is autonomous via FishSpawnService (zone-based).
 //
 //  ── Phase flow ───────────────────────────────────────────────────────────────
 //  Idle  →(hold)→  Charging  →(release)→  Falling
@@ -40,6 +41,9 @@ import { FishCollectionService } from './Fish/FishCollectionService';
 @component()
 export class GameManager extends Component {
 
+  // need to call it at least once
+  private fishService = FishSpawnService.get();
+  private progressionService = PlayerProgressService.get();
   // ── Phase ─────────────────────────────────────────────────────────────────────
   private _phase: GamePhase = GamePhase.Idle;
 
@@ -50,30 +54,33 @@ export class GameManager extends Component {
   // ── Timers ────────────────────────────────────────────────────────────────────
   private _resetTimer = 0;
 
-  // ── Wave ──────────────────────────────────────────────────────────────────────
-  private _waveSpeedMul = 1.0;
-  private _waveIndex    = 0;
-
   // ── Catch tracking ────────────────────────────────────────────────────────────
   private _hookedFishId = -1;
+  private _hookedDefId  = 0;
 
   // ── Init ──────────────────────────────────────────────────────────────────────
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
-    this._spawnWave();
+    console.log("player entity", PlayerService.get().getLocalPlayer());
+    
+    EventService.sendLocally(Events.GameStarted, {});
     this._setPhase(GamePhase.Idle);
+  }
+
+  @subscribe(OnPlayerCreateEvent)
+  onPlayerCreate(p: OnPlayerCreateEventPayload): void {
+    if (!p.entity) return;
+    PlayerProgressService.get().loadForPlayer(p.entity);
   }
 
   // ── Input ─────────────────────────────────────────────────────────────────────
   @subscribe(OnFocusedInteractionInputStartedEvent)
   private _onTouchStart(_p: OnFocusedInteractionInputEventPayload): void {
     switch (this._phase) {
-
       case GamePhase.Idle:
         this._startCharge();
         break;
-
       case GamePhase.CatchDisplay:
         this._dismissCatch();
         break;
@@ -130,6 +137,7 @@ export class GameManager extends Component {
   @subscribe(Events.FishHooked)
   private _onFishHooked(p: Events.FishHookedPayload): void {
     this._hookedFishId = p.fishId;
+    this._hookedDefId  = p.defId;
     this._setPhase(GamePhase.Reeling);
   }
 
@@ -154,15 +162,13 @@ export class GameManager extends Component {
 
   private _triggerCatch(): void {
     if (this._hookedFishId < 0) return;
-    const fishId     = this._hookedFishId;
     const collection = FishCollectionService.get();
-    const isNew      = !collection.hasCaught(fishId);
-    // FishCaught triggers FishCollectionService.recordCatch and the fish entity destroy
-    EventService.sendLocally(Events.FishCaught, { fishId });
+    const isNew      = !collection.hasCaught(this._hookedDefId);
+    EventService.sendLocally(Events.FishCaught, { fishId: this._hookedFishId, defId: this._hookedDefId });
     EventService.sendLocally(HUDEvents.ShowCatch, {
-      fishId,
+      defId:      this._hookedDefId,
       isNew,
-      catchCount: collection.getCount(fishId),
+      catchCount: collection.getCount(this._hookedDefId),
     });
     this._setPhase(GamePhase.CatchDisplay);
   }
@@ -172,44 +178,18 @@ export class GameManager extends Component {
     EventService.sendLocally(HUDEvents.HideCatch, {});
     FishRegistry.get().destroyFish(this._hookedFishId);
     this._hookedFishId = -1;
+    this._hookedDefId  = 0;
     this._setPhase(GamePhase.Reset);
-
-    if (FishRegistry.get().activeCount === 0) {
-      this._resetTimer   = 0.5;
-      this._waveSpeedMul = Math.min(WAVE_SPEED_MAX, this._waveSpeedMul + WAVE_SPEED_STEP);
-    } else {
-      this._resetTimer = 0.2;
-    }
+    this._resetTimer = 0.2;
   }
 
   private _returnToIdle(): void {
-    if (FishRegistry.get().activeCount === 0) this._spawnWave();
     this._setPhase(GamePhase.Idle);
-  }
-
-  private _spawnWave(): void {
-    FishSpawnService.get().spawnWave(FISH_PER_WAVE, this._waveSpeedMul);
-    EventService.sendLocally(Events.WaveStart, {
-      waveIndex:       this._waveIndex,
-      speedMultiplier: this._waveSpeedMul,
-    });
-    this._waveIndex++;
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
   private _setPhase(phase: GamePhase): void {
     this._phase = phase;
     EventService.sendLocally(Events.PhaseChanged, { phase });
-  }
-
-  @subscribe(Events.Restart)
-  private _onRestart(_p: Events.RestartPayload): void {
-    this._phase        = GamePhase.Idle;
-    this._chargeLevel  = 0;
-    this._hookedFishId = -1;
-    this._waveSpeedMul = 1.0;
-    this._waveIndex    = 0;
-    this._spawnWave();
-    this._setPhase(GamePhase.Idle);
   }
 }

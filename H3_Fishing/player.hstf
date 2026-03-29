@@ -18,7 +18,18 @@
                             "data": {
                                 "class": "horizon::platform_api::PlayerPlatformComponent",
                                 "version": 14,
-                                "data": null
+                                "data": {
+                                    "translationEnabled": false,
+                                    "rotationEnabled": false,
+                                    "locomotionSpeed": 1.0,
+                                    "sprintMultiplier": 1.0,
+                                    "jumpSpeed": 0.0,
+                                    "slopeLimitDegrees": 0.0,
+                                    "massWhenPushing": 0.0,
+                                    "pushingExtendedRange": 0.0,
+                                    "useCustomGravity": true,
+                                    "scale": 0.019999999552965165
+                                }
                             }
                         },
                         {

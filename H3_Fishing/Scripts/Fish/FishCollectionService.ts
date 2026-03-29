@@ -1,35 +1,29 @@
-import { Service, service, subscribe, OnServiceReadyEvent } from 'meta/worlds';
+import { Service, service, subscribe } from 'meta/worlds';
 import { Events } from '../Types';
 
 /**
  * FishCollectionService — tracks how many of each fish species the player caught.
  *
- * Storage is in-memory by default. Persistence (PlayerVariables / network sync)
- * can be added here without touching any other file.
- *
- * Extensibility:
- *   - Subscribe to Events.FishCaught elsewhere to react to catches
- *     (e.g. achievement system, daily quest tracker) without modifying this file.
+ * Seeded from persisted data via Events.ProgressLoaded (fired by PlayerProgressService
+ * once the server sends the saved collection). Updated locally on each FishCaught.
  */
 @service()
 export class FishCollectionService extends Service {
 
-  /** fishId → catch count */
+  /** defId → catch count */
   private _counts = new Map<number, number>();
 
-  @subscribe(OnServiceReadyEvent)
-  onReady(): void {
-    // TODO: load persisted data from PlayerVariables here.
+  @subscribe(Events.ProgressLoaded)
+  onProgressLoaded(p: Events.ProgressLoadedPayload): void {
+    this._counts.clear();
+    for (let i = 0; i < p.catchDefIds.length; i++) {
+      this._counts.set(p.catchDefIds[i], p.catchCounts[i]);
+    }
   }
 
   @subscribe(Events.FishCaught)
   private _onFishCaught(p: Events.FishCaughtPayload): void {
-    this.recordCatch(p.fishId);
-  }
-
-  recordCatch(fishId: number): void {
-    this._counts.set(fishId, (this._counts.get(fishId) ?? 0) + 1);
-    // TODO: persist to PlayerVariables here.
+    this._counts.set(p.defId, (this._counts.get(p.defId) ?? 0) + 1);
   }
 
   hasCaught(fishId: number): boolean {
@@ -44,19 +38,8 @@ export class FishCollectionService extends Service {
     return this._counts.size;
   }
 
-  /** All caught fish IDs with their counts. */
-  all(): Map<number, number> {
-    return new Map(this._counts);
-  }
-
   /** All def IDs the player has caught at least once, sorted. */
   caughtDefs(): number[] {
-    return [...this._counts.keys()]
-      .sort((a, b) => a - b);
-  }
-
-  @subscribe(Events.Restart)
-  onRestart(_p: Events.RestartPayload): void {
-    this._counts.clear();
+    return [...this._counts.keys()].sort((a, b) => a - b);
   }
 }

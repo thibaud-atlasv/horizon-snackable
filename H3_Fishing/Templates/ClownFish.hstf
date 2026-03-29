@@ -1,0 +1,106 @@
+{
+    "version": 5,
+    "entities": [
+        {
+            "id": "09e6d7bc-534d-49e7-88ea-6a474901e40f",
+            "name": "Fish",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "SimpleFishController",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "27354517537481558",
+                            "ingestionId": "1252887650921268805",
+                            "targetId": "4237980480"
+                        },
+                        "data": {
+                            "sizeMin": 0.3,
+                            "sizeMax": 0.7
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "c871badf-aae0-426c-b070-cc13d90b1a1c",
+            "name": "Clownfish_remeshed",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localRotation": {
+                                "x": 0.0,
+                                "y": -1.5707963705062867,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 5.0,
+                                "y": 5.0,
+                                "z": 5.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "27354517537481558",
+                                "ingestionId": "12353970150554698591",
+                                "targetId": "3500183637"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "c871badf-aae0-426c-b070-cc13d90b1a1c",
+            "destination": "09e6d7bc-534d-49e7-88ea-6a474901e40f"
+        }
+    ]
+}

@@ -19,6 +19,10 @@ Ported from `../../fish` (landscape prototype). Core mechanics preserved, archit
 Rarity tiers: common / rare / legendary — affect spawn weight and visual flair.
 Currently only seed entries are in `FishDefs.ts` — full data to be populated by the team.
 
+### Fish Visual Types
+- **3D Models**: ClownFish, AngelFish — use imported 3D meshes with standard materials
+- **2D Sprites**: ButterflyFish — uses transparent PNG sprites on planes with alpha-blended unlit shader (`Shaders/UnlitAlphaBlend.surface`). Ideal for stylized or mobile-optimized fish.
+
 ## Architecture At a Glance
 
 ```
@@ -30,14 +34,15 @@ FishController    → per-fish AI, implements IFishInstance
 FishSpawnService  → spawns wave entities, sends Events.InitFish
 FishCollectionService → catch journal (in-memory, persistence-ready)
 BaitController    → visual: moves bait entity on Events.BaitMoved
-GaugeController   → visual: cast/reel gauge entity
+GaugeController   → visual: power/reel gauge with FishingGaugeData ViewModel (UI/FishingGauge.xaml)
+CatchDisplayViewModel → catch reveal screen with CatchDisplayData ViewModel (UI/CatchDisplay.xaml)
 FishingLineRenderer → visual: line from rod to bait
 WaterLayerController → 10-layer animated water with caustics
 AmbientFXController  → god rays, floating particles, seaweed
 BubbleController  → single rising bubble entity (self-destructs)
 BubbleSpawner     → ambient bubble emitter
-FishingHUDViewModel  → main HUD XAML data context
-CatchDisplayViewModel → catch reveal screen + journal navigation
+FishingHUDViewModel  → main HUD XAML data context (UI/FishingHUD.xaml)
+CatchDisplayViewModel → catch reveal screen + journal navigation (animated panel with elastic bounce, cascading fade-ins, rarity stars)
 ```
 
 ## Key Extensibility Points

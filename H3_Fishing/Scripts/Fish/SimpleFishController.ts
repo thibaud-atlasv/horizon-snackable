@@ -1,6 +1,9 @@
 import {
   Component,
+  NetworkMode,
+  type Maybe,
   NetworkingService,
+  OnEntityCreateEvent,
   OnEntityStartEvent,
   OnWorldUpdateEvent,
   type OnWorldUpdateEventPayload,
@@ -9,12 +12,16 @@ import {
   Vec3,
   WorldService,
   component,
-  property,
   subscribe,
 } from 'meta/worlds';
 
-import { FISH_LEFT, FISH_RIGHT } from '../Constants';
+import {
+  FISH_LEFT, FISH_RIGHT,
+  BUBBLE_INTERVAL_MIN, BUBBLE_INTERVAL_MAX,
+  BUBBLE_SPAWN_OFFSET_X, BUBBLE_SPAWN_OFFSET_Y,
+} from '../Constants';
 import { Events, type IFishInstance } from '../Types';
+import { Assets } from '../Assets';
 import { FishRegistry } from './FishRegistry';
 
 const PAUSE_DUR_MIN = 1.2;
@@ -39,19 +46,17 @@ let _nextFishId = 1;
 @component()
 export class SimpleFishController extends Component implements IFishInstance {
 
-  @property() sizeMin  = 0.8;
-  @property() sizeMax  = 1.4;
-  @property() speedMin = 0.8;
-  @property() speedMax = 2.0;
 
   // ── IFishInstance ────────────────────────────────────────────────────────────
   get fishId(): number { return this._fishId; }
+  get defId():  number { return this._defId; }
   get worldX(): number { return this._currentX; }
   get worldY(): number { return this._currentY; }
   get size():   number { return this._size; }
 
   // ── State ────────────────────────────────────────────────────────────────────
   private _fishId     = 0;
+  private _defId      = 0;
   private _size       = 1.0;
   private _facingLeft = false;
   private _caught     = false;
@@ -65,13 +70,20 @@ export class SimpleFishController extends Component implements IFishInstance {
   private _pausing  = false;
   private _pauseDur = 0;
 
+  private _bubbleTimer = 100;
+
   private _tc!: TransformComponent;
 
   // ── Init ─────────────────────────────────────────────────────────────────────
+
+  @subscribe(OnEntityCreateEvent)
+  created(): void {
+    this._tc    = this.entity.getComponent(TransformComponent)!;
+  }
+
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
-    this._tc    = this.entity.getComponent(TransformComponent)!;
     this._baseY = this._tc.worldPosition.y;
     this._fishId = _nextFishId++;
     FishRegistry.get().addFish(this);
@@ -79,19 +91,21 @@ export class SimpleFishController extends Component implements IFishInstance {
 
   @subscribe(Events.InitFish)
   private _onInit(p: Events.InitFishPayload): void {
+    this._defId     = p.defId;
     this._currentX  = p.spawnX;
     this._currentY  = this._baseY;
     this._targetX   = this._randomTargetX(this._currentX);
 
-    const s   = this.sizeMin  + Math.random() * (this.sizeMax  - this.sizeMin);
-    const spd = this.speedMin + Math.random() * (this.speedMax  - this.speedMin);
-    this._size      = s;
+    this._size = this._tc ? this._tc.localScale.x : 1.0;
+    const spd = p.speedMin + Math.random() * (p.speedMax - p.speedMin);
     this._moveSpeed = spd * p.speedMultiplier;
-    this._tc.localScale = new Vec3(s, s, s);
 
     // Apply initial facing direction so the fish is already oriented toward its first target
     this._facingLeft = this._targetX < this._currentX;
     this._flipScale();
+
+    // Spread initial bubble timers across a full 2× window so fish don't all emit in sync
+    this._bubbleTimer = Math.random() * BUBBLE_INTERVAL_MAX * 2;
   }
 
   // ── IFishInstance impl ────────────────────────────────────────────────────────
@@ -115,6 +129,7 @@ export class SimpleFishController extends Component implements IFishInstance {
     this._updateMovement(dt);
     this._currentY = this._baseY + Math.sin(t * BOB_FREQ + this._size * 10) * BOB_AMP;
     this._tc.worldPosition = new Vec3(this._currentX, this._currentY, 0);
+    this._updateBubble(dt);
   }
 
   // ── Private ───────────────────────────────────────────────────────────────────
@@ -139,10 +154,27 @@ export class SimpleFishController extends Component implements IFishInstance {
     this._currentX += dir * this._moveSpeed * dt;
   }
 
+  private async _updateBubble(dt: number): Promise<void> {
+    this._bubbleTimer -= dt;
+    if (this._bubbleTimer > 0) return;
+
+    this._bubbleTimer = BUBBLE_INTERVAL_MIN + Math.random() * (BUBBLE_INTERVAL_MAX - BUBBLE_INTERVAL_MIN);
+
+    const offsetX = this._facingLeft ? -BUBBLE_SPAWN_OFFSET_X : BUBBLE_SPAWN_OFFSET_X;
+    const spawnX  = this._currentX + offsetX;
+    const spawnY  = this._currentY + BUBBLE_SPAWN_OFFSET_Y;
+
+    WorldService.get().spawnTemplate({
+      templateAsset: Assets.BubbleTemplate,
+      position:      new Vec3(spawnX, spawnY, 0),
+      rotation:      Quaternion.identity,
+      scale:         Vec3.one,
+      networkMode:   NetworkMode.LocalOnly,
+    });
+  }
+
   private _flipScale(): void {
-    const s = this._tc.localScale;
     this._tc.worldRotation = this._facingLeft ? Quaternion.identity : Quaternion.fromEuler(new Vec3(0,180,0));
-    //this._tc.localScale = new Vec3(-Math.abs(s.x) * (this._facingLeft ? -1 : 1), s.y, s.z);
   }
 
   private _randomTargetX(from: number): number {

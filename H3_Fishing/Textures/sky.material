@@ -1,0 +1,26 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "New Material",
+    "attributes": [
+        {
+            "name": "baseColorTex",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "27354517537481558",
+                    "ingestionId": "4237520528794371816",
+                    "targetId": "1850524962"
+                }
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "8676292661488983804",
+        "targetId": "2708897769"
+    }
+}

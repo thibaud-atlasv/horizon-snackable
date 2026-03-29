@@ -1,0 +1,242 @@
+{
+    "version": 5,
+    "entities": [
+        {
+            "id": "b104f601-9c97-4874-955a-da88ed24e6cf",
+            "name": "Bait",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 0.25,
+                                "y": 0.25,
+                                "z": 0.25
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "5fc4cc94-b34f-45e9-b54e-2d0ed0cc7ea8",
+            "name": "Cube.hstf",
+            "type": {
+                "packageOrRemoteId": "27354517537481558",
+                "ingestionId": "8745706037259879570",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "bec9bb2c-7cee-4a2c-a35d-1059c1f015d4",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.6117647290229797,
+                                        "g": 0.0470588244497776,
+                                        "b": 0.11764705926179886,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "319b2d81-3be8-416f-a12f-1555dcd863f0",
+            "name": "Cube.hstf(1)",
+            "type": {
+                "packageOrRemoteId": "27354517537481558",
+                "ingestionId": "8745706037259879570",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "bec9bb2c-7cee-4a2c-a35d-1059c1f015d4",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "localScale": {
+                                        "x": 1.100000023841858,
+                                        "y": 0.25,
+                                        "z": 1.100000023841858
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.6117647290229797,
+                                        "g": 0.6117647290229797,
+                                        "b": 0.6117647290229797,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "520369bb-7a41-4610-885c-693e744de4bd",
+            "name": "Cube.hstf(2)",
+            "type": {
+                "packageOrRemoteId": "27354517537481558",
+                "ingestionId": "8745706037259879570",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "bec9bb2c-7cee-4a2c-a35d-1059c1f015d4",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.4000000059604645,
+                                        "y": -0.5,
+                                        "z": 0.0
+                                    },
+                                    "localScale": {
+                                        "x": 0.20000000298023225,
+                                        "y": 1.0,
+                                        "z": 0.20000000298023225
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.6117647290229797,
+                                        "g": 0.6117647290229797,
+                                        "b": 0.6117647290229797,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "2332d45d-1bb4-48cd-b330-8518506f375d",
+            "name": "Cube.hstf(3)",
+            "type": {
+                "packageOrRemoteId": "27354517537481558",
+                "ingestionId": "8745706037259879570",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "bec9bb2c-7cee-4a2c-a35d-1059c1f015d4",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": -0.8999999761581421,
+                                        "z": 0.0
+                                    },
+                                    "localScale": {
+                                        "x": 1.0,
+                                        "y": 0.20000000298023225,
+                                        "z": 0.20000000298023225
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.6117647290229797,
+                                        "g": 0.6117647290229797,
+                                        "b": 0.6117647290229797,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "5fc4cc94-b34f-45e9-b54e-2d0ed0cc7ea8",
+            "destination": "b104f601-9c97-4874-955a-da88ed24e6cf"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "319b2d81-3be8-416f-a12f-1555dcd863f0",
+            "destination": "b104f601-9c97-4874-955a-da88ed24e6cf"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "520369bb-7a41-4610-885c-693e744de4bd",
+            "destination": "b104f601-9c97-4874-955a-da88ed24e6cf"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "2332d45d-1bb4-48cd-b330-8518506f375d",
+            "destination": "b104f601-9c97-4874-955a-da88ed24e6cf"
+        }
+    ]
+}

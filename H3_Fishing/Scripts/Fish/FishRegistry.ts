@@ -1,6 +1,5 @@
-import { Service, service, subscribe } from 'meta/worlds';
+import { Service, service } from 'meta/worlds';
 import type { IFishInstance } from '../Types';
-import { Events } from '../Types';
 
 /**
  * FishRegistry — registre des instances vivantes dans le monde.
@@ -38,10 +37,5 @@ export class FishRegistry extends Service {
       if (Math.sqrt(dx * dx + dy * dy) < 0.6 * inst.size) return inst;
     }
     return null;
-  }
-
-  @subscribe(Events.Restart)
-  onRestart(_p: Events.RestartPayload): void {
-    this._instances.clear();
   }
 }
