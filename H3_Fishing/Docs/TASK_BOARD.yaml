@@ -1,0 +1,61 @@
+tasks:
+  - name: Marine Background
+    status: done
+    summary: Created underwater background plane (9m x 16m portrait) with cartoon ocean texture
+    files: [Textures/UnderwaterBackground.png]
+
+  - name: Fishing Rod Mesh
+    status: done
+    summary: Created colorful cartoon fishing rod (orange/blue/red)
+    files: [Models/Props/FishingRod/FishingRod_remeshed.glb]
+
+  - name: Fishing Hook Mesh
+    status: done
+    summary: Created golden cartoon fishing hook
+    files: [Models/Props/FishingHook/FishingHook_remeshed.glb]
+
+  - name: Tropical Fish Mesh
+    status: in_progress
+    summary: Creating colorful cartoon tropical fish for the fishing game
+
+  - name: Tropical Fish Mesh
+    status: in_progress
+    summary: Creating colorful tropical reef fish for fishing game
+
+  - name: Additional Diver Characters (3 variants)
+    status: parked
+    summary: Abandonné - pas d'animations de nage disponibles pour humanoïdes
+
+  - name: Scuba Diver Swimming Animation
+    status: parked
+    summary: Abandonné - pas d'animations de nage disponibles dans le marketplace
+
+  - name: Cartoon Diver with Animations (Reversed Fishing Game)
+    status: done
+    summary: Generated cartoon scuba diver with blue wetsuit, animations for idle/swim/reeling
+    subtasks:
+      - name: Generate 3D animated cartoon diver
+        status: done
+        summary: Cartoon scuba diver with blue wetsuit, mask, oxygen tanks - rigged with animations
+        files: [Models/Characters/ScubaDiver/ScubaDiver_rigged.fbx]
+      - name: Feedback on mesh and animations
+        status: done
+
+  - name: Seabed Decoration
+    status: done
+    summary: Created 3D seabed with corals, rocks, seaweed, shells, starfish - placed at ocean bottom
+    files: [Models/Environment/SeabedDecoration/SeabedDecoration.glb]
+
+  - name: Underwater Skybox
+    status: in_progress
+    summary: Creating underwater ocean skybox with tropical cartoon style
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding: []
+  failed_attempts: []
+
+notes:
+  - Mobile fishing game in portrait mode
+  - 2D gameplay on XY plane (side view of water)
+  - Style: Cartoon mobile unlit

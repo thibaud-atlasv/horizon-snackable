@@ -1,0 +1,44 @@
+{
+    "version": 5,
+    "entities": [
+        {
+            "id": "da657312-2ea1-4a26-9a67-b85b9b301967",
+            "name": "Player",
+            "type": {
+                "packageOrRemoteId": "24149709574657735",
+                "ingestionId": "8502139112299295806",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "ec859a24-a822-40de-a86c-817ae089c7b4",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::PlayerPlatformComponent",
+                                "version": 14,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::AvatarAnimatorPlatformComponent",
+                                "version": 1,
+                                "data": null
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "989a5d78-6092-46ea-b633-751d7e31222e",
+                    "components": null
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": []
+}
