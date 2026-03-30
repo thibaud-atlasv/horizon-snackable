@@ -4,7 +4,7 @@
             "version": 1
         }
     },
-    "name": "New Material",
+    "name": "sky",
     "attributes": [
         {
             "name": "baseColorTex",
@@ -15,6 +15,18 @@
                     "ingestionId": "4237520528794371816",
                     "targetId": "1850524962"
                 }
+            }
+        },
+        {
+            "name": "uvScaleOffset",
+            "value": {
+                "type": "Floats",
+                "floatValues": [
+                    1.0,
+                    0.6600000262260437,
+                    0.0,
+                    0.0
+                ]
             }
         }
     ],

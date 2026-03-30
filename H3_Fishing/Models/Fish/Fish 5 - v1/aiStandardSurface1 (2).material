@@ -12,7 +12,7 @@
                 "type": "assetId",
                 "assetIdValue": {
                     "packageOrRemoteId": "27354517537481558",
-                    "ingestionId": "3467088628576317906",
+                    "ingestionId": "13562804375201568285",
                     "targetId": "1850524962"
                 }
             }
@@ -22,10 +22,5 @@
         "packageOrRemoteId": "30952996677677480",
         "ingestionId": "9623295632868937486",
         "targetId": "2708897769"
-    },
-    "baseMaterialAssetId": {
-        "packageOrRemoteId": "27354517537481558",
-        "ingestionId": "85039496638747304",
-        "targetId": "157013062"
     }
 }

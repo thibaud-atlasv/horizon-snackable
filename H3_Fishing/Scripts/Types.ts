@@ -67,6 +67,11 @@ export namespace Events {
   export class BaitHitBottomPayload {}
   export const BaitHitBottom = new LocalEvent<BaitHitBottomPayload>('EvBaitHitBottom', BaitHitBottomPayload);
 
+  // ── Bubble pool ───────────────────────────────────────────────────────────────
+  /** Sent to a specific pooled bubble entity to activate it at a position. */
+  export class InitBubblePayload { x: number = 0; y: number = 0; }
+  export const InitBubble = new LocalEvent<InitBubblePayload>('EvInitBubble', InitBubblePayload);
+
   // ── Fish lifecycle ────────────────────────────────────────────────────────────
   /**
    * Sent to a specific spawned fish entity to apply its def.

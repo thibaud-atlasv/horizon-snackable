@@ -7,23 +7,12 @@
     "name": "aiStandardSurface1",
     "attributes": [
         {
-            "name": "layer0ColorAndAlpha",
-            "value": {
-                "type": "assetId",
-                "assetIdValue": {
-                    "packageOrRemoteId": "27354517537481558",
-                    "ingestionId": "13562804375201568285",
-                    "targetId": "1850524962"
-                }
-            }
-        },
-        {
             "name": "baseColorTex",
             "value": {
                 "type": "assetId",
                 "assetIdValue": {
                     "packageOrRemoteId": "27354517537481558",
-                    "ingestionId": "13562804375201568285",
+                    "ingestionId": "3467088628576317906",
                     "targetId": "1850524962"
                 }
             }
@@ -36,7 +25,7 @@
     },
     "baseMaterialAssetId": {
         "packageOrRemoteId": "27354517537481558",
-        "ingestionId": "1116120484700677494",
-        "targetId": "3730567186"
+        "ingestionId": "1290310987958299082",
+        "targetId": "157013062"
     }
 }

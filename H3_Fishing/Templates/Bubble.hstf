@@ -38,6 +38,13 @@
                                 "packageOrRemoteId": "24407058055595655",
                                 "ingestionId": "4300205889696081881",
                                 "targetId": "4060876394"
+                            },
+                            "lightingParams": {
+                                "class": "horizon::platform_api::LightingParams",
+                                "data": {
+                                    "diffuseGISource": "Unlit",
+                                    "contributeToGI": false
+                                }
                             }
                         }
                     },

@@ -1,6 +1,5 @@
 import {
   Component,
-  NetworkMode,
   type Maybe,
   NetworkingService,
   OnEntityCreateEvent,
@@ -21,8 +20,8 @@ import {
   BUBBLE_SPAWN_OFFSET_X, BUBBLE_SPAWN_OFFSET_Y,
 } from '../Constants';
 import { Events, type IFishInstance } from '../Types';
-import { Assets } from '../Assets';
 import { FishRegistry } from './FishRegistry';
+import { BubblePool } from './BubblePool';
 
 const PAUSE_DUR_MIN = 1.2;
 const PAUSE_DUR_MAX = 3.2;
@@ -165,13 +164,7 @@ export class SimpleFishController extends Component implements IFishInstance {
     const spawnX  = this._currentX + offsetX;
     const spawnY  = this._currentY + BUBBLE_SPAWN_OFFSET_Y;
 
-    WorldService.get().spawnTemplate({
-      templateAsset: Assets.BubbleTemplate,
-      position:      new Vec3(spawnX, spawnY, 0),
-      rotation:      Quaternion.identity,
-      scale:         Vec3.one,
-      networkMode:   NetworkMode.LocalOnly,
-    });
+    BubblePool.get().acquire(spawnX, spawnY);
   }
 
   private _flipScale(): void {

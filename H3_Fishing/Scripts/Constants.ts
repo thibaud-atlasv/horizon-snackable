@@ -50,13 +50,13 @@ export const CATCH_ZOOM_DUR  = 0.55;
 
 // ─── Bubbles ─────────────────────────────────────────────────────────────────
 export const BUBBLE_RISE_SPEED_MIN  = 0.22;
-export const BUBBLE_RISE_SPEED_MAX  = 0.55;
+export const BUBBLE_RISE_SPEED_MAX  = 0.65;
 export const BUBBLE_SCALE_MIN       = 0.04;
-export const BUBBLE_SCALE_MAX       = 0.09;
-export const BUBBLE_INTERVAL_MIN    = 3.0;   // seconds between bubble spawns per fish
-export const BUBBLE_INTERVAL_MAX    = 8.0;
+export const BUBBLE_SCALE_MAX       = 0.15;
+export const BUBBLE_INTERVAL_MIN    = 8.0;   // seconds between bubble spawns per fish
+export const BUBBLE_INTERVAL_MAX    = 15.0;
 export const BUBBLE_LIFETIME_MIN    = 2.5;   // seconds a bubble lives before disappearing
-export const BUBBLE_LIFETIME_MAX    = 5.0;
+export const BUBBLE_LIFETIME_MAX    = 6.5;
 export const BUBBLE_SPAWN_OFFSET_X  = 0.35;  // forward offset in front of the fish
 export const BUBBLE_SPAWN_OFFSET_Y  = 0.10;  // slight upward offset from fish center
 

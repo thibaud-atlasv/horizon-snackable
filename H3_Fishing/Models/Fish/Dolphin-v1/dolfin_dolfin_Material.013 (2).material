@@ -22,10 +22,5 @@
         "packageOrRemoteId": "30952996677677480",
         "ingestionId": "9623295632868937486",
         "targetId": "2708897769"
-    },
-    "baseMaterialAssetId": {
-        "packageOrRemoteId": "27354517537481558",
-        "ingestionId": "12841414325673472674",
-        "targetId": "1351780676"
     }
 }

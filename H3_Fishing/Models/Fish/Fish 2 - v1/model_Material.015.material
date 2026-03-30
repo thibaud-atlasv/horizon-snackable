@@ -5,30 +5,6 @@
         }
     },
     "name": "model_Material",
-    "attributes": [
-        {
-            "name": "layer0ColorAndAlpha",
-            "value": {
-                "type": "assetId",
-                "assetIdValue": {
-                    "packageOrRemoteId": "27354517537481558",
-                    "ingestionId": "6324579828111661271",
-                    "targetId": "1850524962"
-                }
-            }
-        },
-        {
-            "name": "baseColorTex",
-            "value": {
-                "type": "assetId",
-                "assetIdValue": {
-                    "packageOrRemoteId": "27354517537481558",
-                    "ingestionId": "6324579828111661271",
-                    "targetId": "1850524962"
-                }
-            }
-        }
-    ],
     "shaderAssetId": {
         "packageOrRemoteId": "30952996677677480",
         "ingestionId": "9623295632868937486",
@@ -36,7 +12,7 @@
     },
     "baseMaterialAssetId": {
         "packageOrRemoteId": "27354517537481558",
-        "ingestionId": "10682163497125864940",
-        "targetId": "3426665354"
+        "ingestionId": "4275670076806386704",
+        "targetId": "157013062"
     }
 }

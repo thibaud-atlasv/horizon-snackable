@@ -292,7 +292,7 @@
     <Grid x:Name="RootContainer" Visibility="{Binding Path=visibility}">
 
         <!-- Semi-transparent dark overlay background -->
-        <Rectangle Fill="#AA000000" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1000" Height="1900" IsEnabled="False"/>
+        <Rectangle Fill="#AA000000" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1000" IsEnabled="False" Height="2100"/>
 
         <!-- Invisible dismiss backdrop - covers entire area, behind all content -->
         <!-- Clicking anywhere on this backdrop dismisses the catch display -->

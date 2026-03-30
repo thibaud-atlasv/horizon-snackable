@@ -7,17 +7,6 @@
     "name": "dolfin_dolfin_Material",
     "attributes": [
         {
-            "name": "layer0ColorAndAlpha",
-            "value": {
-                "type": "assetId",
-                "assetIdValue": {
-                    "packageOrRemoteId": "27354517537481558",
-                    "ingestionId": "18289325026686820326",
-                    "targetId": "1850524962"
-                }
-            }
-        },
-        {
             "name": "baseColorTex",
             "value": {
                 "type": "assetId",
@@ -36,7 +25,7 @@
     },
     "baseMaterialAssetId": {
         "packageOrRemoteId": "27354517537481558",
-        "ingestionId": "12841414325673472674",
-        "targetId": "1351780676"
+        "ingestionId": "15936907545796324041",
+        "targetId": "157013062"
     }
 }
