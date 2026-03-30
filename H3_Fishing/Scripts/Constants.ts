@@ -7,8 +7,8 @@ export const WATER_SURFACE_Y = 4.5;
 export const WATER_BOTTOM_Y  = -8.0;
 
 // ─── Fish Zone ────────────────────────────────────────────────────────────────
-export const FISH_LEFT  = -4.5;
-export const FISH_RIGHT =  4.5;
+export const FISH_LEFT  = -5.5;
+export const FISH_RIGHT =  5.5;
 
 // ─── Rod (top-left, partially off-screen) ─────────────────────────────────────
 export const TIP_X       = -2.5;
@@ -24,7 +24,7 @@ export const COLOR_BUBBLE     = { r: 0.85, g: 0.95, b: 1.00 };
 // ─── Physics ─────────────────────────────────────────────────────────────────
 export const GRAVITY          = -2.8;
 export const PING_PONG_SPEED  =  0.9;   // gauge oscillation speed (units/s)
-export const MIN_LAUNCH_VX    = -2.0;  // negative = left of tip
+export const MIN_LAUNCH_VX    = -0.5;  // negative = left of tip
 export const MAX_LAUNCH_VX    =  5.5;
 export const MAX_LAUNCH_VY    =  0.5;
 export const WATER_DRAG       =  5.0;   // horizontal deceleration in water
@@ -38,6 +38,7 @@ export const REEL_TAP_JUMP_RATIO  =  0.08;  // 8% → ~13 taps regardless of dep
 export const REEL_SINK_SPEED      =  0.5;
 // Fish fatigue: sink resistance at surface vs at depth (0.0–1.0)
 export const REEL_FATIGUE_MIN     =  0.30;  // 30% resistance when fish reaches surface
+export const REEL_SMOOTH_SPEED    =  8.0;   // lerp speed for visual Y position (units/s feel)
 
 // ─── Timing ───────────────────────────────────────────────────────────────────
 export const RESET_DELAY  = 0.4;
@@ -61,11 +62,11 @@ export const BUBBLE_SPAWN_OFFSET_Y  = 0.10;  // slight upward offset from fish c
 
 // ─── Zone System ──────────────────────────────────────────────────────────────
 export const ZONE_COUNT   = 3;
-export const ZONE_FLOOR_Y = [-8.0, -24.0, -40.0] as readonly number[];    // index 0 = zone 1
+export const ZONE_FLOOR_Y = [-8.5, -24.5, -38.5] as readonly number[];    // index 0 = zone 1
 
 // Zone spawn Y: fish spawn randomly within these bounds in their zone
-export const ZONE_SPAWN_TOP_Y = [4.0, -8.5, -24.5] as readonly number[];   // slightly below surface / zone boundary
-export const ZONE_SPAWN_BOT_Y = [-7.5, -23.5, -39.5] as readonly number[]; // slightly above floor
+export const ZONE_SPAWN_TOP_Y = [4.0,   -9.5, -25.5] as readonly number[];   // slightly below surface / zone boundary
+export const ZONE_SPAWN_BOT_Y = [-8.5, -24.5, -38.5] as readonly number[]; // slightly above floor
 
 // ─── Camera ───────────────────────────────────────────────────────────────────
 export const HALF_SCREEN_WORLD_HEIGHT = 8;  // half-height of the viewport in world units (tune with FOV)
@@ -74,8 +75,6 @@ export const HALF_SCREEN_WORLD_HEIGHT = 8;  // half-height of the viewport in wo
 export const FISH_MAX_PER_ZONE     = 5;
 export const FISH_RESPAWN_INTERVAL = 30;  // seconds between respawns per zone
 
-// ─── Global XP Gauge ──────────────────────────────────────────────────────────
-export const XP_NEW_FISH       = 100;   // XP for catching a new species
-export const XP_DUPLICATE_FISH = 10;    // XP for catching an already-known species
-export const XP_UNLOCK_ZONE_2  = 500;   // XP needed to unlock zone 2
-export const XP_UNLOCK_ZONE_3  = 1000;  // XP needed to unlock zone 3
+// ─── Zone Unlock Thresholds (unique species caught) ───────────────────────────
+export const UNLOCK_ZONE_2_UNIQUE = 3;   // zone 1: 3 commons + 1 rare
+export const UNLOCK_ZONE_3_UNIQUE = 7;  // zone 1 complete + 4 from zone 2

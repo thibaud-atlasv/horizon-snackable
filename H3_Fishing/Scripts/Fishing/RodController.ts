@@ -24,6 +24,7 @@ import {
   GRAVITY, MIN_LAUNCH_VX, MAX_LAUNCH_VX, MAX_LAUNCH_VY, WATER_DRAG,
   REEL_BURST_ADD, REEL_BURST_MAX, REEL_BURST_DECAY,
   REEL_HOLD_DUR, REEL_TAP_JUMP_RATIO, REEL_SINK_SPEED, REEL_FATIGUE_MIN,
+  REEL_SMOOTH_SPEED,
   COLOR_LINE, COLOR_LINE_WATER,
 } from '../Constants';
 import { Events, GamePhase, HUDEvents } from '../Types';
@@ -79,6 +80,7 @@ export class RodController extends Component {
   private _baitVY = 0;
 
   // ── Reel physics ──────────────────────────────────────────────────────────────
+  private _renderY       = 0;  // smoothed visual Y, follows _baitY with lerp
   private _reelBurstVel  = 0;
   private _reelHoldTimer = 0;
   private _reelTotalDist = 1.0;
@@ -191,6 +193,7 @@ export class RodController extends Component {
       this._baitX         = hit.worldX;
       this._baitY         = hit.worldY + 0.2;
       this._reelTotalDist = Math.max(0.1, targetY - this._baitY);
+      this._renderY       = this._baitY;
       this._reelSinkSpeed = REEL_SINK_SPEED * hit.size;
       EventService.sendLocally(Events.FishHooked, {
         fishId:   hit.fishId,
@@ -226,10 +229,15 @@ export class RodController extends Component {
     const netVel = this._reelBurstVel - currentSink;
     this._baitY  = Math.max(ZoneProgressionService.get().getFloorY() + 0.1, Math.min(targetY, this._baitY + netVel * dt));
     this._baitX += (FishingService.get().tipX - this._baitX) * 0.012;
-    this._moveBait(this._baitX, this._baitY);
+
+    // Smooth visual position toward physics position
+    this._renderY += (this._baitY - this._renderY) * Math.min(1, REEL_SMOOTH_SPEED * dt);
+    const physicsY = this._baitY;
+    this._moveBait(this._baitX, this._renderY);
+    this._baitY = physicsY; // restore after _moveBait overwrites it
 
     const inst = FishRegistry.get().getInstance(this._hookedFishId);
-    if (inst) inst.setPosition(this._baitX, this._baitY);
+    if (inst) inst.setPosition(this._baitX, this._renderY);
     const ratio = 1.0 - Math.max(0, remaining) / Math.max(0.01, this._reelTotalDist);
     EventService.sendLocally(HUDEvents.UpdateGauge, { value: Math.max(0, ratio), mode: 'reel' });
 
@@ -242,7 +250,7 @@ export class RodController extends Component {
   private _moveBait(x: number, y: number): void {
     this._baitX = x;
     this._baitY = y;
-    if (this._baitTc) this._baitTc.worldPosition = new Vec3(x, y, 0);
+    if (this._baitTc) this._baitTc.worldPosition = new Vec3(x, y, this._phase === GamePhase.Reeling ? -0.5 : 0);
     this._updateLines(x, y);
     EventService.sendLocally(Events.BaitMoved, { x, y });
   }

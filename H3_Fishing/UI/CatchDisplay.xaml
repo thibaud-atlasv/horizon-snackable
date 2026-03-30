@@ -1,116 +1,223 @@
 <Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-      xmlns:noesis="clr-namespace:NoesisGUIExtensions">
+      xmlns:noesis="clr-namespace:NoesisGUIExtensions"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
 
     <Page.Resources>
-        <!-- Color Palette -->
-        <SolidColorBrush x:Key="DeepBlue" Color="#FF1a5276"/>
-        <SolidColorBrush x:Key="OceanBlue" Color="#FF2980b9"/>
-        <SolidColorBrush x:Key="Turquoise" Color="#FF17a2b8"/>
-        <SolidColorBrush x:Key="Coral" Color="#FFff6b6b"/>
-        <SolidColorBrush x:Key="Orange" Color="#FFffa500"/>
-        <SolidColorBrush x:Key="GoldenYellow" Color="#FFffd700"/>
+        <!-- ============================================ -->
+        <!-- COLOR PALETTE -->
+        <!-- ============================================ -->
+        <SolidColorBrush x:Key="GoldenStar" Color="#FFffd700"/>
+        <SolidColorBrush x:Key="GoldenStarStroke" Color="#FFb8860b"/>
         <SolidColorBrush x:Key="White" Color="#FFFFFFFF"/>
         <SolidColorBrush x:Key="DimText" Color="#99FFFFFF"/>
 
         <!-- ============================================ -->
-        <!-- ANIMATIONS -->
+        <!-- 5-POINT STAR GEOMETRY (centered at 0,0, radius ~18) -->
+        <!-- ============================================ -->
+        <StreamGeometry x:Key="StarGeometry">M 0,-18 L 4.2,-5.6 L 17.1,-5.6 L 6.8,2.1 L 10.6,14.6 L 0,7.2 L -10.6,14.6 L -6.8,2.1 L -17.1,-5.6 L -4.2,-5.6 Z</StreamGeometry>
+
+        <!-- ============================================ -->
+        <!-- CASCADE ANIMATIONS - Triggered by DataTrigger -->
         <!-- ============================================ -->
 
-        <!-- Main Panel Pop-In Animation (Elastic/Bounce) -->
+        <!-- 1. Main Panel Pop-In - Elastic bounce -->
         <Storyboard x:Key="PanelPopInAnimation">
-            <!-- Scale X -->
+            <!-- Scale X with overshoot -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="MainPanel"
                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1.1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.12">
                     <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.55" Value="0.95">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="0.94">
                     <EasingDoubleKeyFrame.EasingFunction>
                         <QuadraticEase EasingMode="EaseInOut"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.7" Value="1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.55" Value="1">
                     <EasingDoubleKeyFrame.EasingFunction>
                         <QuadraticEase EasingMode="EaseOut"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
-            <!-- Scale Y -->
+            <!-- Scale Y with overshoot -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="MainPanel"
                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1.1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.12">
                     <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.55" Value="0.95">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="0.94">
                     <EasingDoubleKeyFrame.EasingFunction>
                         <QuadraticEase EasingMode="EaseInOut"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.7" Value="1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.55" Value="1">
                     <EasingDoubleKeyFrame.EasingFunction>
                         <QuadraticEase EasingMode="EaseOut"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
-            <!-- Panel Opacity -->
+            <!-- Opacity fade in -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="MainPanel"
                                            Storyboard.TargetProperty="Opacity">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.2" Value="1"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.15" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
 
-        <!-- NEW Badge Animation -->
+        <!-- 2. Star 1 Pop -->
+        <Storyboard x:Key="Star1Animation">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star1"
+                                           Storyboard.TargetProperty="Opacity">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.05" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star1"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star1"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- 3. Star 2 Pop -->
+        <Storyboard x:Key="Star2Animation">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star2"
+                                           Storyboard.TargetProperty="Opacity">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.05" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star2"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star2"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- 4. Star 3 Pop -->
+        <Storyboard x:Key="Star3Animation">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star3"
+                                           Storyboard.TargetProperty="Opacity">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.05" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star3"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Star3"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- 5. NEW Badge Pop -->
         <Storyboard x:Key="NewBadgeAnimation">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NewBadge"
                                            Storyboard.TargetProperty="Opacity">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1">
+                <LinearDoubleKeyFrame KeyTime="0:0:0.05" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NewBadge"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.15">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.9"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NewBadge"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.15">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.9"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- 6. Fish ID Slide-In -->
+        <Storyboard x:Key="FishIdAnimation">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FishIdContainer"
+                                           Storyboard.TargetProperty="Opacity">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1">
                     <EasingDoubleKeyFrame.EasingFunction>
                         <QuadraticEase EasingMode="EaseOut"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NewBadge"
-                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.5"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="0.5"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.15">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FishIdContainer"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="-30"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0">
                     <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.65" Value="1"/>
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NewBadge"
-                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.5"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="0.5"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.15">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.65" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
 
-        <!-- Fish Name Fade In -->
+        <!-- 7. Fish Name Pop -->
         <Storyboard x:Key="FishNameAnimation">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FishNameText"
                                            Storyboard.TargetProperty="Opacity">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.5" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1">
                     <EasingDoubleKeyFrame.EasingFunction>
                         <QuadraticEase EasingMode="EaseOut"/>
                     </EasingDoubleKeyFrame.EasingFunction>
@@ -118,71 +225,50 @@
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FishNameText"
                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="20"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.5" Value="20"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="15"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0">
                     <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
 
-        <!-- Fish ID Fade In -->
-        <Storyboard x:Key="FishIdAnimation">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FishIdText"
+        <!-- 8. Catch Count Pop -->
+        <Storyboard x:Key="CatchCountAnimation">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CatchCountContainer"
                                            Storyboard.TargetProperty="Opacity">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.6" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.9" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.05" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
-        </Storyboard>
-
-        <!-- Rarity Stars Fade In -->
-        <Storyboard x:Key="RarityStarsAnimation">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RarityStarsText"
-                                           Storyboard.TargetProperty="Opacity">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.7" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:1.0" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RarityStarsText"
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CatchCountContainer"
                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.5"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.7" Value="0.5"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:1.0" Value="1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.1">
                     <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RarityStarsText"
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CatchCountContainer"
                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.5"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.7" Value="0.5"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:1.0" Value="1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.1">
                     <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
                     </EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
 
-        <!-- Catch Count Fade In -->
-        <Storyboard x:Key="CatchCountAnimation">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CatchCountText"
+        <!-- 9. Tap to Continue Fade-In -->
+        <Storyboard x:Key="TapToContinueFadeIn">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TapToContinueText"
                                            Storyboard.TargetProperty="Opacity">
                 <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:0.9" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="1">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="0.6">
                     <EasingDoubleKeyFrame.EasingFunction>
                         <QuadraticEase EasingMode="EaseOut"/>
                     </EasingDoubleKeyFrame.EasingFunction>
@@ -190,23 +276,13 @@
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
 
-        <!-- Tap to Continue Pulsing Animation -->
+        <!-- Continuous Pulse for Tap to Continue -->
         <Storyboard x:Key="TapToContinuePulse" RepeatBehavior="Forever">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TapToContinueText"
                                            Storyboard.TargetProperty="Opacity">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.4"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:1" Value="0.9"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:2" Value="0.4"/>
-            </DoubleAnimationUsingKeyFrames>
-        </Storyboard>
-
-        <!-- Tap to Continue Initial Delay -->
-        <Storyboard x:Key="TapToContinueDelayedFadeIn">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TapToContinueText"
-                                           Storyboard.TargetProperty="Opacity">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:1.3" Value="0"/>
-                <LinearDoubleKeyFrame KeyTime="0:0:1.6" Value="0.4"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.5"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.8" Value="1"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:1.6" Value="0.5"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
 
@@ -216,16 +292,147 @@
     <Grid x:Name="RootContainer" Visibility="{Binding Path=visibility}">
 
         <!-- Semi-transparent dark overlay background -->
-        <Rectangle Fill="#CC000000"/>
+        <Rectangle Fill="#AA000000" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1000" Height="1900" IsEnabled="False"/>
+
+        <!-- Invisible dismiss backdrop - covers entire area, behind all content -->
+        <!-- Clicking anywhere on this backdrop dismisses the catch display -->
+        <Button x:Name="DismissBackdrop"
+                Command="{Binding Path=events.dismiss}"
+                Background="Transparent"
+                BorderThickness="0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Cursor="Hand">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <!-- Transparent hit area that receives clicks -->
+                    <Border Background="Transparent"/>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
 
         <!-- Main content area with Viewbox for scaling -->
         <Viewbox Stretch="Uniform" StretchDirection="Both">
-            <Grid Width="400" Height="700">
+            <Grid Width="420" Height="720">
 
-                <!-- Main Panel with animations -->
+                <!-- Navigation Arrows Container - positioned outside main panel -->
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Arrow Button (Previous) -->
+                    <Button x:Name="PrevButton"
+                            Grid.Column="0"
+                            Command="{Binding Path=events.navigatePrevious}"
+                            Width="70"
+                            Height="70"
+                            Margin="-50,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Cursor="Hand">
+                        <Button.Visibility>
+                            <Binding Path="canNavigatePrevious">
+                                <Binding.Converter>
+                                    <BooleanToVisibilityConverter/>
+                                </Binding.Converter>
+                            </Binding>
+                        </Button.Visibility>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Grid>
+                                    <!-- Button Background -->
+                                    <Border x:Name="ButtonBg"
+                                            Background="#CC17a2b8"
+                                            BorderThickness="2"
+                                            BorderBrush="#5017a2b8" CornerRadius="15,15,15,15">
+                                    </Border>
+                                    <!-- Arrow Icon (Chevron Left) -->
+                                    <Path Data="M 24,12 L 12,24 L 24,36"
+                                          Stroke="#FFFFFFFF"
+                                          StrokeThickness="4"
+                                          StrokeLineJoin="Round"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Width="36"
+                                          Height="48"
+                                          Stretch="Uniform"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="ButtonBg" Property="Background" Value="#FF0d8a9a"/>
+                                        <Setter TargetName="ButtonBg" Property="RenderTransform">
+                                            <Setter.Value>
+                                                <ScaleTransform ScaleX="0.92" ScaleY="0.92" CenterX="35" CenterY="35"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- Right Arrow Button (Next) -->
+                    <Button x:Name="NextButton"
+                            Grid.Column="2"
+                            Command="{Binding Path=events.navigateNext}"
+                            Width="70"
+                            Height="70"
+                            Margin="0,0,-50,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Cursor="Hand">
+                        <Button.Visibility>
+                            <Binding Path="canNavigateNext">
+                                <Binding.Converter>
+                                    <BooleanToVisibilityConverter/>
+                                </Binding.Converter>
+                            </Binding>
+                        </Button.Visibility>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Grid>
+                                    <!-- Button Background -->
+                                    <Border x:Name="ButtonBg"
+                                            Background="#CC17a2b8"
+                                            BorderThickness="2"
+                                            BorderBrush="#5017a2b8" CornerRadius="15,15,15,15">
+                                    </Border>
+                                    <!-- Arrow Icon (Chevron Right) -->
+                                    <Path Data="M 12,12 L 24,24 L 12,36"
+                                          Stroke="#FFFFFFFF"
+                                          StrokeThickness="4"
+                                          StrokeLineJoin="Round"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Width="36"
+                                          Height="48"
+                                          Stretch="Uniform"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="ButtonBg" Property="Background" Value="#FF0d8a9a"/>
+                                        <Setter TargetName="ButtonBg" Property="RenderTransform">
+                                            <Setter.Value>
+                                                <ScaleTransform ScaleX="0.92" ScaleY="0.92" CenterX="35" CenterY="35"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <!-- Main Panel with animations - triggered by animPanel -->
                 <Border x:Name="MainPanel"
-                        Margin="20,80,20,80"
-                        Padding="0"
+                        Margin="16"
                         Opacity="0"
                         RenderTransformOrigin="0.5,0.5">
                     <Border.RenderTransform>
@@ -235,126 +442,224 @@
                         </TransformGroup>
                     </Border.RenderTransform>
                     <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="Loaded">
+                        <b:DataTrigger Binding="{Binding Path=animPanel}" Value="True">
                             <b:ControlStoryboardAction Storyboard="{DynamicResource PanelPopInAnimation}"/>
-                        </b:EventTrigger>
+                        </b:DataTrigger>
                     </b:Interaction.Triggers>
 
-                    <!-- Panel Background with gradient -->
+                    <!-- Panel Background with ocean gradient -->
                     <Border CornerRadius="24">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="#E61a5276" Offset="0"/>
-                                <GradientStop Color="#E6134561" Offset="0.5"/>
-                                <GradientStop Color="#E60d3a4d" Offset="1"/>
+                                <GradientStop Color="#E81a5276" Offset="0"/>
+                                <GradientStop Color="#E8145566" Offset="0.4"/>
+                                <GradientStop Color="#E80d3a4d" Offset="1"/>
                             </LinearGradientBrush>
                         </Border.Background>
-                        <Border.Effect>
-                            <!-- Soft shadow effect via nested border -->
-                        </Border.Effect>
 
-                        <!-- Inner border for glow effect -->
+                        <!-- Inner glow border -->
                         <Border CornerRadius="22"
                                 Margin="3"
                                 BorderThickness="2">
                             <Border.BorderBrush>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#4017a2b8" Offset="0"/>
+                                    <GradientStop Color="#5017a2b8" Offset="0"/>
                                     <GradientStop Color="#2017a2b8" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.BorderBrush>
 
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>      <!-- NEW badge -->
-                                    <RowDefinition Height="Auto"/>       <!-- Space for 3D fish model -->
-                                    <RowDefinition Height="Auto"/>      <!-- Fish name -->
-                                    <RowDefinition Height="Auto" MinHeight="200"/>      <!-- Fish ID -->
-                                    <RowDefinition Height="Auto"/>      <!-- Rarity stars -->
-                                    <RowDefinition Height="Auto"/>      <!-- Catch count -->
-                                    <RowDefinition Height="*"/>         <!-- Spacer -->
-                                    <RowDefinition Height="Auto"/>      <!-- Tap to continue -->
+                                    <RowDefinition Height="Auto"/>      <!-- TOP: Stars + NEW badge -->
+                                    <RowDefinition Height="*"/>         <!-- CENTER: Empty space for 3D fish -->
+                                    <RowDefinition Height="Auto"/>      <!-- BOTTOM: Name + Count + Tap -->
                                 </Grid.RowDefinitions>
 
-                                <!-- NEW! Badge (only visible when isNew is true) -->
-                                <Border x:Name="NewBadge"
-                                        Grid.Row="0"
-                                        HorizontalAlignment="Center"
-                                        Margin="0,20,0,0"
-                                        Padding="16,6,16,6"
-                                        CornerRadius="12"
-                                        Opacity="0"
-                                        RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top">
-                                    <Border.RenderTransform>
-                                        <TransformGroup>
-                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                            <TranslateTransform X="0" Y="0"/>
-                                        </TransformGroup>
-                                    </Border.RenderTransform>
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#FFff6b6b" Offset="0"/>
-                                            <GradientStop Color="#FFffa500" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                    <b:Interaction.Triggers>
-                                        <b:EventTrigger EventName="Loaded">
-                                            <b:ControlStoryboardAction Storyboard="{DynamicResource NewBadgeAnimation}"/>
-                                        </b:EventTrigger>
-                                    </b:Interaction.Triggers>
-                                    <Border.Visibility>
-                                        <Binding Path="newVisibility">
-                                            <Binding.Converter>
-                                                <BooleanToVisibilityConverter/>
-                                            </Binding.Converter>
-                                        </Binding>
-                                    </Border.Visibility>
+                                <!-- ========== TOP SECTION ========== -->
+                                <Grid Grid.Row="0" Margin="16,20,16,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>  <!-- Fish ID (top-left) -->
+                                        <ColumnDefinition Width="*"/>     <!-- Stars (center) -->
+                                        <ColumnDefinition Width="Auto"/>  <!-- NEW badge (top-right) -->
+                                    </Grid.ColumnDefinitions>
 
-                                    <TextBlock FontFamily="Roboto"
-                                               FontSize="18"
-                                               FontWeight="Bold"
-                                               Foreground="#FFFFFFFF"
-                                               HorizontalAlignment="Center" Text="NEW!"/>
-                                </Border>
-                                <TextBlock x:Name="RarityStarsText" Text="{Binding Path=rarityStars}" FontFamily="Roboto" FontSize="32" Foreground="#FFffd700" HorizontalAlignment="Center" Margin="0,12,0,0" Opacity="0" RenderTransformOrigin="0.5,0.5" Grid.Row="1" VerticalAlignment="Top">
-                                    <TextBlock.RenderTransform>
-                                        <TransformGroup>
-                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                            <TranslateTransform X="0" Y="0"/>
-                                        </TransformGroup>
-                                    </TextBlock.RenderTransform>
-                                    <b:Interaction.Triggers>
-                                        <b:EventTrigger EventName="Loaded">
-                                            <b:ControlStoryboardAction Storyboard="{DynamicResource RarityStarsAnimation}"/>
-                                        </b:EventTrigger>
-                                    </b:Interaction.Triggers>
-                                </TextBlock>
-                                <TextBlock x:Name="FishIdText" Text="{Binding Path=fishId}" FontFamily="Roboto" FontSize="18" FontWeight="Normal" Foreground="#99FFFFFF" HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0" Grid.Row="2" VerticalAlignment="Top">
-                                    <b:Interaction.Triggers>
-                                        <b:EventTrigger EventName="Loaded">
-                                            <b:ControlStoryboardAction Storyboard="{DynamicResource FishIdAnimation}"/>
-                                        </b:EventTrigger>
-                                    </b:Interaction.Triggers>
-                                </TextBlock>
+                                    <!-- Fish ID - Top Left - triggered by animFishId -->
+                                    <Border x:Name="FishIdContainer"
+                                            Grid.Column="0"
+                                            Background="#3017a2b8"
+                                            CornerRadius="10"
+                                            Padding="10,5,10,5"
+                                            VerticalAlignment="Top"
+                                            Opacity="0"
+                                            RenderTransformOrigin="0.5,0.5">
+                                        <Border.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                <TranslateTransform X="-30" Y="0"/>
+                                            </TransformGroup>
+                                        </Border.RenderTransform>
+                                        <b:Interaction.Triggers>
+                                            <b:DataTrigger Binding="{Binding Path=animFishId}" Value="True">
+                                                <b:ControlStoryboardAction Storyboard="{DynamicResource FishIdAnimation}"/>
+                                            </b:DataTrigger>
+                                        </b:Interaction.Triggers>
+                                        <TextBlock Text="{Binding Path=fishId}"
+                                                   FontFamily="Roboto"
+                                                   FontSize="16"
+                                                   FontWeight="Bold"
+                                                   Foreground="#AAFFFFFF"/>
+                                    </Border>
 
-                                <!-- Space for 3D Fish Model (empty area) -->
-                                <Grid Margin="20,10,20,10" Grid.Row="3"/>
+                                    <!-- Rarity Stars - Center (5-point star shapes) -->
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Top"
+                                                Margin="0,2,0,0">
+                                        
+                                        <!-- Star 1 (always visible for any rarity) - triggered by animStar1 -->
+                                        <Path x:Name="Star1"
+                                              Data="{DynamicResource StarGeometry}"
+                                              Fill="#FFffd700"
+                                              Stroke="#FFb8860b"
+                                              StrokeThickness="1"
+                                              Width="36"
+                                              Height="36"
+                                              Stretch="Uniform"
+                                              Opacity="0"
+                                              RenderTransformOrigin="0.5,0.5">
+                                            <Path.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0" ScaleY="0"/>
+                                                    <TranslateTransform X="0" Y="0"/>
+                                                </TransformGroup>
+                                            </Path.RenderTransform>
+                                            <b:Interaction.Triggers>
+                                                <b:DataTrigger Binding="{Binding Path=animStar1}" Value="True">
+                                                    <b:ControlStoryboardAction Storyboard="{DynamicResource Star1Animation}"/>
+                                                </b:DataTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Path>
 
-                                <!-- Fish Name - Large prominent text -->
-                                <Grid Grid.Row="2" HorizontalAlignment="Center" Margin="0,10,0,0">
-                                    <!-- Shadow text (offset behind) -->
-                                    <TextBlock Text="{Binding Path=fishName}"
-                                               FontFamily="Roboto"
-                                               FontSize="36"
-                                               FontWeight="Bold"
-                                               Foreground="#40000000"
-                                               HorizontalAlignment="Center"
-                                               Margin="2,2,0,0"/>
-                                    <!-- Main text -->
+                                        <!-- Star 2 (visible for rare and legendary) - triggered by animStar2 -->
+                                        <Path x:Name="Star2"
+                                              Data="{DynamicResource StarGeometry}"
+                                              Fill="#FFffd700"
+                                              Stroke="#FFb8860b"
+                                              StrokeThickness="1"
+                                              Width="36"
+                                              Height="36"
+                                              Stretch="Uniform"
+                                              Opacity="0"
+                                              RenderTransformOrigin="0.5,0.5"
+                                              Margin="4,0,0,0">
+                                            <Path.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0" ScaleY="0"/>
+                                                    <TranslateTransform X="0" Y="0"/>
+                                                </TransformGroup>
+                                            </Path.RenderTransform>
+                                            <Path.Visibility>
+                                                <Binding Path="showStar2">
+                                                    <Binding.Converter>
+                                                        <BooleanToVisibilityConverter/>
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </Path.Visibility>
+                                            <b:Interaction.Triggers>
+                                                <b:DataTrigger Binding="{Binding Path=animStar2}" Value="True">
+                                                    <b:ControlStoryboardAction Storyboard="{DynamicResource Star2Animation}"/>
+                                                </b:DataTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Path>
+
+                                        <!-- Star 3 (visible for legendary only) - triggered by animStar3 -->
+                                        <Path x:Name="Star3"
+                                              Data="{DynamicResource StarGeometry}"
+                                              Fill="#FFffd700"
+                                              Stroke="#FFb8860b"
+                                              StrokeThickness="1"
+                                              Width="36"
+                                              Height="36"
+                                              Stretch="Uniform"
+                                              Opacity="0"
+                                              RenderTransformOrigin="0.5,0.5"
+                                              Margin="4,0,0,0">
+                                            <Path.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0" ScaleY="0"/>
+                                                    <TranslateTransform X="0" Y="0"/>
+                                                </TransformGroup>
+                                            </Path.RenderTransform>
+                                            <Path.Visibility>
+                                                <Binding Path="showStar3">
+                                                    <Binding.Converter>
+                                                        <BooleanToVisibilityConverter/>
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </Path.Visibility>
+                                            <b:Interaction.Triggers>
+                                                <b:DataTrigger Binding="{Binding Path=animStar3}" Value="True">
+                                                    <b:ControlStoryboardAction Storyboard="{DynamicResource Star3Animation}"/>
+                                                </b:DataTrigger>
+                                            </b:Interaction.Triggers>
+                                        </Path>
+                                    </StackPanel>
+
+                                    <!-- NEW! Badge - Top Right - triggered by animNewBadge -->
+                                    <Border x:Name="NewBadge"
+                                            Grid.Column="2"
+                                            Padding="12,6,12,6"
+                                            CornerRadius="12"
+                                            Opacity="0"
+                                            VerticalAlignment="Top"
+                                            RenderTransformOrigin="0.5,0.5">
+                                        <Border.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="0" ScaleY="0"/>
+                                                <TranslateTransform X="0" Y="0"/>
+                                            </TransformGroup>
+                                        </Border.RenderTransform>
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#FFff6b6b" Offset="0"/>
+                                                <GradientStop Color="#FFffa500" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <Border.Visibility>
+                                            <Binding Path="newVisibility">
+                                                <Binding.Converter>
+                                                    <BooleanToVisibilityConverter/>
+                                                </Binding.Converter>
+                                            </Binding>
+                                        </Border.Visibility>
+                                        <b:Interaction.Triggers>
+                                            <b:DataTrigger Binding="{Binding Path=animNewBadge}" Value="True">
+                                                <b:ControlStoryboardAction Storyboard="{DynamicResource NewBadgeAnimation}"/>
+                                            </b:DataTrigger>
+                                        </b:Interaction.Triggers>
+                                        <TextBlock Text="NEW!"
+                                                   FontFamily="Roboto"
+                                                   FontSize="16"
+                                                   FontWeight="Bold"
+                                                   Foreground="#FFFFFFFF"/>
+                                    </Border>
+                                </Grid>
+
+                                <!-- ========== CENTER SECTION - Empty for 3D Fish ========== -->
+                                <Grid Grid.Row="1" MinHeight="350">
+                                    <!-- This space is intentionally left empty for the 3D fish model -->
+                                    <!-- The fish is spawned at fishAnchor position in front of the camera -->
+                                </Grid>
+
+                                <!-- ========== BOTTOM SECTION ========== -->
+                                <StackPanel Grid.Row="2" Margin="16,0,16,24">
+                                    
+                                    <!-- Fish Name - triggered by animFishName -->
                                     <TextBlock x:Name="FishNameText"
                                                Text="{Binding Path=fishName}"
                                                FontFamily="Roboto"
-                                               FontSize="36"
+                                               FontSize="32"
                                                FontWeight="Bold"
                                                Foreground="#FFFFFFFF"
                                                HorizontalAlignment="Center"
@@ -363,45 +668,44 @@
                                         <TextBlock.RenderTransform>
                                             <TransformGroup>
                                                 <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                                <TranslateTransform X="0" Y="0"/>
+                                                <TranslateTransform X="0" Y="15"/>
                                             </TransformGroup>
                                         </TextBlock.RenderTransform>
                                         <b:Interaction.Triggers>
-                                            <b:EventTrigger EventName="Loaded">
+                                            <b:DataTrigger Binding="{Binding Path=animFishName}" Value="True">
                                                 <b:ControlStoryboardAction Storyboard="{DynamicResource FishNameAnimation}"/>
-                                            </b:EventTrigger>
+                                            </b:DataTrigger>
                                         </b:Interaction.Triggers>
                                     </TextBlock>
-                                </Grid>
 
-                                <!-- Fish ID - Smaller dimmed text -->
-
-                                <!-- Rarity Stars - Golden yellow -->
-
-                                <!-- Catch Count Display -->
-                                <StackPanel x:Name="CatchCountText"
-                                            Grid.Row="5"
-                                            Orientation="Horizontal"
+                                    <!-- Catch Count - triggered by animCatchCount -->
+                                    <Border x:Name="CatchCountContainer"
+                                            Background="#3017a2b8"
+                                            CornerRadius="10"
+                                            Padding="16,8,16,8"
                                             HorizontalAlignment="Center"
-                                            Margin="0,16,0,0"
-                                            Opacity="0">
-                                    <b:Interaction.Triggers>
-                                        <b:EventTrigger EventName="Loaded">
-                                            <b:ControlStoryboardAction Storyboard="{DynamicResource CatchCountAnimation}"/>
-                                        </b:EventTrigger>
-                                    </b:Interaction.Triggers>
-
-                                    <!-- Catch count container -->
-                                    <Border Background="#3017a2b8"
-                                            CornerRadius="8"
-                                            Padding="12,6,12,6">
+                                            Margin="0,12,0,0"
+                                            Opacity="0"
+                                            RenderTransformOrigin="0.5,0.5">
+                                        <Border.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="0.5" ScaleY="0.5"/>
+                                                <TranslateTransform X="0" Y="0"/>
+                                            </TransformGroup>
+                                        </Border.RenderTransform>
+                                        <b:Interaction.Triggers>
+                                            <b:DataTrigger Binding="{Binding Path=animCatchCount}" Value="True">
+                                                <b:ControlStoryboardAction Storyboard="{DynamicResource CatchCountAnimation}"/>
+                                            </b:DataTrigger>
+                                        </b:Interaction.Triggers>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="x "
+                                            <TextBlock Text="x"
                                                        FontFamily="Roboto"
                                                        FontSize="20"
                                                        FontWeight="Medium"
-                                                       Foreground="#CC17a2b8"
-                                                       VerticalAlignment="Center"/>
+                                                       Foreground="#AA17a2b8"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,4,0"/>
                                             <TextBlock Text="{Binding Path=catchCount}"
                                                        FontFamily="Roboto"
                                                        FontSize="24"
@@ -410,36 +714,38 @@
                                                        VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
+
+                                    <!-- Tap to Continue - triggered by animTapContinue -->
+                                    <TextBlock x:Name="TapToContinueText"
+                                               Text="Tap to continue"
+                                               FontFamily="Roboto"
+                                               FontSize="16"
+                                               FontWeight="Normal"
+                                               Foreground="#80FFFFFF"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,20,0,0"
+                                               Opacity="0">
+                                        <b:Interaction.Triggers>
+                                            <b:DataTrigger Binding="{Binding Path=animTapContinue}" Value="True">
+                                                <b:ControlStoryboardAction Storyboard="{DynamicResource TapToContinueFadeIn}"/>
+                                                <b:ControlStoryboardAction Storyboard="{DynamicResource TapToContinuePulse}"/>
+                                            </b:DataTrigger>
+                                        </b:Interaction.Triggers>
+                                    </TextBlock>
+
                                 </StackPanel>
-
-                                <!-- Spacer -->
-                                <Grid Grid.Row="6"/>
-
-                                <!-- Tap to Continue hint -->
-                                <TextBlock x:Name="TapToContinueText"
-                                           Grid.Row="7"
-                                           Text="Tap to continue"
-                                           FontFamily="Roboto"
-                                           FontSize="16"
-                                           FontWeight="Normal"
-                                           Foreground="#80FFFFFF"
-                                           HorizontalAlignment="Center"
-                                           Margin="0,0,0,24"
-                                           Opacity="0">
-                                    <b:Interaction.Triggers>
-                                        <b:EventTrigger EventName="Loaded">
-                                            <b:ControlStoryboardAction Storyboard="{DynamicResource TapToContinueDelayedFadeIn}"/>
-                                        </b:EventTrigger>
-                                        <b:EventTrigger EventName="Loaded">
-                                            <b:ControlStoryboardAction Storyboard="{DynamicResource TapToContinuePulse}"/>
-                                        </b:EventTrigger>
-                                    </b:Interaction.Triggers>
-                                </TextBlock>
 
                             </Grid>
                         </Border>
                     </Border>
                 </Border>
+                <Button x:Name="DismissBackdrop001" Command="{Binding Path=events.dismiss}" Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent"/>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
             </Grid>
         </Viewbox>

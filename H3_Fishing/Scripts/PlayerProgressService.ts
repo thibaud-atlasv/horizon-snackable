@@ -1,5 +1,6 @@
 import {
   EventService,
+  ExecuteOn,
   NetworkingService,
   PlayerVariablesService,
   Service,
@@ -10,15 +11,13 @@ import {
 } from 'meta/worlds';
 
 import { Events, NetworkEvents } from './Types';
-import { XP_NEW_FISH, XP_DUPLICATE_FISH, XP_UNLOCK_ZONE_2, XP_UNLOCK_ZONE_3 } from './Constants';
+import { UNLOCK_ZONE_2_UNIQUE, UNLOCK_ZONE_3_UNIQUE } from './Constants';
 
 // ─── Persisted shape ─────────────────────────────────────────────────────────
 @serializable()
 class SaveData {
-  readonly catchDefIds   : readonly number[] = [];
-  readonly catchCounts   : readonly number[] = [];
-  readonly xp            : number            = 0;
-  readonly unlockedZones : number            = 1;
+  readonly catchDefIds : readonly number[] = [];
+  readonly catchCounts : readonly number[] = [];
 }
 
 const SAVE_KEY = 'fishCollection';
@@ -29,22 +28,19 @@ const SAVE_KEY = 'fishCollection';
 //  Single entry point for persistence. Single-player world — one player at a time.
 //
 //  Server:
-//    - OnPlayerCreate → fetchVariable → sendToOwner(ProgressData)
-//    - ReportCatch    → update in-memory state → setVariable
+//    - OnPlayerCreate → fetchVariable → sendGlobally(ProgressData)
+//    - ReportCatch    → update counts → setVariable
 //
 //  Client:
-//    - ProgressData   → Events.ProgressLoaded (local) → services seed themselves
-//    - FishCaught     → sendGlobally(ReportCatch) → server persists
+//    - ProgressData → Events.ProgressLoaded (local) → services seed themselves
+//    - FishCaught   → sendGlobally(ReportCatch) → server persists
 // =============================================================================
 
 @service()
 export class PlayerProgressService extends Service {
 
-  // Server-side state — single player, stored directly
-  private _player  : Entity | null          = null;
-  private _counts  : Map<number, number>    = new Map();
-  private _xp      = 0;
-  private _zones   = 1;
+  private _player : Entity | null       = null;
+  private _counts : Map<number, number> = new Map();
 
   // ── Server: player joins ─────────────────────────────────────────────────────
 
@@ -63,19 +59,21 @@ export class PlayerProgressService extends Service {
       for (let i = 0; i < save.catchDefIds.length; i++) {
         this._counts.set(save.catchDefIds[i], save.catchCounts[i]);
       }
-      this._xp    = save.xp;
-      this._zones = save.unlockedZones;
-
-      EventService.sendToOwner(NetworkEvents.ProgressData, {
-        catchDefIds:   save.catchDefIds,
-        catchCounts:   save.catchCounts,
-        xp:            save.xp,
-        unlockedZones: save.unlockedZones,
-      }, player);
     } else {
-      // First session — persist empty record immediately
       this._persist();
     }
+
+    const unique = this._counts.size;
+    const unlockedZones = unique >= UNLOCK_ZONE_3_UNIQUE ? 3
+                        : unique >= UNLOCK_ZONE_2_UNIQUE ? 2
+                        : 1;
+
+    const catchDefIds = Array.from(this._counts.keys());
+    EventService.sendGlobally(NetworkEvents.ProgressData, {
+      catchDefIds,
+      catchCounts:   catchDefIds.map(id => this._counts.get(id)!),
+      unlockedZones,
+    });
   }
 
   // ── Server: client reports a catch ──────────────────────────────────────────
@@ -83,26 +81,18 @@ export class PlayerProgressService extends Service {
   @subscribe(NetworkEvents.ReportCatch)
   onReportCatch(p: NetworkEvents.ReportCatchPayload): void {
     if (!NetworkingService.get().isServerContext()) return;
-
-    const isNew = !this._counts.has(p.defId);
     this._counts.set(p.defId, (this._counts.get(p.defId) ?? 0) + 1);
-
-    this._xp += isNew ? XP_NEW_FISH : XP_DUPLICATE_FISH;
-    if (this._zones < 2 && this._xp >= XP_UNLOCK_ZONE_2) this._zones = 2;
-    if (this._zones < 3 && this._xp >= XP_UNLOCK_ZONE_3) this._zones = 3;
-
     this._persist();
   }
 
   // ── Client: receive loaded data ──────────────────────────────────────────────
 
-  @subscribe(NetworkEvents.ProgressData)
+  @subscribe(NetworkEvents.ProgressData, { execution: ExecuteOn.Everywhere })
   onProgressData(p: NetworkEvents.ProgressDataPayload): void {
     if (NetworkingService.get().isServerContext()) return;
     EventService.sendLocally(Events.ProgressLoaded, {
       catchDefIds:   p.catchDefIds,
       catchCounts:   p.catchCounts,
-      xp:            p.xp,
       unlockedZones: p.unlockedZones,
     });
   }
@@ -119,15 +109,11 @@ export class PlayerProgressService extends Service {
 
   private _persist(): void {
     if (!this._player) return;
-
     const catchDefIds = Array.from(this._counts.keys());
     const save: SaveData = {
       catchDefIds,
-      catchCounts:   catchDefIds.map(id => this._counts.get(id)!),
-      xp:            this._xp,
-      unlockedZones: this._zones,
+      catchCounts: catchDefIds.map(id => this._counts.get(id)!),
     };
-
     PlayerVariablesService.get()
       .setVariable(this._player, SAVE_KEY, save)
       .catch(e => console.error('[PlayerProgressService] setVariable failed:', e));

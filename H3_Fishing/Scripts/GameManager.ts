@@ -13,6 +13,7 @@ import {
   component,
   subscribe,
   PlayerService,
+  UiService,
 } from 'meta/worlds';
 
 import { PING_PONG_SPEED, RESET_DELAY } from './Constants';
@@ -44,6 +45,8 @@ export class GameManager extends Component {
   // need to call it at least once
   private fishService = FishSpawnService.get();
   private progressionService = PlayerProgressService.get();
+  private networkService = NetworkingService.get();
+  private isServer = true;
   // ── Phase ─────────────────────────────────────────────────────────────────────
   private _phase: GamePhase = GamePhase.Idle;
 
@@ -61,16 +64,15 @@ export class GameManager extends Component {
   // ── Init ──────────────────────────────────────────────────────────────────────
   @subscribe(OnEntityStartEvent)
   onStart(): void {
-    if (NetworkingService.get().isServerContext()) return;
-    console.log("player entity", PlayerService.get().getLocalPlayer());
-    
+    this.isServer = this.networkService.isServerContext();
+    if (this.isServer) return;
     EventService.sendLocally(Events.GameStarted, {});
     this._setPhase(GamePhase.Idle);
   }
 
   @subscribe(OnPlayerCreateEvent)
   onPlayerCreate(p: OnPlayerCreateEventPayload): void {
-    if (!p.entity) return;
+    if (!p.entity || !this.isServer) return;
     PlayerProgressService.get().loadForPlayer(p.entity);
   }
 
@@ -163,18 +165,21 @@ export class GameManager extends Component {
   private _triggerCatch(): void {
     if (this._hookedFishId < 0) return;
     const collection = FishCollectionService.get();
-    const isNew      = !collection.hasCaught(this._hookedDefId);
+    // Read before FishCaught so values are stable regardless of event dispatch order
+    const catchCount = collection.getCount(this._hookedDefId) + 1;
+    const isNew      = catchCount === 1;
     EventService.sendLocally(Events.FishCaught, { fishId: this._hookedFishId, defId: this._hookedDefId });
     EventService.sendLocally(HUDEvents.ShowCatch, {
-      defId:      this._hookedDefId,
+      defId: this._hookedDefId,
       isNew,
-      catchCount: collection.getCount(this._hookedDefId),
+      catchCount,
     });
     this._setPhase(GamePhase.CatchDisplay);
   }
 
   @subscribe(HUDEvents.DismissCatch)
   private _dismissCatch(): void {
+    UiService.get().unfocus();
     EventService.sendLocally(HUDEvents.HideCatch, {});
     FishRegistry.get().destroyFish(this._hookedFishId);
     this._hookedFishId = -1;

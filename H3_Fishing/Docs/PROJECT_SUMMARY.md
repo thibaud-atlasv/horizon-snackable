@@ -15,13 +15,28 @@ Ported from `../../fish` (landscape prototype). Core mechanics preserved, archit
 6. **Wave Reset** — Caught fish removed, new wave spawns (slightly faster).
 
 ## Fish Database
-200 species across 8 families: Solars, Corals, Greens, Crystals, Deeps, Violets, Ghosts, Abyssals.
-Rarity tiers: common / rare / legendary — affect spawn weight and visual flair.
-Currently only seed entries are in `FishDefs.ts` — full data to be populated by the team.
+18 species across 3 zones. Rarity tiers: common / rare / legendary — affect spawn weight and visual flair.
+
+| Zone | Depth | Species |
+|------|-------|---------|
+| 1 — Surface | Y 4.5 → -8.0 | Clownfish, Koi, Blue Discus, Butterflyfish, Angelfish, Rainbow Fish |
+| 2 — Mid-depth | Y -8.0 → -24.0 | Silver Carp, Green Discus, Dolphin, Flame Angelfish, Sand Flounder, Sea Turtle |
+| 3 — Abyss | Y -24.0 → -38.5 | Violet Barracuda, Blue Flounder, Reef Shark, Pink Dolphin, Barracuda, Pink Shark |
+
+All zones spawn fish independently of unlock state (fish exist at depth even before the player can reach them).
+
+## Zone Progression
+Zones are unlocked by catching unique species — no XP system.
+
+| Unlock | Threshold |
+|--------|-----------|
+| Zone 2 | 4 unique species (zone 1: 3 commons + 1 rare) |
+| Zone 3 | 10 unique species (all of zone 1 + 4 from zone 2) |
+
+`ZoneProgressionService` tracks the unlocked zone count and bait floor Y. `PlayerProgressService` recomputes the zone on each session load from the persisted catch list.
 
 ### Fish Visual Types
-- **3D Models**: ClownFish, AngelFish — use imported 3D meshes with standard materials
-- **2D Sprites**: ButterflyFish — uses transparent PNG sprites on planes with alpha-blended unlit shader (`Shaders/UnlitAlphaBlend.surface`). Ideal for stylized or mobile-optimized fish.
+- **3D Models**: All 18 species use imported 3D meshes.
 
 ## Architecture At a Glance
 
@@ -42,7 +57,32 @@ AmbientFXController  → god rays, floating particles, seaweed
 BubbleController  → single rising bubble entity (self-destructs)
 BubbleSpawner     → ambient bubble emitter
 FishingHUDViewModel  → main HUD XAML data context (UI/FishingHUD.xaml)
-CatchDisplayViewModel → catch reveal screen + journal navigation (animated panel with elastic bounce, cascading fade-ins, rarity stars)
+  - Cast/Reel gauge with dynamic color gradient
+  - Progress Bar: Shows unique species discovery progress (X/18) with fade in/out animation
+    - Appears on catch, auto-hides after 3.5 seconds
+    - Two depth threshold cursors marking zone unlock milestones (4/18 and 10/18)
+    - Positions controlled via `cursor1Position` and `cursor2Position` (0-100%)
+  - Zone Unlocked Message: Celebratory "NEW ZONE UNLOCKED!" notification
+    - Positioned above the XP progress bar
+    - Impactful elastic scale pop-in animation (BackEase overshoot 0→1.25→1.0)
+    - Golden gradient text with shadow outline for visibility
+    - Semi-transparent dark background with golden gradient border
+    - Auto-hides after 3.5 seconds with fade-out and scale-down
+    - Triggered via `showZoneUnlocked()` method on FishingHUDViewModel
+CatchDisplayViewModel → WorldSpace UI centered in front of camera with satisfying cascade reward animations:
+  - Animations triggered programmatically via `playAnimation()` method (not auto-play on load)
+  - Elastic "pop" panel with overshoot (BackEase)
+  - 5-point star shapes (Path geometry) with golden fill and stroke, animate sequentially by rarity
+  - NEW! badge pop animation for first catches
+  - Fish ID journal number slide-in (#001, #002...)
+  - Catch count pop with elastic bounce
+  - Pulsing "tap to continue" indicator
+  - Large centered empty space for 3D fish model display
+  - Navigation arrows (◀ ▶) to browse caught fish collection:
+    - Circular turquoise buttons positioned outside main panel
+    - Touch-friendly 70px size with press animation (scale down effect)
+    - Visible only when multiple fish have been caught
+    - Fires HUDEvents.NavigateCatch to cycle through journal
 ```
 
 ## Key Extensibility Points

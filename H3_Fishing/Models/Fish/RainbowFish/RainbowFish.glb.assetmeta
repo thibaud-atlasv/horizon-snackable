@@ -30,7 +30,7 @@
             },
             {
                 "class": "horizon::renderer::tool::MeshAssetBuilderSettings",
-                "version": 10004,
+                "version": 10003,
                 "data": {
                     "target": "mesh",
                     "lightmapTextureTarget": "",
@@ -42,7 +42,7 @@
                     "meshSettingsList": [
                         {
                             "class": "horizon::renderer::tool::MeshAssetBuilderMeshSettings",
-                            "version": 10004,
+                            "version": 10003,
                             "data": {
                                 "nodePath": "/Mesh1",
                                 "lightmapTextureTarget": "",

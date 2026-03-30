@@ -1,50 +1,41 @@
 ---
 name: fishing-extensibility
-summary: How to add fish, families, gameplay variants, and new mechanics without touching existing files
+summary: How to add fish, zones, gameplay mechanics, and new HUD elements without touching existing files
 include: on-demand
 ---
 
 # Fishing Game — Extensibility Guide
 
-## 1. Add a new fish species (one line)
+## 1. Add a new fish species
 
-Open `Scripts/Fish/FishDefs.ts` and add a `FishRegistry.register()` call:
+Open `Scripts/Fish/FishDefs.ts` and add an entry to `FISH_DEFS`:
 
 ```typescript
-FishRegistry.register({
-  id: 201, name: 'Starglint', family: 'Crystals',
-  bodyColor: { r: 0.92, g: 0.98, b: 1.00 },
-  tailColor: { r: 0.55, g: 0.78, b: 0.95 },
-  finColor:  { r: 0.98, g: 0.88, b: 0.22 },
-  sizeMin: 0.60, sizeMax: 0.80,
-  speedMin: 1.5, speedMax: 2.2,
-  waterLayerMin: 0, waterLayerMax: 3,
-  rarity: 'rare',
-});
+{ id: 19, name: 'Moonfish', zone: 2, rarity: 'rare',
+  sizeMin: 1.2, sizeMax: 1.8, speedMin: 1.0, speedMax: 1.8,
+  template: Assets.MyNewFish },
 ```
 
-IDs must be unique. Use the next available integer.
+Then add the template reference in `Scripts/Assets.ts`:
+
+```typescript
+export const MyNewFish = new TemplateAsset('../Templates/Fish/MyNewFish.hstf');
+```
+
+IDs must be unique. Use the next available integer after 18.
 
 ---
 
-## 2. Add a new fish family (new file, zero changes elsewhere)
+## 2. Add a new zone
 
-Create `Scripts/Fish/Defs/MyFamilyDefs.ts`:
+1. Extend `ZONE_FLOOR_Y`, `ZONE_SPAWN_TOP_Y`, `ZONE_SPAWN_BOT_Y` in `Constants.ts`
+2. Update `ZONE_COUNT`
+3. Add fish defs with `zone: 4` in `FishDefs.ts`
+4. Set a new `UNLOCK_ZONE_4_UNIQUE` threshold in `Constants.ts`
+5. Add the unlock check in `ZoneProgressionService._checkUnlocks()`
+6. Recompute zones in `PlayerProgressService.loadForPlayer()`
 
-```typescript
-import { FishRegistry } from '../FishRegistry';
-
-FishRegistry.register({ id: 301, name: 'Emberfin', family: 'Volcanics', ... });
-FishRegistry.register({ id: 302, name: 'Magmaback', family: 'Volcanics', ... });
-```
-
-Then import this file once in `GameManager.ts` (or any entry point):
-
-```typescript
-import './Fish/Defs/MyFamilyDefs'; // side-effect import — registers the defs
-```
-
-Add `'Volcanics'` to the `FishFamily` union type in `Types.ts`.
+No other files need changes — `FishSpawnService` reads `ZONE_COUNT` directly.
 
 ---
 
@@ -53,7 +44,7 @@ Add `'Volcanics'` to the `FishFamily` union type in `Types.ts`.
 Subscribe to existing events from any new Component or Service. No existing file changes needed.
 
 ```typescript
-// Example: combo multiplier that tracks successive catches
+// Example: combo tracker
 @component()
 export class ComboTracker extends Component {
   private _combo = 0;
@@ -61,7 +52,6 @@ export class ComboTracker extends Component {
   @subscribe(Events.FishCaught)
   onCaught(_p: Events.FishCaughtPayload): void {
     this._combo++;
-    // fire your own event, update HUD, etc.
   }
 
   @subscribe(Events.BaitHitBottom)
@@ -71,81 +61,85 @@ export class ComboTracker extends Component {
 }
 ```
 
----
+Key hooks:
 
-## 4. Scripted / themed waves
-
-Edit `Scripts/LevelConfig.ts` — add entries to `WAVE_CONFIGS`:
-
-```typescript
-// Wave 5 — deep hunt: only Deeps and Abyssals, below layer 4
-{ count: 5, speedMultiplier: 1.3, familyFilter: ['Deeps', 'Abyssals'], layerOverride: { min: 4, max: 7 } },
-```
-
-For fully custom logic, override `getWaveConfig()` in `LevelConfig.ts`.
+| Event | When |
+|-------|------|
+| `Events.PhaseChanged` | Every phase transition |
+| `Events.FishHooked` | Bait touches fish → start reeling |
+| `Events.FishCaught` | Fish reaches surface → catch confirmed |
+| `Events.BaitHitBottom` | Bait hits floor → miss |
+| `Events.ZoneUnlocked` | Player unlocks a deeper zone |
+| `Events.ProgressLoaded` | Save data received from server |
 
 ---
 
-## 5. New environmental effect
+## 4. Add a new HUD element
 
-Create a new `@component()` that subscribes to phase/wave events:
+1. Add properties to `FishingHUDData` (or create a new `@uiViewModel()` class)
+2. Subscribe to relevant events and update the vm
+3. Bind in XAML
 
 ```typescript
-@component()
-export class StormEffect extends Component {
-  @subscribe(Events.WaveStart)
-  onWave(p: Events.WaveStartPayload): void {
-    if (p.waveIndex % 5 === 0) {
-      // activate storm visuals on WaterLayerController, etc.
-    }
-  }
+// In FishingHUDData:
+comboCount: number = 0;
+
+// In FishingHUDViewModel:
+@subscribe(Events.FishCaught)
+private _onCaught(_p: Events.FishCaughtPayload): void {
+  this._vm.comboCount++;
 }
 ```
 
-Attach it to a scene entity. No existing file modified.
+---
+
+## 5. Modify reel difficulty
+
+All reel tuning lives in `Constants.ts`:
+
+| Constant | Effect |
+|----------|--------|
+| `REEL_TAP_JUMP_RATIO` | % of total distance per tap (default 0.08 = ~13 taps) |
+| `REEL_BURST_MAX` | Maximum upward velocity from tapping |
+| `REEL_BURST_DECAY` | How fast the burst fades between taps |
+| `REEL_SINK_SPEED` | Base downward resistance (scaled by fish size) |
+| `REEL_FATIGUE_MIN` | Fish resistance at surface (0.3 = 30% of base sink) |
+| `REEL_SMOOTH_SPEED` | Visual smoothing of bait position (higher = snappier) |
+
+Fish size multiplies `_reelSinkSpeed` at hook time — larger fish resist more.
 
 ---
 
-## 6. Catch persistence
+## 6. Zone unlock thresholds
 
-In `FishCollectionService.ts`, the `recordCatch()` and `onReady()` methods have
-`// TODO` comments where PlayerVariables calls should go:
+Thresholds are unique species counts, defined in `Constants.ts`:
 
 ```typescript
-// onReady — load:
-const saved = await PlayerVariablesService.get().getVariable<string>('fishCollection');
-if (saved) this._counts = new Map(JSON.parse(saved));
-
-// recordCatch — save:
-await PlayerVariablesService.get().setVariable('fishCollection',
-  JSON.stringify([...this._counts.entries()]));
+export const UNLOCK_ZONE_2_UNIQUE = 4;   // zone 1: 3 commons + 1 rare
+export const UNLOCK_ZONE_3_UNIQUE = 10;  // zone 1 complete + 4 from zone 2
 ```
 
----
+`ZoneProgressionService` checks these on every new unique catch.
+`PlayerProgressService` recomputes the zone from the persisted catch list on session start.
 
-## 7. 3D animated fish (future)
-
-Replace the `Fish.hstf` template with a 3D rigged model.
-`FishController` already calls `applyDef()` which sets colors via `ColorComponent`.
-For animation state (swim, caught, idle), add `AnimationComponent` calls in
-`FishController._applyDef()` and `FishController.setCaught()` without
-changing any other file.
+All zones spawn fish at all times regardless of unlock state — the unlock only extends the bait floor Y (how deep the player can fish).
 
 ---
 
-## Water Layers
+## 7. Persistence shape
 
-8 gameplay layers, 0 = surface, 7 = sand. Y positions (portrait 9×16):
+`PlayerProgressService` saves a `SaveData` to `PlayerVariablesService` under key `'fishCollection'`:
 
-| Layer | World Y | Description |
-|-------|---------|-------------|
-| 0 | 4.0 | Surface |
-| 1 | 2.8 | Shallow |
-| 2 | 1.4 | Mid-shallow |
-| 3 | 0.0 | Mid |
-| 4 | -1.4 | Mid-deep |
-| 5 | -2.8 | Deep |
-| 6 | -5.0 | Abyss |
-| 7 | -6.5 | Sand |
+```typescript
+{ catchDefIds: number[], catchCounts: number[] }
+```
 
-Use `layerToWorldY(n)` and `randomYForLayers(min, max)` from `Constants.ts`.
+No XP is stored. Zone unlock is recomputed from `catchDefIds.length` (unique species count) each session. To add a new persisted field: extend `SaveData`, update `loadForPlayer`, and pass it through `NetworkEvents.ProgressData` → `Events.ProgressLoaded`.
+
+---
+
+## 8. 3D fish display in catch screen
+
+`CatchDisplayViewModel` spawns the caught fish's template at `fishAnchor` (scene entity in front of camera). The fish auto-rotates and scales in with an `easeOutBack` bounce.
+
+To customize per-species display scale, set a different `localScale` on the anchor or apply a post-spawn scale override using the def's `sizeMax`.

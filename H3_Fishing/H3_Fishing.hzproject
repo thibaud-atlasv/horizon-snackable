@@ -8,7 +8,7 @@
     "organizationId": "896923280160081",
     "organizationName": "thibaud_albyon's team",
     "organizationScope": "thibaudalbyonsteam",
-    "worldId": "26572458959015573",
+    "worldId": "34519578871024101",
     "collisionLayers": [
         "Player",
         "World",
@@ -47,5 +47,5 @@
         "avatarMax": 1,
         "screenOrientation": "Portrait"
     },
-    "editorVersion": "75.0.0.0.37"
+    "editorVersion": "74.0.0.21.106"
 }

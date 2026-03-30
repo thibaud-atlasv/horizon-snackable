@@ -46,7 +46,7 @@
             },
             {
                 "class": "horizon::animation_hzanim::SceneToHzAnimAssetBuilderSettings",
-                "version": 10007,
+                "version": 10006,
                 "data": {
                     "target": "hzanim_anim",
                     "animationSettingsList": [
@@ -132,19 +132,19 @@
             },
             {
                 "class": "horizon::renderer::tool::MeshAssetBuilderSettings",
-                "version": 10004,
+                "version": 10003,
                 "data": {
                     "target": "mesh",
                     "lightmapTextureTarget": "",
                     "materialMapTarget": "materialMap.json",
-                    "streamable": true,
+                    "streamable": false,
                     "streamCount": 2,
                     "instanceGroupID": 0,
                     "flipBitangent": false,
                     "meshSettingsList": [
                         {
                             "class": "horizon::renderer::tool::MeshAssetBuilderMeshSettings",
-                            "version": 10004,
+                            "version": 10003,
                             "data": {
                                 "nodePath": "/RootNode/tortue_geante_photoscan.002",
                                 "lightmapTextureTarget": "",
@@ -216,7 +216,7 @@
                     "target": "phys_convex_mesh",
                     "maxNumConvexHulls": 1,
                     "maxNumVertsPerConvexHull": 128,
-                    "voxelResolution": 400000,
+                    "voxelResolution": 242941,
                     "allowedVolumeErrorPercentage": 1.0,
                     "recursionDepth": 10,
                     "minEdgeLength": 2

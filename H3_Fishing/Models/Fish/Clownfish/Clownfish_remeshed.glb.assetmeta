@@ -30,7 +30,7 @@
             },
             {
                 "class": "horizon::renderer::tool::MeshAssetBuilderSettings",
-                "version": 10004,
+                "version": 10003,
                 "data": {
                     "target": "mesh",
                     "lightmapTextureTarget": "",
@@ -42,7 +42,7 @@
                     "meshSettingsList": [
                         {
                             "class": "horizon::renderer::tool::MeshAssetBuilderMeshSettings",
-                            "version": 10004,
+                            "version": 10003,
                             "data": {
                                 "nodePath": "/Mesh1.0",
                                 "lightmapTextureTarget": "",
@@ -88,8 +88,8 @@
                                 "materials": [
                                     {
                                         "packageOrRemoteId": "0",
-                                        "ingestionId": "12353970150554698591",
-                                        "targetId": "1766461776"
+                                        "ingestionId": "14236779265598894110",
+                                        "targetId": "157013062"
                                     }
                                 ],
                                 "originalMaterials": [

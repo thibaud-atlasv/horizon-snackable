@@ -214,7 +214,7 @@
                             "localPosition": {
                                 "x": 0.0,
                                 "y": 0.0,
-                                "z": 100.0
+                                "z": 20.0
                             }
                         }
                     },
@@ -225,7 +225,7 @@
                         "class": "horizon::platform_api::CameraPlatformComponent",
                         "version": 2,
                         "data": {
-                            "fieldOfView": 11.5
+                            "fieldOfView": 45.0
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -260,7 +260,17 @@
                             "localPosition": {
                                 "x": 0.0,
                                 "y": 0.0,
-                                "z": -2.0
+                                "z": -1.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
                             }
                         }
                     },
@@ -277,7 +287,8 @@
                                 "ingestionId": "8350987042678855076",
                                 "targetId": "2149638574"
                             },
-                            "isInteractable": false,
+                            "panelVisibility": true,
+                            "isInteractable": true,
                             "renderOrderOffset": 10
                         }
                     },
@@ -302,7 +313,7 @@
         },
         {
             "id": "b1a9e7fc-245f-4983-8933-ea324bc3744c",
-            "name": "New Entity",
+            "name": "FishAnchor",
             "components": [
                 {
                     "data": {

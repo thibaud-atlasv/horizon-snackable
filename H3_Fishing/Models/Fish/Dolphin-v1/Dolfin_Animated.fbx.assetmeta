@@ -46,7 +46,7 @@
             },
             {
                 "class": "horizon::animation_hzanim::SceneToHzAnimAssetBuilderSettings",
-                "version": 10007,
+                "version": 10006,
                 "data": {
                     "target": "hzanim_anim",
                     "animationSettingsList": [
@@ -120,7 +120,7 @@
             },
             {
                 "class": "horizon::renderer::tool::MeshAssetBuilderSettings",
-                "version": 10004,
+                "version": 10003,
                 "data": {
                     "target": "mesh",
                     "lightmapTextureTarget": "",
@@ -132,7 +132,7 @@
                     "meshSettingsList": [
                         {
                             "class": "horizon::renderer::tool::MeshAssetBuilderMeshSettings",
-                            "version": 10004,
+                            "version": 10003,
                             "data": {
                                 "nodePath": "/RootNode/dolfin_dolfin_pSphere2.002",
                                 "lightmapTextureTarget": "",

@@ -110,8 +110,8 @@ export namespace HUDEvents {
   export class DismissCatchPayload {}
   export const DismissCatch = new LocalEvent<DismissCatchPayload>('EvHUDDismissCatch', DismissCatchPayload);
 
-  export class UpdateXPPayload { xp: number = 0; maxXp: number = 1000; }
-  export const UpdateXP = new LocalEvent<UpdateXPPayload>('EvHUDUpdateXP', UpdateXPPayload);
+  export class UpdateProgressPayload { uniqueCaught: number = 0; }
+  export const UpdateProgress = new LocalEvent<UpdateProgressPayload>('EvHUDUpdateProgress', UpdateProgressPayload);
 }
 
 // ─── Network Events (server ↔ client) ────────────────────────────────────────
@@ -127,7 +127,6 @@ export namespace NetworkEvents {
   export class ProgressDataPayload {
     readonly catchDefIds   : readonly number[] = [];
     readonly catchCounts   : readonly number[] = [];
-    readonly xp            : number            = 0;
     readonly unlockedZones : number            = 1;
   }
   export const ProgressData = new NetworkEvent<ProgressDataPayload>('EvNetProgressData', ProgressDataPayload);
@@ -149,7 +148,6 @@ export namespace Events {
   export class ProgressLoadedPayload {
     catchDefIds   : readonly number[] = [];
     catchCounts   : readonly number[] = [];
-    xp            : number            = 0;
     unlockedZones : number            = 1;
   }
   export const ProgressLoaded = new LocalEvent<ProgressLoadedPayload>('EvProgressLoaded', ProgressLoadedPayload);

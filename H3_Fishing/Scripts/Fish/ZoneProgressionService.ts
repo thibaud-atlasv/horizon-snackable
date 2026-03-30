@@ -1,24 +1,25 @@
-import { EventService, Service, service, subscribe, OnServiceReadyEvent } from 'meta/worlds';
+import { EventService, Service, service, subscribe } from 'meta/worlds';
 import {
   ZONE_FLOOR_Y,
-  XP_NEW_FISH, XP_DUPLICATE_FISH,
-  XP_UNLOCK_ZONE_2, XP_UNLOCK_ZONE_3,
+  UNLOCK_ZONE_2_UNIQUE,
+  UNLOCK_ZONE_3_UNIQUE,
 } from '../Constants';
 import { Events, HUDEvents } from '../Types';
 import { FISH_DEFS } from './FishDefs';
 
 /**
  * ZoneProgressionService — single source of truth for:
- *   - Global XP and zone unlock thresholds
- *   - Current unlocked zone count
+ *   - Current unlocked zone count (based on unique species caught)
  *   - Dynamic bait floor Y (used by RodController)
  *   - Legendary spawn probability per zone (used by FishSpawnService)
+ *
+ * Zone 2 unlocks at UNLOCK_ZONE_2_UNIQUE unique species caught.
+ * Zone 3 unlocks at UNLOCK_ZONE_3_UNIQUE unique species caught.
  */
 @service()
 export class ZoneProgressionService extends Service {
 
-  private _xp            = 0;
-  private _unlockedZones = 3;
+  private _unlockedZones = 1;
 
   // 0-indexed, tracks defIds caught per zone for legendary probability
   private _caughtPerZone: Set<number>[] = [new Set(), new Set(), new Set()];
@@ -26,14 +27,8 @@ export class ZoneProgressionService extends Service {
   // Own seen-set so we don't depend on FishCollectionService event order
   private _everCaught = new Set<number>();
 
-  @subscribe(OnServiceReadyEvent)
-  onReady(): void {
-    EventService.sendLocally(HUDEvents.UpdateXP, { xp: 0, maxXp: XP_UNLOCK_ZONE_3 });
-  }
-
   @subscribe(Events.ProgressLoaded)
   onProgressLoaded(p: Events.ProgressLoadedPayload): void {
-    this._xp            = p.xp;
     this._unlockedZones = p.unlockedZones;
     this._everCaught    = new Set(p.catchDefIds);
     this._caughtPerZone = [new Set(), new Set(), new Set()];
@@ -41,7 +36,7 @@ export class ZoneProgressionService extends Service {
       const def = FISH_DEFS.find(d => d.id === defId);
       if (def) this._caughtPerZone[def.zone - 1].add(defId);
     }
-    EventService.sendLocally(HUDEvents.UpdateXP, { xp: this._xp, maxXp: XP_UNLOCK_ZONE_3 });
+    EventService.sendLocally(HUDEvents.UpdateProgress, { uniqueCaught: this._everCaught.size });
   }
 
   // ── Public API ───────────────────────────────────────────────────────────────
@@ -52,10 +47,6 @@ export class ZoneProgressionService extends Service {
 
   getUnlockedZones(): number {
     return this._unlockedZones;
-  }
-
-  getTotalXP(): number {
-    return this._xp;
   }
 
   /**
@@ -79,35 +70,30 @@ export class ZoneProgressionService extends Service {
     return Math.min(0.30, chance);
   }
 
-  addCatch(defId: number, isNew: boolean): void {
-    this._xp += isNew ? XP_NEW_FISH : XP_DUPLICATE_FISH;
-
-    const def = FISH_DEFS.find(d => d.id === defId);
-    if (def) {
-      this._caughtPerZone[def.zone - 1].add(defId);
-    }
-
-    this._checkUnlocks();
-    EventService.sendLocally(HUDEvents.UpdateXP, { xp: this._xp, maxXp: XP_UNLOCK_ZONE_3 });
-  }
-
   // ── Event Handlers ───────────────────────────────────────────────────────────
 
   @subscribe(Events.FishCaught)
   private _onFishCaught(p: Events.FishCaughtPayload): void {
     const isNew = !this._everCaught.has(p.defId);
+    if (!isNew) return;
+
     this._everCaught.add(p.defId);
-    this.addCatch(p.defId, isNew);
+    const def = FISH_DEFS.find(d => d.id === p.defId);
+    if (def) this._caughtPerZone[def.zone - 1].add(p.defId);
+
+    this._checkUnlocks();
+    EventService.sendLocally(HUDEvents.UpdateProgress, { uniqueCaught: this._everCaught.size });
   }
 
   // ── Private ───────────────────────────────────────────────────────────────────
 
   private _checkUnlocks(): void {
-    if (this._unlockedZones < 2 && this._xp >= XP_UNLOCK_ZONE_2) {
+    const unique = this._everCaught.size;
+    if (this._unlockedZones < 2 && unique >= UNLOCK_ZONE_2_UNIQUE) {
       this._unlockedZones = 2;
       EventService.sendLocally(Events.ZoneUnlocked, { zone: 2 });
     }
-    if (this._unlockedZones < 3 && this._xp >= XP_UNLOCK_ZONE_3) {
+    if (this._unlockedZones < 3 && unique >= UNLOCK_ZONE_3_UNIQUE) {
       this._unlockedZones = 3;
       EventService.sendLocally(Events.ZoneUnlocked, { zone: 3 });
     }

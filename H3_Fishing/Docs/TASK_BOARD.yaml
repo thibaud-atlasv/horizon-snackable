@@ -73,6 +73,16 @@ tasks:
     summary: Created animated UI panel with fish name, rarity stars (1-3), 3D model viewport. Fixed event subscriptions and XAML bindings.
     files: [UI/CatchDisplay.xaml, Scripts/UI/CatchDisplayViewModel.ts]
 
+  - name: CatchDisplayHUD Redesign
+    status: done
+    summary: Nouvelle UI WorldSpace avec espace central pour poisson 3D, étoiles de rareté, badge New, compteur, numéro journal. Animation cascade élastique satisfaisante.
+    files: [UI/CatchDisplay.xaml, Scripts/GameHUD/CatchDisplayViewModel.ts]
+
+  - name: CatchDisplayHUD Animation Control + Star Shapes
+    status: done
+    summary: Animation déclenchée par playAnimation() au lieu de auto-play. Étoiles en polygones 5 branches dorées au lieu de texte.
+    files: [UI/CatchDisplay.xaml, Scripts/GameHUD/CatchDisplayViewModel.ts]
+
   - name: Fishing UI System
     status: in_progress
     summary: Creating gauge system and fish collection journal UI
@@ -85,6 +95,10 @@ tasks:
         files: [Scripts/GameHUD/FishingHUDViewModel.ts, UI/FishingHUD.xaml]
       - name: Fish Collection Journal
         status: not_started
+      - name: Fish Discovery Progress Gauge
+        status: done
+        summary: Jauge XP en bas avec compteur X/Y, 2 curseurs de profondeur à 33% et 66%, fade in/out sur FishCaught
+        files: [UI/FishingHUD.xaml, Scripts/GameHUD/FishingHUDViewModel.ts]
 
 chopping_block:
   disabled_systems: []
@@ -109,6 +123,10 @@ chopping_block:
     status: done
     summary: Configured "Take 001" animation on Dolphin.hstf template with playOnStart and loop enabled
     files: [Templates/Dolphin.hstf]
+
+  - name: Fishing Cover Art Texture
+    status: in_progress
+    summary: Creating UI cover art banner with "FISHING" text centered
 
 notes:
   - Mobile fishing game in portrait mode

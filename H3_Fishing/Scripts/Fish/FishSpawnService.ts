@@ -17,6 +17,7 @@ import {
   FISH_LEFT, FISH_RIGHT,
   FISH_MAX_PER_ZONE, FISH_RESPAWN_INTERVAL,
   ZONE_SPAWN_TOP_Y, ZONE_SPAWN_BOT_Y,
+  ZONE_COUNT,
 } from '../Constants';
 import { Events, type IFishDef } from '../Types';
 import { FISH_DEFS } from './FishDefs';
@@ -42,8 +43,7 @@ export class FishSpawnService extends Service {
   @subscribe(Events.GameStarted)
   onReady(): void {
     this.isClient = this.networking?.isPlayerContext();
-    const unlockedZones = ZoneProgressionService.get().getUnlockedZones();
-    for (let z = 0; z < unlockedZones; z++) {
+    for (let z = 0; z < ZONE_COUNT; z++) {
       this._fillZone(z);
     }
   }
@@ -64,10 +64,9 @@ export class FishSpawnService extends Service {
   @subscribe(OnWorldUpdateEvent)
   private _onUpdate(p: OnWorldUpdateEventPayload): void {
     if (!this.isClient) return;
-    const dt            = p.deltaTime;
-    const unlockedZones = ZoneProgressionService.get().getUnlockedZones();
+    const dt = p.deltaTime;
 
-    for (let z = 0; z < unlockedZones; z++) {
+    for (let z = 0; z < ZONE_COUNT; z++) {
       if (this._zoneCounts[z] < FISH_MAX_PER_ZONE) {
         this._zoneTimers[z] -= dt;
         if (this._zoneTimers[z] <= 0) {
@@ -88,6 +87,7 @@ export class FishSpawnService extends Service {
   }
 
   private async _spawnInZone(zoneIndex: number): Promise<void> {
+    if (this._zoneCounts[zoneIndex] >= FISH_MAX_PER_ZONE) return;
     const def = this._pickDef(zoneIndex);
     if (!def) return;
 
