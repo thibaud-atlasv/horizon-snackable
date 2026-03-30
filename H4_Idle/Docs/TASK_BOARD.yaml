@@ -1,0 +1,17 @@
+tasks:
+  - name: Core Tap UI
+    status: in_progress
+    subtasks:
+      - name: Tap button with bounce animation
+        status: done
+      - name: Floating text feedback
+        status: not_started
+      - name: Gold counter display
+        status: not_started
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding: []
+  failed_attempts: []
+
+notes: []
