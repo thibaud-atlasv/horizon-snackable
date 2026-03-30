@@ -225,7 +225,7 @@
                         "class": "horizon::platform_api::CameraPlatformComponent",
                         "version": 2,
                         "data": {
-                            "fieldOfView": 11.0
+                            "fieldOfView": 11.5
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -260,7 +260,7 @@
                             "localPosition": {
                                 "x": 0.0,
                                 "y": 0.0,
-                                "z": -3.0
+                                "z": -2.0
                             }
                         }
                     },
@@ -291,7 +291,40 @@
                             "ingestionId": "16511716237075559692",
                             "targetId": "4237980480"
                         },
-                        "data": {}
+                        "data": {
+                            "fishAnchor": "b1a9e7fc-245f-4983-8933-ea324bc3744c"
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "b1a9e7fc-245f-4983-8933-ea324bc3744c",
+            "name": "New Entity",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.05000000074505806
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 0.10000000149011612,
+                                "y": 0.10000000149011612,
+                                "z": 0.10000000149011612
+                            }
+                        }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
                 }
@@ -1343,7 +1376,7 @@
                             "localRotation": {
                                 "x": -0.0,
                                 "y": 1.5707966089248658,
-                                "z": 1.7453292608261109
+                                "z": 1.832595705986023
                             },
                             "localScale": {
                                 "x": 30.71677589416504,
@@ -1423,6 +1456,7 @@
                                 "ingestionId": "14945328142828507141",
                                 "targetId": "3500183637"
                             },
+                            "isVisibleSelf": true,
                             "lightingParams": {
                                 "class": "horizon::platform_api::LightingParams",
                                 "data": {
@@ -1494,39 +1528,6 @@
                 }
             ],
             "attributes": []
-        },
-        {
-            "id": "9a08970d-819f-4b8f-86de-0fe83f105b41",
-            "name": "Bubble",
-            "type": {
-                "packageOrRemoteId": "27354517537481558",
-                "ingestionId": "6004292121390197499",
-                "targetId": "2719744159"
-            },
-            "deltas": [
-                {
-                    "sourceId": "e070493b-409a-447b-b21e-cc5a9e14ffe0",
-                    "components": [
-                        {
-                            "dataType": "horizon::DataDefinitionAsset",
-                            "data": {
-                                "class": "horizon::platform_api::MeshPlatformComponent",
-                                "version": 11,
-                                "data": {
-                                    "lightingParams": {
-                                        "class": "horizon::platform_api::LightingParams",
-                                        "data": {
-                                            "diffuseGISource": "LightProbes"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    "attributes": []
-                }
-            ],
-            "attributes": []
         }
     ],
     "relationships": [
@@ -1554,6 +1555,11 @@
             "relationshipType": "RelationChildOf",
             "source": "445b8a8e-fb57-4315-8f20-25570242ecf6",
             "destination": "3489b035-2ec6-4b8a-be94-e1216a3e98c1"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "b1a9e7fc-245f-4983-8933-ea324bc3744c",
+            "destination": "445b8a8e-fb57-4315-8f20-25570242ecf6"
         },
         {
             "relationshipType": "RelationChildOf",
@@ -1638,11 +1644,6 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "8fd8efc6-3970-4a46-b9da-ab92178455ee",
-            "destination": "1293a97b-0174-449b-b0a8-12baafd20dd3"
-        },
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "9a08970d-819f-4b8f-86de-0fe83f105b41",
             "destination": "1293a97b-0174-449b-b0a8-12baafd20dd3"
         }
     ]

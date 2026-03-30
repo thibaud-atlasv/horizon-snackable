@@ -8,29 +8,25 @@
 import { TemplateAsset } from 'meta/worlds';
 
 export namespace Assets {
-  // ── Fish — Zone 1 ─────────────────────────────────────────────────────────────
-  export const ClownFish   = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const AngelFish   = new TemplateAsset('../Templates/AngelFish.hstf');
-  export const TigerFish   = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const BlueTang    = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const Seahorse    = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const GoldenManta = new TemplateAsset('../Templates/ClownFish.hstf');
-
-  // ── Fish — Zone 2 ─────────────────────────────────────────────────────────────
-  export const PufferFish       = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const LanternFish      = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const GhostEel         = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const CrystalJellyfish = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const AnglerFish       = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const DeepDragon       = new TemplateAsset('../Templates/ClownFish.hstf');
-
-  // ── Fish — Zone 3 ─────────────────────────────────────────────────────────────
-  export const ShadowFish       = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const AbyssEel         = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const VoidRay          = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const NightManta       = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const AbyssalKing      = new TemplateAsset('../Templates/ClownFish.hstf');
-  export const AncientLeviathan = new TemplateAsset('../Templates/ClownFish.hstf');
+  
+  export const ClownFish    = new TemplateAsset('../Templates/Fish/ClownFish.hstf');
+  export const AngelFish    = new TemplateAsset('../Templates/Fish/AngelFish.hstf');
+  export const Dolphin      = new TemplateAsset('../Templates/Fish/Dolphin.hstf');
+  export const Dolphinv2      = new TemplateAsset('../Templates/Fish/Dolphin_v2.hstf');
+  export const Fish_1       = new TemplateAsset('../Templates/Fish/Fish_1.hstf');
+  export const Fish_1v2       = new TemplateAsset('../Templates/Fish/Fish_1_v2.hstf');
+  export const Fish_2       = new TemplateAsset('../Templates/Fish/Fish_2.hstf');
+  export const Fish_2v2       = new TemplateAsset('../Templates/Fish/Fish_2_v2.hstf');
+  export const Fish_3       = new TemplateAsset('../Templates/Fish/Fish_3.hstf');
+  export const Fish_3v2       = new TemplateAsset('../Templates/Fish/Fish_3_v2.hstf');
+  export const Fish_4       = new TemplateAsset('../Templates/Fish/Fish_4.hstf');
+  export const Fish_4v2       = new TemplateAsset('../Templates/Fish/Fish_4_v2.hstf');
+  export const Fish_5       = new TemplateAsset('../Templates/Fish/Fish_5.hstf');
+  export const Fish_5v2       = new TemplateAsset('../Templates/Fish/Fish_5_v2.hstf');
+  export const RainbowFish  = new TemplateAsset('../Templates/Fish/RainbowFish.hstf');
+  export const Shark        = new TemplateAsset('../Templates/Fish/Shark.hstf');
+  export const Sharkv2        = new TemplateAsset('../Templates/Fish/Shark_v2.hstf');
+  export const Tortoise     = new TemplateAsset('../Templates/Fish/Tortoise.hstf');
 
   // ── Scene Elements ────────────────────────────────────────────────────────────
   export const CubeTemplate   = new TemplateAsset('../Templates/Cube.hstf');

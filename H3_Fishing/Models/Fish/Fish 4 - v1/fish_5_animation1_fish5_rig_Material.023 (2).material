@@ -1,0 +1,31 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "fish_5_animation1_fish5_rig_Material",
+    "attributes": [
+        {
+            "name": "baseColorTex",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "27354517537481558",
+                    "ingestionId": "40172863898328104",
+                    "targetId": "1850524962"
+                }
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "9623295632868937486",
+        "targetId": "2708897769"
+    },
+    "baseMaterialAssetId": {
+        "packageOrRemoteId": "27354517537481558",
+        "ingestionId": "8644607261349225102",
+        "targetId": "969338776"
+    }
+}

@@ -49,7 +49,6 @@ export class PlayerProgressService extends Service {
   // ── Server: player joins ─────────────────────────────────────────────────────
 
   async loadForPlayer(player: Entity): Promise<void> {
-    console.log("loading...");
     if (!NetworkingService.get().isServerContext()) return;
     this._player = player;
     let save: SaveData | undefined;
@@ -67,8 +66,6 @@ export class PlayerProgressService extends Service {
       this._xp    = save.xp;
       this._zones = save.unlockedZones;
 
-      console.log(`[Progress] LOAD OK — ${save.catchDefIds.length} species, xp=${save.xp}, zones=${save.unlockedZones}`);
-
       EventService.sendToOwner(NetworkEvents.ProgressData, {
         catchDefIds:   save.catchDefIds,
         catchCounts:   save.catchCounts,
@@ -76,7 +73,6 @@ export class PlayerProgressService extends Service {
         unlockedZones: save.unlockedZones,
       }, player);
     } else {
-      console.log('[Progress] LOAD — no save found, starting fresh');
       // First session — persist empty record immediately
       this._persist();
     }
@@ -95,7 +91,6 @@ export class PlayerProgressService extends Service {
     if (this._zones < 2 && this._xp >= XP_UNLOCK_ZONE_2) this._zones = 2;
     if (this._zones < 3 && this._xp >= XP_UNLOCK_ZONE_3) this._zones = 3;
 
-    console.log(`[Progress] SAVE — defId=${p.defId} isNew=${isNew} xp=${this._xp} zones=${this._zones} total_species=${this._counts.size}`);
     this._persist();
   }
 
@@ -104,7 +99,6 @@ export class PlayerProgressService extends Service {
   @subscribe(NetworkEvents.ProgressData)
   onProgressData(p: NetworkEvents.ProgressDataPayload): void {
     if (NetworkingService.get().isServerContext()) return;
-    console.log(`[Progress] CLIENT received ProgressData — ${p.catchDefIds.length} species, xp=${p.xp}, zones=${p.unlockedZones}`);
     EventService.sendLocally(Events.ProgressLoaded, {
       catchDefIds:   p.catchDefIds,
       catchCounts:   p.catchCounts,
@@ -118,7 +112,6 @@ export class PlayerProgressService extends Service {
   @subscribe(Events.FishCaught)
   onFishCaught(p: Events.FishCaughtPayload): void {
     if (NetworkingService.get().isServerContext()) return;
-    console.log(`[Progress] CLIENT reporting catch defId=${p.defId} to server`);
     EventService.sendGlobally(NetworkEvents.ReportCatch, { defId: p.defId });
   }
 

@@ -59,7 +59,7 @@ export class SimpleFishController extends Component implements IFishInstance {
   private _defId      = 0;
   private _size       = 1.0;
   private _facingLeft = false;
-  private _caught     = false;
+  private _caught     = true;
 
   private _baseY     = 0;
   private _currentX  = 0;
@@ -85,16 +85,16 @@ export class SimpleFishController extends Component implements IFishInstance {
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
     this._baseY = this._tc.worldPosition.y;
-    this._fishId = _nextFishId++;
-    FishRegistry.get().addFish(this);
   }
 
   @subscribe(Events.InitFish)
   private _onInit(p: Events.InitFishPayload): void {
+    this._fishId = _nextFishId++;
     this._defId     = p.defId;
     this._currentX  = p.spawnX;
     this._currentY  = this._baseY;
     this._targetX   = this._randomTargetX(this._currentX);
+    this._caught = false;
 
     this._size = this._tc ? this._tc.localScale.x : 1.0;
     const spd = p.speedMin + Math.random() * (p.speedMax - p.speedMin);
@@ -106,6 +106,7 @@ export class SimpleFishController extends Component implements IFishInstance {
 
     // Spread initial bubble timers across a full 2× window so fish don't all emit in sync
     this._bubbleTimer = Math.random() * BUBBLE_INTERVAL_MAX * 2;
+    FishRegistry.get().addFish(this);
   }
 
   // ── IFishInstance impl ────────────────────────────────────────────────────────

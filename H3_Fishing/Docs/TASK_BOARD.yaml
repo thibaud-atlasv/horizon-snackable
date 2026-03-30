@@ -96,6 +96,20 @@ chopping_block:
     summary: Generated 1024x1024 cartoon sky texture with fluffy clouds
     files: [Textures/CartoonSky.png]
 
+  - name: Low Poly Fish (<1000 verts, 256x256)
+    status: done
+    summary: Integrated Rainbow Fish from marketplace - low poly cartoon style with vibrant colors
+    files: [Models/Fish/RainbowFish.glb]
+
+  - name: Dolphin Texture
+    status: in_progress
+    summary: Creating cartoon texture for Dolfin_Animated.fbx
+
+  - name: Dolphin Animation Setup
+    status: done
+    summary: Configured "Take 001" animation on Dolphin.hstf template with playOnStart and loop enabled
+    files: [Templates/Dolphin.hstf]
+
 notes:
   - Mobile fishing game in portrait mode
   - 2D gameplay on XY plane (side view of water)

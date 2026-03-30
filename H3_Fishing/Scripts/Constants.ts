@@ -29,12 +29,15 @@ export const MAX_LAUNCH_VX    =  5.5;
 export const MAX_LAUNCH_VY    =  0.5;
 export const WATER_DRAG       =  5.0;   // horizontal deceleration in water
 
-export const REEL_BURST_ADD   =  1.0;
-export const REEL_BURST_MAX   =  2.0;
-export const REEL_BURST_DECAY =  0.7;
-export const REEL_HOLD_DUR    =  0.18;
-export const REEL_TAP_JUMP    =  0.15;
-export const REEL_SINK_SPEED  =  0.5;
+export const REEL_BURST_ADD       =  1.0;
+export const REEL_BURST_MAX       =  2.0;
+export const REEL_BURST_DECAY     =  0.7;
+export const REEL_HOLD_DUR        =  0.18;
+// Fraction of total reel distance gained per tap (A+C: proportional tap, fish fatigue)
+export const REEL_TAP_JUMP_RATIO  =  0.08;  // 8% → ~13 taps regardless of depth
+export const REEL_SINK_SPEED      =  0.5;
+// Fish fatigue: sink resistance at surface vs at depth (0.0–1.0)
+export const REEL_FATIGUE_MIN     =  0.30;  // 30% resistance when fish reaches surface
 
 // ─── Timing ───────────────────────────────────────────────────────────────────
 export const RESET_DELAY  = 0.4;

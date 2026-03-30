@@ -1,11 +1,5 @@
-# Task: Low Poly Fish Meshes
+# Task: Low Poly Fish Mesh
 
 ## Tasks
-
-- [x] 1. **mesh_gen** - Generate low poly fish meshes
-  - LOW POLY (minimal polygon count)
-  - Lightweight textures or vertex colors
-  - Colorful tropical cartoon style
-  - First fish variety created: Models/Fish/SimpleFish.glb
-
-- [ ] 2. **Feedback Point** - Review fish meshes for mobile optimization
+1. [x] mesh_gen_agent - Generate a low poly tropical fish mesh (under 1000 vertices, 256x256 texture). Style: 3D cartoon coloré et simplifié, optimisé pour mobile. Couleurs vives et saturées avec des formes arrondies et amicales. Rendu unlit pour un look léger et joyeux. Ambiance sous-marine tropicale avec des teintes de bleu, turquoise, corail et orange. This is a static mesh for a catchable fish character in a mobile fishing game.
+2. [ ] Feedback Point - Request feedback on the generated tropical fish mesh.

@@ -2,11 +2,20 @@ import {
   Component,
   CustomUiComponent,
   NetworkingService,
+  NetworkMode,
   OnEntityStartEvent,
+  OnWorldUpdateEvent,
+  type OnWorldUpdateEventPayload,
+  Quaternion,
+  TransformComponent,
   UiViewModel,
+  Vec3,
+  WorldService,
   component,
+  property,
   subscribe,
   uiViewModel,
+  type Entity,
   type Maybe,
 } from 'meta/worlds';
 
@@ -19,32 +28,26 @@ import { FishCollectionService } from '../Fish/FishCollectionService';
 export class CatchDisplayData extends UiViewModel {
   visibility   : string  = 'Collapsed';  // 'Visible' or 'Collapsed'
   fishName     : string  = '';
-  fishId       : string  = '';   // padded, e.g. '#042'
   rarityStars  : string  = '';   // '★', '★★', '★★★'
   catchCount   : number  = 0;
-  isNew        : boolean = false;
-  newLabel     : string  = '';   // 'NEW!' or ''
-  newVisibility: string  = 'Collapsed'; // 'Visible' when isNew, 'Collapsed' otherwise
+  newVisibility: boolean  = false; // 'Visible' when isNew, 'Collapsed' otherwise
 }
+
+const ROTATE_SPEED_DEG = 40; // degrees per second (Y-axis spin)
 
 // ─── Component ────────────────────────────────────────────────────────────────
 /**
- * CatchDisplayViewModel — drives the catch reveal screen.
+ * CatchDisplayViewModel — drives the catch reveal screen + 3D fish display.
  *
  * ── Editor setup ────────────────────────────────────────────────────────────
  * Attach to the entity that holds the CatchDisplay CustomUiComponent.
- *
- * ── Component Attachment ────────────────────────────────────────────────────
- * Attached to: Scene Entity (CatchDisplayHUD)
- * Component Networking: Local (UI runs on client only)
- * Component Ownership: Not Networked (scene entity, executes everywhere but
- *                      UI operations are filtered to client-side only)
+ * Assign fishAnchor to the entity in front of the camera where the 3D fish
+ * should appear (position/scale set in scene).
  *
  * ── XAML bindings ───────────────────────────────────────────────────────────
  * <Panel Visibility="{Binding visibility}">
- *   <Label Text="{Binding newLabel}" Visibility="{Binding newVisibility}" />
+ *   <Label Text="NEW!" Visibility="{Binding newVisibility}" />
  *   <Label Text="{Binding fishName}" />
- *   <Label Text="{Binding fishId}" />
  *   <Label Text="{Binding rarityStars}" />
  *   <Label Text="×{Binding catchCount}" />
  * </Panel>
@@ -56,12 +59,17 @@ export class CatchDisplayData extends UiViewModel {
 @component()
 export class CatchDisplayViewModel extends Component {
 
+  /** Anchor entity in front of the camera — the 3D fish spawns here. */
+  @property() fishAnchor: Maybe<Entity> = null;
+
   private _vm  = new CatchDisplayData();
   private _ui: Maybe<CustomUiComponent> = null;
 
-  /** All caught fish IDs for journal navigation. */
   private _journalIds: number[] = [];
   private _journalIndex = 0;
+
+  private _spawnedFish: Entity | null = null;
+  private _fishVisible = false;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
@@ -69,6 +77,8 @@ export class CatchDisplayViewModel extends Component {
     this._ui = this.entity.getComponent(CustomUiComponent);
     if (this._ui) this._ui.dataContext = this._vm;
   }
+
+  // ── UI events ────────────────────────────────────────────────────────────────
 
   @subscribe(HUDEvents.ShowCatch)
   private _onShowCatch(p: HUDEvents.ShowCatchPayload): void {
@@ -84,6 +94,7 @@ export class CatchDisplayViewModel extends Component {
   private _onHideCatch(_p: HUDEvents.HideCatchPayload): void {
     if (NetworkingService.get().isServerContext()) return;
     this._vm.visibility = 'Collapsed';
+    this._despawnFish();
   }
 
   @subscribe(HUDEvents.NavigateCatch)
@@ -96,16 +107,60 @@ export class CatchDisplayViewModel extends Component {
     this._showFish(fishId, false, count);
   }
 
-  private _showFish(fishId: number, isNew: boolean, catchCount: number): void {
-    const def = FISH_DEFS.find(d => d.id === fishId);
+  // ── 3D fish rotation ─────────────────────────────────────────────────────────
+
+  @subscribe(OnWorldUpdateEvent)
+  private _onUpdate(_p: OnWorldUpdateEventPayload): void {
+    if (!this._fishVisible || !this._spawnedFish) return;
+    const tc = this._spawnedFish.getComponent(TransformComponent);
+    if (!tc) return;
+    const deg = WorldService.get().getWorldTime() * ROTATE_SPEED_DEG;
+    tc.worldRotation = Quaternion.fromEuler(new Vec3(0, deg, 0));
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+
+  private _showFish(defId: number, isNew: boolean, catchCount: number): void {
+    const def = FISH_DEFS.find(d => d.id === defId);
     if (!def) return;
+
     this._vm.fishName     = def.name;
-    this._vm.fishId       = `#${String(def.id).padStart(3, '0')}`;
     this._vm.rarityStars  = def.rarity === 'legendary' ? '★★★' : def.rarity === 'rare' ? '★★' : '★';
     this._vm.catchCount   = catchCount;
-    this._vm.isNew        = isNew;
-    this._vm.newLabel     = isNew ? 'NEW!' : '';
-    this._vm.newVisibility = isNew ? 'Visible' : 'Collapsed';
+    this._vm.newVisibility = isNew;
+
+    void this._spawnFish(def.id);
+  }
+
+  private async _spawnFish(defId: number): Promise<void> {
+    console.log("SPANWNING")
+    this._despawnFish();
+    
+    const def = FISH_DEFS.find(d => d.id === defId);
+    if (!def || !this.fishAnchor) return;
+
+    const anchorTc = this.fishAnchor.getComponent(TransformComponent);
+    if (!anchorTc) return;
+
+    const entity = await WorldService.get().spawnTemplate({
+      templateAsset: def.template,
+      position: anchorTc.worldPosition,
+      rotation: Quaternion.identity,
+      scale: anchorTc.localScale,
+      networkMode: NetworkMode.LocalOnly,
+    });
+
+    console.log("SPAWNED")
+    this._spawnedFish = entity;
+    this._fishVisible = true;
+  }
+
+  private _despawnFish(): void {
+    this._fishVisible = false;
+    if (this._spawnedFish) {
+      this._spawnedFish.destroy();
+      this._spawnedFish = null;
+    }
   }
 
   private _refreshJournal(): void {

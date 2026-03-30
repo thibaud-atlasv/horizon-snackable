@@ -23,7 +23,7 @@ import {
   WATER_SURFACE_Y, HALF_W,
   GRAVITY, MIN_LAUNCH_VX, MAX_LAUNCH_VX, MAX_LAUNCH_VY, WATER_DRAG,
   REEL_BURST_ADD, REEL_BURST_MAX, REEL_BURST_DECAY,
-  REEL_HOLD_DUR, REEL_TAP_JUMP, REEL_SINK_SPEED,
+  REEL_HOLD_DUR, REEL_TAP_JUMP_RATIO, REEL_SINK_SPEED, REEL_FATIGUE_MIN,
   COLOR_LINE, COLOR_LINE_WATER,
 } from '../Constants';
 import { Events, GamePhase, HUDEvents } from '../Types';
@@ -117,7 +117,8 @@ export class RodController extends Component {
   private _onTouchStart(_p: OnFocusedInteractionInputEventPayload): void {
     if (this._phase !== GamePhase.Reeling) return;
     this._reelBurstVel  = Math.min(this._reelBurstVel + REEL_BURST_ADD, REEL_BURST_MAX);
-    this._baitY         = Math.min(WATER_SURFACE_Y + 0.2, this._baitY + REEL_TAP_JUMP);
+    const tapJump       = this._reelTotalDist * REEL_TAP_JUMP_RATIO;
+    this._baitY         = Math.min(WATER_SURFACE_Y + 0.2, this._baitY + tapJump);
     this._reelHoldTimer = REEL_HOLD_DUR;
   }
 
@@ -219,15 +220,16 @@ export class RodController extends Component {
       this._reelBurstVel *= Math.max(0, 1 - REEL_BURST_DECAY * dt);
     }
 
-    const netVel = this._reelBurstVel - this._reelSinkSpeed;
+    const remaining   = targetY - this._baitY;
+    const depthRatio  = Math.max(0, remaining) / Math.max(0.01, this._reelTotalDist);
+    const currentSink = this._reelSinkSpeed * (REEL_FATIGUE_MIN + (1 - REEL_FATIGUE_MIN) * depthRatio);
+    const netVel = this._reelBurstVel - currentSink;
     this._baitY  = Math.max(ZoneProgressionService.get().getFloorY() + 0.1, Math.min(targetY, this._baitY + netVel * dt));
     this._baitX += (FishingService.get().tipX - this._baitX) * 0.012;
     this._moveBait(this._baitX, this._baitY);
 
     const inst = FishRegistry.get().getInstance(this._hookedFishId);
-    if (inst) inst.setPosition(this._baitX, this._baitY - 0.5 * inst.size);
-
-    const remaining = targetY - this._baitY;
+    if (inst) inst.setPosition(this._baitX, this._baitY);
     const ratio = 1.0 - Math.max(0, remaining) / Math.max(0.01, this._reelTotalDist);
     EventService.sendLocally(HUDEvents.UpdateGauge, { value: Math.max(0, ratio), mode: 'reel' });
 
