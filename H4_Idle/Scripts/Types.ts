@@ -25,29 +25,39 @@ export enum GainSource {
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
-/** Static definition of a generator type. Registered in GeneratorDefs.ts. */
+/** One upgrade in a generator's upgrade chain. */
+export interface IGeneratorUpgradeDef {
+  id         : string;   // e.g. 'cursor.upgrade.1' — must be globally unique
+  name       : string;
+  detail     : string;
+  cost       : number;
+  multiplier : number;   // applied to this generator's output on purchase
+  unlockCount: number;   // min owned of this generator required to reveal
+}
+
+/** Static definition of a generator type. */
 export interface IGeneratorDef {
   id            : number;
   name          : string;
   description   : string;
-  baseCost      : number;        // cost of the first purchase
-  costMultiplier: number;        // each purchase: cost × costMultiplier (e.g. 1.15)
-  baseOutput    : number;        // gold produced per cycle per owned unit, before upgrades
-  cycleTime     : number;        // seconds between production cycles
-  unlockAt      : number;        // cumulative gold required to reveal in the shop
+  baseCost      : number;
+  costMultiplier: number;
+  baseOutput    : number;   // gold per cycle per unit, before upgrades
+  cycleTime     : number;   // seconds between production cycles
+  /** Condition to reveal the buy button. */
+  unlockCondition: { goldEarned: number } | { generatorId: number; count: number };
+  upgrades      : IGeneratorUpgradeDef[];
 }
 
-/** Static definition of an upgrade. Registered in UpgradeDefs.ts. */
+/** Static definition of a tap/click upgrade (used by TapService). */
 export interface IUpgradeDef {
   id                : number;
   name              : string;
   description       : string;
   cost              : number;
-  multiplier        : number;    // output multiplier applied on purchase (e.g. 2 = ×2)
-  /** If set, only applies to this generator. If undefined, applies to click value. */
+  multiplier        : number;
   targetGeneratorId ?: number;
-  /** Condition to reveal this upgrade in the shop. */
-  unlockCondition: { generatorId: number; count: number } | { resourceAmount: number };
+  unlockCondition   : { generatorId: number; count: number } | { resourceAmount: number };
 }
 
 /**
@@ -62,11 +72,6 @@ export interface IAction {
   isEnabled: boolean;    // if false, button is grayed out
 }
 
-/**
- * Condition used by systems to self-register their unlock threshold
- * with ProgressionService.
- */
-export type UnlockCondition = () => boolean;
 
 // ─── Events ───────────────────────────────────────────────────────────────────
 
@@ -76,6 +81,11 @@ export namespace Events {
   export class PlayerTapPayload {}
   export const PlayerTap = new LocalEvent<PlayerTapPayload>('EvPlayerTap', PlayerTapPayload);
 
+  // ── UI Animation triggers ─────────────────────────────────────────────────
+  /** Fired to trigger the tap button visual animation externally (e.g. auto-clicker). */
+  export class PlayTapAnimationPayload {}
+  export const PlayTapAnimation = new LocalEvent<PlayTapAnimationPayload>('EvPlayTapAnimation', PlayTapAnimationPayload);
+
   // ── Action bus ───────────────────────────────────────────────────────────────
   /** Fired by ActionService when a registered button is tapped by the player. */
   export class ActionTriggeredPayload { id: string = ''; }
@@ -84,6 +94,11 @@ export namespace Events {
   /** Signal fired by ActionService whenever the registry changes (register/update/unregister). */
   export class ActionRegistryChangedPayload {}
   export const ActionRegistryChanged = new LocalEvent<ActionRegistryChangedPayload>('EvActionRegistryChanged', ActionRegistryChangedPayload);
+
+  // ── Stats ─────────────────────────────────────────────────────────────────────
+  /** Fired whenever a stat counter is incremented. ActionService uses this to refresh declared actions. */
+  export class StatsChangedPayload {}
+  export const StatsChanged = new LocalEvent<StatsChangedPayload>('EvStatsChanged', StatsChangedPayload);
 
   // ── Resources ─────────────────────────────────────────────────────────────────
   export class ResourceChangedPayload {
@@ -95,66 +110,15 @@ export namespace Events {
   // ── Modifier pipeline ─────────────────────────────────────────────────────────
   /** Fired after every gain is applied (post-modifiers). For tracking and VFX. */
   export class GainAppliedPayload {
-    amount: number     = 0;
-    source: GainSource = GainSource.Tap;
+    amount  : number     = 0;
+    source  : GainSource = GainSource.Tap;
+    isCrit  : boolean    = false;
+    isFrenzy: boolean    = false;
   }
   export const GainApplied = new LocalEvent<GainAppliedPayload>('EvGainApplied', GainAppliedPayload);
-
-  // ── Generators ────────────────────────────────────────────────────────────────
-  export class GeneratorChangedPayload {
-    generatorId: number = 0;
-    newCount   : number = 0;
-    nextCost   : number = 0;
-  }
-  export const GeneratorChanged = new LocalEvent<GeneratorChangedPayload>('EvGeneratorChanged', GeneratorChangedPayload);
-
-  // ── Upgrades ──────────────────────────────────────────────────────────────────
-  export class UpgradePurchasedPayload { upgradeId: number = 0; }
-  export const UpgradePurchased = new LocalEvent<UpgradePurchasedPayload>('EvUpgradePurchased', UpgradePurchasedPayload);
 
   // ── Passive tick ──────────────────────────────────────────────────────────────
   export class TickPayload { dt: number = 0; }
   export const Tick = new LocalEvent<TickPayload>('EvTick', TickPayload);
 
-  // ── Crit ──────────────────────────────────────────────────────────────────────
-  export class CritTriggeredPayload {
-    rawAmount   : number     = 0;
-    multiplier  : number     = 1;
-    finalAmount : number     = 0;
-    source      : GainSource = GainSource.Tap;
-  }
-  export const CritTriggered = new LocalEvent<CritTriggeredPayload>('EvCritTriggered', CritTriggeredPayload);
-
-  // ── Frenzy ────────────────────────────────────────────────────────────────────
-  export class FrenzyProgressPayload { current: number = 0; threshold: number = 1; }
-  export const FrenzyProgress = new LocalEvent<FrenzyProgressPayload>('EvFrenzyProgress', FrenzyProgressPayload);
-
-  export class FrenzyStartedPayload { duration: number = 0; multiplier: number = 1; }
-  export const FrenzyStarted = new LocalEvent<FrenzyStartedPayload>('EvFrenzyStarted', FrenzyStartedPayload);
-
-  export class FrenzyEndedPayload {}
-  export const FrenzyEnded = new LocalEvent<FrenzyEndedPayload>('EvFrenzyEnded', FrenzyEndedPayload);
-
-  // ── Interest ──────────────────────────────────────────────────────────────────
-  export class InterestPaidPayload { amount: number = 0; rate: number = 0; }
-  export const InterestPaid = new LocalEvent<InterestPaidPayload>('EvInterestPaid', InterestPaidPayload);
-
-  // ── Vault ─────────────────────────────────────────────────────────────────────
-  export class VaultLockedPayload { amount: number = 0; duration: number = 0; }
-  export const VaultLocked = new LocalEvent<VaultLockedPayload>('EvVaultLocked', VaultLockedPayload);
-
-  export class VaultReadyPayload { lockedAmount: number = 0; bonusMultiplier: number = 1; }
-  export const VaultReady = new LocalEvent<VaultReadyPayload>('EvVaultReady', VaultReadyPayload);
-
-  export class VaultCollectedPayload { principal: number = 0; bonus: number = 0; total: number = 0; }
-  export const VaultCollected = new LocalEvent<VaultCollectedPayload>('EvVaultCollected', VaultCollectedPayload);
-
-  // ── Progression ───────────────────────────────────────────────────────────────
-  /** Fired by ProgressionService when a system's unlock condition is first met. */
-  export class FeatureUnlockedPayload { featureId: string = ''; }
-  export const FeatureUnlocked = new LocalEvent<FeatureUnlockedPayload>('EvFeatureUnlocked', FeatureUnlockedPayload);
-
-  // ── Session ───────────────────────────────────────────────────────────────────
-  export class RestartPayload {}
-  export const Restart = new LocalEvent<RestartPayload>('EvRestart', RestartPayload);
 }

@@ -1,0 +1,56 @@
+{
+    "version": 6,
+    "entities": [
+        {
+            "id": "54522af5-0218-4a23-a09a-3639dfcf9a28",
+            "name": "Player",
+            "type": {
+                "packageOrRemoteId": "24149709574657735",
+                "ingestionId": "8502139112299295806",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "ec859a24-a822-40de-a86c-817ae089c7b4",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::PlayerPlatformComponent",
+                                "version": 14,
+                                "data": {
+                                    "translationEnabled": false,
+                                    "rotationEnabled": false,
+                                    "locomotionSpeed": 1.0,
+                                    "sprintMultiplier": 1.0,
+                                    "jumpSpeed": 0.0,
+                                    "maxStepHeight": 0.0,
+                                    "slopeLimitDegrees": 0.0,
+                                    "massWhenPushing": 0.0,
+                                    "pushingExtendedRange": 0.0,
+                                    "useCustomGravity": true,
+                                    "scale": 0.019999999552965165
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::AvatarAnimatorPlatformComponent",
+                                "version": 1,
+                                "data": null
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "989a5d78-6092-46ea-b633-751d7e31222e",
+                    "components": null
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": []
+}

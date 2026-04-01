@@ -6,12 +6,16 @@ Mobile portrait idle/clicker game (9×16 world units). **Triple S** design philo
 
 Session = one complete run. No persistence between sessions — all state resets on world reload. The game progressively reveals features as the player reaches milestones, requiring zero tutorialization.
 
+---
+
 ## Core Loop
 
 1. **Tap** — generates gold manually
-2. **Buy Generators** — passive income per cycle, each generator has its own production timer
-3. **Buy Upgrades** — multiply generator output or click value
+2. **Buy Generators** — passive income per cycle, each has its own production timer
+3. **Buy Upgrades** — multiply generator output or tap value
 4. **Unlock Features** — new mechanics appear progressively as milestones are reached
+
+---
 
 ## Features
 
@@ -20,117 +24,180 @@ All features are upgradable and revealed progressively. The game starts with onl
 | Feature | Description | Unlock condition |
 |---------|-------------|-----------------|
 | **Tap** | Manual gold per tap | From the start |
-| **Generators** | Passive income per cycle, buyable | After 10 taps |
-| **Crit** | % chance on any gain to multiply it | After owning 5 generators |
-| **Frenzy** | Every X taps, all gains boosted for Xs | After 100 taps |
+| **Farm** | Passive income per cycle | When player has 15g |
+| **Cursor** | Auto-tapper (participates in frenzy) | After 1st farm + 50 taps |
+| **Mine** | Stronger passive income | After 10 farms |
+| **Crit** | % chance on any gain to multiply it | When player has 150g |
+| **Frenzy** | Every X taps, all gains boosted for Xs | After 150 taps |
 | **Interest** | Every Xs, earn % of current gold | After earning 1 000 gold |
-| **Vault** | Lock gold for Xs → returned with % bonus | After earning 5 000 gold |
+| **Vault** | Lock 50% gold for Xs → returned with % bonus (auto-collects) | After earning 5 000 gold |
 
-**Crit** — rolled on every gain regardless of source. Upgradable: chance (5%→50%), multiplier (×2→×N). Visual feedback via `CritTriggered` event.
+**Crit** — rolled on every gain regardless of source. Upgradable: chance, multiplier. Deeper upgrades unlock after N crits fired.
 
-**Frenzy** — tap counter fills a progress bar; at threshold all gains are multiplied for a duration. Upgradable: tap threshold, duration, multiplier.
+**Frenzy** — tap counter fills a threshold; at threshold all gains are multiplied for a duration. Upgradable: tap threshold, duration, multiplier. Deeper upgrades unlock after N activations.
 
-**Interest** — passive % of current gold paid on a countdown timer. Upgradable: rate, interval.
+**Interest** — passive % of current gold paid on a countdown timer. Upgradable: rate, interval. Deeper upgrades unlock after N payouts.
 
-**Vault** — player locks 50% of gold; unspendable until timer expires, then returned with a bonus multiplier. Upgradable: duration, bonus multiplier.
+**Vault** — player locks 50% of gold; unspendable until timer expires, then automatically returned with a bonus multiplier. Lock button shows remaining countdown. Upgradable: duration, bonus multiplier. Deeper upgrades unlock after N locks.
+
+---
 
 ## Architecture At a Glance
 
 ```
 Components/
-  ClientSetup      → camera lock, touch → Events.PlayerTap
-  GameManager      → tick loop only (fires Events.Tick every TICK_INTERVAL)
-  TapButtonUIComponent → UI tap button + bounce animation → Events.PlayerTap
+  GameManager             → tick loop (fires Events.Tick every TICK_INTERVAL)
+  TapButtonUIComponent    → XAML tap button + bounce animation → fires Events.PlayerTap
+  FloatingTextUIComponent → XAML floating "+N" text pool (20 slots), color-coded by GainSource
+  GoldCounterDisplay      → XAML gold counter, listens to ResourceChanged
+  ActionListUIComponent   → XAML shop panel (bottom), ItemsControl bound to ActionService
 
 Services/
-  ResourceService  → gold database + gain modifier pipeline (addGain / spend)
-  TapService       → PlayerTap handling, click multiplier, click upgrades
-  GeneratorService → counts, production cycles, generator upgrades
-  ActionService    → action registry (register / update / unregister / trigger)
-  ProgressionService → milestone tracking, fires Events.FeatureUnlocked
-  CritService      → crit modifier + upgrades, self-registers with ResourceService
-  FrenzyService    → frenzy modifier + upgrades, self-registers with ResourceService
-  InterestService  → interest payout + upgrades, self-managing
-  VaultService     → vault lock/collect + upgrades, self-managing
+  ResourceService  → gold state + gain modifier pipeline (addGain / spend / buy)
+  TapService       → PlayerTap handling, tap multiplier, cursor auto-clicker
+  GeneratorService → generator counts, production cycles, upgrade chain
+  ActionService    → action registry: declare / register / update / unregister / trigger / refreshDeclared
+  StatsService     → cumulative counters (taps, gold_earned, generator.N, feature stats) → fires StatsChanged
+  CritService      → crit modifier + upgrade chain
+  FrenzyService    → frenzy modifier + upgrade chain
+  InterestService  → interest payout timer + upgrade chain
+  VaultService     → vault lock/auto-collect + upgrade chain
 
-Data/
-  GeneratorDefs    → static generator catalog (id, baseCost, baseOutput, cycleTime, …)
-  UpgradeDefs      → static upgrade catalog (tap upgrades + generator upgrades)
+Defs/
+  ActionDefs.ts    → ALL player-facing actions: label, description, cost, costPow, maxCount, unlock conditions
+  GeneratorDefs.ts → generator production stats: baseOutput, cycleTime, upgradeMultipliers
 
 UI/
-  TapButton.xaml   → main tap button XAML (ScreenSpace, centered, circular button)
-Types.ts         → all interfaces, enums, events
-Constants.ts     → tuning values
-Assets.ts        → all TemplateAsset refs
+  TapButton.xaml    → main tap button (ScreenSpace, centered)
+  GoldCounter.xaml  → gold counter display (ScreenSpace, top)
+  FloatingText.xaml → animated "+N" text slots, pooled ×20, color per GainSource
+  ActionList.xaml   → scrollable shop panel with dynamic ItemsControl
+
+Types.ts     → all interfaces, enums, events (zero local imports)
+Constants.ts → tuning values (zero local imports)
+Assets.ts    → TemplateAsset refs
 ```
+
+---
+
+## Event Bus
+
+All inter-system communication goes through events. No direct service-to-service references.
+
+| Event | Fired by | Consumed by |
+|-------|----------|-------------|
+| `Events.PlayerTap` | ClientSetup, cursor (TapService) | TapService, FrenzyService |
+| `Events.Tick { dt }` | GameManager | GeneratorService, FrenzyService, InterestService, VaultService |
+| `Events.ResourceChanged` | ResourceService | ActionService (auto-refresh), GoldCounterDisplay, all services for affordability |
+| `Events.StatsChanged` | StatsService | ActionService (auto-refresh for unlock conditions) |
+| `Events.GainApplied { amount, source, isCrit, isFrenzy }` | ResourceService | FloatingTextUIComponent |
+| `Events.ActionTriggered { id }` | ActionService | Owning service per action prefix |
+| `Events.ActionRegistryChanged` | ActionService | ActionListUIComponent |
+
+---
 
 ## Modifier Pipeline
 
-Every gold gain passes through `ResourceService.addGain(rawAmount, source)`, which runs all registered modifier functions before crediting:
+Every gold gain passes through `ResourceService.addGain(rawAmount, source)`:
 
 ```
-rawAmount → [Crit ×?] → [Frenzy ×?] → [...future] → _gold += amount → GainApplied
+rawAmount → [Crit ×? @ priority 10] → [Frenzy ×? @ priority 0] → [...future modifiers]
+          → _gold += finalAmount → StatsService.increment('gold_earned') → GainApplied → ResourceChanged
 ```
 
-Modifiers register themselves in `onReady()` — `ResourceService` has zero knowledge of specific modifiers:
+Modifiers self-register in service `onActionTriggered` (after unlock purchase).
+**Adding a new modifier = one `registerModifier(fn, priority)` call. No existing code changes.**
+
+---
+
+## Floating Text Color Coding
+
+| Color | Source | Modifier |
+|-------|--------|----------|
+| Gold `#FFD700` | Tap | — |
+| Light green `#90EE90` | Passive (generators) | — |
+| Cyan `#00BFFF` | Interest | — |
+| Orchid `#DA70D6` | Vault payout | — |
+| Orange `#FF6600` | Any | Crit (always priority) |
+| Blend toward yellow | Any | Frenzy only |
+| Blend toward red | Any | Crit + Frenzy |
+
+---
+
+## Action System
+
+### Declaration Pattern (service startup)
+
+Every service declares its actions once in `onReady()`. ActionService auto-evaluates factories on `ResourceChanged` + `StatsChanged`:
 
 ```typescript
-// In CritService.onReady():
-ResourceService.get().registerModifier((amount, source) => {
-  if (Math.random() >= this._chance) return amount;
-  EventService.sendLocally(Events.CritTriggered, { ... });
-  return amount * this._multiplier;
-}, 10 /* priority */);
+@subscribe(OnServiceReadyEvent)
+onReady(): void {
+  ActionService.get().declare('feature.unlock', () => ({
+    label    : def.label,
+    detail   : `${def.description} [current state]`,
+    cost     : def.cost,
+    isEnabled: ResourceService.get().canAfford(def.cost),
+  }));
+}
 ```
 
-**Adding a new modifier = one `registerModifier()` call. No existing code changes.**
-
-## Action Bus Pattern
-
-Systems self-register their available actions in `ActionService`. The UI calls `trigger(id)` — the owning service handles the result.
-
-```
-register(action)  → visible in UI
-update(id, patch) → refresh label / cost / isEnabled
-unregister(id)    → hidden from UI
-
-trigger(id) → fires Events.ActionTriggered → owning service handles spend + state change
-```
-
-Action ID conventions:
-- `generator.buy.{id}` — buy a generator
-- `generator.upgrade.{id}` — generator output upgrade
-- `upgrade.buy.{id}` — click/tap upgrade
-- `crit.*`, `frenzy.*`, `interest.*`, `vault.*` — feature-specific upgrades
-
-## Progressive Reveal
-
-`ProgressionService` tracks cumulative taps, gold earned, and generators owned. Each feature service self-registers its unlock condition in `onReady()`:
+### Purchase Pattern (onActionTriggered)
 
 ```typescript
-ProgressionService.get().register('crit', { generatorsOwned: 5 });
+if (p.id === 'feature.upgrade') {
+  if (!ResourceService.get().buy(p.id)) return; // spend + StatsService.increment(id)
+  this._state += delta;                          // update internal state
+  ActionService.get().refreshDeclared();         // force factories to re-run with new state
+}
 ```
 
-On threshold met → `Events.FeatureUnlocked { featureId }` → feature registers its actions.
+### Auto-Reveal + Auto-Cleanup
+
+- `canReveal(id)` = `!isMaxed(id) && (isRegistered(id) || isUnlocked(def.unlock))`
+- `_isMaxed(id)` = `StatsService.get(id) >= def.maxCount` (maxCount: 1 = one-time, 0 = unlimited)
+- `refreshDeclared()` removes maxed actions automatically — no explicit `unregister()` needed
+
+### Unlock Keys in ActionDefs
+
+| Key | Checks | Use for |
+|-----|--------|---------|
+| `gold` | `ResourceService.getGold()` | Appears when affordable |
+| `gold_earned` | `StatsService.get('gold_earned')` | Mid/late objectives (monotonic) |
+| `taps` | `StatsService.get('taps')` | Tap milestone |
+| `generator.N` | `StatsService.get('generator.N')` | Generator ownership count |
+| `<action.id>` | `StatsService.get('<action.id>')` | Times purchased (works because `buy()` increments) |
+| `crit.proc`, `frenzy.activated`, etc. | `StatsService.get(key)` | Feature usage milestones |
+
+---
 
 ## Generator Production
 
-Each generator type has an independent accumulator. On `Events.Tick`:
+Each generator has an independent accumulator. On `Events.Tick`:
 
 ```
 accum += dt
-if accum >= cycleTime → produce (count × baseOutput × upgradeMultiplier) → addGain(Passive) → reset
+if accum >= cycleTime:
+  produce: count × baseOutput × getOutputMultiplier(id) → addGain(Passive)
+  accum -= cycleTime
 ```
+
+Cost scaling: `getScaledCost('generator.buy.N', ownedCount)` — cost and `costPow` live in ActionDefs.
+Upgrade chain: each rank's unlock requires `<previous rank id>: 1` — enforced by `StatsService` via `buy()`.
+
+---
 
 ## Key Extensibility Points
 
 | Goal | Where to change |
 |------|----------------|
-| Add a generator | One entry in `Data/GeneratorDefs.ts` + optional template |
-| Add a tap upgrade | Entry in `Data/UpgradeDefs.ts` with `targetGeneratorId: undefined` |
-| Add a generator upgrade | Entry in `Data/UpgradeDefs.ts` with `targetGeneratorId: N` |
-| Add a gain modifier | New service, call `ResourceService.get().registerModifier(fn, priority)` in `onReady()` |
-| Add a new feature | New service, call `ProgressionService.get().register(id, condition)` in `onReady()` |
+| Add a generator tier | `GeneratorDefs.ts` (production stats) + `ActionDefs.ts` (buy + 10 upgrade entries) |
+| Add a tap upgrade | Entry in `ActionDefs.ts`, handle in `TapService.onActionTriggered` |
+| Add a new feature system | New service: `declare()` in `onReady`, `onActionTriggered` for purchases, optional `registerModifier()` |
+| Add a gain modifier | `ResourceService.get().registerModifier(fn, priority)` in `onActionTriggered` after unlock purchase |
+| Add a new unlock condition | New key in `ActionDefs.unlock` + handle in `checkUnlock.ts` `isUnlocked()` |
+
+---
 
 ## Design Decisions
 
@@ -138,8 +205,9 @@ if accum >= cycleTime → produce (count × baseOutput × upgradeMultiplier) →
 |----------|-----------|
 | No save / session = full run | Triple S — sessions are short; persistence adds complexity with no benefit |
 | Progressive feature reveal | No tutorialization needed; discovery is the reward |
-| Self-registering systems | Maximum isolation — no central feature registry, no circular deps |
-| Modifiers in ResourceService | Every gold path calls `addGain()` anyway; no extra import needed at call sites |
-| Generator upgrades on GeneratorService | The system that owns counts also owns the multiplier; no cross-service query |
-| Tap upgrades on TapService | Symmetric with generators; GameManager is just a tick loop |
+| Self-registering services | Maximum isolation — no central feature registry, no circular deps |
+| ActionDefs as source of truth | Cost, scaling, unlock conditions, labels all in one place per action |
+| `declare()` + auto-refresh | Services declare what to show; ActionService decides when to show it |
+| `ResourceService.buy()` | Standard purchase in one call: spend + stat increment + return bool |
+| Vault auto-collects | Removes friction; the reveal moment (gold gain VFX) is reward enough |
 | All logic client-side only | SDK constraint + simplicity |

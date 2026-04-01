@@ -1,94 +1,57 @@
 /**
  * GeneratorService — Generator counts, buy actions, upgrades, and production cycles.
  *
- * Each generator type has an independent accumulator. When the accumulator reaches
- * cycleTime, it produces baseOutput × count × upgradeMultiplier gold through the
- * modifier pipeline and resets.
+ * Each generator has 10 upgrade milestones generated automatically from a few
+ * parameters defined in its IGeneratorDef. No manual UPGRADE_DEFS array needed.
+ *
+ * Unlock chain: generator N becomes visible once the player owns at least
+ * the count specified in ActionDefs unlock conditions. The first generator (id 0)
+ * appears when affordable.
+ *
+ * Upgrade formulas (rank = 0-based milestone index):
+ *   cost(rank)       = upgradeCostBase × upgradeCostScale ^ rank
+ *   multiplier(rank) = upgradeMultiplierBase × upgradeMultiplierScale ^ rank
+ *
+ * The output multiplier for a generator is the product of all purchased milestone
+ * multipliers, compounded: buying rank 0 (×2) then rank 1 (×3) yields ×6 total.
  */
-import { EventService, Service, service, subscribe } from 'meta/worlds';
-import { Events, GainSource, type IGeneratorDef, type IUpgradeDef } from '../Types';
+import { OnServiceReadyEvent, Service, service, subscribe } from 'meta/worlds';
+import { Events, GainSource } from '../Types';
 import { ResourceService } from './ResourceService';
 import { ActionService } from './ActionService';
+import { StatsService } from './StatsService';
+import { type IGeneratorDef, GENERATOR_DEFS } from '../Defs/GeneratorDefs';
+import { getActionDef, getScaledCost } from '../Defs/ActionDefs';
 
-export const UPGRADE_DEFS: IUpgradeDef[] = [
-  // ── Generator upgrades ────────────────────────────────────────────────────────
-  {
-    id: 1,
-    name: 'Faster Cursors',
-    description: 'Cursors are twice as efficient.',
-    cost: 500,
-    multiplier: 2,
-    targetGeneratorId: 0, // Cursor
-    unlockCondition: { generatorId: 0, count: 10 },
-  },
-  {
-    id: 2,
-    name: 'Fertilizer',
-    description: 'Farms produce twice as much gold.',
-    cost: 2500,
-    multiplier: 2,
-    targetGeneratorId: 1, // Farm
-    unlockCondition: { generatorId: 1, count: 10 },
-  },
-  // Add more upgrades here. Convention: unlock at 10, 25, 50, 100, 150, 200 owned.
-];
-
-export const GENERATOR_DEFS: IGeneratorDef[] = [
-  // ── Tier 1 ───────────────────────────────────────────────────────────────────
-  {
-    id: 0,
-    name: 'Cursor',
-    description: 'Automatically clicks for you.',
-    baseCost: 15,
-    costMultiplier: 1.15,
-    baseOutput: 0.1,     // 0.1 gold/cycle → 0.1 gold/sec effective
-    cycleTime: 1,
-    unlockAt: 0,
-  },
-  {
-    id: 1,
-    name: 'Farm',
-    description: 'Grows gold-bearing crops.',
-    baseCost: 100,
-    costMultiplier: 1.15,
-    baseOutput: 2.5,     // 2.5 gold/cycle → 0.5 gold/sec effective
-    cycleTime: 5,
-    unlockAt: 10,
-  },
-  {
-    id: 2,
-    name: 'Mine',
-    description: 'Extracts gold from deep underground.',
-    baseCost: 1100,
-    costMultiplier: 1.15,
-    baseOutput: 40,      // 40 gold/cycle → 4 gold/sec effective
-    cycleTime: 10,
-    unlockAt: 100,
-  },
-  // Add more generators here following the same pattern.
-  // Costs should roughly follow a ×10 progression per tier.
-];
-
-const GENERATOR_UPGRADES = UPGRADE_DEFS.filter(u => u.targetGeneratorId !== undefined);
+// ---------------------------------------------------------------------------
+// Service
+// ---------------------------------------------------------------------------
 
 @service()
 export class GeneratorService extends Service {
 
   private readonly _resources = Service.injectWeak(ResourceService);
 
-  private _counts           : Map<number, number> = new Map();
-  private _accumulators     : Map<number, number> = new Map();
-  private _purchasedUpgrades: Set<number>          = new Set();
-  private _featureUnlocked  : boolean              = false;
-  private _gold             : number               = 0;
+  /** How many of each generator the player owns. */
+  private _counts: Map<number, number> = new Map();
 
-  // ── Unlock ────────────────────────────────────────────────────────────────────
+  /** Per-generator time accumulator (seconds since last cycle). */
+  private _accumulators: Map<number, number> = new Map();
 
-  @subscribe(Events.FeatureUnlocked)
-  onFeatureUnlocked(p: Events.FeatureUnlockedPayload): void {
-    if (p.featureId !== 'generators') return;
-    this._featureUnlocked = true;
-    this._refreshActions();
+  /**
+   * Tracks how many upgrade milestones have been *purchased* per generator.
+   * Used by getOutputMultiplier() and the upgrade factories.
+   */
+  private _purchasedRanks: Map<number, number> = new Map();
+
+  // ── Startup: declare all actions ──────────────────────────────────────────────
+
+  @subscribe(OnServiceReadyEvent)
+  onReady(): void {
+    for (const def of GENERATOR_DEFS) {
+      this._declareBuyAction(def);
+      this._declareUpgradeActions(def);
+    }
   }
 
   // ── Production cycle ──────────────────────────────────────────────────────────
@@ -106,24 +69,16 @@ export class GeneratorService extends Service {
       }
       this._accumulators.set(def.id, accum - def.cycleTime);
 
-      const raw    = count * def.baseOutput * this.getOutputMultiplier(def.id);
+      const raw = count * def.baseOutput * this.getOutputMultiplier(def.id);
       this._resources?.addGain(raw, GainSource.Passive);
     }
-  }
-
-  // ── Action refresh ────────────────────────────────────────────────────────────
-
-  @subscribe(Events.ResourceChanged)
-  onResourceChanged(p: Events.ResourceChangedPayload): void {
-    this._gold = p.amount;
-    if (this._featureUnlocked) this._refreshActions();
-    this._refreshUpgradeActions();
   }
 
   // ── Action handling ───────────────────────────────────────────────────────────
 
   @subscribe(Events.ActionTriggered)
   onActionTriggered(p: Events.ActionTriggeredPayload): void {
+    // ── Buy a generator ────────────────────────────────────────────────────
     if (p.id.startsWith('generator.buy.')) {
       const genId = parseInt(p.id.split('.')[2], 10);
       if (isNaN(genId)) return;
@@ -133,112 +88,111 @@ export class GeneratorService extends Service {
       return;
     }
 
+    // ── Buy an upgrade ─────────────────────────────────────────────────────
     if (p.id.startsWith('generator.upgrade.')) {
-      const upgradeId = parseInt(p.id.split('.')[2], 10);
-      const def = GENERATOR_UPGRADES.find(u => u.id === upgradeId);
-      if (!def || this._purchasedUpgrades.has(upgradeId)) return;
-      if (!this._resources?.spend(def.cost)) return;
-      this._purchasedUpgrades.add(upgradeId);
-      ActionService.get().unregister(p.id);
-      EventService.sendLocally(Events.UpgradePurchased, { upgradeId });
-      this._refreshUpgradeActions();
+      const parts    = p.id.split('.');
+      const genId    = parseInt(parts[2], 10);
+      const rank     = parseInt(parts[3], 10);
+      if (isNaN(genId) || isNaN(rank)) return;
+
+      const nextRank = this._purchasedRanks.get(genId) ?? 0;
+      if (rank !== nextRank) return;
+
+      if (!ResourceService.get().buy(p.id)) return;
+      this._purchasedRanks.set(genId, nextRank + 1);
+      // StatsChanged fires inside buy() → refreshDeclared() removes old rank, reveals next
+      // Final refresh ensures factories see the updated _purchasedRanks
+      ActionService.get().refreshDeclared();
     }
   }
 
-  // ── Public API ───────────────────────────────────────────────────────────────
+  // ── Public API ────────────────────────────────────────────────────────────────
 
   getCount(generatorId: number): number {
     return this._counts.get(generatorId) ?? 0;
   }
 
   getNextCost(generatorId: number): number {
-    const def = GENERATOR_DEFS.find(d => d.id === generatorId);
-    if (!def) return Infinity;
-    return Math.floor(def.baseCost * Math.pow(def.costMultiplier, this.getCount(generatorId)));
+    if (!GENERATOR_DEFS.some(d => d.id === generatorId)) return Infinity;
+    return getScaledCost(`generator.buy.${generatorId}`, this.getCount(generatorId));
   }
 
+  /**
+   * Compounded product of all purchased upgrade multipliers for a generator.
+   * Example: rank 0 (×2) + rank 1 (×3) → ×6 total.
+   */
   getOutputMultiplier(generatorId: number): number {
-    return GENERATOR_UPGRADES
-      .filter(u => u.targetGeneratorId === generatorId && this._purchasedUpgrades.has(u.id))
-      .reduce((mult, u) => mult * u.multiplier, 1);
+    const def       = GENERATOR_DEFS.find(d => d.id === generatorId);
+    const purchased = this._purchasedRanks.get(generatorId) ?? 0;
+    if (!def || purchased === 0) return 1;
+    return def.upgradeMultipliers
+      .slice(0, purchased)
+      .reduce((mult: number, m: number) => mult * m, 1);
   }
 
-  // ── Reset ─────────────────────────────────────────────────────────────────────
+  /**
+   * Returns the cycle progress (0-1) of the first owned generator.
+   * Used for progress bar UI.
+   */
+  getFirstGeneratorCycleProgress(): { progress: number; hasGenerator: boolean } {
+    for (const def of GENERATOR_DEFS) {
+      const count = this.getCount(def.id);
+      if (count > 0) {
+        const accum = this._accumulators.get(def.id) ?? 0;
+        return { progress: accum / def.cycleTime, hasGenerator: true };
+      }
+    }
+    return { progress: 0, hasGenerator: false };
+  }
 
-  @subscribe(Events.Restart)
-  onRestart(): void {
-    for (const def of GENERATOR_DEFS)    ActionService.get().unregister(`generator.buy.${def.id}`);
-    for (const def of GENERATOR_UPGRADES) ActionService.get().unregister(`generator.upgrade.${def.id}`);
-    this._counts.clear();
-    this._accumulators.clear();
-    this._purchasedUpgrades.clear();
-    this._featureUnlocked = false;
-    this._gold            = 0;
+  /** Returns the ActionDef of the next unpurchased upgrade for a generator, or undefined. */
+  getNextUpgrade(generatorId: number): ReturnType<typeof getActionDef> | undefined {
+    const nextRank = this._purchasedRanks.get(generatorId) ?? 0;
+    const id = `generator.upgrade.${generatorId}.${nextRank}`;
+    try { return getActionDef(id); } catch { return undefined; }
   }
 
   // ── Private ───────────────────────────────────────────────────────────────────
 
   private _addOne(generatorId: number): void {
-    const newCount = this.getCount(generatorId) + 1;
-    this._counts.set(generatorId, newCount);
-    EventService.sendLocally(Events.GeneratorChanged, {
-      generatorId,
-      newCount,
-      nextCost: this.getNextCost(generatorId),
-    });
-    this._refreshActions();
-    this._refreshUpgradeActions();
+    this._counts.set(generatorId, this.getCount(generatorId) + 1);
+    StatsService.get().increment(`generator.${generatorId}`);
+    // StatsChanged → refreshDeclared() updates buy action detail + reveals next tier/upgrades
   }
 
-  private _refreshActions(): void {
-    for (const def of GENERATOR_DEFS) {
-      const id      = `generator.buy.${def.id}`;
-      const cost    = this.getNextCost(def.id);
-      const owned   = this.getCount(def.id);
-      const visible = this._gold >= def.unlockAt || owned > 0;
-
-      if (!visible) continue;
-
-      const action = {
-        id,
-        label    : `Buy ${def.name}`,
-        detail   : `${def.description} [${owned} owned]`,
+  private _declareBuyAction(def: IGeneratorDef): void {
+    const buyId     = `generator.buy.${def.id}`;
+    const actionDef = getActionDef(buyId);
+    ActionService.get().declare(buyId, () => {
+      const owned = this.getCount(def.id);
+      const cost  = this.getNextCost(def.id);
+      return {
+        label    : actionDef.label,
+        detail   : `${actionDef.description} [${owned} -> ${owned + 1}]`,
         cost,
-        isEnabled: this._gold >= cost,
+        isEnabled: ResourceService.get().canAfford(cost),
       };
-
-      if (ActionService.get().getAll().some(a => a.id === id)) {
-        ActionService.get().update(id, { detail: action.detail, cost, isEnabled: action.isEnabled });
-      } else {
-        ActionService.get().register(action);
-      }
-    }
+    });
   }
 
-  private _refreshUpgradeActions(): void {
-    for (const def of GENERATOR_UPGRADES) {
-      if (this._purchasedUpgrades.has(def.id)) continue;
-      const id      = `generator.upgrade.${def.id}`;
-      const visible = this._isUpgradeUnlocked(def);
-      const already = ActionService.get().getAll().some(a => a.id === id);
+  private _declareUpgradeActions(def: IGeneratorDef): void {
+    for (let rank = 0; rank < def.upgradeMultipliers.length; rank++) {
+      const upgradeId = `generator.upgrade.${def.id}.${rank}`;
+      let upgDef: ReturnType<typeof getActionDef>;
+      try { upgDef = getActionDef(upgradeId); } catch { break; }
 
-      if (visible && !already) {
-        ActionService.get().register({
-          id,
-          label    : def.name,
-          detail   : def.description,
-          cost     : def.cost,
-          isEnabled: this._gold >= def.cost,
-        });
-      } else if (visible && already) {
-        ActionService.get().update(id, { isEnabled: this._gold >= def.cost });
-      }
+      ActionService.get().declare(upgradeId, () => {
+        const purchased   = this._purchasedRanks.get(def.id) ?? 0;
+        const currentMult = parseFloat(this.getOutputMultiplier(def.id).toFixed(2));
+        const rankMul     = def.upgradeMultipliers[purchased] ?? 1;
+        const nextMult    = parseFloat((currentMult * rankMul).toFixed(2));
+        return {
+          label    : upgDef.label,
+          detail   : `${upgDef.description} [x${currentMult} -> x${nextMult}]`,
+          cost     : upgDef.cost,
+          isEnabled: ResourceService.get().canAfford(upgDef.cost),
+        };
+      });
     }
-  }
-
-  private _isUpgradeUnlocked(def: (typeof GENERATOR_UPGRADES)[0]): boolean {
-    const cond = def.unlockCondition;
-    if ('generatorId' in cond) return (this._counts.get(cond.generatorId) ?? 0) >= cond.count;
-    return false;
   }
 }

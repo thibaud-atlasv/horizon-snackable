@@ -1,104 +1,88 @@
 /**
- * TapService — Handles player tap input and tap/click upgrades.
+ * TapService — Player tap input, tap upgrades, and cursor auto-clicker.
  *
- * Applies the modifier pipeline (Crit, Frenzy) to each tap before crediting gold.
- * Owns all upgrades in UPGRADE_DEFS where targetGeneratorId is undefined.
+ * The Cursor is a tap-simulating auto-clicker: each cycle it fires PlayerTap,
+ * so tap upgrades naturally boost cursor output too.
  */
-import { EventService, Service, service, subscribe } from 'meta/worlds';
+import { OnServiceReadyEvent, EventService, Service, service, subscribe } from 'meta/worlds';
 import { BASE_CLICK_VALUE } from '../Constants';
-import { Events, GainSource, type IUpgradeDef } from '../Types';
+import { Events, GainSource } from '../Types';
 import { ResourceService } from './ResourceService';
 import { ActionService } from './ActionService';
+import { StatsService } from './StatsService';
+import { getActionDef, getScaledCost } from '../Defs/ActionDefs';
 
-
-export const TAP_UPGRADES: IUpgradeDef[] = [
-  // ── Click upgrades ────────────────────────────────────────────────────────────
-  {
-    id: 0,
-    name: 'Reinforced Finger',
-    description: 'Double the value of each tap.',
-    cost: 100,
-    multiplier: 2,
-    unlockCondition: { resourceAmount: 50 },
-  },
-];
+const CURSOR_CYCLE_TIME = 2; // seconds per auto-click cycle
 
 @service()
 export class TapService extends Service {
 
   private readonly _resources = Service.injectWeak(ResourceService);
 
-  private _purchased : Set<number> = new Set();
-  private _multiplier: number      = 1;
-  private _gold      : number      = 0;
+  private _multiplier  : number = 1;
+  private _cursorCount : number = 0;
+  private _cursorAccum : number = 0;
+
+  // ── Startup: declare all actions ──────────────────────────────────────────────
+
+  @subscribe(OnServiceReadyEvent)
+  onReady(): void {
+    const buyDef = getActionDef('tap.buy');
+    ActionService.get().declare('tap.buy', () => ({
+      label    : buyDef.label,
+      detail   : `${buyDef.description} [${this._cursorCount} -> ${this._cursorCount + 1}]`,
+      cost     : getScaledCost('tap.buy'),
+      isEnabled: ResourceService.get().canAfford(getScaledCost('tap.buy')),
+    }));
+
+    const upgDef = getActionDef('tap.upgrade');
+    ActionService.get().declare('tap.upgrade', () => ({
+      label    : upgDef.label,
+      detail   : `${upgDef.description} [x${this._multiplier} -> x${this._multiplier + 1}]`,
+      cost     : getScaledCost('tap.upgrade'),
+      isEnabled: ResourceService.get().canAfford(getScaledCost('tap.upgrade')),
+    }));
+  }
 
   // ── Tap ───────────────────────────────────────────────────────────────────────
 
   @subscribe(Events.PlayerTap)
   onPlayerTap(): void {
+    StatsService.get().increment('taps');
     this._resources?.addGain(BASE_CLICK_VALUE * this._multiplier, GainSource.Tap);
   }
 
-  // ── Action refresh ────────────────────────────────────────────────────────────
+  // ── Cursor production ─────────────────────────────────────────────────────────
 
-  @subscribe(Events.ResourceChanged)
-  onResourceChanged(p: Events.ResourceChangedPayload): void {
-    this._gold = p.amount;
-    this._refreshActions();
+  @subscribe(Events.Tick)
+  onTick(p: Events.TickPayload): void {
+    if (this._cursorCount === 0) return;
+    this._cursorAccum += p.dt;
+    if (this._cursorAccum < CURSOR_CYCLE_TIME / this._cursorCount) return;
+    this._cursorAccum -= CURSOR_CYCLE_TIME / this._cursorCount;
+    EventService.sendLocally(Events.PlayerTap, {});
   }
 
   // ── Action handling ───────────────────────────────────────────────────────────
 
   @subscribe(Events.ActionTriggered)
   onActionTriggered(p: Events.ActionTriggeredPayload): void {
-    if (!p.id.startsWith('upgrade.buy.')) return;
-    const upgradeId = parseInt(p.id.split('.')[2], 10);
-    const def = TAP_UPGRADES.find(u => u.id === upgradeId);
-    if (!def || this._purchased.has(upgradeId)) return;
-    if (!this._resources?.spend(def.cost)) return;
-    this._purchased.add(upgradeId);
-    this._multiplier *= def.multiplier;
-    ActionService.get().unregister(p.id);
-    EventService.sendLocally(Events.UpgradePurchased, { upgradeId });
-    this._refreshActions();
-  }
+    if (p.id === 'tap.buy') {
+      if (!ResourceService.get().buy('tap.buy')) return;
+      this._cursorCount++;
+      ActionService.get().refreshDeclared();
+      return;
+    }
 
-  // ── Public API ───────────────────────────────────────────────────────────────
-
-  getClickValue(): number { return BASE_CLICK_VALUE * this._multiplier; }
-
-  // ── Reset ─────────────────────────────────────────────────────────────────────
-
-  @subscribe(Events.Restart)
-  onRestart(): void {
-    for (const def of TAP_UPGRADES) ActionService.get().unregister(`upgrade.buy.${def.id}`);
-    this._purchased.clear();
-    this._multiplier = 1;
-    this._gold       = 0;
-  }
-
-  // ── Private ───────────────────────────────────────────────────────────────────
-
-  private _refreshActions(): void {
-    for (const def of TAP_UPGRADES) {
-      if (this._purchased.has(def.id)) continue;
-      const id      = `upgrade.buy.${def.id}`;
-      const visible = 'resourceAmount' in def.unlockCondition
-        ? this._gold >= def.unlockCondition.resourceAmount
-        : false;
-      const already = ActionService.get().getAll().some(a => a.id === id);
-
-      if (visible && !already) {
-        ActionService.get().register({
-          id,
-          label    : def.name,
-          detail   : def.description,
-          cost     : def.cost,
-          isEnabled: this._gold >= def.cost,
-        });
-      } else if (visible && already) {
-        ActionService.get().update(id, { isEnabled: this._gold >= def.cost });
-      }
+    if (p.id === 'tap.upgrade') {
+      if (!ResourceService.get().buy('tap.upgrade')) return;
+      this._multiplier += 1;
+      ActionService.get().refreshDeclared();
     }
   }
+
+  // ── Public API ────────────────────────────────────────────────────────────────
+
+  getClickValue()  : number { return BASE_CLICK_VALUE * this._multiplier; }
+  getCursorCount() : number { return this._cursorCount; }
 }

@@ -211,6 +211,18 @@
                 },
                 {
                     "data": {
+                        "class": "GameManager",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26099284973107559",
+                            "ingestionId": "12774929493161441445",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
                         "class": "ClientSetup",
                         "definitionAsset": {
                             "packageOrRemoteId": "26099284973107559",
@@ -256,6 +268,178 @@
                 }
             ],
             "attributes": []
+        },
+        {
+            "id": "a1e4fbb5-6f1c-4841-a82e-71615083a9d5",
+            "name": "GoldCounterUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26099284973107559",
+                                "ingestionId": "8017935974432239366",
+                                "targetId": "2149638574"
+                            },
+                            "renderOrderOffset": 10
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "GoldCounterDisplay",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26099284973107559",
+                            "ingestionId": "10123428119535495025",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "adb2d6e0-1ff5-492c-8042-bfa08d338dcf",
+            "name": "FloatingTextUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26099284973107559",
+                                "ingestionId": "18022672287849644351",
+                                "targetId": "2149638574"
+                            },
+                            "renderOrderOffset": 1
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "FloatingTextUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26099284973107559",
+                            "ingestionId": "7539320197411346565",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "5667df73-34c6-4c4a-a904-390db61b8cc6",
+            "name": "ActionListUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26099284973107559",
+                                "ingestionId": "3099087490787529407",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true,
+                            "renderOrderOffset": -10
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "ActionListUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26099284973107559",
+                            "ingestionId": "3645987342898496204",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "642e983a-ff0c-4f15-8ae2-197a4b739e37",
+            "name": "ProgressBarsUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26099284973107559",
+                                "ingestionId": "14743194896381742133",
+                                "targetId": "2149638574"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "ProgressBarsUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26099284973107559",
+                            "ingestionId": "8551956351383941483",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
         }
     ],
     "relationships": [
@@ -283,6 +467,26 @@
             "relationshipType": "RelationChildOf",
             "source": "808aec1f-6830-4bb0-98d0-d0083392f178",
             "destination": "7c227d94-9e4b-4e3b-acb4-ae89d5da0c72"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "a1e4fbb5-6f1c-4841-a82e-71615083a9d5",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "adb2d6e0-1ff5-492c-8042-bfa08d338dcf",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "5667df73-34c6-4c4a-a904-390db61b8cc6",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "642e983a-ff0c-4f15-8ae2-197a4b739e37",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
         }
     ]
 }

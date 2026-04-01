@@ -1,82 +1,72 @@
 /**
  * FrenzyService — Tap counter → timed all-gain multiplier.
- * Self-registers its unlock and manages its own upgrade chain via ActionService.
  */
-import { EventService, Service, OnServiceReadyEvent, service, subscribe } from 'meta/worlds';
+import { OnServiceReadyEvent, Service, service, subscribe } from 'meta/worlds';
 import { FRENZY_TAP_THRESHOLD, FRENZY_DURATION, FRENZY_MULTIPLIER } from '../Constants';
 import { Events } from '../Types';
 import { ResourceService } from './ResourceService';
 import { ActionService } from './ActionService';
-import { ProgressionService } from './ProgressionService';
-
-const FEATURE_ID = 'frenzy';
-
-const THRESHOLD_UPGRADES = [
-  { id: 'frenzy.threshold.1', label: 'Hair Trigger I',  detail: '-2 taps to frenzy', cost: 300   },
-  { id: 'frenzy.threshold.2', label: 'Hair Trigger II', detail: '-2 taps to frenzy', cost: 900   },
-  { id: 'frenzy.threshold.3', label: 'Hair Trigger III',detail: '-2 taps to frenzy', cost: 2_500 },
-] as const;
-
-const DURATION_UPGRADES = [
-  { id: 'frenzy.duration.1', label: 'Frenzy Duration I',  detail: '+5s frenzy',  cost: 800   },
-  { id: 'frenzy.duration.2', label: 'Frenzy Duration II', detail: '+5s frenzy',  cost: 2_400 },
-  { id: 'frenzy.duration.3', label: 'Frenzy Duration III',detail: '+5s frenzy',  cost: 6_000 },
-] as const;
-
-const POWER_UPGRADES = [
-  { id: 'frenzy.power.1', label: 'Frenzy Power I',  detail: '+1× frenzy multiplier', cost: 1_500 },
-  { id: 'frenzy.power.2', label: 'Frenzy Power II', detail: '+1× frenzy multiplier', cost: 5_000 },
-] as const;
+import { StatsService } from './StatsService';
+import { getActionDef, getScaledCost } from '../Defs/ActionDefs';
 
 @service()
 export class FrenzyService extends Service {
 
-  private _threshold  : number  = FRENZY_TAP_THRESHOLD;
-  private _duration   : number  = FRENZY_DURATION;
-  private _multiplier : number  = FRENZY_MULTIPLIER;
+  private _threshold  : number = FRENZY_TAP_THRESHOLD;
+  private _duration   : number = FRENZY_DURATION;
+  private _multiplier : number = FRENZY_MULTIPLIER;
 
   private _tapCount   : number  = 0;
   private _active     : boolean = false;
   private _timeLeft   : number  = 0;
 
-  private _threshIdx  : number = 0;
-  private _durIdx     : number = 0;
-  private _powIdx     : number = 0;
-  private _gold       : number = 0;
-
-  private readonly _resources = Service.injectWeak(ResourceService);
-
-  // ── Lifecycle ────────────────────────────────────────────────────────────────
+  // ── Startup: declare all actions ──────────────────────────────────────────────
 
   @subscribe(OnServiceReadyEvent)
   onReady(): void {
-    ProgressionService.get().register(FEATURE_ID, () => true);
-    ResourceService.get().registerModifier((amount, _source) => {
-      return this._active ? amount * this._multiplier : amount;
-    }, 0);
-  }
+    const unlockDef = getActionDef('frenzy.unlock');
+    ActionService.get().declare('frenzy.unlock', () => ({
+      label    : unlockDef.label,
+      detail   : `${unlockDef.description} [x${FRENZY_MULTIPLIER} / ${FRENZY_TAP_THRESHOLD} taps / ${FRENZY_DURATION}s]`,
+      cost     : unlockDef.cost,
+      isEnabled: ResourceService.get().canAfford(unlockDef.cost),
+    }));
 
-  // ── Unlock ────────────────────────────────────────────────────────────────────
+    const thrDef = getActionDef('frenzy.threshold');
+    ActionService.get().declare('frenzy.threshold', () => ({
+      label    : thrDef.label,
+      detail   : `${thrDef.description} [${this._threshold} taps -> ${Math.max(5, this._threshold - 2)} taps]`,
+      cost     : getScaledCost('frenzy.threshold'),
+      isEnabled: ResourceService.get().canAfford(getScaledCost('frenzy.threshold')),
+    }));
 
-  @subscribe(Events.FeatureUnlocked)
-  onFeatureUnlocked(p: Events.FeatureUnlockedPayload): void {
-    if (p.featureId !== FEATURE_ID) return;
-    this._registerCurrentUpgrades();
+    const durDef = getActionDef('frenzy.duration');
+    ActionService.get().declare('frenzy.duration', () => ({
+      label    : durDef.label,
+      detail   : `${durDef.description} [${this._duration}s -> ${this._duration + 3}s]`,
+      cost     : getScaledCost('frenzy.duration'),
+      isEnabled: ResourceService.get().canAfford(getScaledCost('frenzy.duration')),
+    }));
+
+    const powDef = getActionDef('frenzy.power');
+    ActionService.get().declare('frenzy.power', () => ({
+      label    : powDef.label,
+      detail   : `${powDef.description} [x${this._multiplier} -> x${parseFloat((this._multiplier + 0.5).toFixed(1))}]`,
+      cost     : getScaledCost('frenzy.power'),
+      isEnabled: ResourceService.get().canAfford(getScaledCost('frenzy.power')),
+    }));
   }
 
   // ── Tap counter ───────────────────────────────────────────────────────────────
 
   @subscribe(Events.PlayerTap)
   onPlayerTap(): void {
+    if (!this._isPurchased()) return;
     if (this._active) return;
     this._tapCount++;
     if (this._tapCount >= this._threshold) {
       this._tapCount = 0;
       this._activate();
-    } else {
-      EventService.sendLocally(Events.FrenzyProgress, {
-        current: this._tapCount, threshold: this._threshold,
-      });
     }
   }
 
@@ -89,7 +79,6 @@ export class FrenzyService extends Service {
     if (this._timeLeft <= 0) {
       this._active   = false;
       this._timeLeft = 0;
-      EventService.sendLocally(Events.FrenzyEnded, {});
     }
   }
 
@@ -99,100 +88,56 @@ export class FrenzyService extends Service {
   onActionTriggered(p: Events.ActionTriggeredPayload): void {
     if (!p.id.startsWith('frenzy.')) return;
 
-    const thresh = THRESHOLD_UPGRADES[this._threshIdx];
-    if (thresh && p.id === thresh.id) {
-      if (!this._resources?.spend(thresh.cost)) return;
+    if (p.id === 'frenzy.unlock') {
+      if (!ResourceService.get().buy(p.id)) return;
+      ResourceService.get().registerModifier((amount, _source) => {
+        if (!this._active) return { amount };
+        return { amount: amount * this._multiplier, isFrenzy: true };
+      }, 0);
+      return;
+    }
+
+    if (p.id === 'frenzy.threshold') {
+      if (!ResourceService.get().buy(p.id)) return;
       this._threshold = Math.max(5, this._threshold - 2);
-      ActionService.get().unregister(thresh.id);
-      this._threshIdx++;
-      this._registerCurrentUpgrades();
+      ActionService.get().refreshDeclared();
       return;
     }
 
-    const dur = DURATION_UPGRADES[this._durIdx];
-    if (dur && p.id === dur.id) {
-      if (!this._resources?.spend(dur.cost)) return;
-      this._duration += 5;
-      ActionService.get().unregister(dur.id);
-      this._durIdx++;
-      this._registerCurrentUpgrades();
+    if (p.id === 'frenzy.duration') {
+      if (!ResourceService.get().buy(p.id)) return;
+      this._duration += 3;
+      ActionService.get().refreshDeclared();
       return;
     }
 
-    const pow = POWER_UPGRADES[this._powIdx];
-    if (pow && p.id === pow.id) {
-      if (!this._resources?.spend(pow.cost)) return;
-      this._multiplier += 1;
-      ActionService.get().unregister(pow.id);
-      this._powIdx++;
-      this._registerCurrentUpgrades();
+    if (p.id === 'frenzy.power') {
+      if (!ResourceService.get().buy(p.id)) return;
+      this._multiplier += 0.5;
+      ActionService.get().refreshDeclared();
     }
-  }
-
-  // ── Affordability refresh ─────────────────────────────────────────────────────
-
-  @subscribe(Events.ResourceChanged)
-  onResourceChanged(p: Events.ResourceChangedPayload): void {
-    this._gold = p.amount;
-    this._refreshEnabled();
   }
 
   // ── Public queries ────────────────────────────────────────────────────────────
 
+  isPurchased()  : boolean { return this._isPurchased(); }
   isActive()     : boolean { return this._active; }
   getTimeLeft()  : number  { return this._timeLeft; }
   getTapCount()  : number  { return this._tapCount; }
   getThreshold() : number  { return this._threshold; }
   getMultiplier(): number  { return this._multiplier; }
-
-  // ── Reset ─────────────────────────────────────────────────────────────────────
-
-  @subscribe(Events.Restart)
-  onRestart(): void {
-    this._unregisterAll();
-    this._threshold  = FRENZY_TAP_THRESHOLD;
-    this._duration   = FRENZY_DURATION;
-    this._multiplier = FRENZY_MULTIPLIER;
-    this._tapCount   = 0;
-    this._active     = false;
-    this._timeLeft   = 0;
-    this._threshIdx  = 0;
-    this._durIdx     = 0;
-    this._powIdx     = 0;
-    this._gold       = 0;
-  }
+  getDuration()  : number  { return this._duration; }
 
   // ── Private ───────────────────────────────────────────────────────────────────
+
+  private _isPurchased(): boolean {
+    return StatsService.get().get('frenzy.unlock') > 0;
+  }
 
   private _activate(): void {
     this._active   = true;
     this._timeLeft = this._duration;
-    EventService.sendLocally(Events.FrenzyStarted, {
-      duration: this._duration, multiplier: this._multiplier,
-    });
-  }
-
-  private _registerCurrentUpgrades(): void {
-    const t = THRESHOLD_UPGRADES[this._threshIdx];
-    if (t) ActionService.get().register({ id: t.id, label: t.label, detail: t.detail, cost: t.cost, isEnabled: this._gold >= t.cost });
-    const d = DURATION_UPGRADES[this._durIdx];
-    if (d) ActionService.get().register({ id: d.id, label: d.label, detail: d.detail, cost: d.cost, isEnabled: this._gold >= d.cost });
-    const p = POWER_UPGRADES[this._powIdx];
-    if (p) ActionService.get().register({ id: p.id, label: p.label, detail: p.detail, cost: p.cost, isEnabled: this._gold >= p.cost });
-  }
-
-  private _refreshEnabled(): void {
-    const t = THRESHOLD_UPGRADES[this._threshIdx];
-    if (t) ActionService.get().update(t.id, { isEnabled: this._gold >= t.cost });
-    const d = DURATION_UPGRADES[this._durIdx];
-    if (d) ActionService.get().update(d.id, { isEnabled: this._gold >= d.cost });
-    const p = POWER_UPGRADES[this._powIdx];
-    if (p) ActionService.get().update(p.id, { isEnabled: this._gold >= p.cost });
-  }
-
-  private _unregisterAll(): void {
-    for (const u of [...THRESHOLD_UPGRADES, ...DURATION_UPGRADES, ...POWER_UPGRADES]) {
-      ActionService.get().unregister(u.id);
-    }
+    StatsService.get().increment('frenzy.activated');
+    // StatsChanged → ActionService.refreshDeclared() reveals upgrades when threshold met
   }
 }

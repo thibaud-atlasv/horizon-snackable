@@ -16,7 +16,6 @@ import {
 import { TICK_INTERVAL } from '../Constants';
 import { Events } from '../Types';
 import { ResourceService } from '../Services/ResourceService';
-import { ProgressionService } from '../Services/ProgressionService';
 import { ActionService } from '../Services/ActionService';
 import { GeneratorService } from '../Services/GeneratorService';
 import { FrenzyService } from '../Services/FrenzyService';
@@ -31,7 +30,6 @@ export class GameManager extends Component {
   // force service availability
   private services: Service[] = [
     ResourceService.get(),
-    ProgressionService.get(),
     ActionService.get(),
     GeneratorService.get(),
     FrenzyService.get(),
@@ -42,6 +40,10 @@ export class GameManager extends Component {
   ];
   private _network  : NetworkingService = NetworkingService.get();
   private _tickAccum: number = 0;
+
+  // DEBUG — auto-buy cursor every 5s
+  private _debugAccum: number = 0;
+  private readonly DEBUG_BUY_INTERVAL = 5;
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -61,10 +63,4 @@ export class GameManager extends Component {
     }
   }
 
-  // ── Reset ─────────────────────────────────────────────────────────────────────
-
-  @subscribe(Events.Restart)
-  onRestart(_p: Events.RestartPayload): void {
-    this._tickAccum = 0;
-  }
 }

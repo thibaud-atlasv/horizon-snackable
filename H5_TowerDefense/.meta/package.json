@@ -1,0 +1,15 @@
+{
+    "id": "25333092833033243",
+    "author": "thibaudalbyonsteam",
+    "name": "H5_TowerDefense",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.12.1"
+        }
+    ]
+}

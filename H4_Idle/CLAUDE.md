@@ -1,5 +1,11 @@
 # H4_Idle — Claude Code Context
 
+## Language
+
+All code, comments, documentation, and files in this project must be written in **English**.
+
+---
+
 ## Project
 
 Mobile **portrait** single-player **idle/clicker** game built with **Meta Horizon Worlds SDK** (TypeScript).
@@ -237,7 +243,7 @@ Docs/
 | Forgetting server guard in `onStart` | Every Component `onStart` must check `isServerContext()` |
 | `Types.ts` importing from a sibling | `Types.ts` has zero local imports |
 | Spawning without `NetworkMode.LocalOnly` | All spawns must be `NetworkMode.LocalOnly` |
-| Calling `dispose()` on a `@service()` | Reset state in `@subscribe(Events.Restart)` |
+| Calling `dispose()` on a `@service()` | Services are singletons — never dispose them |
 | Magic numbers in gameplay code | Named constants in `Constants.ts` |
 | Active code on module load | Wait for `OnServiceReadyEvent` or `OnEntityStartEvent` |
 | Offline income computed on server | All logic client-side only |

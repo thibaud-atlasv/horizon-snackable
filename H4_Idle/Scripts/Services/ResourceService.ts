@@ -6,10 +6,13 @@
  * (Crit, Frenzy, …) in their onReady(). ResourceService has no knowledge of
  * specific modifiers.
  */
-import { EventService, Service, service, subscribe } from 'meta/worlds';
+import { EventService, Service, service } from 'meta/worlds';
 import { Events, GainSource, ResourceType } from '../Types';
+import { StatsService } from './StatsService';
+import { getScaledCost } from '../Defs/ActionDefs';
 
-type GainModifier = (amount: number, source: GainSource) => number;
+type GainModifierResult = { amount: number; isCrit?: boolean; isFrenzy?: boolean };
+type GainModifier = (amount: number, source: GainSource) => GainModifierResult;
 
 @service()
 export class ResourceService extends Service {
@@ -28,9 +31,18 @@ export class ResourceService extends Service {
 
   /** Route a gain through the modifier pipeline, credit gold, and notify. */
   addGain(rawAmount: number, source: GainSource): void {
-    const amount = this._modifiers.reduce((a, { fn }) => fn(a, source), rawAmount);
+    let amount   = rawAmount;
+    let isCrit   = false;
+    let isFrenzy = false;
+    for (const { fn } of this._modifiers) {
+      const result = fn(amount, source);
+      amount   = result.amount;
+      if (result.isCrit)   isCrit   = true;
+      if (result.isFrenzy) isFrenzy = true;
+    }
     this._gold += amount;
-    EventService.sendLocally(Events.GainApplied, { amount, source });
+    StatsService.get().increment('gold_earned', amount);
+    EventService.sendLocally(Events.GainApplied, { amount, source, isCrit, isFrenzy });
     this._notify();
   }
 
@@ -45,12 +57,16 @@ export class ResourceService extends Service {
   canAfford(amount: number): boolean { return this._gold >= amount; }
   getGold()              : number    { return this._gold; }
 
-  // ── Reset ─────────────────────────────────────────────────────────────────────
-
-  @subscribe(Events.Restart)
-  onRestart(): void {
-    this._gold = 0;
-    this._notify();
+  /**
+   * Standard action purchase: spend scaled cost + track stat.
+   * Covers all repeatable upgrades and one-time unlocks (level 0 → cost × pow⁰ = base cost).
+   * Returns false if insufficient funds (no state change).
+   */
+  buy(actionId: string): boolean {
+    const cost = getScaledCost(actionId);
+    if (!this.spend(cost)) return false;
+    StatsService.get().increment(actionId);
+    return true;
   }
 
   // ── Private ───────────────────────────────────────────────────────────────────

@@ -15,5 +15,6 @@ export namespace Assets {
   // export const CursorTemplate = new TemplateAsset('../Templates/Generators/Cursor.hstf');
 
   // ── UI / FX ───────────────────────────────────────────────────────────────
-  // export const FloatingTextTemplate = new TemplateAsset('../Templates/FX/FloatingText.hstf');
+  // DISABLED: 3D floating text replaced by pure XAML 2D system (FloatingTextUIComponent)
+  // export const FloatingTextTemplate = new TemplateAsset('../Templates/GameplayObjects/FloatingText.hstf');
 }

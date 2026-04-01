@@ -5,13 +5,94 @@ tasks:
       - name: Tap button with bounce animation
         status: done
       - name: Floating text feedback
-        status: not_started
+        status: done
       - name: Gold counter display
-        status: not_started
+        status: done
+      - name: Enhanced tap button animation
+        status: in_progress
+      - name: Tap button resize and reposition
+        status: done
+        summary: Button 2x bigger, positioned at 1/3 from top, animation scaled
+        files: [UI/TapButton.xaml]
+      - name: XAML 2D floating text system
+        status: in_progress
+      - name: Gold resource UI icon
+        status: done
+        summary: Generated gold coin icon with transparent background
+        files: [Textures/UI/gold_icon.png]
+      - name: Gold counter icon and animation
+        status: done
+        summary: Replaced G with coin icon, added pulse animation on gold gain
+        files: [UI/GoldCounter.xaml, Components/GoldCounterDisplay.ts]
+
+  - name: Dynamic Action List UI
+    status: done
+    summary: ItemsControl with dynamic binding, pulse animation on affordable items via DataTrigger
+    files: [UI/ActionList.xaml, Components/ActionListUIComponent.ts]
+    subtasks:
+      - name: Create ActionList.xaml
+        status: done
+      - name: Create ActionListUIComponent.ts
+        status: done
+      - name: Verification
+        status: done
+      - name: User testing
+        status: done
+      - name: Convert to ItemsControl dynamic list
+        status: done
+        summary: Full rewrite with ItemsControl, new portrait button design, slide-in and pulse animations
+        files: [UI/ActionList.xaml, Components/ActionListUIComponent.ts]
+      - name: JustBecameAffordable pulse animation
+        status: done
+        summary: DataTrigger animation on individual items when they become affordable
+        files: [UI/ActionList.xaml, Components/ActionListUIComponent.ts]
+
+  - name: Test ItemsControl XAML
+    status: done
+    summary: ItemsControl + ItemsSource + DataTemplate confirmed working in MHS XAML
+    files: [UI/TestItemsControl.xaml, Components/TestItemsControlComponent.ts]
+
+  - name: Progress Bars UI
+    status: in_progress
+    subtasks:
+      - name: Service getters
+        status: done
+        summary: Added isPurchased() to Vault/Frenzy/Interest, getDuration() to Frenzy, getFirstGeneratorCycleProgress() to Generator
+      - name: XAML progress bars
+        status: done
+        summary: 4 colored bars (purple/orange/green/blue) with fill width and visibility bindings
+        files: [UI/ProgressBars.xaml]
+      - name: Component + Entity
+        status: done
+        summary: ViewModel with progress/visibility, tick-based updates, Frenzy dual-mode logic
+        files: [Scripts/Components/ProgressBarsUIComponent.ts]
+      - name: Verification
+        status: done
+      - name: Refactor to vertical layout
+        status: done
+        summary: Vertical bars (bottom-to-top), 2 left (Gen/Frenzy) + 2 right (Interest/Vault), icons at bottom, Frenzy drains when active
+        files: [UI/ProgressBars.xaml, Scripts/Components/ProgressBarsUIComponent.ts]
+      - name: Resize bars x5 height x2 width
+        status: done
+        summary: Bars now 750px tall, 32px wide, image placeholders for icons
+        files: [UI/ProgressBars.xaml, Scripts/Components/ProgressBarsUIComponent.ts]
+      - name: User testing
+        status: in_progress
+
+  - name: GoldCounter visibility variable
+    status: done
+    summary: Added exposed isVisible boolean property to GoldCounterDisplay component
+    files: [Components/GoldCounterDisplay.ts]
+
+  - name: TapButton animation event
+    status: done
+    summary: Added Events.PlayTapAnimation event to trigger tap button animation from code
+    files: [Scripts/Types.ts, Components/TapButtonUIComponent.ts, UI/TapButton.xaml]
 
 chopping_block:
   disabled_systems: []
-  temp_scaffolding: []
+  temp_scaffolding:
+    - TestItemsControlUI entity (test UI on left side)
   failed_attempts: []
 
 notes: []
