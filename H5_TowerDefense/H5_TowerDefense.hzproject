@@ -43,5 +43,9 @@
         "",
         ""
     ],
-    "editorVersion": "76.0.0.0.128"
+    "playerSettings": {
+        "avatarMax": 1,
+        "screenOrientation": "Portrait"
+    },
+    "editorVersion": "74.0.0.21.106"
 }

@@ -1,0 +1,74 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "TargetingRange",
+    "attributes": [
+        {
+            "name": "baseColorTex",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "25333092833033243",
+                    "ingestionId": "10792908828759975816",
+                    "targetId": "1850524962"
+                }
+            }
+        },
+        {
+            "name": "RenderGroup",
+            "value": {
+                "type": "String",
+                "stringValue": "translucent"
+            }
+        },
+        {
+            "name": "lightingmode",
+            "value": {
+                "type": "String",
+                "stringValue": "Unlit"
+            }
+        },
+        {
+            "name": "blendmode",
+            "value": {
+                "type": "String",
+                "stringValue": "Alpha"
+            }
+        },
+        {
+            "name": "cullmode",
+            "value": {
+                "type": "String",
+                "stringValue": "Back"
+            }
+        },
+        {
+            "name": "vertexcolortint",
+            "value": {
+                "type": "Integers",
+                "intValues": [
+                    "1"
+                ]
+            }
+        },
+        {
+            "name": "layer0ColorAndAlpha",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "25333092833033243",
+                    "ingestionId": "10792908828759975816",
+                    "targetId": "1850524962"
+                }
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "33451255657851516",
+        "ingestionId": "12536732106106040758",
+        "targetId": "2708897769"
+    }
+}

@@ -1,0 +1,31 @@
+/**
+ * Assets.ts — Single source of truth for ALL TemplateAsset references.
+ *
+ * Workflow:
+ *   1. Create the .hstf template in Horizon Studio.
+ *   2. Add an entry here — this is the ONLY file to edit when a path changes.
+ *   3. Reference the export from Defs files or services — never use new TemplateAsset() elsewhere.
+ */
+import { TemplateAsset } from 'meta/worlds';
+
+export namespace Assets {
+
+  // ── Towers ────────────────────────────────────────────────────────────────
+  export const Arrow  = new TemplateAsset('@Templates/Towers/VoxelArrowTower.hstf');
+  export const Cannon = new TemplateAsset('@Templates/Towers/VoxelCannonTower.hstf');
+  export const Frost  = new TemplateAsset('@Templates/Towers/VoxelFrostTower.hstf');
+  export const Laser  = new TemplateAsset('@Templates/Towers/VoxelLaserTower.hstf');
+
+  // ── Enemies ───────────────────────────────────────────────────────────────
+  export const EnemyBasic = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
+  export const EnemyFast  = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
+  export const EnemyTank  = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
+  export const EnemyBoss  = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
+
+  // ── Shared ────────────────────────────────────────────────────────────────
+  export const Projectile      = new TemplateAsset('@Templates/Projectile.hstf');
+  export const RangeIndicator  = new TemplateAsset('@Templates/RangeIndicator.hstf');
+  export const HealthBar       = new TemplateAsset('@Templates/HealthBar.hstf');
+  export const PathCell        = new TemplateAsset('@Templates/PathCell.hstf');
+  export const FloatingText    = new TemplateAsset('@Templates/UI/FloatingText.hstf');
+}

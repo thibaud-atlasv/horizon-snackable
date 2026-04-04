@@ -1,0 +1,191 @@
+import { LocalEvent, UiEvent, serializable } from 'meta/worlds';
+import type { TemplateAsset } from 'meta/worlds';
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+export enum GamePhase {
+  Idle      = 0,
+  Build     = 1,
+  Wave      = 2,
+  WaveClear = 3,
+  GameOver  = 4,
+  Victory   = 5,
+}
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
+
+export interface ITowerStats {
+  damage: number;
+  range: number;
+  fireRate: number;
+  projectileSpeed: number;
+  props: Record<string, unknown>; // splashRadius, debuff, and any future per-system data
+}
+
+export type UpgradeApplyFn = (stats: ITowerStats) => ITowerStats;
+
+export interface IUpgradeNode {
+  label: string;
+  cost: number;
+  apply: UpgradeApplyFn;
+  next?: readonly [IUpgradeNode, IUpgradeNode];
+}
+
+export interface ITowerDef {
+  id: string;
+  name: string;
+  cost: number;
+  stats: ITowerStats;
+
+  /*damage: number;
+  range: number;           // cells
+  fireRate: number;        // shots per second
+  projectileSpeed: number; // cells per second
+  props?: Record<string, unknown>; // feature-specific base data (splashRadius, debuff, …)*/
+
+
+  template: TemplateAsset;
+  upgrades: readonly [IUpgradeNode, IUpgradeNode];
+}
+
+export interface IEnemyDef {
+  id: string;
+  name: string;
+  hp: number;
+  speed: number;    // cells per second
+  reward: number;   // gold on death
+  size: number;     // world-unit radius (collision + visual scale)
+  color: { r: number; g: number; b: number };
+  template: TemplateAsset;
+}
+
+export interface IWaveGroup {
+  enemyId: string;
+  count: number;
+}
+
+export interface IWaveDef {
+  groups: IWaveGroup[];
+}
+
+// ─── Pipeline Contexts ────────────────────────────────────────────────────────
+
+export interface IHitContext {
+  originX: number;
+  originZ: number;
+  primaryTargetId: number;
+  targets: number[];
+  damage: number;
+  props: Record<string, unknown>;
+}
+
+export interface IDamageContext {
+  enemyId: number;
+  damage: number;
+  props: Record<string, unknown>;
+}
+
+// ─── Events ───────────────────────────────────────────────────────────────────
+
+export namespace Events {
+
+  // Game phase
+  export class GamePhaseChangedPayload { phase: GamePhase = GamePhase.Idle; }
+  export const GamePhaseChanged = new LocalEvent<GamePhaseChangedPayload>('EvGamePhaseChanged', GamePhaseChangedPayload);
+
+  // Wave
+  export class WaveStartedPayload { waveIndex: number = 0; totalWaves: number = 0; }
+  export const WaveStarted = new LocalEvent<WaveStartedPayload>('EvWaveStarted', WaveStartedPayload);
+
+  export class WaveCompletedPayload { waveIndex: number = 0; }
+  export const WaveCompleted = new LocalEvent<WaveCompletedPayload>('EvWaveCompleted', WaveCompletedPayload);
+
+  // Enemy lifecycle
+  export class InitEnemyPayload { defId: string = ''; waveIndex: number = 0; }
+  export const InitEnemy = new LocalEvent<InitEnemyPayload>('EvInitEnemy', InitEnemyPayload);
+
+  export class UpdateHealthBarPayload { worldX: number = 0; worldY: number = 0; worldZ: number = 0; hp: number = 0; maxHp: number = 1; }
+  export const UpdateHealthBar = new LocalEvent<UpdateHealthBarPayload>('EvUpdateHealthBar', UpdateHealthBarPayload);
+
+  export class ParkHealthBarPayload {}
+  export const ParkHealthBar = new LocalEvent<ParkHealthBarPayload>('EvParkHealthBar', ParkHealthBarPayload);
+
+  export class EnemyDiedPayload { enemyId: number = 0; reward: number = 0; worldX: number = 0; worldZ: number = 0; }
+  export const EnemyDied = new LocalEvent<EnemyDiedPayload>('EvEnemyDied', EnemyDiedPayload);
+
+  // Floating text
+  export class ActivateFloatingTextPayload {
+    text: string = '';
+    worldX: number = 0;
+    worldZ: number = 0;
+    colorR: number = 0.96; // default gold
+    colorG: number = 0.77;
+    colorB: number = 0.09;
+  }
+  export const ActivateFloatingText = new LocalEvent<ActivateFloatingTextPayload>('EvActivateFloatingText', ActivateFloatingTextPayload);
+
+  export class EnemyReachedEndPayload { enemyId: number = 0; }
+  export const EnemyReachedEnd = new LocalEvent<EnemyReachedEndPayload>('EvEnemyReachedEnd', EnemyReachedEndPayload);
+
+  // Tower lifecycle
+  export class InitTowerPayload { defId: string = ''; col: number = 0; row: number = 0; }
+  export const InitTower = new LocalEvent<InitTowerPayload>('EvInitTower', InitTowerPayload);
+
+  // Input
+  export class GridTappedPayload { col: number = 0; row: number = 0; }
+  export const GridTapped = new LocalEvent<GridTappedPayload>('EvGridTapped', GridTappedPayload);
+
+  // Projectile
+  export class InitProjectilePayload {
+    targetEnemyId: number = 0;
+    damage: number = 0;
+    speed: number = 0;
+    props: Record<string, unknown> = {};
+  }
+  export const InitProjectile = new LocalEvent<InitProjectilePayload>('EvInitProjectile', InitProjectilePayload);
+
+  export class TakeDamagePayload { enemyId: number = 0; damage: number = 0; props: Record<string, unknown> = {}; }
+  export const TakeDamage = new LocalEvent<TakeDamagePayload>('EvTakeDamage', TakeDamagePayload);
+
+  // Resources
+  export class ResourceChangedPayload { gold: number = 0; lives: number = 0; }
+  export const ResourceChanged = new LocalEvent<ResourceChangedPayload>('EvResourceChanged', ResourceChangedPayload);
+
+  // Tower shop
+  export class TowerShopSelectedPayload { towerId: string = ''; }
+  export const TowerShopSelected = new LocalEvent<TowerShopSelectedPayload>('EvTowerShopSelected', TowerShopSelectedPayload);
+
+  // Tower selection
+  export class TowerSelectedPayload { col: number = 0; row: number = 0; defId: string = ''; tier: number = 0; choices: number[] = []; }
+  export const TowerSelected = new LocalEvent<TowerSelectedPayload>('EvTowerSelected', TowerSelectedPayload);
+
+  export class TowerDeselectedPayload {}
+  export const TowerDeselected = new LocalEvent<TowerDeselectedPayload>('EvTowerDeselected', TowerDeselectedPayload);
+
+  // Tower actions
+  export class TowerSoldPayload { col: number = 0; row: number = 0; refund: number = 0; }
+  export const TowerSold = new LocalEvent<TowerSoldPayload>('EvTowerSold', TowerSoldPayload);
+
+  export class TowerUpgradedPayload { col: number = 0; row: number = 0; tier: number = 0; choice: number = 0; }
+  export const TowerUpgraded = new LocalEvent<TowerUpgradedPayload>('EvTowerUpgraded', TowerUpgradedPayload);
+
+  // Game end
+  export class GameOverPayload { won: boolean = false; }
+  export const GameOver = new LocalEvent<GameOverPayload>('EvGameOver', GameOverPayload);
+
+  // Restart game
+  export class RestartGamePayload {}
+  export const RestartGame = new LocalEvent<RestartGamePayload>('EvRestartGame', RestartGamePayload);
+}
+
+// ─── UI Events ────────────────────────────────────────────────────────────────
+
+export namespace UiEvents {
+  @serializable() export class TowerShopTapPayload      { readonly parameter: string = ''; }
+  @serializable() export class SellTowerTapPayload      { readonly parameter: string = ''; }
+  @serializable() export class UpgradeTowerTapPayload   { readonly parameter: string = ''; }
+
+  export const towerShopTap    = new UiEvent('TowerShopTapEvent',                             TowerShopTapPayload);
+  export const sellTowerTap    = new UiEvent('TowerUpgradeMenuViewModel-onSellTowerTap',    SellTowerTapPayload);
+  export const upgradeTowerTap = new UiEvent('TowerUpgradeMenuViewModel-onUpgradeTowerTap', UpgradeTowerTapPayload);
+}

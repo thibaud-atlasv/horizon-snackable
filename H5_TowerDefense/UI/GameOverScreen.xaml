@@ -1,0 +1,159 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+
+    <Page.Resources>
+        <!-- Colors -->
+        <SolidColorBrush x:Key="OverlayBrush" Color="#99000000"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="#1a1a2e"/>
+        <SolidColorBrush x:Key="VictoryBrush" Color="#2ecc71"/>
+        <SolidColorBrush x:Key="DefeatBrush" Color="#e74c3c"/>
+        <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ffffff"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#a0a0c0"/>
+        <SolidColorBrush x:Key="TransparentBrush" Color="Transparent"/>
+    </Page.Resources>
+
+    <!-- Main Container - Full Screen Overlay -->
+    <Grid>
+        <Grid.Visibility>
+            <Binding Path="visible">
+                <Binding.Converter>
+                    <BooleanToVisibilityConverter/>
+                </Binding.Converter>
+            </Binding>
+        </Grid.Visibility>
+
+        <!-- Full Screen Button for tap-to-restart -->
+        <Button x:Name="RestartButton"
+                Command="{Binding Path=events.restartTap}"
+                Background="{StaticResource TransparentBrush}"
+                BorderThickness="0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+
+            <!-- Semi-transparent black overlay -->
+            <Grid Background="{StaticResource OverlayBrush}"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch">
+
+                <!-- Centered Content Panel -->
+                <Border Background="{StaticResource PanelBrush}"
+                        CornerRadius="24"
+                        Padding="80,60"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        MinWidth="800">
+
+                    <StackPanel HorizontalAlignment="Center">
+
+                        <!-- Title Text - VICTORY or DEFEAT -->
+                        <Grid HorizontalAlignment="Center" Margin="0,0,0,60">
+                            <!-- Victory Text (shown when isVictory=true) -->
+                            <TextBlock x:Name="VictoryText"
+                                       Text="VICTORY"
+                                       Foreground="{StaticResource VictoryBrush}"
+                                       FontSize="80"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Visibility="Collapsed"/>
+
+                            <!-- Defeat Text (shown when isVictory=false) -->
+                            <TextBlock x:Name="DefeatText"
+                                       Text="DEFEAT"
+                                       Foreground="{StaticResource DefeatBrush}"
+                                       FontSize="80"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Visibility="Visible"/>
+                        </Grid>
+
+                        <!-- Stats Section -->
+                        <StackPanel HorizontalAlignment="Center" Margin="0,0,0,60">
+
+                            <!-- Row 1: Enemies Killed -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,24">
+                                <TextBlock Text="ENEMIES KILLED"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="48"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,40,0"/>
+                                <TextBlock Text="{Binding Path=enemiesKilled, StringFormat=F0}"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="60"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Row 2: Gold Earned -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,24">
+                                <TextBlock Text="GOLD EARNED"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="48"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,40,0"/>
+                                <Image Source="Textures/gold_icon.png"
+                                       Width="60"
+                                       Height="60"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,12,0"/>
+                                <TextBlock Text="{Binding Path=goldEarned, StringFormat=F0}"
+                                           Foreground="{StaticResource GoldBrush}"
+                                           FontSize="60"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Row 3: Waves -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="WAVES"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="48"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,40,0"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Path=wavesCompleted, StringFormat=F0}"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="60"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="/"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="60"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Path=totalWaves, StringFormat=F0}"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="60"
+                                               FontWeight="Bold"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </StackPanel>
+
+                        <!-- Tap to Restart Text -->
+                        <TextBlock Text="TAP TO RESTART"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="40"
+                                   HorizontalAlignment="Center"/>
+
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Button>
+
+        <!-- DataTriggers for Victory/Defeat state -->
+        <b:Interaction.Triggers>
+            <!-- Victory state -->
+            <b:DataTrigger Binding="{Binding Path=isVictory}" Value="True">
+                <b:ChangePropertyAction TargetName="VictoryText" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="DefeatText" PropertyName="Visibility" Value="Collapsed"/>
+            </b:DataTrigger>
+            <!-- Defeat state -->
+            <b:DataTrigger Binding="{Binding Path=isVictory}" Value="False">
+                <b:ChangePropertyAction TargetName="VictoryText" PropertyName="Visibility" Value="Collapsed"/>
+                <b:ChangePropertyAction TargetName="DefeatText" PropertyName="Visibility" Value="Visible"/>
+            </b:DataTrigger>
+        </b:Interaction.Triggers>
+    </Grid>
+</Page>

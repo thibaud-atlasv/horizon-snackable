@@ -1,0 +1,171 @@
+import { Service, Vec3, WorldService, NetworkMode, Quaternion, NetworkingService, Color, ColorComponent } from 'meta/worlds';
+import { service, subscribe } from 'meta/worlds';
+import { OnServiceReadyEvent } from 'meta/worlds';
+import { CELL_SIZE, GRID_ROWS, GRID_ORIGIN_X, GRID_ORIGIN_Z, GROUND_Y, PATH_CELL_COLOR, hexColor } from '../Constants';
+import { Assets } from '../Assets';
+import { LEVEL_DEFS } from '../Defs/LevelDefs';
+
+interface IPathSegment {
+  startX: number;
+  startZ: number;
+  endX: number;
+  endZ: number;
+  length: number;
+  cumLength: number;
+}
+
+interface ISubPath {
+  segments: IPathSegment[];
+  length: number;
+}
+
+@service()
+export class PathService extends Service {
+  private _waypoints: ReadonlyArray<readonly [number, number]> = [];
+  private _subPaths:   ISubPath[] = [];
+  private _segments:   IPathSegment[] = [];
+  private _totalLength: number = 0;
+  private _pathCells:  Set<number> = new Set();
+  private _worldService: WorldService = Service.inject(WorldService);
+
+  @subscribe(OnServiceReadyEvent)
+  onReady(): void {
+    this._waypoints = LEVEL_DEFS[0].pathWaypoints;
+    this._buildPath();
+  }
+
+  async prewarm(): Promise<void> {
+    if (NetworkingService.get().isServerContext()) return;
+    for (const k of this._pathCells) {
+      const col = Math.floor(k / 100);
+      const row = k % 100;
+      const wp  = this.cellToWorld(col, row);
+      const tile = await this._worldService.spawnTemplate({
+        templateAsset: Assets.PathCell,
+        position: new Vec3(wp.x, GROUND_Y + 0.01, wp.z),
+        rotation: Quaternion.identity,
+        scale: new Vec3(CELL_SIZE, 1, CELL_SIZE),
+        networkMode: NetworkMode.LocalOnly,
+      }).catch((e: unknown) => { console.error(e); return null; });
+      if (tile) {
+        const pc = hexColor(PATH_CELL_COLOR);
+        const tileColor = new Color(pc.r, pc.g, pc.b);
+        for (const child of tile.getChildren()) {
+          const c = child.getComponent(ColorComponent);
+          if (c) c.color = tileColor;
+        }
+        const c = tile.getComponent(ColorComponent);
+        if (c) c.color = tileColor;
+      }
+    }
+  }
+
+  get totalLength(): number { return this._totalLength; }
+
+  getWaypointCount(): number { return this._waypoints.length; }
+
+  getSubPathLength(wpIndex: number): number {
+    return this._subPaths[wpIndex]?.length ?? 0;
+  }
+
+  getWorldPositionInSubPath(wpIndex: number, subT: number): Vec3 {
+    const sub = this._subPaths[wpIndex];
+    if (!sub || sub.segments.length === 0) {
+      const [c, r] = this._waypoints[Math.min(wpIndex, this._waypoints.length - 1)];
+      return this.cellToWorld(c, r);
+    }
+    const t = Math.max(0, Math.min(subT, sub.length));
+    for (const seg of sub.segments) {
+      const localT = t - seg.cumLength;
+      if (localT <= seg.length) {
+        const alpha = seg.length > 0 ? localT / seg.length : 0;
+        return new Vec3(
+          seg.startX + (seg.endX - seg.startX) * alpha,
+          GROUND_Y,
+          seg.startZ + (seg.endZ - seg.startZ) * alpha,
+        );
+      }
+    }
+    const last = sub.segments[sub.segments.length - 1];
+    return new Vec3(last.endX, GROUND_Y, last.endZ);
+  }
+
+  getGlobalT(wpIndex: number, subT: number): number {
+    let total = 0;
+    for (let i = 0; i < wpIndex && i < this._subPaths.length; i++) {
+      total += this._subPaths[i].length;
+    }
+    return total + subT;
+  }
+
+  isPathCell(col: number, row: number): boolean {
+    return this._pathCells.has(col * 100 + row);
+  }
+
+  // col → Z axis, row → X axis (row 0 = top)
+  cellToWorld(col: number, row: number): Vec3 {
+    return new Vec3(
+      GRID_ORIGIN_X + (GRID_ROWS - 1 - row) * CELL_SIZE,
+      GROUND_Y,
+      GRID_ORIGIN_Z + col * CELL_SIZE,
+    );
+  }
+
+  worldToCell(worldX: number, worldZ: number): readonly [number, number] {
+    const col = Math.round((worldZ - GRID_ORIGIN_Z) / CELL_SIZE);
+    const row = GRID_ROWS - 1 - Math.round((worldX - GRID_ORIGIN_X) / CELL_SIZE);
+    return [col, row] as const;
+  }
+
+  getWorldPositionAtT(pathT: number): Vec3 {
+    const t = Math.max(0, Math.min(pathT, this._totalLength));
+    for (const seg of this._segments) {
+      const localT = t - seg.cumLength;
+      if (localT <= seg.length) {
+        const alpha = seg.length > 0 ? localT / seg.length : 0;
+        return new Vec3(
+          seg.startX + (seg.endX - seg.startX) * alpha,
+          GROUND_Y,
+          seg.startZ + (seg.endZ - seg.startZ) * alpha,
+        );
+      }
+    }
+    const last = this._segments[this._segments.length - 1];
+    return new Vec3(last.endX, GROUND_Y, last.endZ);
+  }
+
+  // ── Private ──────────────────────────────────────────────────────────────────
+
+  private _buildPath(): void {
+    this._subPaths  = [];
+    this._segments  = [];
+    this._pathCells = new Set();
+    let globalCum   = 0;
+
+    for (let i = 0; i < this._waypoints.length - 1; i++) {
+      const [c0, r0] = this._waypoints[i];
+      const [c1, r1] = this._waypoints[i + 1];
+
+      const start = this.cellToWorld(c0, r0);
+      const end   = this.cellToWorld(c1, r1);
+      const dx     = end.x - start.x;
+      const dz     = end.z - start.z;
+      const length = Math.sqrt(dx * dx + dz * dz);
+
+      const subSeg: IPathSegment = { startX: start.x, startZ: start.z, endX: end.x, endZ: end.z, length, cumLength: 0 };
+      this._subPaths.push({ segments: [subSeg], length });
+      this._segments.push({ ...subSeg, cumLength: globalCum });
+      globalCum += length;
+
+      // Mark all cells along this waypoint segment
+      const steps = Math.max(Math.abs(c1 - c0), Math.abs(r1 - r0));
+      for (let step = 0; step <= steps; step++) {
+        const col = Math.round(c0 + (c1 - c0) * (step / steps));
+        const row = Math.round(r0 + (r1 - r0) * (step / steps));
+        this._pathCells.add(col * 100 + row);
+      }
+    }
+
+    this._totalLength = globalCum;
+  }
+}

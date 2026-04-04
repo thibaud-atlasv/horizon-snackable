@@ -1,0 +1,22 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "UnlitBlend",
+    "attributes": [
+        {
+            "name": "RenderGroup",
+            "value": {
+                "type": "String",
+                "stringValue": "automatic"
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "18157220368666114631",
+        "targetId": "2708897769"
+    }
+}

@@ -1,0 +1,184 @@
+tasks:
+  - name: Tower Shop UI
+    status: done
+    summary: Scrollable horizontal shop bar with dynamic tower buttons, 3 visual states, ViewModel bindings
+    files:
+      - Scripts/Components/TowerShopHud.ts
+      - UI/TowerShop.xaml
+      - player.hstf
+
+  - name: Modular Tower Kit
+    status: in_progress
+    subtasks:
+      - name: Generate tower bases (3 variants)
+        status: in_progress
+      - name: Generate tower bodies (4 variants)
+        status: not_started
+      - name: Generate tower tops (5 variants)
+        status: not_started
+
+  - name: Arrow Tower Mesh
+    status: done
+    summary: Generated complete Arrow Tower 3D mesh with green color scheme, hexagonal design
+    files:
+      - Models/Towers/ArrowTower_remeshed.glb
+      - Models/Towers/ArrowTower_remeshed.fbx
+      - Models/Towers/ArrowTower.material
+      - Models/Towers/ArrowTower.png
+
+  - name: Enlarge Tower Shop UI
+    status: done
+    summary: Doubled shop bar height to 200px (~20% screen), enlarged buttons to 120x120px, scaled fonts and icons
+    files:
+      - UI/TowerShop.xaml
+
+  - name: Triple Tower Shop Size
+    status: done
+    summary: Tripled all shop dimensions - 600px height, 360x360px buttons, 54px/48px fonts, 72px icons
+    files:
+      - UI/TowerShop.xaml
+
+  - name: Cannon Tower Mesh
+    status: done
+    summary: Generated Cannon Tower mesh with dual cannons, orange color scheme, hexagonal fortress design
+    files:
+      - Models/Towers/CannonTower/CannonTower_remeshed.glb
+      - Models/Towers/CannonTower/CannonTower_remeshed.fbx
+
+  - name: Frost Tower Mesh
+    status: done
+    summary: Generated optimized Frost Tower mesh (~1,250 triangles, 512x512 texture, cyan ice crystals)
+    files:
+      - Models/Towers/FrostTower/FrostTower_remeshed.glb
+      - Models/Towers/FrostTower/FrostTower_remeshed.fbx
+
+  - name: Laser Tower Mesh
+    status: done
+    summary: Generated optimized Laser Tower mesh (~1,500 triangles, 512x512 texture, purple sci-fi spire design)
+    files:
+      - Models/Towers/LaserTower/LaserTower_remeshed.glb
+      - Models/Towers/LaserTower/LaserTower_remeshed.fbx
+
+  - name: Integrate Tower Meshes
+    status: done
+    summary: Created 4 tower templates with meshes, updated Assets.ts and TowerDefs.ts, verified system compatibility
+    files:
+      - Templates/Towers/ArrowTower.hstf
+      - Templates/Towers/CannonTower.hstf
+      - Templates/Towers/FrostTower.hstf
+      - Templates/Towers/LaserTower.hstf
+      - Scripts/Assets.ts
+
+  - name: Game HUD
+    status: done
+    summary: Created top banner HUD with lives, gold, wave display. GameHudController subscribes to events for live updates.
+    files:
+      - UI/GameHud.xaml
+      - Scripts/Components/GameHudController.ts
+      - player.hstf
+
+  - name: Move UI to Scene
+    status: done
+    summary: Moved TowerShopUI and GameHud from player.hstf to space.hstf for scene-level UI hosting
+    files:
+      - space.hstf
+      - player.hstf
+
+  - name: Enlarge Game HUD
+    status: done
+    summary: Scaled HUD 5x - height 550px, values 110px, labels 60px, icons 120-130px
+    files:
+      - UI/GameHud.xaml
+
+  - name: Redesign Game HUD
+    status: done
+    summary: Simplified HUD - removed wave, lives left with heart shape, gold right with gold_icon.png
+    files:
+      - UI/GameHud.xaml
+
+  - name: Add Wave to HUD Center
+    status: done
+    summary: Added wave number in center on 2 lines (WAVE label + number), 3-column layout
+    files:
+      - UI/GameHud.xaml
+
+  - name: Wave Format X/10
+    status: done
+    summary: Changed wave display from just number to "X/10" format (e.g., 1/10, 2/10)
+    files:
+      - UI/GameHud.xaml
+      - Scripts/Components/GameHudController.ts
+
+  - name: Tower Upgrade Menu
+    status: done
+    summary: Created upgrade menu panel (600px, 3 columns - Sell/Upgrade1/Upgrade2) with visibility coordination with TowerShop
+    files:
+      - UI/TowerUpgradeMenu.xaml
+      - Scripts/Components/TowerUpgradeMenuHud.ts
+      - UI/TowerShop.xaml
+      - Scripts/Components/TowerShopHud.ts
+      - space.hstf
+
+  - name: Tower Shop Selection Indicator
+    status: done
+    summary: Added colored border (4px) on selected tower matching tower color, with lighter background
+    files:
+      - UI/TowerShop.xaml
+      - Scripts/Components/TowerShopHud.ts
+
+  - name: Voxel Arrow Tower Test
+    status: done
+    summary: Created voxel tower prototype with 5 stacked cubes (Base gray, Body green, Turret light green, Tip dark) at Z=5
+    files:
+      - space.hstf
+
+  - name: Voxel Cannon Tower
+    status: done
+    summary: Created voxel Cannon Tower with horizontal barrel at X=1.5, Z=5 (orange body, gray cannon pointing forward)
+    files:
+      - space.hstf
+
+  - name: Voxel Frost Tower
+    status: done
+    summary: Created voxel Frost Tower with ice crystals at X=3, Z=5 (cyan body, 3 crystal spikes, diamond top)
+    files:
+      - space.hstf
+
+  - name: Voxel Laser Tower
+    status: done
+    summary: Created voxel Laser Tower at X=4.5, Z=5 (purple body, tall antenna, energy orb on top)
+    files:
+      - space.hstf
+
+  - name: Game Over Screen
+    status: done
+    summary: Created full-screen Game Over/Victory UI with stats (enemies killed, gold earned, waves), tap to restart
+    files:
+      - UI/GameOverScreen.xaml
+      - Scripts/Components/GameOverScreenHud.ts
+      - Scripts/Types.ts
+      - space.hstf
+
+  - name: Floating Text System
+    status: done
+    summary: Created pooled floating text system (10 rotating instances) showing "+gold" on enemy death with rise+fade animation
+    files:
+      - Scripts/Components/FloatingTextController.ts
+      - Scripts/Services/FloatingTextService.ts
+      - Templates/UI/FloatingText.hstf
+      - Scripts/Types.ts
+      - Scripts/Components/EnemyController.ts
+      - Scripts/Components/GameManager.ts
+      - Scripts/Assets.ts
+      - Scripts/Constants.ts
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding:
+    - VoxelTowerTest cubes at Z=5 (visual prototype)
+  failed_attempts: []
+
+notes:
+  - Tower icon paths bound to ViewModel, user fills by code
+  - Use gold_icon.png from Textures for price display
+  - Follow art direction colors and typography

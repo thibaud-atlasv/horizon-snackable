@@ -1,0 +1,135 @@
+import { Service, EventService } from 'meta/worlds';
+import { service, subscribe } from 'meta/worlds';
+import { OnServiceReadyEvent } from 'meta/worlds';
+import { Events, GamePhase } from '../Types';
+import { WAVE_BUILD_DURATION, WAVE_CLEAR_DURATION, WAVE_BONUS_GOLD, ENEMY_SPAWN_INTERVAL } from '../Constants';
+import { LEVEL_DEFS } from '../Defs/LevelDefs';
+import { EnemyService } from './EnemyService';
+import { ResourceService } from './ResourceService';
+
+@service()
+export class WaveService extends Service {
+  private _waveIndex: number = 0;
+  private _totalWaves: number = 0;
+  private _phase: GamePhase = GamePhase.Idle;
+  private _timer: number = 0;
+
+  // ── Spawn queue ───────────────────────────────────────────────────────────────
+  private _spawnQueue: string[] = [];
+  private _spawnTimer: number = 0;
+  private _spawnedCount: number = 0;
+  private _totalInWave: number = 0;
+
+  @subscribe(OnServiceReadyEvent)
+  onReady(): void {
+    this._totalWaves = LEVEL_DEFS[0].waves.length;
+  }
+
+  get waveIndex(): number { return this._waveIndex; }
+  get totalWaves(): number { return this._totalWaves; }
+  get phase(): GamePhase { return this._phase; }
+
+  @subscribe(Events.RestartGame)
+  onRestart(_p: Events.RestartGamePayload): void {
+    this._waveIndex    = 0;
+    this._phase        = GamePhase.Idle;
+    this._timer        = 0;
+    this._spawnQueue   = [];
+    this._spawnTimer   = 0;
+    this._spawnedCount = 0;
+    this._totalInWave  = 0;
+  }
+
+  startGame(): void {
+    this._waveIndex = 0;
+    this._enterBuild();
+  }
+
+  tick(dt: number): void {
+    this._timer -= dt;
+
+    if (this._phase === GamePhase.Build && this._timer <= 0) {
+      this._enterWave();
+    } else if (this._phase === GamePhase.WaveClear && this._timer <= 0) {
+      if (this._waveIndex >= this._totalWaves) {
+        this._sendPhase(GamePhase.Victory);
+      } else {
+        this._enterBuild();
+      }
+    }
+
+    this._tickSpawn(dt);
+  }
+
+  @subscribe(Events.EnemyDied)
+  onEnemyDied(_p: Events.EnemyDiedPayload): void {
+    this._checkWaveClear();
+  }
+
+  @subscribe(Events.EnemyReachedEnd)
+  onEnemyReachedEnd(_p: Events.EnemyReachedEndPayload): void {
+    this._checkWaveClear();
+  }
+
+  private _tickSpawn(dt: number): void {
+    if (this._spawnQueue.length === 0) return;
+    this._spawnTimer -= dt;
+    if (this._spawnTimer > 0) return;
+    this._spawnTimer = ENEMY_SPAWN_INTERVAL;
+
+    const enemyId = this._spawnQueue.shift()!;
+    void EnemyService.get().spawn(enemyId, this._waveIndex);
+    this._spawnedCount++;
+  }
+
+  private _checkWaveClear(): void {
+    if (this._phase !== GamePhase.Wave) return;
+    if (this._spawnedCount < this._totalInWave) return; // still spawning
+    if (EnemyService.get().count > 0) return;
+
+    ResourceService.get().earn(WAVE_BONUS_GOLD);
+    this._waveIndex++;
+
+    const doneP = new Events.WaveCompletedPayload();
+    doneP.waveIndex = this._waveIndex - 1;
+    EventService.sendLocally(Events.WaveCompleted, doneP);
+
+    this._phase = GamePhase.WaveClear;
+    this._timer = WAVE_CLEAR_DURATION;
+    this._sendPhase(GamePhase.WaveClear);
+  }
+
+  private _enterBuild(): void {
+    this._phase = GamePhase.Build;
+    this._timer = WAVE_BUILD_DURATION;
+    this._sendPhase(GamePhase.Build);
+  }
+
+  private _enterWave(): void {
+    this._phase = GamePhase.Wave;
+    this._spawnedCount = 0;
+    this._spawnTimer = 0;
+
+    const waveDef = LEVEL_DEFS[0].waves[this._waveIndex];
+    this._spawnQueue = [];
+    for (const group of waveDef.groups) {
+      for (let i = 0; i < group.count; i++) {
+        this._spawnQueue.push(group.enemyId);
+      }
+    }
+    this._totalInWave = this._spawnQueue.length;
+
+    const startP = new Events.WaveStartedPayload();
+    startP.waveIndex = this._waveIndex;
+    startP.totalWaves = this._totalWaves;
+    EventService.sendLocally(Events.WaveStarted, startP);
+
+    this._sendPhase(GamePhase.Wave);
+  }
+
+  private _sendPhase(phase: GamePhase): void {
+    const p = new Events.GamePhaseChangedPayload();
+    p.phase = phase;
+    EventService.sendLocally(Events.GamePhaseChanged, p);
+  }
+}

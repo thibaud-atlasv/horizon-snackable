@@ -1,0 +1,152 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+
+    <Page.Resources>
+        <!-- Colors -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#1a1a2e"/>
+        <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#2a2a4a"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#3a3a5a"/>
+        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="#2a2a4a"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ffffff"/>
+        <SolidColorBrush x:Key="TextDisabledBrush" Color="#555577"/>
+        <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
+
+        <!-- Horizontal Panel Template -->
+        <ItemsPanelTemplate x:Key="HorizontalPanel">
+            <StackPanel Orientation="Horizontal"/>
+        </ItemsPanelTemplate>
+
+        <!-- Item Container Style -->
+        <Style x:Key="TowerItemContainerStyle" TargetType="ContentPresenter">
+            <Setter Property="Margin" Value="30,0"/>
+        </Style>
+
+        <!-- Tower Item Template -->
+        <DataTemplate x:Key="TowerItemTemplate">
+            <Grid>
+                <Button x:Name="TowerButton"
+                        Command="{Binding DataContext.events.towerTap, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        CommandParameter="{Binding towerId}"
+                        MinWidth="360"
+                        MinHeight="360"
+                        Padding="36,30"
+                        Background="{StaticResource ButtonBackgroundBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Tower Name -->
+                        <TextBlock x:Name="TowerName"
+                                   Grid.Row="0"
+                                   Text="{Binding name}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="54"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,18"/>
+
+                        <!-- Cost Row with Gold Icon -->
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Image Source="Textures/gold_icon.png"
+                                   Width="72"
+                                   Height="72"
+                                   Margin="0,0,18,0"
+                                   VerticalAlignment="Center"/>
+                            <TextBlock x:Name="CostText"
+                                       Text="{Binding cost, StringFormat=F0}"
+                                       Foreground="{StaticResource GoldBrush}"
+                                       FontSize="48"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <!-- Selection Border Overlay - binds to towerColor for dynamic border color -->
+                <Border x:Name="SelectionBorder"
+                        MinWidth="360"
+                        MinHeight="360"
+                        BorderThickness="4"
+                        Visibility="Collapsed"
+                        IsHitTestVisible="False">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{Binding towerColor}"/>
+                    </Border.BorderBrush>
+                </Border>
+            </Grid>
+
+            <!-- DataTriggers for state-based styling -->
+            <DataTemplate.Triggers>
+                <!-- Affordable state - full opacity -->
+                <DataTrigger Binding="{Binding state}" Value="affordable">
+                    <Setter TargetName="TowerButton" Property="Opacity" Value="1.0"/>
+                    <Setter TargetName="TowerName" Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                    <Setter TargetName="CostText" Property="Foreground" Value="{StaticResource GoldBrush}"/>
+                </DataTrigger>
+
+                <!-- Too expensive state - greyed out -->
+                <DataTrigger Binding="{Binding state}" Value="too_expensive">
+                    <Setter TargetName="TowerButton" Property="Opacity" Value="0.5"/>
+                    <Setter TargetName="TowerName" Property="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                    <Setter TargetName="CostText" Property="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                </DataTrigger>
+
+                <!-- Selected state - highlighted border -->
+                <DataTrigger Binding="{Binding selected}" Value="True">
+                    <Setter TargetName="TowerButton" Property="BorderThickness" Value="4"/>
+                    <Setter TargetName="TowerButton" Property="Background" Value="{StaticResource SelectedBackgroundBrush}"/>
+                    <Setter TargetName="SelectionBorder" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+
+                <!-- Unselected state - default border -->
+                <DataTrigger Binding="{Binding selected}" Value="False">
+                    <Setter TargetName="TowerButton" Property="BorderThickness" Value="2"/>
+                    <Setter TargetName="TowerButton" Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                    <Setter TargetName="TowerButton" Property="Background" Value="{StaticResource ButtonBackgroundBrush}"/>
+                    <Setter TargetName="SelectionBorder" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Page.Resources>
+
+    <!-- Main Layout - Full width bar at bottom -->
+    <Grid VerticalAlignment="Bottom">
+        <Grid.Visibility>
+            <Binding Path="visible">
+                <Binding.Converter>
+                    <BooleanToVisibilityConverter/>
+                </Binding.Converter>
+            </Binding>
+        </Grid.Visibility>
+
+        <!-- Background Bar -->
+        <Border Background="{StaticResource BackgroundBrush}"
+                Height="600"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,2,0,0">
+
+            <!-- Horizontal ScrollViewer for tower list -->
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                          VerticalScrollBarVisibility="Disabled"
+                          PanningMode="HorizontalOnly"
+                          Padding="48,36">
+
+                <!-- Tower Items List -->
+                <ItemsControl ItemsSource="{Binding items}"
+                              ItemsPanel="{StaticResource HorizontalPanel}"
+                              ItemTemplate="{StaticResource TowerItemTemplate}"
+                              ItemContainerStyle="{StaticResource TowerItemContainerStyle}"
+                              VerticalAlignment="Center"/>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Page>

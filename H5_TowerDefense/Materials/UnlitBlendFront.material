@@ -1,0 +1,27 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "UnlitBlendFront",
+    "attributes": [
+        {
+            "name": "RenderGroup",
+            "value": {
+                "type": "String",
+                "stringValue": "translucent"
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "18157220368666114631",
+        "targetId": "2708897769"
+    },
+    "baseMaterialAssetId": {
+        "packageOrRemoteId": "25333092833033243",
+        "ingestionId": "8122370046246016572",
+        "targetId": "157013062"
+    }
+}

@@ -1,0 +1,126 @@
+import { Component, EventService, TransformComponent, Color, ColorComponent } from 'meta/worlds';
+import { component, subscribe } from 'meta/worlds';
+import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
+import type { OnWorldUpdateEventPayload } from 'meta/worlds';
+import { NetworkingService } from 'meta/worlds';
+import { Events } from '../Types';
+import { HP_SCALE_PER_WAVE } from '../Constants';
+import { PathService } from '../Services/PathService';
+import { EnemyService } from '../Services/EnemyService';
+import { ResourceService } from '../Services/ResourceService';
+
+@component()
+export class EnemyController extends Component {
+  private _transform!: TransformComponent;
+  private _enemyId: number = -1;
+  private _defId: string = '';
+
+  private _hp: number = 0;
+  private _speed: number = 0;
+  private _reward: number = 0;
+  private _alive: boolean = false;
+
+  // Waypoint-segment tracking — enemies re-read the path at each waypoint boundary.
+  private _wpIndex: number = 0; // current sub-path index (0 = wp[0]→wp[1], …)
+  private _subT: number = 0;    // distance traveled within the current sub-path
+
+  @subscribe(OnEntityStartEvent)
+  onStart(): void {
+    if (NetworkingService.get().isServerContext()) return;
+    this._transform = this.entity.getComponent(TransformComponent)!;
+  }
+
+  @subscribe(Events.InitEnemy)
+  onInit(p: Events.InitEnemyPayload): void {
+    const def = EnemyService.get().find(p.defId);
+    if (!def) return;
+
+    const hpMult = 1 + p.waveIndex * HP_SCALE_PER_WAVE;
+
+    this._defId   = p.defId;
+    this._hp      = Math.round(def.hp * hpMult);
+    this._speed   = def.speed;
+    this._reward  = def.reward;
+    this._wpIndex = 0;
+    this._subT    = 0;
+    this._alive   = true;
+
+    const startPos = PathService.get().getWorldPositionInSubPath(0, 0);
+    this._transform.worldPosition = startPos;
+    this._enemyId = EnemyService.get().register(this.entity, this._defId, this._hp, startPos.x, startPos.z);
+
+    const col = def.color;
+    const color = new Color(col.r, col.g, col.b, 1);
+    for (const child of this.entity.getChildrenWithComponent(ColorComponent)) {
+      const c = child.getComponent(ColorComponent);
+      if (c) c.color = color;
+    }
+  }
+
+  @subscribe(Events.TakeDamage)
+  onTakeDamage(p: Events.TakeDamagePayload): void {
+    if (!this._alive || p.enemyId !== this._enemyId) return;
+
+    this._hp -= p.damage;
+    const pos = this._transform.worldPosition;
+    EnemyService.get().update(this._enemyId, pos.x, pos.z, PathService.get().getGlobalT(this._wpIndex, this._subT), this._hp);
+
+
+    if (this._hp <= 0) this._die();
+  }
+
+  @subscribe(OnWorldUpdateEvent)
+  onUpdate(p: OnWorldUpdateEventPayload): void {
+    if (!this._alive) return;
+
+    const dt = p.deltaTime;
+    const pathService = PathService.get();
+    this._subT += this._speed * (EnemyService.get().get(this._enemyId)?.speedFactor ?? 1) * dt;
+
+    // Advance through completed sub-paths — this is where the enemy reads the updated path.
+    const waypointCount = pathService.getWaypointCount();
+    while (this._wpIndex < waypointCount - 1) {
+      const subLen = pathService.getSubPathLength(this._wpIndex);
+      if (this._subT < subLen) break;
+      this._subT -= subLen;
+      this._wpIndex++;
+    }
+
+    if (this._wpIndex >= waypointCount - 1) {
+      this._reachEnd();
+      return;
+    }
+
+    const pos = pathService.getWorldPositionInSubPath(this._wpIndex, this._subT);
+    this._transform.worldPosition = pos;
+    EnemyService.get().update(this._enemyId, pos.x, pos.z, pathService.getGlobalT(this._wpIndex, this._subT), this._hp);
+  }
+
+  private _die(): void {
+    this._alive = false;
+    EnemyService.get().unregister(this._enemyId);
+    ResourceService.get().earn(this._reward);
+
+    // Capture position before destroying entity
+    const pos = this._transform.worldPosition;
+
+    const p = new Events.EnemyDiedPayload();
+    p.enemyId = this._enemyId;
+    p.reward  = this._reward;
+    p.worldX  = pos.x;
+    p.worldZ  = pos.z;
+    EventService.sendLocally(Events.EnemyDied, p);
+    this.entity.destroy();
+  }
+
+  private _reachEnd(): void {
+    this._alive = false;
+    EnemyService.get().unregister(this._enemyId);
+    ResourceService.get().loseLife();
+
+    const p = new Events.EnemyReachedEndPayload();
+    p.enemyId = this._enemyId;
+    EventService.sendLocally(Events.EnemyReachedEnd, p);
+    this.entity.destroy();
+  }
+}

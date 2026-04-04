@@ -1,0 +1,262 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+
+    <Page.Resources>
+        <!-- Colors (matching TowerShop) -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#1a1a2e"/>
+        <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#2a2a4a"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#3a3a5a"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ffffff"/>
+        <SolidColorBrush x:Key="TextDisabledBrush" Color="#555577"/>
+        <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
+        <SolidColorBrush x:Key="SellButtonBrush" Color="#8B0000"/>
+    </Page.Resources>
+
+    <!-- Main Layout - Full width bar at bottom, visibility bound to ViewModel -->
+    <Grid VerticalAlignment="Bottom">
+        <Grid.Visibility>
+            <Binding Path="visible">
+                <Binding.Converter>
+                    <BooleanToVisibilityConverter/>
+                </Binding.Converter>
+            </Binding>
+        </Grid.Visibility>
+
+        <!-- Background Bar -->
+        <Border Background="{StaticResource BackgroundBrush}"
+                Height="600"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,2,0,0">
+
+            <!-- 3-Column Layout -->
+            <Grid Margin="48,36">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column - Sell Button -->
+                <Button x:Name="SellButton"
+                        Grid.Column="0"
+                        Command="{Binding Path=events.sellTowerTap}"
+                        MinWidth="360"
+                        MinHeight="360"
+                        Padding="36,30"
+                        Background="{StaticResource SellButtonBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Sell Label -->
+                        <TextBlock Grid.Row="0"
+                                   Text="SELL"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="54"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,18"/>
+
+                        <!-- Sell Value with Gold Icon -->
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Image Source="Textures/gold_icon.png"
+                                   Width="72"
+                                   Height="72"
+                                   Margin="0,0,18,0"
+                                   VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding sellValue, StringFormat=F0}"
+                                       Foreground="{StaticResource GoldBrush}"
+                                       FontSize="48"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <!-- Center Column - Upgrade 1 -->
+                <Button x:Name="Upgrade1Button"
+                        Grid.Column="1"
+                        Command="{Binding Path=events.upgradeTowerTap}"
+                        CommandParameter="0"
+                        MinWidth="360"
+                        MinHeight="360"
+                        Padding="36,30"
+                        Background="{StaticResource ButtonBackgroundBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Upgrade 1 Name -->
+                        <TextBlock x:Name="Upgrade1Name"
+                                   Grid.Row="0"
+                                   Text="{Binding upgrade1Name}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="54"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,18"/>
+
+                        <!-- Upgrade 1 Cost with Gold Icon (hidden when maxed) -->
+                        <StackPanel x:Name="Upgrade1CostPanel"
+                                    Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Image Source="Textures/gold_icon.png"
+                                   Width="72"
+                                   Height="72"
+                                   Margin="0,0,18,0"
+                                   VerticalAlignment="Center"/>
+                            <TextBlock x:Name="Upgrade1CostText"
+                                       Text="{Binding upgrade1Cost, StringFormat=F0}"
+                                       Foreground="{StaticResource GoldBrush}"
+                                       FontSize="48"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- MAX label (shown when maxed) -->
+                        <TextBlock x:Name="Upgrade1MaxLabel"
+                                   Grid.Row="1"
+                                   Text="MAX"
+                                   Foreground="{StaticResource TextDisabledBrush}"
+                                   FontSize="48"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   Visibility="Collapsed"/>
+                    </Grid>
+                </Button>
+
+                <!-- Right Column - Upgrade 2 -->
+                <Button x:Name="Upgrade2Button"
+                        Grid.Column="2"
+                        Command="{Binding Path=events.upgradeTowerTap}"
+                        CommandParameter="1"
+                        MinWidth="360"
+                        MinHeight="360"
+                        Padding="36,30"
+                        Background="{StaticResource ButtonBackgroundBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Upgrade 2 Name -->
+                        <TextBlock x:Name="Upgrade2Name"
+                                   Grid.Row="0"
+                                   Text="{Binding upgrade2Name}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="54"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,18"/>
+
+                        <!-- Upgrade 2 Cost with Gold Icon (hidden when maxed) -->
+                        <StackPanel x:Name="Upgrade2CostPanel"
+                                    Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Image Source="Textures/gold_icon.png"
+                                   Width="72"
+                                   Height="72"
+                                   Margin="0,0,18,0"
+                                   VerticalAlignment="Center"/>
+                            <TextBlock x:Name="Upgrade2CostText"
+                                       Text="{Binding upgrade2Cost, StringFormat=F0}"
+                                       Foreground="{StaticResource GoldBrush}"
+                                       FontSize="48"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- MAX label (shown when maxed) -->
+                        <TextBlock x:Name="Upgrade2MaxLabel"
+                                   Grid.Row="1"
+                                   Text="MAX"
+                                   Foreground="{StaticResource TextDisabledBrush}"
+                                   FontSize="48"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   Visibility="Collapsed"/>
+                    </Grid>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- DataTriggers for Upgrade 1 state -->
+        <b:Interaction.Triggers>
+            <!-- Upgrade 1: affordable -->
+            <b:DataTrigger Binding="{Binding upgrade1State}" Value="affordable">
+                <b:ChangePropertyAction TargetName="Upgrade1Button" PropertyName="Opacity" Value="1.0"/>
+                <b:ChangePropertyAction TargetName="Upgrade1Name" PropertyName="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade1CostText" PropertyName="Foreground" Value="{StaticResource GoldBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade1CostPanel" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="Upgrade1MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
+            </b:DataTrigger>
+
+            <!-- Upgrade 1: too_expensive -->
+            <b:DataTrigger Binding="{Binding upgrade1State}" Value="too_expensive">
+                <b:ChangePropertyAction TargetName="Upgrade1Button" PropertyName="Opacity" Value="0.5"/>
+                <b:ChangePropertyAction TargetName="Upgrade1Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade1CostText" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade1CostPanel" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="Upgrade1MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
+            </b:DataTrigger>
+
+            <!-- Upgrade 1: maxed -->
+            <b:DataTrigger Binding="{Binding upgrade1State}" Value="maxed">
+                <b:ChangePropertyAction TargetName="Upgrade1Button" PropertyName="Opacity" Value="0.5"/>
+                <b:ChangePropertyAction TargetName="Upgrade1Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade1CostPanel" PropertyName="Visibility" Value="Collapsed"/>
+                <b:ChangePropertyAction TargetName="Upgrade1MaxLabel" PropertyName="Visibility" Value="Visible"/>
+            </b:DataTrigger>
+
+            <!-- Upgrade 2: affordable -->
+            <b:DataTrigger Binding="{Binding upgrade2State}" Value="affordable">
+                <b:ChangePropertyAction TargetName="Upgrade2Button" PropertyName="Opacity" Value="1.0"/>
+                <b:ChangePropertyAction TargetName="Upgrade2Name" PropertyName="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade2CostText" PropertyName="Foreground" Value="{StaticResource GoldBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade2CostPanel" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="Upgrade2MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
+            </b:DataTrigger>
+
+            <!-- Upgrade 2: too_expensive -->
+            <b:DataTrigger Binding="{Binding upgrade2State}" Value="too_expensive">
+                <b:ChangePropertyAction TargetName="Upgrade2Button" PropertyName="Opacity" Value="0.5"/>
+                <b:ChangePropertyAction TargetName="Upgrade2Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade2CostText" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade2CostPanel" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="Upgrade2MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
+            </b:DataTrigger>
+
+            <!-- Upgrade 2: maxed -->
+            <b:DataTrigger Binding="{Binding upgrade2State}" Value="maxed">
+                <b:ChangePropertyAction TargetName="Upgrade2Button" PropertyName="Opacity" Value="0.5"/>
+                <b:ChangePropertyAction TargetName="Upgrade2Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
+                <b:ChangePropertyAction TargetName="Upgrade2CostPanel" PropertyName="Visibility" Value="Collapsed"/>
+                <b:ChangePropertyAction TargetName="Upgrade2MaxLabel" PropertyName="Visibility" Value="Visible"/>
+            </b:DataTrigger>
+        </b:Interaction.Triggers>
+    </Grid>
+</Page>
