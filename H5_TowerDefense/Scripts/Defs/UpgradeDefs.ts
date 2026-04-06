@@ -1,3 +1,15 @@
+/**
+ * UpgradeDefs.ts — Upgrade atom catalog and binary tree builder.
+ *
+ * tree(t1, t2, t3): builds a readonly [IUpgradeNode, IUpgradeNode] from flat arrays.
+ *   t1: 2 root atoms, t2: 2 pairs (one per root), t3: 4 pairs (one per t2 node).
+ *   Each node's apply() is a pure function (ITowerStats) → ITowerStats.
+ * Upg: named atom constructors — each takes a cost and returns an Atom.
+ *   rate: fireRate × 2 | damage: damage × 2 | range: +2.0 world units
+ *   splash: splashRadius + 0.8 | slowFactor: ×0.7 (min 0.15) | slowDuration: +1.0s
+ *   crit: critChance + 0.20 (max 0.80) — arrow/cannon only, handled by CritService.
+ * To add a new atom: add a new entry to Upg, handle its props key in a pipeline service.
+ */
 import type { IUpgradeNode, ITowerStats } from '../Types';
 
 // ── Atom type ─────────────────────────────────────────────────────────────────

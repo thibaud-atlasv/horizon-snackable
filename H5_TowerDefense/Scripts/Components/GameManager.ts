@@ -1,3 +1,16 @@
+/**
+ * GameManager — Top-level game orchestrator. Attached to a scene entity in space.hstf.
+ *
+ * Responsibilities:
+ *   - _startGame(): prewarms all pools, forces service instantiation, starts first wave.
+ *   - onUpdate(): drives WaveService.tick(dt) each frame while _running.
+ *   - onEnemyReachedEnd(): calls _endGame(false) when lives reach 0.
+ *   - onPhaseChanged(): calls _endGame(true) on Victory phase.
+ *   - onRestart(): resets resources and restarts the wave sequence.
+ *   - _endGame(): sets _running=false, fires GameOver event (once, guarded).
+ * Services are force-instantiated here to control initialization order.
+ * Ground entity is linked via @property() in the editor to apply GROUND_COLOR at start.
+ */
 import { Component, EventService, ColorComponent, Color } from 'meta/worlds';
 import { component, subscribe, property } from 'meta/worlds';
 import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
@@ -7,7 +20,6 @@ import { Events, GamePhase } from '../Types';
 import { GROUND_COLOR, hexColor } from '../Constants';
 import { WaveService } from '../Services/WaveService';
 import { ResourceService } from '../Services/ResourceService';
-import { SplashSystem } from '../Services/SplashSystem';
 import { SlowService } from '../Services/SlowService';
 import { PlacementService } from '../Services/PlacementService';
 import { PathService } from '../Services/PathService';
@@ -15,6 +27,7 @@ import { ProjectilePool } from '../Services/ProjectilePool';
 import { HealthBarService } from '../Services/HealthBarService';
 import { FloatingTextService } from '../Services/FloatingTextService';
 import { CritService } from '../Services/CritService';
+import { SplashSystem } from '../Services/SplashSystem';
 
 @component()
 export class GameManager extends Component {
@@ -30,8 +43,7 @@ export class GameManager extends Component {
       const gc = hexColor(GROUND_COLOR);
       if (c) c.color = new Color(gc.r, gc.g, gc.b);
     }
-    SplashSystem.get(); // force instantiation so it registers its HitService modifier
-    SlowService.get();  // force instantiation so it subscribes to TakeDamage
+    SlowService.get();
     this._startGame();
   }
 
@@ -66,24 +78,24 @@ export class GameManager extends Component {
 
   private _startGame(): void {
     this._running = true;
-    PathService.get().prewarm();
-    ProjectilePool.get().prewarm();
-    HealthBarService.get().prewarm();
-    PlacementService.get().prewarm();
-    FloatingTextService.get().prewarm();
     CritService.get();
+    SplashSystem.get();
+    void Promise.all([
+      PathService.get().prewarm(),
+      ProjectilePool.get().prewarm(),
+      HealthBarService.get().prewarm(),
+      PlacementService.get().prewarm(),
+      FloatingTextService.get().prewarm(),
+    ]);
     ResourceService.get().reset();
     WaveService.get().startGame();
   }
 
   private _endGame(won: boolean): void {
+    if (!this._running) return;
     this._running = false;
     const p = new Events.GameOverPayload();
     p.won = won;
     EventService.sendLocally(Events.GameOver, p);
-
-    const phaseP = new Events.GamePhaseChangedPayload();
-    phaseP.phase = won ? GamePhase.Victory : GamePhase.GameOver;
-    EventService.sendLocally(Events.GamePhaseChanged, phaseP);
   }
 }

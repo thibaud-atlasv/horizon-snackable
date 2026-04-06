@@ -1,3 +1,13 @@
+/**
+ * HealthBarController — Animates a pooled health bar entity above an enemy.
+ *
+ * Attached to: pooled health bar entities (managed by HealthBarService).
+ * onUpdateHealthBar (UpdateHealthBar event targeted to this entity): positions the bar
+ *   at worldX/Y/Z + HEALTHBAR_OFFSET_X ahead of enemy, scales fill width by hp/maxHp.
+ *   Green → yellow → red color gradient based on remaining HP ratio.
+ * onParkHealthBar (ParkHealthBar event targeted to this entity): moves bar off-screen.
+ * Health bars are assigned and released by HealthBarService via targeted events.
+ */
 import { Component, TransformComponent, ColorComponent, Color, Vec3 } from 'meta/worlds';
 import { component, property, subscribe } from 'meta/worlds';
 import { OnEntityStartEvent } from 'meta/worlds';

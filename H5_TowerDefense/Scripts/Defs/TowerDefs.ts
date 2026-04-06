@@ -1,3 +1,13 @@
+/**
+ * TowerDefs.ts — Static data table for all tower types and their upgrade trees.
+ *
+ * Pure data — no side effects, no service calls.
+ * To add a new tower: add an entry to TOWER_DEFS, declare its template in Assets.ts.
+ * Upgrade trees are built with tree() from UpgradeDefs. Cost rule: T1≤base, T2≤1.5×, T3≤3×.
+ * Design constraints: no splash on arrow, no slow on non-frost, crit on arrow (×2/path max)
+ *   and cannon (×1/path), range on laser max once per path.
+ * Read by TowerService.onReady() into its internal catalog.
+ */
 import type { ITowerDef } from '../Types';
 import { Assets } from '../Assets';
 import { Upg, tree } from './UpgradeDefs';
@@ -10,7 +20,7 @@ export const TOWER_DEFS: ITowerDef[] = [
   {
     id: 'arrow', name: 'Arrow', cost: 50,
     stats: { damage: 10, range: 3.5, fireRate: 1.5, projectileSpeed: 12,
-      props: { projectileColor: { r: 0.18, g: 0.80, b: 0.44 }, projectileScale: 0.10 } },
+      props: { projectileColor: { r: 0.18, g: 0.80, b: 0.44 }, projectileScale: 0.10, critMultiplier:2, critChance: 0.2 } },
     template: Assets.Arrow,
     upgrades: tree(
       [Upg.range(50),    Upg.crit(50)],
@@ -59,7 +69,7 @@ export const TOWER_DEFS: ITowerDef[] = [
   {
     id: 'laser', name: 'Laser', cost: 200,
     stats: { damage: 8, range: 5.0, fireRate: 5.0, projectileSpeed: 9,
-      props: { projectileColor: { r: 0.61, g: 0.35, b: 0.71 }, projectileScale: 0.07 } },
+      props: { projectileColor: { r: 0.61, g: 0.35, b: 0.71 }, projectileScale: 0.1 } },
     template: Assets.Laser,
     upgrades: tree(
       [Upg.rate(175),    Upg.damage(175)],

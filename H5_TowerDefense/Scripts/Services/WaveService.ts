@@ -1,3 +1,16 @@
+/**
+ * WaveService — Wave state machine and enemy spawn sequencer.
+ *
+ * State machine: Idle → Build → Wave → WaveClear → Build → … → Victory
+ * startGame(): transitions from Idle to Build phase.
+ * tick(dt): called every frame by GameManager. Drives timers and spawn queue.
+ * Build phase lasts WAVE_BUILD_DURATION seconds, then auto-starts the wave.
+ * Wave phase spawns enemies at ENEMY_SPAWN_INTERVAL intervals from the current wave def.
+ * WaveClear phase waits WAVE_CLEAR_DURATION after last enemy dies, then loops or fires Victory.
+ * Sends: GamePhaseChanged, WaveStarted, WaveCompleted, InitEnemy (via EnemyService.spawn).
+ * Awards WAVE_BONUS_GOLD at end of each wave via ResourceService.
+ * Resets on RestartGame.
+ */
 import { Service, EventService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';

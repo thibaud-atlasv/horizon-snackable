@@ -40,7 +40,7 @@ All events declared in `Types.ts` → `namespace Events`. Never elsewhere.
 
 ## Pipeline Pattern
 
-`HitService` and `DamageService` are reducer pipelines. A modifier is a pure function `ctx → ctx`.
+`HitService` is a reducer pipeline. A modifier is a pure function `ctx → ctx`.
 New mechanics self-register in `onReady()`:
 
 ```typescript

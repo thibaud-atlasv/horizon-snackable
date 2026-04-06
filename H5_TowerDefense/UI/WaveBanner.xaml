@@ -1,0 +1,36 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Background="Transparent">
+
+    <!-- Wave Banner - Centered overlay for wave announcements -->
+    <Grid HorizontalAlignment="Center" 
+          VerticalAlignment="Center"
+          Opacity="{Binding Path=opacity}">
+        
+        <!-- Visibility controlled by boolean binding -->
+        <Grid.Visibility>
+            <Binding Path="visible">
+                <Binding.Converter>
+                    <BooleanToVisibilityConverter/>
+                </Binding.Converter>
+            </Binding>
+        </Grid.Visibility>
+
+        <!-- Banner Panel -->
+        <Border Background="#CC1a1a2e"
+                CornerRadius="16"
+                Padding="80,40"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                MinWidth="500">
+
+            <!-- Wave Text -->
+            <TextBlock Text="{Binding Path=waveText}"
+                       FontSize="96"
+                       FontWeight="Bold"
+                       Foreground="#e67e22"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+        </Border>
+    </Grid>
+</Page>

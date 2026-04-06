@@ -191,7 +191,8 @@
                         },
                         "data": {
                             "cameraAnchor": "93b43a13-fc53-44a2-b053-4cdee96349e9",
-                            "cameraFov": 20.0
+                            "cameraFov": 20.0,
+                            "initDelay": 0.0
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -214,6 +215,282 @@
             "attributes": []
         },
         {
+            "id": "f13514f0-27f7-40a8-83c2-97e74008556c",
+            "name": "UI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": 5.596508979797363,
+                                "y": 1.5374030226666947e-7,
+                                "z": -3.998673439025879
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "4c1e1a40-31ca-449f-bef5-87095211b019",
+            "name": "GameHud",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": -5.596508979797363,
+                                "y": -1.5374030226666947e-7,
+                                "z": 3.998673439025879
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "25333092833033243",
+                                "ingestionId": "1163505773543164790",
+                                "targetId": "2149638574"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "GameHudController",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "25333092833033243",
+                            "ingestionId": "17103954622872723756",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "2c766490-a569-4461-b5e9-65b342c045cc",
+            "name": "GameOverScreenUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": -5.596508979797363,
+                                "y": -0.028182728216052057,
+                                "z": 0.998673677444458
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "25333092833033243",
+                                "ingestionId": "10428394446689991341",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true,
+                            "renderOrderOffset": 100
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "GameOverScreenHud",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "25333092833033243",
+                            "ingestionId": "15296766258014742423",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "3ab108d6-b9bb-48b0-9a39-8748b405d4a8",
+            "name": "TowerUpgradeMenuUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": -5.596508979797363,
+                                "y": -0.028182728216052057,
+                                "z": 0.998673677444458
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "25333092833033243",
+                                "ingestionId": "13556288631819529011",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "TowerUpgradeMenuHud",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "25333092833033243",
+                            "ingestionId": "609740852708442460",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "21e29d6a-7194-4a4b-9b78-d40e363cfcf7",
+            "name": "WaveBannerUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": -5.596508979797363,
+                                "y": -1.5374030226666947e-7,
+                                "z": 3.998673439025879
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "25333092833033243",
+                                "ingestionId": "5661597941959440209",
+                                "targetId": "2149638574"
+                            },
+                            "renderOrderOffset": 200
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "WaveBannerHud",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "25333092833033243",
+                            "ingestionId": "12620709719329681919",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "37eb09a1-4280-4844-b060-e8607080d129",
+            "name": "TowerShopUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": -5.596508979797363,
+                                "y": -1.5374030226666947e-7,
+                                "z": 3.998673439025879
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "25333092833033243",
+                                "ingestionId": "7104944567618298833",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "TowerShopHud",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "25333092833033243",
+                            "ingestionId": "14615937440026964852",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
             "id": "93b43a13-fc53-44a2-b053-4cdee96349e9",
             "name": "Camera",
             "components": [
@@ -223,7 +500,7 @@
                         "version": 2,
                         "data": {
                             "localPosition": {
-                                "x": -13.0,
+                                "x": -12.0,
                                 "y": 20.0,
                                 "z": 0.0
                             },
@@ -256,6 +533,81 @@
             "attributes": []
         },
         {
+            "id": "bcc2641a-d829-4725-807b-bbafc40385a7",
+            "name": "Env",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": 5.596508979797363,
+                                "y": 1.5374030226666947e-7,
+                                "z": -3.998673439025879
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "65f20434-0ed4-421c-a98b-78a04a7c0f86",
+            "name": "SpawnTunnel_remeshed",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.294863224029541,
+                                "y": 0.5,
+                                "z": 1.748673439025879
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": -1.5707964897155762,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "25333092833033243",
+                                "ingestionId": "6835855698066695504",
+                                "targetId": "3500183637"
+                            },
+                            "isVisibleSelf": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
             "id": "5c3c6afd-4be2-4e0f-a478-96f923194a09",
             "name": "Ground",
             "components": [
@@ -265,9 +617,9 @@
                         "version": 2,
                         "data": {
                             "localPosition": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "x": -5.596508979797363,
+                                "y": -1.5374030226666947e-7,
+                                "z": 3.998673439025879
                             },
                             "localRotation": {
                                 "x": 0.0,
@@ -336,91 +688,6 @@
                 }
             ],
             "attributes": []
-        },
-        {
-            "id": "37eb09a1-4280-4844-b060-e8607080d129",
-            "name": "TowerShopUI",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
-                        "data": {
-                            "customUiType": "ScreenSpace",
-                            "xaml": {
-                                "packageOrRemoteId": "25333092833033243",
-                                "ingestionId": "7104944567618298833",
-                                "targetId": "2149638574"
-                            },
-                            "isInteractable": true
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "TowerShopHud",
-                        "definitionAsset": {
-                            "packageOrRemoteId": "25333092833033243",
-                            "ingestionId": "14615937440026964852",
-                            "targetId": "4237980480"
-                        },
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
-        },
-        {
-            "id": "4c1e1a40-31ca-449f-bef5-87095211b019",
-            "name": "GameHud",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
-                        "data": {
-                            "customUiType": "ScreenSpace",
-                            "xaml": {
-                                "packageOrRemoteId": "25333092833033243",
-                                "ingestionId": "1163505773543164790",
-                                "targetId": "2149638574"
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "GameHudController",
-                        "definitionAsset": {
-                            "packageOrRemoteId": "25333092833033243",
-                            "ingestionId": "17103954622872723756",
-                            "targetId": "4237980480"
-                        },
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
         }
     ],
     "relationships": [
@@ -446,23 +713,53 @@
         },
         {
             "relationshipType": "RelationChildOf",
+            "source": "f13514f0-27f7-40a8-83c2-97e74008556c",
+            "destination": "2b1c87ce-337d-4e7a-b041-e619d6fd4b3f"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "4c1e1a40-31ca-449f-bef5-87095211b019",
+            "destination": "f13514f0-27f7-40a8-83c2-97e74008556c"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "2c766490-a569-4461-b5e9-65b342c045cc",
+            "destination": "f13514f0-27f7-40a8-83c2-97e74008556c"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "3ab108d6-b9bb-48b0-9a39-8748b405d4a8",
+            "destination": "f13514f0-27f7-40a8-83c2-97e74008556c"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "21e29d6a-7194-4a4b-9b78-d40e363cfcf7",
+            "destination": "f13514f0-27f7-40a8-83c2-97e74008556c"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "37eb09a1-4280-4844-b060-e8607080d129",
+            "destination": "f13514f0-27f7-40a8-83c2-97e74008556c"
+        },
+        {
+            "relationshipType": "RelationChildOf",
             "source": "93b43a13-fc53-44a2-b053-4cdee96349e9",
             "destination": "2b1c87ce-337d-4e7a-b041-e619d6fd4b3f"
         },
         {
             "relationshipType": "RelationChildOf",
+            "source": "bcc2641a-d829-4725-807b-bbafc40385a7",
+            "destination": "82caeea0-b9be-4add-af69-8e4af059d43e"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "65f20434-0ed4-421c-a98b-78a04a7c0f86",
+            "destination": "bcc2641a-d829-4725-807b-bbafc40385a7"
+        },
+        {
+            "relationshipType": "RelationChildOf",
             "source": "5c3c6afd-4be2-4e0f-a478-96f923194a09",
-            "destination": "82caeea0-b9be-4add-af69-8e4af059d43e"
-        },
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "37eb09a1-4280-4844-b060-e8607080d129",
-            "destination": "82caeea0-b9be-4add-af69-8e4af059d43e"
-        },
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "4c1e1a40-31ca-449f-bef5-87095211b019",
-            "destination": "82caeea0-b9be-4add-af69-8e4af059d43e"
+            "destination": "bcc2641a-d829-4725-807b-bbafc40385a7"
         }
     ]
 }

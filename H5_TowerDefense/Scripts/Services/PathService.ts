@@ -1,3 +1,14 @@
+/**
+ * PathService — Waypoint path management, world coordinate conversion, and path tile spawning.
+ *
+ * Reads PATH_WAYPOINTS_LEVEL_0 from LevelDefs in onReady(). Builds ISubPath segments.
+ * prewarm(): spawns one scaled tile entity per path segment (not per cell) for performance.
+ * getWorldPositionInSubPath(wpIndex, subT): interpolates world position along a segment.
+ * getGlobalT(wpIndex, subT): converts segment position to global path progress (used for targeting).
+ * isPathCell(col, row): checks if a grid cell is occupied by the path (blocks tower placement).
+ * cellToWorld(col, row) / worldToCell(x, z): converts between grid coords and world coords.
+ * Note: col → Z axis, row → X axis (row 0 = top of screen).
+ */
 import { Service, Vec3, WorldService, NetworkMode, Quaternion, NetworkingService, Color, ColorComponent } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
@@ -36,20 +47,26 @@ export class PathService extends Service {
 
   async prewarm(): Promise<void> {
     if (NetworkingService.get().isServerContext()) return;
-    for (const k of this._pathCells) {
-      const col = Math.floor(k / 100);
-      const row = k % 100;
-      const wp  = this.cellToWorld(col, row);
+    const pc = hexColor(PATH_CELL_COLOR);
+    const tileColor = new Color(pc.r, pc.g, pc.b);
+
+    await Promise.all(this._subPaths.map(async (sub) => {
+      const seg = sub.segments[0];
+      const cx = (seg.startX + seg.endX) / 2;
+      const cz = (seg.startZ + seg.endZ) / 2;
+      // extend by CELL_SIZE to fully cover both endpoint cells
+      const scaleX = Math.abs(seg.endX - seg.startX) + CELL_SIZE;
+      const scaleZ = Math.abs(seg.endZ - seg.startZ) + CELL_SIZE;
+
       const tile = await this._worldService.spawnTemplate({
         templateAsset: Assets.PathCell,
-        position: new Vec3(wp.x, GROUND_Y + 0.01, wp.z),
+        position: new Vec3(cx, GROUND_Y + 0.01, cz),
         rotation: Quaternion.identity,
-        scale: new Vec3(CELL_SIZE, 1, CELL_SIZE),
+        scale: new Vec3(scaleX, 1, scaleZ),
         networkMode: NetworkMode.LocalOnly,
       }).catch((e: unknown) => { console.error(e); return null; });
+
       if (tile) {
-        const pc = hexColor(PATH_CELL_COLOR);
-        const tileColor = new Color(pc.r, pc.g, pc.b);
         for (const child of tile.getChildren()) {
           const c = child.getComponent(ColorComponent);
           if (c) c.color = tileColor;
@@ -57,7 +74,7 @@ export class PathService extends Service {
         const c = tile.getComponent(ColorComponent);
         if (c) c.color = tileColor;
       }
-    }
+    }));
   }
 
   get totalLength(): number { return this._totalLength; }

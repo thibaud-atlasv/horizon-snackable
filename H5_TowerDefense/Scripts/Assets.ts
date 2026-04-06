@@ -17,10 +17,10 @@ export namespace Assets {
   export const Laser  = new TemplateAsset('@Templates/Towers/VoxelLaserTower.hstf');
 
   // ── Enemies ───────────────────────────────────────────────────────────────
-  export const EnemyBasic = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
-  export const EnemyFast  = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
-  export const EnemyTank  = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
-  export const EnemyBoss  = new TemplateAsset('@Templates/Enemies/Sphere.hstf');
+  export const EnemyBasic = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
+  export const EnemyFast  = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
+  export const EnemyTank  = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
+  export const EnemyBoss  = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
 
   // ── Shared ────────────────────────────────────────────────────────────────
   export const Projectile      = new TemplateAsset('@Templates/Projectile.hstf');

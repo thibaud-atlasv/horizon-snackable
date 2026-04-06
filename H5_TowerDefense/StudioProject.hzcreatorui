@@ -1,0 +1,3 @@
+<Project>
+  <StartupDocument>UI/GameHud.xaml</StartupDocument>
+</Project>

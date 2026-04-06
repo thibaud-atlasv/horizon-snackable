@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "entities": [
         {
             "id": "2e7f0eb8-c407-4566-b3ea-73d31d752c49",
@@ -8,7 +8,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -53,7 +53,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": -2.3841858265427619e-8,
@@ -91,24 +91,6 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
-                        "version": 8,
-                        "data": {
-                            "type": "StaticCollision"
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
                         "class": "horizon::platform_api::ColorPlatformComponent",
                         "version": 2,
                         "data": {
@@ -129,9 +111,9 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "24407058055595655",
-                                    "ingestionId": "4707432788469128401",
-                                    "targetId": "2197070581"
+                                    "packageOrRemoteId": "25333092833033243",
+                                    "ingestionId": "12134158875616216341",
+                                    "targetId": "157013062"
                                 }
                             ]
                         }
@@ -148,7 +130,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": -2.3841858265427619e-8,
@@ -186,24 +168,6 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
-                        "version": 8,
-                        "data": {
-                            "type": "StaticCollision"
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
                         "class": "horizon::platform_api::ColorPlatformComponent",
                         "version": 2,
                         "data": {
@@ -224,9 +188,9 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "24407058055595655",
-                                    "ingestionId": "4707432788469128401",
-                                    "targetId": "2197070581"
+                                    "packageOrRemoteId": "25333092833033243",
+                                    "ingestionId": "12134158875616216341",
+                                    "targetId": "157013062"
                                 }
                             ]
                         }
@@ -243,7 +207,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": -2.3841858265427619e-8,
@@ -286,24 +250,6 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
-                        "version": 8,
-                        "data": {
-                            "type": "StaticCollision"
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
                         "class": "horizon::platform_api::ColorPlatformComponent",
                         "version": 2,
                         "data": {
@@ -324,9 +270,9 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "24407058055595655",
-                                    "ingestionId": "4707432788469128401",
-                                    "targetId": "2197070581"
+                                    "packageOrRemoteId": "25333092833033243",
+                                    "ingestionId": "12134158875616216341",
+                                    "targetId": "157013062"
                                 }
                             ]
                         }
@@ -343,7 +289,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": -0.0000012797013368981425,
@@ -386,24 +332,6 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
-                        "version": 8,
-                        "data": {
-                            "type": "StaticCollision"
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
                         "class": "horizon::platform_api::ColorPlatformComponent",
                         "version": 2,
                         "data": {
@@ -424,121 +352,12 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "24407058055595655",
-                                    "ingestionId": "4707432788469128401",
-                                    "targetId": "2197070581"
+                                    "packageOrRemoteId": "25333092833033243",
+                                    "ingestionId": "12134158875616216341",
+                                    "targetId": "157013062"
                                 }
                             ]
                         }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
-        },
-        {
-            "id": "f37b5a8a-5bbc-4512-b378-e53eb21e2556",
-            "name": "TowerUpgradeMenuUI",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
-                        "data": {
-                            "localPosition": {
-                                "x": -2.3841858265427619e-8,
-                                "y": -0.02818257361650467,
-                                "z": -2.999999761581421
-                            },
-                            "localScale": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
-                        "data": {
-                            "customUiType": "ScreenSpace",
-                            "xaml": {
-                                "packageOrRemoteId": "25333092833033243",
-                                "ingestionId": "13556288631819529011",
-                                "targetId": "2149638574"
-                            },
-                            "isInteractable": true
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "TowerUpgradeMenuHud",
-                        "definitionAsset": {
-                            "packageOrRemoteId": "25333092833033243",
-                            "ingestionId": "609740852708442460",
-                            "targetId": "4237980480"
-                        },
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
-        },
-        {
-            "id": "42c58310-e11f-4ba0-9681-b86a7886c413",
-            "name": "GameOverScreenUI",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
-                        "data": {
-                            "localPosition": {
-                                "x": -2.3841858265427619e-8,
-                                "y": -0.02818257361650467,
-                                "z": -2.999999761581421
-                            },
-                            "localScale": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
-                        "data": {
-                            "customUiType": "ScreenSpace",
-                            "xaml": {
-                                "packageOrRemoteId": "25333092833033243",
-                                "ingestionId": "10428394446689991341",
-                                "targetId": "2149638574"
-                            },
-                            "isInteractable": true,
-                            "renderOrderOffset": 100
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "GameOverScreenHud",
-                        "definitionAsset": {
-                            "packageOrRemoteId": "25333092833033243",
-                            "ingestionId": "15296766258014742423",
-                            "targetId": "4237980480"
-                        },
-                        "data": {}
                     },
                     "dataType": "horizon::DataDefinitionAsset"
                 }
@@ -552,7 +371,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": -2.3841858265427619e-8,
@@ -590,24 +409,6 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
-                        "version": 8,
-                        "data": {
-                            "type": "StaticCollision"
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
                         "class": "horizon::platform_api::ColorPlatformComponent",
                         "version": 2,
                         "data": {
@@ -628,9 +429,9 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "24407058055595655",
-                                    "ingestionId": "4707432788469128401",
-                                    "targetId": "2197070581"
+                                    "packageOrRemoteId": "25333092833033243",
+                                    "ingestionId": "12134158875616216341",
+                                    "targetId": "157013062"
                                 }
                             ]
                         }
@@ -647,7 +448,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -690,24 +491,6 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
-                        "version": 2,
-                        "data": {}
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
-                        "version": 8,
-                        "data": {
-                            "type": "StaticCollision"
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
                         "class": "horizon::platform_api::ColorPlatformComponent",
                         "version": 2,
                         "data": {
@@ -728,9 +511,9 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "24407058055595655",
-                                    "ingestionId": "4707432788469128401",
-                                    "targetId": "2197070581"
+                                    "packageOrRemoteId": "25333092833033243",
+                                    "ingestionId": "12134158875616216341",
+                                    "targetId": "157013062"
                                 }
                             ]
                         }
@@ -761,16 +544,6 @@
             "relationshipType": "RelationChildOf",
             "source": "931e9228-b39d-4ca4-a580-56d9a1f5bff9",
             "destination": "6cb2093a-ff3b-4bc3-adf1-3820df87fc9d"
-        },
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "f37b5a8a-5bbc-4512-b378-e53eb21e2556",
-            "destination": "2e7f0eb8-c407-4566-b3ea-73d31d752c49"
-        },
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "42c58310-e11f-4ba0-9681-b86a7886c413",
-            "destination": "2e7f0eb8-c407-4566-b3ea-73d31d752c49"
         },
         {
             "relationshipType": "RelationChildOf",

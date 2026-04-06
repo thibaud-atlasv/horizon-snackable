@@ -1,3 +1,10 @@
+/**
+ * Types.ts — Central type registry for the entire project.
+ *
+ * Contains ALL: enums, interfaces, pipeline contexts, LocalEvents, UiEvents.
+ * No imports from sibling files — zero local dependencies.
+ * Add new events, interfaces, and enums here at implementation time only.
+ */
 import { LocalEvent, UiEvent, serializable } from 'meta/worlds';
 import type { TemplateAsset } from 'meta/worlds';
 
@@ -79,12 +86,6 @@ export interface IHitContext {
   props: Record<string, unknown>;
 }
 
-export interface IDamageContext {
-  enemyId: number;
-  damage: number;
-  props: Record<string, unknown>;
-}
-
 // ─── Events ───────────────────────────────────────────────────────────────────
 
 export namespace Events {
@@ -141,10 +142,12 @@ export namespace Events {
     damage: number = 0;
     speed: number = 0;
     props: Record<string, unknown> = {};
+    originX: number = 0;
+    originZ: number = 0;
   }
   export const InitProjectile = new LocalEvent<InitProjectilePayload>('EvInitProjectile', InitProjectilePayload);
 
-  export class TakeDamagePayload { enemyId: number = 0; damage: number = 0; props: Record<string, unknown> = {}; }
+  export class TakeDamagePayload { enemyId: number = 0; damage: number = 0; props: Record<string, unknown> = {}; originX: number = 0; originZ: number = 0; }
   export const TakeDamage = new LocalEvent<TakeDamagePayload>('EvTakeDamage', TakeDamagePayload);
 
   // Resources
@@ -176,6 +179,7 @@ export namespace Events {
   // Restart game
   export class RestartGamePayload {}
   export const RestartGame = new LocalEvent<RestartGamePayload>('EvRestartGame', RestartGamePayload);
+
 }
 
 // ─── UI Events ────────────────────────────────────────────────────────────────

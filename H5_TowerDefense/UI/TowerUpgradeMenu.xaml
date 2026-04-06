@@ -13,6 +13,10 @@
         <SolidColorBrush x:Key="TextDisabledBrush" Color="#555577"/>
         <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
         <SolidColorBrush x:Key="SellButtonBrush" Color="#8B0000"/>
+        <SolidColorBrush x:Key="UpgradeHistoryBrush" Color="#a0a0c0"/>
+
+        <!-- BooleanToVisibilityConverter for showUpgrades / showHistory bindings -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Page.Resources>
 
     <!-- Main Layout - Full width bar at bottom, visibility bound to ViewModel -->
@@ -31,26 +35,198 @@
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,2,0,0">
 
-            <!-- 3-Column Layout -->
-            <Grid Margin="48,36">
+            <!-- 4-Column Layout: [Info] [Upgrade1?] [Upgrade2?] [Sell] -->
+            <Grid HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Left Column - Sell Button -->
+                <!-- Column 0 - Info Panel (always visible) -->
+                <Border Grid.Column="0"
+                        Background="Transparent"
+                        BorderBrush="{Binding towerBorderColor}"
+                        BorderThickness="2"
+                        Width="360"
+                        Height="360"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Margin="36,0,36,0" Padding="36,36,36,36">
+                    <StackPanel VerticalAlignment="Center">
+                        <!-- Tower Name -->
+                        <TextBlock Text="{Binding towerName}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="54"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,24"/>
+
+                        <!-- Upgrade History Line 1 -->
+                        <TextBlock x:Name="UpgradeHistory1Text"
+                                   Text="{Binding upgradeHistory1, StringFormat='+ {0}'}"
+                                   Foreground="{StaticResource UpgradeHistoryBrush}"
+                                   FontSize="42"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,6"
+                                   Visibility="{Binding showHistory1, Converter={StaticResource BoolToVisConverter}}"/>
+
+                        <!-- Upgrade History Line 2 -->
+                        <TextBlock x:Name="UpgradeHistory2Text"
+                                   Text="{Binding upgradeHistory2, StringFormat='+ {0}'}"
+                                   Foreground="{StaticResource UpgradeHistoryBrush}"
+                                   FontSize="42"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,6"
+                                   Visibility="{Binding showHistory2, Converter={StaticResource BoolToVisConverter}}"/>
+
+                        <!-- Upgrade History Line 3 -->
+                        <TextBlock x:Name="UpgradeHistory3Text"
+                                   Text="{Binding upgradeHistory3, StringFormat='+ {0}'}"
+                                   Foreground="{StaticResource UpgradeHistoryBrush}"
+                                   FontSize="42"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,6"
+                                   Visibility="{Binding showHistory3, Converter={StaticResource BoolToVisConverter}}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Column 1 - Upgrade 1 (hidden when maxed) -->
+                <Border Grid.Column="1"
+                        Visibility="{Binding showUpgrades, Converter={StaticResource BoolToVisConverter}}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Margin="36,0,36,0">
+                    <Button x:Name="Upgrade1Button"
+                            Command="{Binding Path=events.upgradeTowerTap}"
+                            CommandParameter="0"
+                            MinWidth="360"
+                            MinHeight="360"
+                            Background="{StaticResource ButtonBackgroundBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="2"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" Padding="0,0,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Upgrade 1 Name -->
+                            <TextBlock x:Name="Upgrade1Name"
+                                       Grid.Row="0"
+                                       Text="{Binding upgrade1Name}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       FontSize="54"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Margin="0,0,0,18"/>
+
+                            <!-- Upgrade 1 Cost with Gold Icon (hidden when maxed) -->
+                            <StackPanel x:Name="Upgrade1CostPanel"
+                                        Grid.Row="1"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <Image Source="Textures/gold_icon.png"
+                                       Width="72"
+                                       Height="72"
+                                       Margin="0,0,18,0"
+                                       VerticalAlignment="Center"/>
+                                <TextBlock x:Name="Upgrade1CostText"
+                                           Text="{Binding upgrade1Cost, StringFormat=F0}"
+                                           Foreground="{StaticResource GoldBrush}"
+                                           FontSize="48"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- MAX label (shown when maxed) -->
+                            <TextBlock x:Name="Upgrade1MaxLabel"
+                                       Grid.Row="1"
+                                       Text="MAX"
+                                       Foreground="{StaticResource TextDisabledBrush}"
+                                       FontSize="48"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                        </Grid>
+                    </Button>
+                </Border>
+
+                <!-- Column 2 - Upgrade 2 (hidden when maxed) -->
+                <Border Grid.Column="2"
+                        Visibility="{Binding showUpgrades, Converter={StaticResource BoolToVisConverter}}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Margin="36,0,36,0">
+                    <Button x:Name="Upgrade2Button"
+                            Command="{Binding Path=events.upgradeTowerTap}"
+                            CommandParameter="1"
+                            MinWidth="360"
+                            MinHeight="360"
+                            Background="{StaticResource ButtonBackgroundBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="2"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" Padding="0,0,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Upgrade 2 Name -->
+                            <TextBlock x:Name="Upgrade2Name"
+                                       Grid.Row="0"
+                                       Text="{Binding upgrade2Name}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       FontSize="54"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Margin="0,0,0,18"/>
+
+                            <!-- Upgrade 2 Cost with Gold Icon (hidden when maxed) -->
+                            <StackPanel x:Name="Upgrade2CostPanel"
+                                        Grid.Row="1"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <Image Source="Textures/gold_icon.png"
+                                       Width="72"
+                                       Height="72"
+                                       Margin="0,0,18,0"
+                                       VerticalAlignment="Center"/>
+                                <TextBlock x:Name="Upgrade2CostText"
+                                           Text="{Binding upgrade2Cost, StringFormat=F0}"
+                                           Foreground="{StaticResource GoldBrush}"
+                                           FontSize="48"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- MAX label (shown when maxed) -->
+                            <TextBlock x:Name="Upgrade2MaxLabel"
+                                       Grid.Row="1"
+                                       Text="MAX"
+                                       Foreground="{StaticResource TextDisabledBrush}"
+                                       FontSize="48"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                        </Grid>
+                    </Button>
+                </Border>
+
+                <!-- Column 3 - Sell Button (always visible, far right) -->
                 <Button x:Name="SellButton"
-                        Grid.Column="0"
+                        Grid.Column="3"
                         Command="{Binding Path=events.sellTowerTap}"
                         MinWidth="360"
                         MinHeight="360"
-                        Padding="36,30"
                         Background="{StaticResource SellButtonBrush}"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="2"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
+                        VerticalAlignment="Center" Padding="0,0,0,0" Margin="36,0,36,0">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -81,124 +257,6 @@
                                        FontSize="48"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
-                    </Grid>
-                </Button>
-
-                <!-- Center Column - Upgrade 1 -->
-                <Button x:Name="Upgrade1Button"
-                        Grid.Column="1"
-                        Command="{Binding Path=events.upgradeTowerTap}"
-                        CommandParameter="0"
-                        MinWidth="360"
-                        MinHeight="360"
-                        Padding="36,30"
-                        Background="{StaticResource ButtonBackgroundBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="2"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Upgrade 1 Name -->
-                        <TextBlock x:Name="Upgrade1Name"
-                                   Grid.Row="0"
-                                   Text="{Binding upgrade1Name}"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   FontSize="54"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"
-                                   Margin="0,0,0,18"/>
-
-                        <!-- Upgrade 1 Cost with Gold Icon (hidden when maxed) -->
-                        <StackPanel x:Name="Upgrade1CostPanel"
-                                    Grid.Row="1"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
-                            <Image Source="Textures/gold_icon.png"
-                                   Width="72"
-                                   Height="72"
-                                   Margin="0,0,18,0"
-                                   VerticalAlignment="Center"/>
-                            <TextBlock x:Name="Upgrade1CostText"
-                                       Text="{Binding upgrade1Cost, StringFormat=F0}"
-                                       Foreground="{StaticResource GoldBrush}"
-                                       FontSize="48"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-
-                        <!-- MAX label (shown when maxed) -->
-                        <TextBlock x:Name="Upgrade1MaxLabel"
-                                   Grid.Row="1"
-                                   Text="MAX"
-                                   Foreground="{StaticResource TextDisabledBrush}"
-                                   FontSize="48"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   Visibility="Collapsed"/>
-                    </Grid>
-                </Button>
-
-                <!-- Right Column - Upgrade 2 -->
-                <Button x:Name="Upgrade2Button"
-                        Grid.Column="2"
-                        Command="{Binding Path=events.upgradeTowerTap}"
-                        CommandParameter="1"
-                        MinWidth="360"
-                        MinHeight="360"
-                        Padding="36,30"
-                        Background="{StaticResource ButtonBackgroundBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="2"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Upgrade 2 Name -->
-                        <TextBlock x:Name="Upgrade2Name"
-                                   Grid.Row="0"
-                                   Text="{Binding upgrade2Name}"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   FontSize="54"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"
-                                   Margin="0,0,0,18"/>
-
-                        <!-- Upgrade 2 Cost with Gold Icon (hidden when maxed) -->
-                        <StackPanel x:Name="Upgrade2CostPanel"
-                                    Grid.Row="1"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
-                            <Image Source="Textures/gold_icon.png"
-                                   Width="72"
-                                   Height="72"
-                                   Margin="0,0,18,0"
-                                   VerticalAlignment="Center"/>
-                            <TextBlock x:Name="Upgrade2CostText"
-                                       Text="{Binding upgrade2Cost, StringFormat=F0}"
-                                       Foreground="{StaticResource GoldBrush}"
-                                       FontSize="48"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-
-                        <!-- MAX label (shown when maxed) -->
-                        <TextBlock x:Name="Upgrade2MaxLabel"
-                                   Grid.Row="1"
-                                   Text="MAX"
-                                   Foreground="{StaticResource TextDisabledBrush}"
-                                   FontSize="48"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   Visibility="Collapsed"/>
                     </Grid>
                 </Button>
             </Grid>

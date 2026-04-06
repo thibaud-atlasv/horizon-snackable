@@ -1,7 +1,16 @@
+/**
+ * CritService — HitService modifier that applies critical hit damage.
+ *
+ * Reads props.critChance from IHitContext. Rolls Math.random(); on success:
+ *   - multiplies ctx.damage by props.critMultiplier (default CRIT_MULTIPLIER from Constants).
+ *   - sets props.critHit = multiplier so FloatingTextService can display it.
+ *   - sets props.isCrit = true (legacy flag, critHit is the authoritative check).
+ * Only arrow and cannon towers have critChance in their stats/upgrades.
+ * Force-instantiated in GameManager._startGame() to trigger self-registration.
+ */
 import { Service, service } from 'meta/worlds';
 import { OnServiceReadyEvent, subscribe } from 'meta/worlds';
 import { HitService } from './HitService';
-import { CRIT_MULTIPLIER } from '../Constants';
 
 @service()
 export class CritService extends Service {

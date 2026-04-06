@@ -1,0 +1,276 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors">
+
+    <Page.Resources>
+        <!-- Title Pop-In Animation -->
+        <Storyboard x:Key="TitlePopAnim">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TitleBlock"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1.15">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TitleBlock"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1.15">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TitleBlock"
+                                           Storyboard.TargetProperty="Opacity">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.15" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- Content Fade-In Animation -->
+        <Storyboard x:Key="ContentFadeInAnim">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ContentContainer"
+                                           Storyboard.TargetProperty="Opacity">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ContentContainer"
+                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="30"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="30"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- Leaderboard Entry Item Template -->
+        <DataTemplate x:Key="LeaderboardEntryTemplate">
+            <Grid Height="60" Margin="0,4,0,4">
+                <!-- Current Player Highlight Background -->
+                <Border x:Name="PlayerHighlightBorder" CornerRadius="8" Background="#40FFD700">
+                    <Border.Visibility>
+                        <Binding Path="isCurrentPlayer">
+                            <Binding.Converter>
+                                <BooleanToVisibilityConverter/>
+                            </Binding.Converter>
+                        </Binding>
+                    </Border.Visibility>
+                </Border>
+                
+                <!-- Normal Row Background -->
+                <Border CornerRadius="8" Background="#30000000">
+                    <Border.Visibility>
+                        <Binding Path="isCurrentPlayer">
+                            <Binding.Converter>
+                                <BooleanToVisibilityConverter Visibility="Hidden"/>
+                            </Binding.Converter>
+                        </Binding>
+                    </Border.Visibility>
+                </Border>
+
+                <Grid Margin="16,0,16,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Rank Display -->
+                    <Grid Grid.Column="0" VerticalAlignment="Center">
+                        <!-- Shadow -->
+                        <TextBlock Text="{Binding Path=rankDisplay}"
+                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center"
+                                   Margin="2,2,0,0" TextAlignment="Center" FontSize="40"/>
+                        <!-- Outline -->
+                        <TextBlock Text="{Binding Path=rankDisplay}"
+                                   FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="3"
+                                   Foreground="Transparent"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center" TextAlignment="Center" FontSize="40"/>
+                        <!-- Main Text - Color based on rank -->
+                        <TextBlock Text="{Binding Path=rankDisplay}"
+                                   FontFamily="Roboto" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" TextAlignment="Center" FontSize="40">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=rank}" Value="1">
+                                            <Setter Property="Foreground" Value="#FFFFD700"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=rank}" Value="2">
+                                            <Setter Property="Foreground" Value="#FFC0C0C0"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=rank}" Value="3">
+                                            <Setter Property="Foreground" Value="#FFCD7F32"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Player Name -->
+                    <Grid Grid.Column="1" VerticalAlignment="Center">
+                        <!-- Shadow -->
+                        <TextBlock Text="{Binding Path=playerName}"
+                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000"
+                                   VerticalAlignment="Center"
+                                   FontSize="40" TextAlignment="Center" Margin="0,2,0,0"/>
+                        <!-- Outline -->
+                        <TextBlock Text="{Binding Path=playerName}"
+                                   FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="2"
+                                   Foreground="Transparent"
+                                   VerticalAlignment="Center" FontSize="40" TextAlignment="Center" Margin="0,2,0,0"/>
+                        <!-- Main Text -->
+                        <TextBlock Text="{Binding Path=playerName}"
+                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFFFFF"
+                                   VerticalAlignment="Center" FontSize="40" TextAlignment="Center" Margin="0,2,0,0"/>
+                    </Grid>
+
+                    <!-- Score -->
+                    <Grid Grid.Column="2" VerticalAlignment="Center">
+                        <!-- Shadow -->
+                        <TextBlock Text="{Binding Path=score, StringFormat=F0}"
+                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Margin="2,2,0,0" FontSize="40"/>
+                        <!-- Outline -->
+                        <TextBlock Text="{Binding Path=score, StringFormat=F0}"
+                                   FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="2"
+                                   Foreground="Transparent"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="40"/>
+                        <!-- Main Text -->
+                        <TextBlock Text="{Binding Path=score, StringFormat=F0}"
+                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFFF"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="40"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Vertical Panel Template for ItemsControl -->
+        <ItemsPanelTemplate x:Key="VerticalPanel">
+            <StackPanel Orientation="Vertical"/>
+        </ItemsPanelTemplate>
+    </Page.Resources>
+
+    <!-- Main Container - Visibility bound to isVisible -->
+    <Grid>
+        <Grid.Visibility>
+            <Binding Path="isVisible">
+                <Binding.Converter>
+                    <BooleanToVisibilityConverter/>
+                </Binding.Converter>
+            </Binding>
+        </Grid.Visibility>
+
+        <!-- Trigger animations when visible -->
+        <b:Interaction.Triggers>
+            <b:DataTrigger Binding="{Binding Path=isVisible}" Value="True">
+                <b:ControlStoryboardAction Storyboard="{StaticResource TitlePopAnim}"/>
+                <b:ControlStoryboardAction Storyboard="{StaticResource ContentFadeInAnim}"/>
+            </b:DataTrigger>
+        </b:Interaction.Triggers>
+
+        <!-- Full-screen dark overlay -->
+        <Border/>
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="40,40,40,40" Background="#E6000000" Padding="75,75,75,75">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid x:Name="TitleBlock" RenderTransformOrigin="0.5,0.5" Margin="0,0,0,30">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <TextBlock Text="{Binding Path=title}" FontFamily="Roboto" FontWeight="Bold" Foreground="{Binding Path=titleColor}" HorizontalAlignment="Center" VerticalAlignment="Center" CharacterSpacing="-30" TextAlignment="Center" FontSize="120"/>
+                </Grid>
+                <Grid x:Name="ContentContainer" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <StackPanel>
+                        <Border CornerRadius="12" Padding="30,20,30,20" Margin="0,0,0,20">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Grid HorizontalAlignment="Center">
+                                    <TextBlock Text="YOUR SCORE" FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0" FontSize="40"/>
+                                    <TextBlock Text="YOUR SCORE" FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="2" Foreground="Transparent" HorizontalAlignment="Center" FontSize="40"/>
+                                    <TextBlock Text="YOUR SCORE" FontFamily="Roboto" FontWeight="Bold" Foreground="#AAFFFFFF" HorizontalAlignment="Center" FontSize="40"/>
+                                </Grid>
+                                <Grid HorizontalAlignment="Center" Margin="0,5,0,5">
+                                    <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000" HorizontalAlignment="Center" Margin="3,3,0,0" FontSize="80"/>
+                                    <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="4" Foreground="Transparent" HorizontalAlignment="Center" FontSize="80"/>
+                                    <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFFFFF" HorizontalAlignment="Center" CharacterSpacing="-20" FontSize="80"/>
+                                </Grid>
+                                <Grid HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Path=yourRankDisplay}" FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0" FontSize="50"/>
+                                    <TextBlock Text="{Binding Path=yourRankDisplay}" FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="3" Foreground="Transparent" HorizontalAlignment="Center" FontSize="50"/>
+                                    <TextBlock Text="{Binding Path=yourRankDisplay}" FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFD700" HorizontalAlignment="Center" FontSize="50"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        <Grid Margin="0,10,0,10">
+                            <Grid.Visibility>
+                                <Binding Path="isLoading">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Grid.Visibility>
+                            <TextBlock Text="Loading..." FontFamily="Roboto" FontWeight="Bold" FontSize="32" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0"/>
+                            <TextBlock Text="Loading..." FontFamily="Roboto" FontWeight="Bold" FontSize="32" Stroke="#FF1A1A2E" StrokeThickness="2" Foreground="Transparent" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Loading..." FontFamily="Roboto" FontWeight="Bold" FontSize="32" Foreground="#AAFFFFFF" HorizontalAlignment="Center"/>
+                        </Grid>
+                        <Grid Margin="0,10,0,10">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=errorMessage}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <TextBlock Text="{Binding Path=errorMessage}" FontFamily="Roboto" FontWeight="Bold" FontSize="24" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0"/>
+                            <TextBlock Text="{Binding Path=errorMessage}" FontFamily="Roboto" FontWeight="Bold" FontSize="24" Stroke="#FF1A1A2E" StrokeThickness="2" Foreground="Transparent" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=errorMessage}" FontFamily="Roboto" FontWeight="Bold" FontSize="24" Foreground="#FFFF6666" HorizontalAlignment="Center"/>
+                        </Grid>
+                        <Grid Margin="0,10,0,10">
+                            <TextBlock Text="TOP 10" FontFamily="Roboto" FontWeight="Bold" FontSize="36" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0"/>
+                            <TextBlock Text="TOP 10" FontFamily="Roboto" FontWeight="Bold" FontSize="36" Stroke="#FF1A1A2E" StrokeThickness="3" Foreground="Transparent" HorizontalAlignment="Center"/>
+                            <TextBlock Text="TOP 10" FontFamily="Roboto" FontWeight="Bold" FontSize="36" Foreground="#FFFFFFFF" HorizontalAlignment="Center"/>
+                        </Grid>
+                        <Border Background="#20000000" CornerRadius="12" Padding="10" MaxHeight="850" MinWidth="950">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding Path=entries}" ItemTemplate="{StaticResource LeaderboardEntryTemplate}" ItemsPanel="{StaticResource VerticalPanel}"/>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Semi-transparent background overlay for content panel -->
+    </Grid>
+</Page>

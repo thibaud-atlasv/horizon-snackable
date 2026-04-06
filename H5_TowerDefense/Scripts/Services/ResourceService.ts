@@ -1,3 +1,13 @@
+/**
+ * ResourceService — Manages player economy (gold and lives).
+ *
+ * earn(n): adds gold, fires ResourceChanged.
+ * spend(n): deducts gold if affordable, fires ResourceChanged. Returns false if insufficient.
+ * loseLife(): decrements lives, fires ResourceChanged.
+ * reset(): restores START_GOLD and START_LIVES, fires ResourceChanged.
+ * canAfford(n): read-only check used by UI to grey out unaffordable options.
+ * Resets on RestartGame.
+ */
 import { Service, EventService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';

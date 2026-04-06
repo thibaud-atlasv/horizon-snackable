@@ -1,3 +1,16 @@
+/**
+ * ProjectileController — Homing projectile movement and hit pipeline detonation.
+ *
+ * Attached to: pooled projectile entities (managed by ProjectilePool).
+ * onInit (InitProjectile event): sets target, damage, speed, props. Applies visual
+ *   scale and color from props. Tracks last known enemy position for dead-target follow.
+ * onUpdate: moves toward target position each frame. On arrival (PROJECTILE_HIT_RADIUS):
+ *   - If target alive OR props.splashRadius > 0: calls _detonate() at current position.
+ *   - If target dead and no splash: calls _return() silently.
+ * _detonate(): calls HitService.resolve() to run all modifiers (SplashSystem, CritService),
+ *   then sends TakeDamage to each resolved target with hitCtx.props (includes critHit etc).
+ * _return(): parks entity back in ProjectilePool.
+ */
 import { Component, TransformComponent, EventService, Vec3, Color, ColorComponent } from 'meta/worlds';
 import { component, subscribe } from 'meta/worlds';
 import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
@@ -19,6 +32,8 @@ export class ProjectileController extends Component {
   private _active: boolean = false;
   private _destX: number = 0;
   private _destZ: number = 0;
+  private _originX: number = 0;
+  private _originZ: number = 0;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
@@ -32,6 +47,8 @@ export class ProjectileController extends Component {
     this._damage   = p.damage;
     this._speed    = p.speed;
     this._props    = p.props;
+    this._originX  = p.originX;
+    this._originZ  = p.originZ;
     this._active   = true;
     const rec = EnemyService.get().get(p.targetEnemyId);
     if (rec) { this._destX = rec.worldX; this._destZ = rec.worldZ; }
@@ -71,8 +88,9 @@ export class ProjectileController extends Component {
     const dist = Math.sqrt(dx * dx + dz * dz);
 
     if (dist <= PROJECTILE_HIT_RADIUS) {
-      // Only detonate if target is still alive; otherwise just vanish silently
-      if (target) this._detonate(pos.x, pos.z);
+      const hasSplash = !!(this._props['splashRadius'] as number | undefined);
+      // Detonate at last known position if splash; vanish silently if single-target and target is dead
+      if (target || hasSplash) this._detonate(pos.x, pos.z);
       else this._return();
       return;
     }
@@ -94,7 +112,7 @@ export class ProjectileController extends Component {
 
     for (const id of hitCtx.targets) {
       EventService.sendLocally(Events.TakeDamage,
-        { enemyId: id, damage: hitCtx.damage, props: hitCtx.props });
+        { enemyId: id, damage: hitCtx.damage, props: hitCtx.props, originX: this._originX, originZ: this._originZ });
     }
 
     this._return();

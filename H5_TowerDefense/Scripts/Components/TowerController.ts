@@ -1,3 +1,15 @@
+/**
+ * TowerController — Per-frame targeting and firing logic for placed tower entities.
+ *
+ * Attached to: every spawned tower entity template.
+ * onInit (InitTower event): reads ITowerDef from TowerService, stores col/row.
+ * onUpdate: calls TargetingService.getBestTarget() each frame. Fires a projectile when
+ *   cooldown expires and a target is in range. Acquires projectile from ProjectilePool,
+ *   positions it at the tower base, sends InitProjectile to it.
+ * Stats (damage, range, fireRate) are read live via TowerService.computeStats() so
+ *   upgrades apply immediately without reinitializing the component.
+ * Does NOT handle hit resolution — that is ProjectileController's responsibility.
+ */
 import { Component, TransformComponent, Vec3, Quaternion, EventService } from 'meta/worlds';
 import type { Entity, Maybe } from 'meta/worlds';
 import { component, property, subscribe } from 'meta/worlds';
@@ -78,6 +90,8 @@ export class TowerController extends Component {
     initP.damage        = this._stats.damage;
     initP.speed         = this._stats.projectileSpeed;
     initP.props         = this._stats.props;
+    initP.originX       = spawnPos.x;
+    initP.originZ       = spawnPos.z;
     EventService.sendLocally(Events.InitProjectile, initP, { eventTarget: entity });
   }
 

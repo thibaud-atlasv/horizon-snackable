@@ -1,3 +1,12 @@
+/**
+ * HealthBarService — Pre-spawned pool of health bar entities that follow enemies.
+ *
+ * prewarm(): spawns HEALTHBAR_POOL_SIZE entities at park position during game init.
+ * Each health bar entity has a HealthBarController that handles positioning and fill.
+ * Bars are assigned to enemies via UpdateHealthBar event (targeted to the bar entity),
+ * and returned to the pool via ParkHealthBar event on enemy death.
+ * Pool size tuned in Constants.ts (HEALTHBAR_POOL_SIZE).
+ */
 import { Service, WorldService, NetworkMode, Vec3, Quaternion, NetworkingService, EventService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnWorldUpdateEvent } from 'meta/worlds';
@@ -17,16 +26,18 @@ export class HealthBarService extends Service {
 
   async prewarm(): Promise<void> {
     if (NetworkingService.get().isServerContext()) return;
-    for (let i = 0; i < HEALTHBAR_POOL_SIZE; i++) {
-      const entity = await WorldService.get().spawnTemplate({
-        templateAsset: Assets.HealthBar,
-        position: PARK,
-        rotation: Quaternion.identity,
-        scale: new Vec3(HEALTHBAR_HEIGHT, HEALTHBAR_DEPTH, HEALTHBAR_WIDTH),
-        networkMode: NetworkMode.LocalOnly,
-      }).catch((e) => { console.error(e); return null; });
-      if (entity) this._free.push(entity);
-    }
+    const entities = await Promise.all(
+      Array.from({ length: HEALTHBAR_POOL_SIZE }, () =>
+        WorldService.get().spawnTemplate({
+          templateAsset: Assets.HealthBar,
+          position: PARK,
+          rotation: Quaternion.identity,
+          scale: new Vec3(HEALTHBAR_HEIGHT, HEALTHBAR_DEPTH, HEALTHBAR_WIDTH),
+          networkMode: NetworkMode.LocalOnly,
+        }).catch((e) => { console.error(e); return null; }),
+      ),
+    );
+    for (const entity of entities) { if (entity) this._free.push(entity); }
   }
 
   @subscribe(Events.RestartGame)

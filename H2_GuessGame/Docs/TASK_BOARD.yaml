@@ -1,0 +1,109 @@
+tasks:
+  - name: Shape Display Component
+    status: done
+    summary: Classe ShapeRenderer avec toutes les propriétés demandées
+    files:
+      - Scripts/Rendering/ShapeRenderer.ts (DELETED)
+      - Scripts/Defs/ShapeDefs.ts
+
+  - name: Shape Display Custom UI
+    status: done
+    summary: Custom UI avec XAML + ViewModel pour afficher des shapes contrôlables par code
+    files:
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+      - xaml/shape_display.xaml
+
+  - name: Answer Buttons UI
+    status: done
+    summary: 4 boutons 2x2 avec shapes, intégrés au flow de jeu
+    files:
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts (extended)
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts (extended)
+      - xaml/shape_display.xaml (extended)
+
+  - name: UI Polish & Feedback Animations
+    status: done
+    summary: Boutons stylés, fond des shapes, overlays animés correct/incorrect
+    files:
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts (extended)
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts (extended)
+      - xaml/shape_display.xaml (extended)
+
+  - name: Intruder Zone Refactor
+    status: done
+    summary: Zone dédiée 448x488 avec fond arrondi, overlay localisé
+    files:
+      - xaml/shape_display.xaml (restructured)
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts (zone coordinates)
+
+  - name: Timer & Score HUD
+    status: done
+    summary: Bandeau avec compteur de score et jauge timer animée
+    files:
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts (scoreText, timerProgress)
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts (timer tick, score tracking)
+      - xaml/shape_display.xaml (3-row layout with HUD)
+
+  - name: Leaderboard Popup Background
+    status: done
+    summary: Overlay sombre semi-transparent ajouté derrière le leaderboard
+    files:
+      - UI/LeaderboardHUD.xaml
+
+  - name: Home Screen UI
+    status: done
+    summary: Écran titre avec Shape/Intruder en gros, explication et Tap to start
+    files:
+      - Scripts/UI/HomeScreenViewModel.ts
+      - Scripts/UI/HomeScreenComponent.ts
+      - UI/home_screen.xaml
+      - space.hstf (HomeScreen entity)
+
+  - name: Home Screen Decorative Shapes
+    status: done
+    summary: 14 formes géométriques décoratives en arrière-plan avec opacité réduite
+    files:
+      - UI/home_screen.xaml
+
+  - name: Tap to Start Animation
+    status: done
+    summary: Animation pulse en boucle sur le bouton Tap to Start (scale 1.0 → 1.08)
+    files:
+      - UI/home_screen.xaml
+
+  - name: Decorative Shapes Animation
+    status: done
+    summary: Animation flottante sur les 14 shapes déco (mouvement Y 8-15px, durées variées 3.5-5.8s)
+    files:
+      - UI/home_screen.xaml
+
+  - name: Tap to Start Text Conversion
+    status: done
+    summary: Button converti en TextBlock, tap sur tout l'écran pour démarrer
+    files:
+      - UI/home_screen.xaml
+
+  - name: Wrong Answer Feedback Animation
+    status: done
+    summary: Animation feedback sur mauvaise réponse - dim des autres shapes + pulse sur la shape identique
+    files:
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts (opacity property)
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts (_animateWrongShapes method)
+      - Scripts/Constants.ts (animation constants)
+      - UI/shape_display.xaml (opacity binding)
+
+  - name: Title Texture Generation
+    status: done
+    summary: Texture carrée avec "Shape Intruder" centré et formes géométriques décoratives sur fond noir
+    files:
+      - assets/title_shape_intruder.png
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding: []
+  failed_attempts: []
+
+notes:
+  - Composant technique pour Shape Intruder
+  - Doit être pilotable entièrement par code

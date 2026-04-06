@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "entities": [
         {
             "id": "3f549ba8-4290-4fc8-b915-8f788f03f148",
@@ -8,7 +8,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -51,7 +51,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": -0.30000001192092898,
@@ -133,7 +133,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.00410041818395257,
@@ -215,7 +215,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -292,7 +292,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -374,7 +374,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -456,7 +456,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -538,7 +538,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.30000001192092898,
@@ -620,7 +620,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,

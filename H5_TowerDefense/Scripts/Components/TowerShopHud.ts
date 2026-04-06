@@ -1,3 +1,14 @@
+/**
+ * TowerShopHud — ViewModel controller for the tower purchase bar at the bottom of the screen.
+ *
+ * Attached to: TowerShopUI entity in space.hstf (has CustomUiComponent → TowerShop.xaml).
+ * TowerShopViewModel: items[] (TowerShopItemViewModel per tower), selectedTowerId, visible.
+ * TowerShopItemViewModel: name, cost, state ("affordable"|"too_expensive"), selected, towerColor.
+ * Hides when a placed tower is selected (TowerSelected), shows on deselect or RestartGame.
+ * On tower tap (UiEvents.towerShopTap): calls TowerService.selectShopTower(), fires TowerShopSelected.
+ * Updates affordability state on ResourceChanged.
+ * On RestartGame: resets visible=true and resets selection to first tower.
+ */
 import {
   Component,
   OnEntityStartEvent,
@@ -84,6 +95,15 @@ export class TowerShopHud extends Component {
     if (!this.viewModel) return;
     this.viewModel.visible = true;
   }
+
+  @subscribe(Events.RestartGame, { execution: ExecuteOn.Owner })
+  onRestart(_payload: Events.RestartGamePayload): void {
+    if (!this.viewModel) return;
+    this.viewModel.visible = true;
+    this.viewModel.selectedTowerId = this.itemVMs.length > 0 ? this.itemVMs[0].towerId : '';
+    for (const item of this.itemVMs) item.selected = item.towerId === this.viewModel.selectedTowerId;
+  }
+
 
   @subscribe(UiEvents.towerShopTap, { execution: ExecuteOn.Owner })
   onTowerTapped(payload: UiEvents.TowerShopTapPayload): void {

@@ -1,3 +1,15 @@
+/**
+ * TowerService — Tower catalog, registry, placement, upgrade, and sell logic.
+ *
+ * Catalog: find(id), all() — reads TOWER_DEFS in onReady().
+ * Registry: getAt(col, row) — stores ITowerRecord (def, tier, choices, totalInvested).
+ * selectShopTower(id): sets the currently selected shop tower for placement.
+ * _tryPlace(col, row): spawns a tower entity, sends InitTower, registers it.
+ * upgrade(choiceIndex): advances the selected tower one tier, applies stat upgrade.
+ * sell(): refunds SELL_RATIO of totalInvested, destroys entity, unregisters.
+ * computeStats(defId, choices): walks the upgrade tree to get live ITowerStats.
+ * Resets registry on RestartGame.
+ */
 import { Service, EventService, WorldService, NetworkMode, Vec3, Quaternion } from 'meta/worlds';
 import type { Entity } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';

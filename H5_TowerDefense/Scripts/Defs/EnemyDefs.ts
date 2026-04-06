@@ -1,3 +1,12 @@
+/**
+ * EnemyDefs.ts — Static data table for all enemy types.
+ *
+ * Pure data — no side effects, no service calls.
+ * To add a new enemy: add an entry here and its template in Assets.ts.
+ * HP is base value — EnemyController applies wave scaling: hp × (1 + waveIndex × HP_SCALE_PER_WAVE).
+ * color is applied at runtime to all ColorComponent children of the entity.
+ * Read by EnemyService.onReady() into its internal catalog.
+ */
 import { type IEnemyDef } from '../Types';
 import { Assets } from '../Assets';
 

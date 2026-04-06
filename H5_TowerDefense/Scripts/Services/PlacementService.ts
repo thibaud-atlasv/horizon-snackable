@@ -1,3 +1,15 @@
+/**
+ * PlacementService — Drag-to-place touch input handler for tower placement.
+ *
+ * prewarm(): pre-spawns a preview entity and a range indicator entity.
+ * selectTower(id, cost, range): activates placement mode for a given tower type.
+ * Touch events (Started/Moved/Ended) convert screen coords to grid cells.
+ * Preview entity snaps to nearest cell: green tint = valid, red = invalid.
+ * Range indicator disc scales to tower range diameter around preview.
+ * On touch end over a valid cell: sends GridTapped → TowerService._tryPlace().
+ * Valid cell = not a path cell, not already occupied, affordable.
+ * Deactivated when TowerDeselected or tower is placed.
+ */
 import { Service, WorldService, NetworkMode, Vec3, Quaternion, EventService, TransformComponent, ColorComponent, Color } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnFocusedInteractionInputStartedEvent, OnFocusedInteractionInputMovedEvent, OnFocusedInteractionInputEndedEvent } from 'meta/worlds';
@@ -154,7 +166,7 @@ export class PlacementService extends Service {
     const pos = PathService.get().cellToWorld(col, row);
     const t = this._rangeEntity.getComponent(TransformComponent);
     if (t) {
-      t.worldPosition = new Vec3(pos.x, GROUND_Y + 0.02, pos.z);
+      t.worldPosition = new Vec3(pos.x, GROUND_Y + 0.05, pos.z);
       t.localScale    = new Vec3(diameter, 1, diameter);
     }
   }

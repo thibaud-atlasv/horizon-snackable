@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "entities": [
         {
             "id": "a9b3788d-7918-42d6-8f42-fc6c3c1f2b55",
@@ -8,7 +8,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -38,6 +38,12 @@
                                 "packageOrRemoteId": "24407058055595655",
                                 "ingestionId": "4300205889696081881",
                                 "targetId": "4060876394"
+                            },
+                            "lightingParams": {
+                                "class": "horizon::platform_api::LightingParams",
+                                "data": {
+                                    "contributeToGI": false
+                                }
                             }
                         }
                     },

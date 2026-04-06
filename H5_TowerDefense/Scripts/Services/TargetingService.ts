@@ -1,3 +1,12 @@
+/**
+ * TargetingService — Enemy targeting queries for towers and hit systems.
+ *
+ * getBestTarget(worldX, worldZ, range): returns the enemyId furthest along the path
+ *   within range — towers always shoot the enemy closest to the exit.
+ * getEnemiesInRadius(worldX, worldZ, radius): returns all enemy IDs within radius
+ *   of a world position — used by SplashSystem at detonation.
+ * Both read live positions from EnemyService.getAll().
+ */
 import { Service } from 'meta/worlds';
 import { service } from 'meta/worlds';
 import { EnemyService } from './EnemyService';

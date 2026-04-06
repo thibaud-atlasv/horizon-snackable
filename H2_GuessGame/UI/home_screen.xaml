@@ -1,0 +1,468 @@
+<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="clr-namespace:horizon.ui_noesis;assembly=ui_noesis"
+      Background="#0a0a0f">
+
+    <Grid.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Grid.Resources>
+
+    <Viewbox Stretch="Uniform">
+        <Grid Width="480" Height="800">
+            <!-- Home screen: tap anywhere to start -->
+            <Button Command="{Binding events.onHomeScreenTapToStart}"
+                    Visibility="{Binding isHomeVisible, Converter={StaticResource BoolToVis}}"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <Grid>
+                <!-- Decorative background shapes (low opacity, behind content) -->
+                <Canvas Width="480" Height="800" ClipToBounds="True">
+                    <!-- Triangle - top left, red -->
+                    <Path Data="M 0 -1 L 0.866 0.5 L -0.866 0.5 Z"
+                          Fill="#ef4444" Opacity="0.10">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="45" ScaleY="45"/>
+                                <RotateTransform Angle="15"/>
+                                <TranslateTransform x:Name="FloatTrans1" X="60" Y="90"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans1"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="90" To="78"
+                                                         Duration="0:0:4.5"
+                                                         BeginTime="0:0:0"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Circle - top right, cyan -->
+                    <Path Data="M 0 -1 C 0.5523 -1, 1 -0.5523, 1 0 C 1 0.5523, 0.5523 1, 0 1 C -0.5523 1, -1 0.5523, -1 0 C -1 -0.5523, -0.5523 -1, 0 -1 Z"
+                          Fill="#06b6d4" Opacity="0.09">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="35" ScaleY="35"/>
+                                <TranslateTransform x:Name="FloatTrans2" X="400" Y="70"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans2"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="70" To="60"
+                                                         Duration="0:0:5.2"
+                                                         BeginTime="0:0:0.8"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Hexagon - left side, purple -->
+                    <Path Data="M 1 0 L 0.5 0.866 L -0.5 0.866 L -1 0 L -0.5 -0.866 L 0.5 -0.866 Z"
+                          Fill="#8b5cf6" Opacity="0.12">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="40" ScaleY="40"/>
+                                <RotateTransform Angle="30"/>
+                                <TranslateTransform x:Name="FloatTrans3" X="30" Y="280"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans3"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="280" To="266"
+                                                         Duration="0:0:3.8"
+                                                         BeginTime="0:0:1.5"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Star - right side, yellow -->
+                    <Path Data="M 0 -1 L 0.2245 -0.309 L 0.9511 -0.309 L 0.3633 0.118 L 0.5878 0.809 L 0 0.382 L -0.5878 0.809 L -0.3633 0.118 L -0.9511 -0.309 L -0.2245 -0.309 Z"
+                          Fill="#eab308" Opacity="0.11">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="30" ScaleY="30"/>
+                                <RotateTransform Angle="-20"/>
+                                <TranslateTransform x:Name="FloatTrans4" X="430" Y="240"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans4"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="240" To="229"
+                                                         Duration="0:0:4.9"
+                                                         BeginTime="0:0:0.3"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Diamond - upper center-left, orange -->
+                    <Path Data="M 0 -1 L 1 0 L 0 1 L -1 0 Z"
+                          Fill="#f97316" Opacity="0.08">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="50" ScaleY="50"/>
+                                <RotateTransform Angle="10"/>
+                                <TranslateTransform x:Name="FloatTrans5" X="140" Y="180"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans5"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="180" To="167"
+                                                         Duration="0:0:5.5"
+                                                         BeginTime="0:0:1.2"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Cross - center right, green -->
+                    <Path Data="M -0.3 -1 L 0.3 -1 L 0.3 -0.3 L 1 -0.3 L 1 0.3 L 0.3 0.3 L 0.3 1 L -0.3 1 L -0.3 0.3 L -1 0.3 L -1 -0.3 L -0.3 -0.3 Z"
+                          Fill="#22c55e" Opacity="0.10">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="28" ScaleY="28"/>
+                                <RotateTransform Angle="45"/>
+                                <TranslateTransform x:Name="FloatTrans6" X="420" Y="440"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans6"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="440" To="431"
+                                                         Duration="0:0:4.2"
+                                                         BeginTime="0:0:0.6"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Square - lower left, blue -->
+                    <Path Data="M -0.707 -0.707 L 0.707 -0.707 L 0.707 0.707 L -0.707 0.707 Z"
+                          Fill="#3b82f6" Opacity="0.12">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="38" ScaleY="38"/>
+                                <RotateTransform Angle="22"/>
+                                <TranslateTransform x:Name="FloatTrans7" X="80" Y="520"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans7"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="520" To="505"
+                                                         Duration="0:0:3.5"
+                                                         BeginTime="0:0:1.8"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Arrow - bottom right, pink -->
+                    <Path Data="M 0 -1 L 0.7 0.1 L 0.3 0.1 L 0.3 1 L -0.3 1 L -0.3 0.1 L -0.7 0.1 Z"
+                          Fill="#ec4899" Opacity="0.09">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="32" ScaleY="32"/>
+                                <RotateTransform Angle="135"/>
+                                <TranslateTransform x:Name="FloatTrans8" X="380" Y="620"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans8"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="620" To="610"
+                                                         Duration="0:0:5.0"
+                                                         BeginTime="0:0:0.4"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Triangle - bottom center, cyan -->
+                    <Path Data="M 0 -1 L 0.866 0.5 L -0.866 0.5 Z"
+                          Fill="#06b6d4" Opacity="0.08">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="42" ScaleY="42"/>
+                                <RotateTransform Angle="180"/>
+                                <TranslateTransform x:Name="FloatTrans9" X="220" Y="720"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans9"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="720" To="708"
+                                                         Duration="0:0:4.7"
+                                                         BeginTime="0:0:1.0"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Hexagon - bottom left, yellow -->
+                    <Path Data="M 1 0 L 0.5 0.866 L -0.5 0.866 L -1 0 L -0.5 -0.866 L 0.5 -0.866 Z"
+                          Fill="#eab308" Opacity="0.10">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="25" ScaleY="25"/>
+                                <RotateTransform Angle="60"/>
+                                <TranslateTransform x:Name="FloatTrans10" X="55" Y="700"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans10"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="700" To="692"
+                                                         Duration="0:0:5.8"
+                                                         BeginTime="0:0:0.2"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Star - center left, pink -->
+                    <Path Data="M 0 -1 L 0.2245 -0.309 L 0.9511 -0.309 L 0.3633 0.118 L 0.5878 0.809 L 0 0.382 L -0.5878 0.809 L -0.3633 0.118 L -0.9511 -0.309 L -0.2245 -0.309 Z"
+                          Fill="#ec4899" Opacity="0.12">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="22" ScaleY="22"/>
+                                <RotateTransform Angle="40"/>
+                                <TranslateTransform x:Name="FloatTrans11" X="50" Y="420"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans11"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="420" To="409"
+                                                         Duration="0:0:3.9"
+                                                         BeginTime="0:0:1.4"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Diamond - mid right, purple -->
+                    <Path Data="M 0 -1 L 1 0 L 0 1 L -1 0 Z"
+                          Fill="#8b5cf6" Opacity="0.09">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="35" ScaleY="35"/>
+                                <RotateTransform Angle="-15"/>
+                                <TranslateTransform x:Name="FloatTrans12" X="450" Y="150"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans12"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="150" To="136"
+                                                         Duration="0:0:4.3"
+                                                         BeginTime="0:0:0.7"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Circle - lower center, green -->
+                    <Path Data="M 0 -1 C 0.5523 -1, 1 -0.5523, 1 0 C 1 0.5523, 0.5523 1, 0 1 C -0.5523 1, -1 0.5523, -1 0 C -1 -0.5523, -0.5523 -1, 0 -1 Z"
+                          Fill="#22c55e" Opacity="0.08">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="30" ScaleY="30"/>
+                                <TranslateTransform x:Name="FloatTrans13" X="300" Y="750"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans13"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="750" To="740"
+                                                         Duration="0:0:5.1"
+                                                         BeginTime="0:0:1.6"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+
+                    <!-- Cross - upper center, red -->
+                    <Path Data="M -0.3 -1 L 0.3 -1 L 0.3 -0.3 L 1 -0.3 L 1 0.3 L 0.3 0.3 L 0.3 1 L -0.3 1 L -0.3 0.3 L -1 0.3 L -1 -0.3 L -0.3 -0.3 Z"
+                          Fill="#ef4444" Opacity="0.08">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="25" ScaleY="25"/>
+                                <RotateTransform Angle="20"/>
+                                <TranslateTransform x:Name="FloatTrans14" X="340" Y="30"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FloatTrans14"
+                                                         Storyboard.TargetProperty="Y"
+                                                         From="30" To="17"
+                                                         Duration="0:0:4.0"
+                                                         BeginTime="0:0:0.9"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
+                </Canvas>
+
+                <!-- Centered content -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- Title: Shape -->
+                    <TextBlock Text="Shape"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center" FontFamily="Kallisto" FontSize="100" Foreground="#FF1D42D6"/>
+
+                    <!-- Title: Intruder -->
+                    <TextBlock Text="Intruder"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               Margin="0,-10,0,0" FontFamily="Kallisto" FontSize="100" Foreground="#FF1D42D6"/>
+
+                    <!-- Vertical spacing -->
+                    <Rectangle Height="40"/>
+
+                    <!-- Subtitle -->
+                    <TextBlock Text="Spot the missing shape before time runs out."
+                               FontSize="18"
+                               Foreground="#aaaaaa"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               MaxWidth="350" CharacterSpacing="120"/>
+
+                    <!-- Vertical spacing -->
+                    <Rectangle Height="60"/>
+
+                    <!-- Tap to start text with pulse animation -->
+                    <TextBlock Text="Tap to start"
+                               FontSize="22"
+                               Foreground="#22c55e"
+                               FontFamily="Kallisto"
+                               Opacity="0.8"
+                               HorizontalAlignment="Center"
+                               RenderTransformOrigin="0.5,0.5">
+                        <TextBlock.RenderTransform>
+                            <ScaleTransform x:Name="TapToStartScale" ScaleX="1" ScaleY="1"/>
+                        </TextBlock.RenderTransform>
+                        <TextBlock.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="TapToStartScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         From="1.0" To="1.08"
+                                                         Duration="0:0:0.8"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                        <DoubleAnimation Storyboard.TargetName="TapToStartScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         From="1.0" To="1.08"
+                                                         Duration="0:0:0.8"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </TextBlock.Triggers>
+                    </TextBlock>
+                </StackPanel>
+                </Grid>
+            </Button>
+        </Grid>
+    </Viewbox>
+</Grid>

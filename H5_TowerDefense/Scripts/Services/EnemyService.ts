@@ -1,3 +1,14 @@
+/**
+ * EnemyService — Enemy def catalog, live registry, and spawn logic.
+ *
+ * Catalog: find(id), all() — reads ENEMY_DEFS in onReady().
+ * Registry: register(), unregister(), update(), get(), getAll() — tracks live enemies.
+ *   Each IEnemyRecord stores: entity, defId, worldX, worldZ, pathT, hp, maxHp, speedFactor.
+ *   worldX/Z updated every frame by EnemyController — used by TargetingService and FloatingTextService.
+ *   speedFactor modified by SlowService; read by EnemyController each frame.
+ * spawn(enemyId, waveIndex): spawns enemy entity from template, sends InitEnemy to it.
+ * Destroys all live entities and clears registry on RestartGame.
+ */
 import { Service, EventService, WorldService, NetworkMode, Quaternion, Vec3 } from 'meta/worlds';
 import type { Entity } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';

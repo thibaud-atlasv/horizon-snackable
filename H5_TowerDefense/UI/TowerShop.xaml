@@ -21,7 +21,7 @@
 
         <!-- Item Container Style -->
         <Style x:Key="TowerItemContainerStyle" TargetType="ContentPresenter">
-            <Setter Property="Margin" Value="30,0"/>
+            <Setter Property="Margin" Value="36,0,36,0"/>
         </Style>
 
         <!-- Tower Item Template -->
@@ -137,15 +137,14 @@
             <!-- Horizontal ScrollViewer for tower list -->
             <ScrollViewer HorizontalScrollBarVisibility="Hidden"
                           VerticalScrollBarVisibility="Disabled"
-                          PanningMode="HorizontalOnly"
-                          Padding="48,36">
+                          PanningMode="HorizontalOnly">
 
                 <!-- Tower Items List -->
                 <ItemsControl ItemsSource="{Binding items}"
                               ItemsPanel="{StaticResource HorizontalPanel}"
                               ItemTemplate="{StaticResource TowerItemTemplate}"
                               ItemContainerStyle="{StaticResource TowerItemContainerStyle}"
-                              VerticalAlignment="Center"/>
+                              VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </ScrollViewer>
         </Border>
     </Grid>

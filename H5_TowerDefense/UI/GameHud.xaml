@@ -34,23 +34,15 @@
             </StackPanel>
 
             <!-- CENTER SECTION: Wave -->
-            <StackPanel Grid.Column="1" 
-                        Orientation="Vertical" 
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Orientation="Horizontal" Grid.Column="1" Grid.Row="1" Margin="0,100,0,-230">
                 <!-- Wave label -->
-                <TextBlock Text="WAVE" 
-                           FontSize="50" 
-                           Foreground="#a0a0c0" 
-                           FontWeight="Normal"
-                           HorizontalAlignment="Center"/>
                 <!-- Wave number in X/10 format -->
                 <TextBlock Text="{Binding Path=waveText}" 
-                           FontSize="90" 
                            Foreground="#ffffff" 
                            FontWeight="Bold"
                            HorizontalAlignment="Center"
-                           Margin="0,-10,0,0"/>
+                           Margin="0,-10,0,0" FontSize="60"/>
             </StackPanel>
 
             <!-- RIGHT SECTION: Gold -->

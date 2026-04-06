@@ -1,3 +1,13 @@
+/**
+ * SlowService — Applies slow debuffs to enemies on TakeDamage hits.
+ *
+ * Subscribes to TakeDamage. If props.slowFactor and props.slowDuration are present,
+ * calls EnemyService.setSpeedFactor() to slow the enemy for the given duration.
+ * Tracks active slow timers per enemyId in onUpdate, restoring speedFactor=1 on expiry.
+ * Also tints the enemy entity blue while slowed, restores original color on expiry.
+ * Frost tower base stats and Upg.slowFactor/slowDuration feed into this system.
+ * Force-instantiated in GameManager._startGame().
+ */
 import { Service, Color, ColorComponent, subscribe } from 'meta/worlds';
 import { service } from 'meta/worlds';
 import type { Entity } from 'meta/worlds';

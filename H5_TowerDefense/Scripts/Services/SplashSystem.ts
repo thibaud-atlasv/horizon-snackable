@@ -1,3 +1,11 @@
+/**
+ * SplashSystem — HitService modifier that expands hit targets to all enemies in splash radius.
+ *
+ * Reads props.splashRadius from IHitContext. If > 0, replaces ctx.targets with all enemies
+ * within that radius of ctx.originX/Z using TargetingService.getEnemiesInRadius().
+ * Force-instantiated in GameManager._startGame() to trigger self-registration.
+ * Cannon base stats include splashRadius=1.0; Upg.splash adds +0.8 per upgrade.
+ */
 import { Service, type Maybe } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';

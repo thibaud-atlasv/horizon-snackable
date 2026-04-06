@@ -25,6 +25,7 @@ import {
 import type { Maybe } from 'meta/worlds';
 
 import { Events, UiEvents } from '../Types';
+import { LEVEL_DEFS } from '../Defs/LevelDefs';
 
 // ── Module-level UiEvent constants ──────────────────────────────────────────
 
@@ -48,7 +49,7 @@ export class GameOverScreenViewModel extends UiViewModel {
   enemiesKilled: number = 0;
   goldEarned: number = 0;
   wavesCompleted: number = 0;
-  totalWaves: number = 10;
+  totalWaves: number = LEVEL_DEFS[0].waves.length;
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -61,7 +62,8 @@ export class GameOverScreenHud extends Component {
   // Track stats during gameplay
   private _enemiesKilled: number = 0;
   private _goldEarned: number = 0;
-  private _wavesCompleted: number = 0;
+  private _currentWave: number = 0;
+  private _ended: boolean = false;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -90,12 +92,13 @@ export class GameOverScreenHud extends Component {
   }
 
   /**
-   * Track wave completion for stats
+   * Track current wave number for stats
    */
-  @subscribe(Events.WaveCompleted, { execution: ExecuteOn.Owner })
-  onWaveCompleted(_payload: Events.WaveCompletedPayload): void {
+  @subscribe(Events.WaveStarted, { execution: ExecuteOn.Owner })
+  onWaveStarted(payload: Events.WaveStartedPayload): void {
     if (NetworkingService.get().isServerContext()) return;
-    this._wavesCompleted++;
+    if (this._ended) return;
+    this._currentWave = payload.waveIndex + 1;
   }
 
   /**
@@ -106,10 +109,11 @@ export class GameOverScreenHud extends Component {
     if (NetworkingService.get().isServerContext()) return;
     if (!this.viewModel) return;
 
+    this._ended = true;
     this.viewModel.isVictory = payload.won;
     this.viewModel.enemiesKilled = this._enemiesKilled;
     this.viewModel.goldEarned = this._goldEarned;
-    this.viewModel.wavesCompleted = this._wavesCompleted;
+    this.viewModel.wavesCompleted = this._currentWave;
 
     // Show the overlay
     this.viewModel.visible = true;
@@ -126,7 +130,8 @@ export class GameOverScreenHud extends Component {
     this.viewModel.visible = false;
     this._enemiesKilled = 0;
     this._goldEarned = 0;
-    this._wavesCompleted = 0;
+    this._currentWave = 0;
+    this._ended = false;
 
     // Fire restart event
     EventService.sendLocally(Events.RestartGame, new Events.RestartGamePayload());

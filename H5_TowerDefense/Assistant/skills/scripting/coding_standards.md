@@ -202,7 +202,7 @@ this._vm.gold = 42;  // triggers reactive XAML update automatically
 
 ---
 
-## Pipeline Services (HitService / DamageService / DebuffService)
+## Pipeline Services (HitService)
 
 New mechanics are added as a new `@service()` that self-registers into a pipeline in `onReady()`.
 Then add one line to `GameManager._services[]` to force instantiation in the desired order.

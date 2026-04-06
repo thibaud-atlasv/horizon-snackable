@@ -1,0 +1,15 @@
+{
+    "id": "34898376709806710",
+    "author": "thibaudalbyonsteam",
+    "name": "H2_GuessGame",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.12.1"
+        }
+    ]
+}

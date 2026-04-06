@@ -1,7 +1,15 @@
+/**
+ * Constants.ts — All tuning values, grid dimensions, timing, and economy constants.
+ *
+ * No imports from sibling files — zero local dependencies.
+ * Add named constants here instead of magic numbers anywhere in the codebase.
+ * Also exports hexColor() utility for converting CSS hex strings to normalized RGB.
+ */
+
 // ─── Grid ─────────────────────────────────────────────────────────────────────
 
-export const GRID_COLS = 18;
-export const GRID_ROWS = 24;
+export const GRID_COLS = 16;
+export const GRID_ROWS = 26;
 export const CELL_SIZE = 0.5; // world units per cell
 
 // col → Z axis (horizontal, left/right on screen)
@@ -47,18 +55,14 @@ export const HEALTHBAR_DEPTH       = 0.02; // world units (flat)
 
 // ─── Theme colors ────────────────────────────────────────────────────────────
 
-export const GROUND_COLOR    = '#212126'; // dark teal
-export const PATH_CELL_COLOR = '#80522E'; // warm sand
+export const GROUND_COLOR    = '#1a2e3d'; // deep blue-teal
+export const PATH_CELL_COLOR = '#c87832'; // warm copper-amber
 
 /** Convert a CSS hex color string to normalized { r, g, b } in [0, 1]. */
 export function hexColor(hex: string): { r: number; g: number; b: number } {
   const n = parseInt(hex.replace('#', ''), 16);
   return { r: ((n >> 16) & 0xff) / 255, g: ((n >> 8) & 0xff) / 255, b: (n & 0xff) / 255 };
 }
-
-// ─── Crit ─────────────────────────────────────────────────────────────────────
-
-export const CRIT_MULTIPLIER = 2.5;
 
 // ─── Floating Text ────────────────────────────────────────────────────────────
 export const FLOATING_TEXT_POOL_SIZE = 10;   // pre-spawned floating text instances

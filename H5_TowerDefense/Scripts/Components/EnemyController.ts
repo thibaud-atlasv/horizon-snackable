@@ -1,4 +1,17 @@
-import { Component, EventService, TransformComponent, Color, ColorComponent } from 'meta/worlds';
+/**
+ * EnemyController — Path-following, damage handling, and death animation for enemy entities.
+ *
+ * Attached to: every spawned enemy entity template.
+ * onInit (InitEnemy event): reads IEnemyDef, registers with EnemyService, sets HP and color.
+ * onUpdate: advances along the waypoint path using _wpIndex + _subT. Calls PathService
+ *   for world positions, applies speedFactor from EnemyService (slow debuffs). Calls
+ *   lookAt() toward movement direction so the entity faces forward. Calls _reachEnd()
+ *   when past the last waypoint.
+ * onTakeDamage: reduces _hp, updates EnemyService registry, triggers _die() at 0 HP.
+ * _die(): unregisters from EnemyService, rewards gold, fires EnemyDied, starts death anim.
+ * Death animation: squash Y scale to 0 over DEATH_DURATION seconds, then destroys entity.
+ */
+import { Component, EventService, TransformComponent, Color, ColorComponent, Vec3 } from 'meta/worlds';
 import { component, subscribe } from 'meta/worlds';
 import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload } from 'meta/worlds';
@@ -19,6 +32,11 @@ export class EnemyController extends Component {
   private _speed: number = 0;
   private _reward: number = 0;
   private _alive: boolean = false;
+  private _dying: boolean = false;
+  private _deathTimer: number = 0;
+  private _baseScale: number = 1;
+
+  private static readonly DEATH_DURATION = 0.35; // seconds
 
   // Waypoint-segment tracking — enemies re-read the path at each waypoint boundary.
   private _wpIndex: number = 0; // current sub-path index (0 = wp[0]→wp[1], …)
@@ -45,14 +63,17 @@ export class EnemyController extends Component {
     this._subT    = 0;
     this._alive   = true;
 
+    this._baseScale = this._transform.localScale.x;
     const startPos = PathService.get().getWorldPositionInSubPath(0, 0);
     this._transform.worldPosition = startPos;
     this._enemyId = EnemyService.get().register(this.entity, this._defId, this._hp, startPos.x, startPos.z);
 
     const col = def.color;
     const color = new Color(col.r, col.g, col.b, 1);
-    for (const child of this.entity.getChildrenWithComponent(ColorComponent)) {
-      const c = child.getComponent(ColorComponent);
+    const child = this.entity.getChildrenWithComponent(ColorComponent);
+    if (child.length > 0) {
+        //for (const child of this.entity.getChildrenWithComponent(ColorComponent)) {
+      const c = child[0].getComponent(ColorComponent);
       if (c) c.color = color;
     }
   }
@@ -71,6 +92,13 @@ export class EnemyController extends Component {
 
   @subscribe(OnWorldUpdateEvent)
   onUpdate(p: OnWorldUpdateEventPayload): void {
+    if (this._dying) {
+      this._deathTimer += p.deltaTime;
+      const t = Math.min(this._deathTimer / EnemyController.DEATH_DURATION, 1.0);
+      this._transform.localScale = new Vec3(this._baseScale * (1 - t), this._baseScale * (1 - t), this._baseScale * (1 - t));
+      if (t >= 1.0) this._finishDie();
+      return;
+    }
     if (!this._alive) return;
 
     const dt = p.deltaTime;
@@ -93,23 +121,29 @@ export class EnemyController extends Component {
 
     const pos = pathService.getWorldPositionInSubPath(this._wpIndex, this._subT);
     this._transform.worldPosition = pos;
+    const ahead = pathService.getWorldPositionInSubPath(this._wpIndex, this._subT + 0.1);
+    this._transform.lookAt(ahead, Vec3.up);
     EnemyService.get().update(this._enemyId, pos.x, pos.z, pathService.getGlobalT(this._wpIndex, this._subT), this._hp);
   }
 
   private _die(): void {
     this._alive = false;
+    this._dying = true;
+    this._deathTimer = 0;
     EnemyService.get().unregister(this._enemyId);
     ResourceService.get().earn(this._reward);
 
-    // Capture position before destroying entity
     const pos = this._transform.worldPosition;
-
     const p = new Events.EnemyDiedPayload();
     p.enemyId = this._enemyId;
     p.reward  = this._reward;
     p.worldX  = pos.x;
     p.worldZ  = pos.z;
     EventService.sendLocally(Events.EnemyDied, p);
+  }
+
+  private _finishDie(): void {
+    this._dying = false;
     this.entity.destroy();
   }
 

@@ -84,6 +84,6 @@ Props flow from `ITowerStats.props` → `IHitContext.props` → `TakeDamagePaylo
 | `projectileColor` | `{r,g,b}` | All tower base stats | `ProjectileController` |
 | `projectileScale` | `number` | Arrow/Frost base stats | `ProjectileController` |
 
-## DamageService
+## Adding a Damage-Value Pipeline (if needed)
 
-`DamageService` exists as a secondary pipeline (`IDamageContext → IDamageContext`) but currently has no modifiers registered. It can be used for damage-value transformations after hit resolution (armor, resistance, etc.).
+If armor, resistance, or damage-value transforms are needed in the future, add a new `DamageService` following the same pattern as `HitService` — a `reduce` over registered `(ctx) → ctx` modifiers. Register it in `GameManager._startGame()` and declare its context interface in `Types.ts`.

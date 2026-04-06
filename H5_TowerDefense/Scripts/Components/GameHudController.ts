@@ -1,3 +1,11 @@
+/**
+ * GameHudController — ViewModel controller for the top HUD bar (gold, lives, wave).
+ *
+ * Attached to: GameHUD entity in space.hstf (has CustomUiComponent → GameHud.xaml).
+ * GameHudViewModel fields: lives, gold, waveNumber, totalWaves, waveText ("N/10").
+ * Updates on: ResourceChanged (gold/lives), WaveStarted (wave number), RestartGame (reset to 1).
+ * All subscriptions use ExecuteOn.Owner — client-only UI, no server logic.
+ */
 import {
   Component,
   OnEntityStartEvent,
@@ -18,11 +26,12 @@ import { LEVEL_DEFS } from '../Defs/LevelDefs';
 
 @uiViewModel()
 export class GameHudViewModel extends UiViewModel {
+  visible: boolean = true;
   lives: number = START_LIVES;
   gold: number = START_GOLD;
   waveNumber: number = 1;
-  totalWaves: number = 10;
-  waveText: string = '1/10';
+  totalWaves: number = LEVEL_DEFS[0].waves.length;
+  waveText: string = '';
 }
 
 @component()
@@ -45,7 +54,7 @@ export class GameHudController extends Component {
     this.viewModel.gold = resourceSvc.gold;
     this.viewModel.waveNumber = 1;
     this.viewModel.totalWaves = LEVEL_DEFS[0].waves.length;
-    this._updateWaveText();
+    //this._updateWaveText();
   }
 
   @subscribe(Events.ResourceChanged, { execution: ExecuteOn.Owner })
@@ -68,13 +77,16 @@ export class GameHudController extends Component {
   @subscribe(Events.RestartGame, { execution: ExecuteOn.Owner })
   onRestart(_p: Events.RestartGamePayload): void {
     if (!this.viewModel) return;
+    this.viewModel.visible = true;
     this.viewModel.waveNumber = 1;
     this.viewModel.totalWaves = LEVEL_DEFS[0].waves.length;
-    this._updateWaveText();
+    this.viewModel.waveText = "";
+    //this._updateWaveText();
   }
+
 
   private _updateWaveText(): void {
     if (!this.viewModel) return;
-    this.viewModel.waveText = `${this.viewModel.waveNumber}/${this.viewModel.totalWaves}`;
+    this.viewModel.waveText = `WAVE ${this.viewModel.waveNumber}/${this.viewModel.totalWaves}`;
   }
 }

@@ -1,0 +1,31 @@
+{
+    "class": "horizon::AssetMetadata",
+    "version": 1,
+    "data": {
+        "id": "4473720397161144717",
+        "pipelineVersion": 1,
+        "assetBuilderSettings": [
+            {
+                "class": "horizon::renderer::tool::TextureAssetBuilderSettings",
+                "version": 10003,
+                "data": {
+                    "target": "tex",
+                    "streamable": true,
+                    "streamCount": 2,
+                    "cpuReadable": false,
+                    "textureSettings": {
+                        "class": "horizon::renderer::tool::TextureAssetBuilderTextureSettings",
+                        "version": 3,
+                        "data": {
+                            "equirectangularToCube": false,
+                            "enableRoughnessConvolution": false,
+                            "premultiplyAlpha": false,
+                            "defaultFormat": "Srgb",
+                            "platformOverrides": []
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

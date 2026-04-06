@@ -36,10 +36,8 @@ export class FloatingTextController extends Component {
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
-    console.log("start")
     this._transform = this.entity.getComponent(TransformComponent);
     this._textComponent = this.entity.getComponent(WorldTextComponent);
-console.log("text");
     // Configure text appearance
     if (this._textComponent) {
       this._textComponent.color = new Color(GOLD_R, GOLD_G, GOLD_B, 1);
@@ -74,7 +72,6 @@ console.log("text");
     // Start animation
     this._elapsed = 0;
     this._isAnimating = true;
-    console.log("done");
   }
 
   @subscribe(OnWorldUpdateEvent)

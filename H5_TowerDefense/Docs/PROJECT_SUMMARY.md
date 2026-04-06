@@ -30,12 +30,11 @@ New features are new files — existing files are only modified when necessary.
 All gameplay communication via `EventService.sendLocally()`.
 
 ### Pipeline Services
-Two resolution pipelines — each is a `reduce` over registered modifier closures:
+One resolution pipeline — a `reduce` over registered modifier closures:
 
 | Service | Pipeline | Current modifiers |
 |---------|----------|-------------------|
 | `HitService` | `IHitContext → IHitContext` | `SplashSystem` (AoE target expansion), `CritService` (crit damage × multiplier) |
-| `DamageService` | `IDamageContext → IDamageContext` | *(passthrough — no modifiers registered)* |
 
 Adding a new mechanic (chain, pierce, burn…) = one new `@service()` that calls `HitService.get().register(modifier)` in `onReady()`, then one import line in `GameManager`.
 
@@ -65,7 +64,6 @@ Scripts/
     WaveService         — state machine: Build → Wave → WaveClear → loop
     PlacementService    — drag-to-place input handler + preview + range indicator
     HitService          — hit target expansion pipeline
-    DamageService       — damage value pipeline (passthrough currently)
     SplashSystem        — registers AoE modifier into HitService
     SlowService         — subscribes to TakeDamage, applies slowFactor to enemies
     CritService         — registers crit modifier into HitService (arrow/cannon only)
@@ -85,6 +83,7 @@ Scripts/
     TowerShopHud         — ViewModel for tower purchase bar
     TowerUpgradeMenuHud  — ViewModel for upgrade/sell panel
     GameOverScreenHud    — ViewModel for end screen + stats
+    WaveBannerHud        — ViewModel for wave announcement banner (WAVE X, animated)
 ```
 
 ---
@@ -169,9 +168,9 @@ Idle → Build (5s) → Wave → WaveClear (0.5s) → Build → … → Victory
 |-------|------|-------|--------|
 | **HUD** | `UI/GameHud.xaml` | Always | ✅ |
 | **Tower Shop** | `UI/TowerShop.xaml` | Build + Wave | ✅ |
-| **Tower Upgrade Menu** | `UI/TowerUpgradeMenu.xaml` | Tower selected | ✅ |
+| **Tower Upgrade Menu** | `UI/TowerUpgradeMenu.xaml` | Tower selected | ✅ — 4-column layout: [Info Panel] [Upgrade1] [Upgrade2] [Sell]. Info panel shows tower name + upgrade history (up to 3 lines). Upgrade buttons hidden when tower is at max tier (3). |
 | **Game Over / Victory** | `UI/GameOverScreen.xaml` | End | ✅ |
-| **Wave Banner** | — | Build→Wave | Planned |
+| **Wave Banner** | UI/WaveBanner.xaml | Wave start | ✅ |
 
 ---
 

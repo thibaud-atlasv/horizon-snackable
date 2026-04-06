@@ -1,10 +1,19 @@
+/**
+ * FloatingTextService — Pool manager for floating text visual effects.
+ *
+ * prewarm(): spawns FLOATING_TEXT_POOL_SIZE entities at park position during game init.
+ * show(x, z, value): displays "+N" gold text in gold color at world position.
+ * showCrit(x, z, multiplier): displays "xN" crit text in red at world position.
+ * Subscribes to EnemyDied → show gold reward above the death position.
+ * Subscribes to TakeDamage → if props.critHit present, show crit multiplier above enemy.
+ * Uses round-robin pool; animation and parking handled by FloatingTextController.
+ */
 import { Service, WorldService, NetworkMode, Vec3, Quaternion, NetworkingService, EventService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import type { Entity } from 'meta/worlds';
 import { ExecuteOn } from 'meta/worlds';
 import { Assets } from '../Assets';
 import { Events } from '../Types';
-import { EnemyService } from './EnemyService';
 import { FLOATING_TEXT_POOL_SIZE, FLOATING_TEXT_PARK_Y } from '../Constants';
 
 const PARK_POS = new Vec3(0, FLOATING_TEXT_PARK_Y, 0);
@@ -16,15 +25,17 @@ export class FloatingTextService extends Service {
 
   async prewarm(): Promise<void> {
     if (NetworkingService.get().isServerContext()) return;
-    for (let i = 0; i < FLOATING_TEXT_POOL_SIZE; i++) {
-      const entity = await WorldService.get().spawnTemplate({
-        templateAsset: Assets.FloatingText,
-        position: PARK_POS,
-        scale: Vec3.one,
-        networkMode: NetworkMode.LocalOnly,
-      }).catch((e: unknown) => { console.error(e); return null; });
-      if (entity) this._pool.push(entity);
-    }
+    const entities = await Promise.all(
+      Array.from({ length: FLOATING_TEXT_POOL_SIZE }, () =>
+        WorldService.get().spawnTemplate({
+          templateAsset: Assets.FloatingText,
+          position: PARK_POS,
+          scale: Vec3.one,
+          networkMode: NetworkMode.LocalOnly,
+        }).catch((e: unknown) => { console.error(e); return null; }),
+      ),
+    );
+    for (const entity of entities) { if (entity) this._pool.push(entity); }
   }
 
   showCrit(worldX: number, worldZ: number, multiplier: number): void {
@@ -57,8 +68,7 @@ export class FloatingTextService extends Service {
     if (!p.props['isCrit']) return;
     const multiplier = p.props['critMultiplier'] as number | undefined;
     if (multiplier === undefined) return;
-    const rec = EnemyService.get().get(p.enemyId);
-    if (rec) this.showCrit(rec.worldX, rec.worldZ, multiplier);
+    this.showCrit(p.originX, p.originZ, multiplier);
   }
 
   @subscribe(Events.EnemyDied, { execution: ExecuteOn.Owner })

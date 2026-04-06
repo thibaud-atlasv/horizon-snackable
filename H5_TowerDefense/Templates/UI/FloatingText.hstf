@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "entities": [
         {
             "id": "21571de5-5dc9-4fec-8f5c-24ef3c5a5a15",
@@ -8,7 +8,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -41,7 +41,7 @@
                                 "a": 1.0
                             },
                             "fontSize": 1.0,
-                            "fontFamily": "Oswald"
+                            "fontFamily": "Roboto"
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
