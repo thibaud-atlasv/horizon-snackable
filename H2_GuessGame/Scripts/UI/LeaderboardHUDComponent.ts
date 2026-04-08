@@ -60,10 +60,7 @@ export class LeaderboardHUDComponent extends Component {
   onStart(): void {
     this._isServer = NetworkingService.get().isServerContext();
 
-    if (this._isServer) {
-      this._fetchTopEntries();
-      return;
-    }
+    if (this._isServer) return;
 
     this._customUi = this.entity.getComponent(CustomUiComponent);
     if (this._customUi) this._customUi.dataContext = this._vm;
@@ -75,8 +72,8 @@ export class LeaderboardHUDComponent extends Component {
   @subscribe(OnPlayerCreateEvent, {execution: ExecuteOn.Everywhere})
   onPlayerCreate(p: OnPlayerCreateEventPayload): void {
     if (!p.entity || !this._isServer) return;
+    this._fetchTopEntries();
     this._fetchForPlayer(p.entity);
-    
   }
 
   // ─── Server: initial fetch at scene start ─────────────────────────────────
@@ -92,14 +89,13 @@ export class LeaderboardHUDComponent extends Component {
 
   private async _fetchForPlayer(player: Entity): Promise<void>
   {
-    console.log('[LB][S] fetchForPlayer — start');
     const entry = await this._withTimeout(
       this.lbService.fetchEntryForPlayer(player, this.leaderboardApiName),
       'fetchForPlayer',
     );
     this._cachedScore = entry?.score ?? 0; // 0 = no entry (distinct from undefined = fetch not done)
     this._cachedRank  = entry?.rank;
-    console.log(`[LB][S] fetchForPlayer — score=${this._cachedScore} rank=${this._cachedRank ?? 'none'}`);
+
     EventService.sendGlobally(NetworkEvents.LeaderboardPlayerData, {
       yourBestScore: this._cachedScore,
       yourRank:      this._cachedRank ?? 0,
@@ -107,13 +103,18 @@ export class LeaderboardHUDComponent extends Component {
   }
 
   private async _fetchTopEntries(): Promise<void> {
-    console.log('[LB][S] fetchTopEntries — start');
-    this._serverTopEntries = await this._withTimeout(
+    const _serverTopEntries = await this._withTimeout(
       this.lbService.fetchEntries(this.leaderboardApiName),
       'fetchTopEntries',
     );
-    console.log(`[LB][S] fetchTopEntries — ${this._serverTopEntries?.length ?? 'failed'} entries`);
+    
+    if (!_serverTopEntries)
+    {
+      this._fetchTopEntries()
+      return;
+    }
 
+    this._serverTopEntries = _serverTopEntries;
     const names:  string[] = [];
     const scores: number[] = [];
     const ranks:  number[] = [];
@@ -127,18 +128,16 @@ export class LeaderboardHUDComponent extends Component {
       for (let i = this._serverTopEntries.length; i < MAX_ENTRIES; i++) {
         names.push('---'); scores.push(0); ranks.push(i + 1);
       }
-    }
 
     EventService.sendGlobally(NetworkEvents.LeaderboardData, {
       playerNames:        names,
       playerScores:       scores,
       playerRanks:        ranks,
     });
+    }
   }
 
   // ─── Client: game over → show UI, submit only if new high score ───────────
-
-
   @subscribe(Events.AnswerResult)
   onAnswerResult(p: Events.AnswerResultPayload): void {
     if (this._isServer) return;
@@ -217,7 +216,6 @@ export class LeaderboardHUDComponent extends Component {
     });
     // Refresh top entries only if the player moved within (or into) the visible board
     if (newRank > 0 && newRank <= MAX_ENTRIES && newRank !== this._cachedRank) {
-      console.log('[LB][S] onSubmitScore — rank changed in top 10, refreshing top entries');
       void this._fetchTopEntries();
     }
     this._cachedRank  = newRank;
@@ -227,8 +225,6 @@ export class LeaderboardHUDComponent extends Component {
   @subscribe(NetworkEvents.LeaderboardData, { execution: ExecuteOn.Owner })
   onLeaderboardData(p: NetworkEvents.LeaderboardDataPayload): void {
     if (this._isServer) return;
-
-    console.log(`[LB][C] onLeaderboardData — ${p.playerNames.length} entries`);
     const alias = PlayerService.get().getLocalPlayer()?.getComponent(BasePlayerComponent)?.displayName ?? '';
     this._vm.entries = p.playerNames.map((name, i) => {
       const row           = new LeaderboardRowData();
@@ -278,6 +274,12 @@ export class LeaderboardHUDComponent extends Component {
 
     // Insert at the correct position (rank is 1-based)
     entries.splice(newRank - 1, 0, row);
+
+    // Re-number all rows to match their new positions
+    for (let i = 0; i < entries.length; i++) {
+      entries[i].rank        = i + 1;
+      entries[i].rankDisplay = this._formatRank(i + 1);
+    }
 
     // Keep only MAX_ENTRIES rows
     this._vm.entries = entries.slice(0, MAX_ENTRIES);

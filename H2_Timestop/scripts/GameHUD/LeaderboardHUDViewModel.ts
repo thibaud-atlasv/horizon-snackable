@@ -24,6 +24,7 @@ import {
   NetworkingService,
   OnEntityStartEvent,
   OnLeaderboardUpdatedEvent,
+  OnPlayerCreateEvent,
   PlayerService,
   UiViewModel,
   component,
@@ -31,6 +32,7 @@ import {
   subscribe,
   uiViewModel,
   type OnLeaderboardUpdatedEventPayload,
+  type OnPlayerCreateEventPayload,
 } from 'meta/worlds';
 import { ExecuteOn, type Entity, type Maybe } from 'meta/worlds';
 import { Events, GamePhase, LeaderboardEvents, NetworkEvents } from '../Types';
@@ -109,6 +111,13 @@ export class LeaderboardHUDViewModel extends Component {
     this._setVisibility(false);
     this._setEntries(this._createPlaceholderEntries());
   }
+
+  @subscribe(OnPlayerCreateEvent)
+  onPlayerCreate(payload: OnPlayerCreateEventPayload): void {
+    this._fetchLeaderboardData();
+  }
+
+
 
   @subscribe(NetworkEvents.UpdateScore, { execution: ExecuteOn.Everywhere })
   async onUpdateScore(payload: NetworkEvents.UpdateScorePayload): Promise<void> {
@@ -231,11 +240,9 @@ export class LeaderboardHUDViewModel extends Component {
   }
 
   private async _fetchLeaderboardData(): Promise<void> {
-
-    if (!this._leaderboardService || !this._localPlayer) {
-      this._viewModel.isLoading = false;
+    if (!this._localPlayer) {
+      this._viewModel.isLoading = true;
       this._viewModel.errorMessage = 'Leaderboard unavailable';
-      this._setEntries(this._createPlaceholderEntries());
       return;
     }
     this._viewModel.errorMessage = "";
