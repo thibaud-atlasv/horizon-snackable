@@ -1,0 +1,15 @@
+{
+    "id": "26069514912725984",
+    "author": "emporiumofwonders",
+    "name": "H3_IdleFactory",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.13.2"
+        }
+    ]
+}

@@ -1,0 +1,160 @@
+tasks:
+  - name: Entrepôt en Primitives 3D
+    status: done
+    summary: Entrepôt créé avec sol, toit, murs, 8 slots de stockage, zones entrée/sortie
+    files: [space.hstf]
+    subtasks:
+      - name: Créer entrepôt avec cubes dans space.hstf
+        status: done
+
+  - name: Route 2 Voies pour Camions
+    status: done
+    summary: Route créée avec chaussée asphalte, ligne centrale pointillée blanche, bordures jaunes
+    files: [space.hstf]
+    subtasks:
+      - name: Créer route avec cubes dans space.hstf
+        status: done
+
+  - name: Produit en Primitives Assemblées
+    status: done
+    summary: Template carton créé avec corps marron, ruban adhésif, et lignes de rabats
+    files: [Templates/GameplayObjects/Product.hstf]
+    subtasks:
+      - name: Créer template boîte/carton avec primitives
+        status: done
+
+  - name: Conveyor Belt en Primitives 3D
+    status: done
+    summary: Conveyor belt créé avec base, 8 slots alignés aux productions, et rails latéraux
+    files: [space.hstf]
+    subtasks:
+      - name: Créer conveyor belt avec slots dans space.hstf
+        status: done
+
+  - name: Camion en Primitives 3D
+    status: done
+    summary: Template camion créé avec primitives (châssis gris, cabine rouge, 4 roues noires)
+    files: [Templates/GameplayObjects/Truck.hstf]
+    subtasks:
+      - name: Créer modèle camion avec cubes/cylindres
+        status: done
+
+  - name: Layout 3D Mobile Portrait
+    status: done
+    reference: "Idle Factory Tycoon"
+    summary: Layout primitives 3D créé avec 6 zones colorées et caméra top-down
+    files: [space.hstf, Templates/GameplayObjects/FactoryZoneCube.hstf, Scripts/IdleFactoryCameraComponent.ts]
+    subtasks:
+      - name: Créer layout avec primitives 3D
+        status: done
+
+  - name: UI Jauge Entrepôt
+    status: done
+    summary: Jauge de contenance avec barre de progression verte et texte "X / Y"
+    files: [Scripts/Components/WarehouseGaugeHudComponent.ts, Scripts/UI/WarehouseGaugeHudViewModel.ts, UI/WarehouseGaugeHud.xaml, Scripts/Types.ts]
+    subtasks:
+      - name: Créer UI jauge et connecter au WarehouseService
+        status: done
+
+  - name: Rebuild Warehouse Template
+    status: done
+    summary: Entrepôt reconstruit avec sol, toit, 6 murs avec gaps, 8 slots, zones entrée/sortie
+    files: [Templates/GameplayObjects/Warehouse.hstf]
+    subtasks:
+      - name: Assembler sol, toit, murs, slots, zones dans template
+        status: done
+
+  - name: Jauge 3D World-Space Entrepôt
+    status: done
+    summary: Jauge 3D avec bordure épaisse, barre de remplissage verte, et texte "X/Y" visible en top-down
+    files: [Scripts/Components/Warehouse3DGaugeController.ts, Templates/Warehouse.hstf]
+    subtasks:
+      - name: Supprimer ancienne UI screen-space
+        status: done
+      - name: Créer jauge 3D avec bordure épaisse et chiffre
+        status: done
+      - name: Vérifier implémentation
+        status: done
+
+  - name: Custom UI World-Space Entrepôt
+    status: done
+    summary: Custom UI XAML en world-space avec bordure épaisse, barre verte, texte "X/Y" visible en top-down
+    files: [UI/WarehouseGauge.xaml, Scripts/UI/WarehouseGaugeViewModel.ts, Templates/Warehouse.hstf]
+    subtasks:
+      - name: Remplacer jauge 3D par Custom UI world-space
+        status: done
+      - name: Vérifier implémentation
+        status: done
+
+  - name: UI Upgrades Screenspace
+    status: done
+    summary: Custom UI 2D screenspace pour liste dynamique d'upgrades (prix, titre, description, enabled, position, event click)
+    files: [UI/UpgradePanel.xaml, Scripts/UI/UpgradePanelViewModel.ts]
+    subtasks:
+      - name: Créer XAML style jauge warehouse + ViewModel avec bindings
+        status: done
+
+  - name: UI Upgrades Position XY + Component
+    status: done
+    summary: Position XY par bouton via RenderTransform binding + UpgradePanelComponent créé
+    files: [UI/UpgradePanel.xaml, Scripts/UI/UpgradePanelViewModel.ts, Scripts/Components/UpgradePanelComponent.ts]
+    subtasks:
+      - name: Ajouter position XY avec RenderTransform binding dans XAML
+        status: done
+      - name: Créer UpgradePanelComponent pour ajouter les boutons
+        status: done
+
+  - name: Redesign Boutons Upgrade
+    status: done
+    summary: Layout vertical avec prix en gros (38px gold) pleine largeur, titre/description en petit au-dessus
+    files: [UI/UpgradePanel.xaml]
+    subtasks:
+      - name: Prix en gros pleine largeur, label/description en petit au-dessus
+        status: done
+
+  - name: Style Boutons Upgrade v2
+    status: done
+    summary: Icône gold_icon.png, double bordure (vert ext + gris int), fond gris semi-transparent
+    files: [UI/UpgradePanel.xaml, Scripts/Components/UpgradePanelComponent.ts]
+    subtasks:
+      - name: Icône gold_icon.png au lieu de $, double bordure épaisse, fond gris semi-transparent
+        status: done
+
+  - name: UI Bandeau Stats Joueur
+    status: done
+    summary: Bandeau screenspace en haut avec temps, paquets envoyés, gold
+    files: [UI/PlayerStatsBar.xaml, Scripts/UI/PlayerStatsBarViewModel.ts, Scripts/Components/PlayerStatsBarComponent.ts]
+    subtasks:
+      - name: Créer XAML + ViewModel + Component
+        status: done
+
+  - name: Module Production en Primitives 3D
+    status: done
+    summary: Template ProductionModule créé avec corps, rampe inclinée -11°, rails, machine colorable, cheminée
+    files: [Templates/ProductionModule.hstf, Templates/Layout.hstf]
+    subtasks:
+      - name: Créer template module production avec primitives et rampe
+        status: done
+
+  - name: Grue sur Modules de Production
+    status: done
+    summary: Grue ajoutée avec base grise, pilier jaune, bras horizontal, et crochet au-dessus de la rampe
+    files: [Templates/ProductionModule.hstf]
+    subtasks:
+      - name: Ajouter grue en primitives au template ProductionModule
+        status: done
+
+  - name: Sprite Titre Idle Factory
+    status: in_progress
+    subtasks:
+      - name: Générer image titre avec texte centré et background industriel
+        status: in_progress
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding: []
+  failed_attempts: []
+
+notes:
+  - Jeu Idle Factory Tycoon avec modules isolés et souples
+  - Ratio mobile portrait (9:16)

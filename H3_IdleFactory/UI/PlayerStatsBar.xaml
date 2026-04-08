@@ -1,0 +1,109 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent">
+
+    <Page.Resources>
+        <!-- Color Palette - Warehouse Theme (matching existing UI) -->
+        <SolidColorBrush x:Key="PanelBorder" Color="#FF2E7D32"/>
+        <SolidColorBrush x:Key="PanelBackground" Color="#CC1A1A1A"/>
+        <SolidColorBrush x:Key="HeaderText" Color="#FF4CAF50"/>
+        <SolidColorBrush x:Key="TextShadow" Color="#80000000"/>
+        <SolidColorBrush x:Key="StatText" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="GoldText" Color="#FFFFD700"/>
+        <SolidColorBrush x:Key="PlaceholderIcon" Color="#FF666666"/>
+    </Page.Resources>
+
+    <Viewbox Stretch="Uniform" VerticalAlignment="Bottom">
+        <Grid Width="900" Height="100">
+            <!-- Main Stats Bar Container -->
+            <Border BorderBrush="{StaticResource PanelBorder}"
+                    Background="{StaticResource PanelBackground}"
+                    Padding="20,10" BorderThickness="0,3,0,0">
+                
+                <!-- Three Stats in Horizontal Layout -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Stat 1: Time Played -->
+                    <StackPanel Grid.Column="0" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center">
+                        <Image Source="Textures/Time.png" 
+                               Width="40" Height="40" 
+                               Stretch="Uniform"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                        <Grid VerticalAlignment="Center">
+                            <!-- Text Shadow -->
+                            <TextBlock Text="{Binding Path=TimePlayed}" 
+                                       FontSize="28" 
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextShadow}"
+                                       Margin="2,2,0,0"/>
+                            <!-- Main Text -->
+                            <TextBlock Text="{Binding Path=TimePlayed}" 
+                                       FontSize="28" 
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource StatText}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Stat 2: Packages Sent -->
+                    <StackPanel Grid.Column="1" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center">
+                        <Image Width="40" Height="40" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,10,0" Source="/Root;component/Textures/cube.png"/>
+                        <!-- Placeholder Icon (gray square) -->
+                        <Grid VerticalAlignment="Center">
+                            <!-- Text Shadow -->
+                            <TextBlock Text="{Binding Path=PackagesSent}" 
+                                       FontSize="28" 
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextShadow}"
+                                       Margin="2,2,0,0"/>
+                            <!-- Main Text -->
+                            <TextBlock Text="{Binding Path=PackagesSent}" 
+                                       FontSize="28" 
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource StatText}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Stat 3: Gold -->
+                    <StackPanel Grid.Column="2" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center">
+                        <Image Source="Textures/gold_icon.png" 
+                               Width="40" Height="40" 
+                               Stretch="Uniform"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                        <Grid VerticalAlignment="Center">
+                            <!-- Text Shadow -->
+                            <TextBlock Text="{Binding Path=Gold}" 
+                                       FontSize="28" 
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextShadow}"
+                                       Margin="2,2,0,0"/>
+                            <!-- Main Text -->
+                            <TextBlock Text="{Binding Path=Gold}" 
+                                       FontSize="28" 
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource GoldText}"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Viewbox>
+</Page>

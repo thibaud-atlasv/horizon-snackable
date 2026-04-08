@@ -1,0 +1,12 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["tsconfig.custom.json"],
+      "url": "https://json.schemastore.org/tsconfig"
+    }
+  ],
+  "chat.tools.urls.autoApprove": {
+    "https://code.visualstudio.com": true,
+    "https://github.com/microsoft/vscode/wiki/*": true
+  }
+}
