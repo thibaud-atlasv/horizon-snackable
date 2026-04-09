@@ -1,4 +1,12 @@
 tasks:
+  - name: Camera Shake on Life Lost
+    status: done
+    summary: Decaying random X/Y shake on EnemyReachedEnd, 0.3s duration
+    files: [CameraShakeService.ts, ClientSetup.ts]
+  - name: Grass Ground Plane
+    status: done
+    summary: Bloons TD style grass texture with cartoon vibrant greens, UV tiling (6,4)
+    files: [Textures/GrassTexture.png, TDGroundTextureController.ts, GameManager.ts]
   - name: Spawn Tunnel Mesh
     status: done
     summary: Low poly stone tunnel for enemy spawn point (1,250 tris, 1m height)

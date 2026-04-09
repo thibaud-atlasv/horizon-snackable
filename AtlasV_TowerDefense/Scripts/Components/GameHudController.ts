@@ -8,6 +8,7 @@
  */
 import {
   Component,
+  EventService,
   OnEntityStartEvent,
   NetworkingService,
   ExecuteOn,
@@ -19,7 +20,7 @@ import {
 } from 'meta/worlds';
 import type { Maybe } from 'meta/worlds';
 
-import { Events } from '../Types';
+import { Events, UiEvents } from '../Types';
 import { ResourceService } from '../Services/ResourceService';
 import { START_GOLD, START_LIVES } from '../Constants';
 import { LEVEL_DEFS } from '../Defs/LevelDefs';
@@ -84,6 +85,12 @@ export class GameHudController extends Component {
     //this._updateWaveText();
   }
 
+
+  @subscribe(UiEvents.skipWaveTap, { execution: ExecuteOn.Owner })
+  onSkipWaveTap(_p: UiEvents.SkipWaveTapPayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    EventService.sendLocally(Events.SkipBuild, new Events.SkipBuildPayload());
+  }
 
   private _updateWaveText(): void {
     if (!this.viewModel) return;

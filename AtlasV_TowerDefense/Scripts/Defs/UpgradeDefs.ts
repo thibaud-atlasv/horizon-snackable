@@ -55,10 +55,10 @@ const u = (label: string, apply: (s: ITowerStats) => ITowerStats): AtomFn =>
 export const Upg = {
   rate:         u('Rate',     s => ({ ...s, fireRate: s.fireRate * 2.0 })),
   damage:       u('Damage',   s => ({ ...s, damage: s.damage * 2.0 })),
-  range:        u('Range',    s => ({ ...s, range: s.range + 2.0 })),
+  range:        u('Range',    s => ({ ...s, range: s.range + 1.0 })),
   splash:       u('Splash',   s => {
     const cur = (s.props['splashRadius'] as number | undefined) ?? 0;
-    return { ...s, props: { ...s.props, splashRadius: cur + 0.8 } };
+    return { ...s, props: { ...s.props, splashRadius: cur + 0.4 } };
   }),
   slowFactor:   u('Slow',    s => {
     const cur = (s.props['slowFactor'] as number | undefined) ?? 0.5;

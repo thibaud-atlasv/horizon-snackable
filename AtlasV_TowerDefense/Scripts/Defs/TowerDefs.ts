@@ -19,8 +19,8 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Crit path  → gambler spikes, then bigger hits or faster procs
   {
     id: 'arrow', name: 'Arrow', cost: 50,
-    stats: { damage: 10, range: 3.5, fireRate: 1.5, projectileSpeed: 12,
-      props: { projectileColor: { r: 0.18, g: 0.80, b: 0.44 }, projectileScale: 0.10, critMultiplier:2, critChance: 0.2 } },
+    stats: { damage: 12, range: 2.25, fireRate: 1.5, projectileSpeed: 7,
+      props: { projectileColor: { r: 1.00, g: 0.90, b: 0.20 }, projectileScale: 0.10, critMultiplier:2, critChance: 0.2 } },
     template: Assets.Arrow,
     upgrades: tree(
       [Upg.range(50),    Upg.crit(50)],
@@ -35,8 +35,8 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Splash path → massive zone or rapid AoE
   {
     id: 'cannon', name: 'Cannon', cost: 100,
-    stats: { damage: 35, range: 2.5, fireRate: 0.6, projectileSpeed: 6.5,
-      props: { splashRadius: 1.0, projectileColor: { r: 0.90, g: 0.49, b: 0.13 } } },
+    stats: { damage: 40, range: 1.75, fireRate: 0.6, projectileSpeed: 4.5,
+      props: { splashRadius: 0.6, projectileColor: { r: 1.00, g: 0.50, b: 0.10 } } },
     template: Assets.Cannon,
     upgrades: tree(
       [Upg.damage(100),  Upg.splash(100)],
@@ -51,9 +51,9 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Duration path → longer freeze, then more intense or wider
   {
     id: 'frost', name: 'Frost', cost: 80,
-    stats: { damage: 4, range: 3.0, fireRate: 1.0, projectileSpeed: 5,
-      props: { slowFactor: 0.5, slowDuration: 1.5,
-               projectileColor: { r: 0.0, g: 0.74, b: 0.83 }, projectileScale: 0.12 } },
+    stats: { damage: 5, range: 1.90, fireRate: 1.0, projectileSpeed: 5.5,
+      props: { slowFactor: 0.5, slowDuration: 1.5, splashRadius: 0.4,
+               projectileColor: { r: 0.40, g: 0.91, b: 0.97 }, projectileScale: 0.12 } },
     template: Assets.Frost,
     upgrades: tree(
       [Upg.splash(80),        Upg.slowDuration(80)],
@@ -68,8 +68,8 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Damage path → focused beam, then speed burst or longer reach (max 1× Range)
   {
     id: 'laser', name: 'Laser', cost: 200,
-    stats: { damage: 8, range: 5.0, fireRate: 5.0, projectileSpeed: 9,
-      props: { projectileColor: { r: 0.61, g: 0.35, b: 0.71 }, projectileScale: 0.1 } },
+    stats: { damage: 8, range: 3.0, fireRate: 5.0, projectileSpeed: 12.5,
+      props: { projectileColor: { r: 0.75, g: 0.52, b: 0.98 }, projectileScale: 0.1 } },
     template: Assets.Laser,
     upgrades: tree(
       [Upg.rate(175),    Upg.damage(175)],

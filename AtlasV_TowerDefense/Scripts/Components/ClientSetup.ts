@@ -15,14 +15,16 @@
  */
 import {
   Component, OnEntityStartEvent,
-  NetworkingService, 
+  NetworkingService,
   CameraService, CameraMode,
   FocusedInteractionService,
   TransformComponent,
   type Maybe, type Entity,
   ExecuteOn, component, property, subscribe,
   CameraComponent,
+  OnPlayerCreateEvent,
 } from 'meta/worlds';
+import { CameraShakeService } from '../Services/CameraShakeService';
 
 @component()
 export class ClientSetup extends Component {
@@ -38,30 +40,30 @@ export class ClientSetup extends Component {
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
 
-  @subscribe(OnEntityStartEvent, { execution: ExecuteOn.Owner })
-  onStart(): void {
-    if (NetworkingService.get().isServerContext()) return;
-    this._initCamera();
-  }
-
   // ── Camera setup ─────────────────────────────────────────────────────────────
 
   private _initCamera(): void {
     setTimeout(() => {
       FocusedInteractionService.get().enableFocusedInteraction({
-        disableEmotesButton:    true,
+        disableEmotesButton: true,
         disableFocusExitButton: true,
       });
 
       const anchorTc = this.cameraAnchor?.getComponent(TransformComponent);
       const cameraC = this.cameraAnchor?.getComponent(CameraComponent);
+      if (cameraC)
+        CameraService.get().setActiveCamera({ camera: cameraC });
 
-      CameraService.get().setCameraMode(CameraMode.Fixed, {
-        position: anchorTc?.worldPosition,
-        rotation: anchorTc?.worldRotation,
-        duration: 0,
-        fov: cameraC?.fieldOfView ??    this.cameraFov,
-      });
+      if (this.cameraAnchor)
+        CameraShakeService.get().init(this.cameraAnchor);
     }, this.initDelay * 1000);
   }
+
+  @subscribe(OnPlayerCreateEvent)
+  onPlayerCreate(): void {
+    if (NetworkingService.get().isPlayerContext()) {
+      this._initCamera();
+    }
+  }
+
 }

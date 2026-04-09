@@ -17,10 +17,11 @@ import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload } from 'meta/worlds';
 import { NetworkingService } from 'meta/worlds';
 import { Events } from '../Types';
-import { PROJECTILE_HIT_RADIUS } from '../Constants';
+import { PROJECTILE_HIT_RADIUS, PROJECTILE_PARTICLE_INTERVAL } from '../Constants';
 import { EnemyService } from '../Services/EnemyService';
 import { HitService } from '../Services/HitService';
 import { ProjectilePool, POOL_PARK_POSITION } from '../Services/ProjectilePool';
+import { VfxService } from '../Services/VfxService';
 
 @component()
 export class ProjectileController extends Component {
@@ -34,6 +35,7 @@ export class ProjectileController extends Component {
   private _destZ: number = 0;
   private _originX: number = 0;
   private _originZ: number = 0;
+  private _col: Color = Color.white;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
@@ -44,12 +46,12 @@ export class ProjectileController extends Component {
   @subscribe(Events.InitProjectile)
   onInit(p: Events.InitProjectilePayload): void {
     this._targetId = p.targetEnemyId;
-    this._damage   = p.damage;
-    this._speed    = p.speed;
-    this._props    = p.props;
-    this._originX  = p.originX;
-    this._originZ  = p.originZ;
-    this._active   = true;
+    this._damage = p.damage;
+    this._speed = p.speed;
+    this._props = p.props;
+    this._originX = p.originX;
+    this._originZ = p.originZ;
+    this._active = true;
     const rec = EnemyService.get().get(p.targetEnemyId);
     if (rec) { this._destX = rec.worldX; this._destZ = rec.worldZ; }
 
@@ -61,15 +63,17 @@ export class ProjectileController extends Component {
 
     const col = p.props['projectileColor'] as { r: number; g: number; b: number } | undefined;
     if (col) {
-      const color = new Color(col.r, col.g, col.b, 1);
+      this._col = new Color(col.r, col.g, col.b, 1);
       const c = this.entity.getComponent(ColorComponent);
-      if (c) c.color = color;
+      if (c) c.color = this._col;
       for (const child of this.entity.getChildrenWithComponent(ColorComponent)) {
         const cc = child.getComponent(ColorComponent);
-        if (cc) cc.color = color;
+        if (cc) cc.color = this._col;
       }
     }
   }
+
+  private particleCD: number = PROJECTILE_PARTICLE_INTERVAL;
 
   @subscribe(OnWorldUpdateEvent)
   onUpdate(p: OnWorldUpdateEventPayload): void {
@@ -94,6 +98,16 @@ export class ProjectileController extends Component {
       else this._return();
       return;
     }
+
+    if (this.particleCD > 0) {
+      this.particleCD -= p.deltaTime;
+      if (this.particleCD <= 0) {
+        VfxService.get().spawnTrail(pos.x, pos.y, pos.z, this._col.r, this._col.g, this._col.b);
+        this.particleCD = PROJECTILE_PARTICLE_INTERVAL;
+      }
+    }
+
+
 
     const step = this._speed * p.deltaTime;
     const norm = step / dist;

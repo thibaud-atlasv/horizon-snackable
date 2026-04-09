@@ -9,15 +9,15 @@
  *   - onRestart(): resets resources and restarts the wave sequence.
  *   - _endGame(): sets _running=false, fires GameOver event (once, guarded).
  * Services are force-instantiated here to control initialization order.
- * Ground entity is linked via @property() in the editor to apply GROUND_COLOR at start.
+ * Ground texture is handled by TDGroundTextureController (grass texture on Ground entity).
  */
-import { Component, EventService, ColorComponent, Color } from 'meta/worlds';
+import { Color, ColorComponent, Component, EventService } from 'meta/worlds';
 import { component, subscribe, property } from 'meta/worlds';
 import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload, Maybe, Entity } from 'meta/worlds';
 import { NetworkingService } from 'meta/worlds';
 import { Events, GamePhase } from '../Types';
-import { GROUND_COLOR, hexColor } from '../Constants';
+
 import { WaveService } from '../Services/WaveService';
 import { ResourceService } from '../Services/ResourceService';
 import { SlowService } from '../Services/SlowService';
@@ -28,6 +28,9 @@ import { HealthBarService } from '../Services/HealthBarService';
 import { FloatingTextService } from '../Services/FloatingTextService';
 import { CritService } from '../Services/CritService';
 import { SplashSystem } from '../Services/SplashSystem';
+import { VfxService } from '../Services/VfxService';
+import { GROUND_COLOR, hexColor } from '../Constants';
+import { CameraShakeService } from '../Services/CameraShakeService';
 
 @component()
 export class GameManager extends Component {
@@ -80,12 +83,15 @@ export class GameManager extends Component {
     this._running = true;
     CritService.get();
     SplashSystem.get();
+    VfxService.get();
+    CameraShakeService.get();
     void Promise.all([
       PathService.get().prewarm(),
       ProjectilePool.get().prewarm(),
       HealthBarService.get().prewarm(),
       PlacementService.get().prewarm(),
       FloatingTextService.get().prewarm(),
+      VfxService.get().prewarm(),
     ]);
     ResourceService.get().reset();
     WaveService.get().startGame();

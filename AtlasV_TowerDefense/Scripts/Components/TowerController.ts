@@ -17,10 +17,15 @@ import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload } from 'meta/worlds';
 import { NetworkingService } from 'meta/worlds';
 import { Events, type ITowerStats } from '../Types';
+import { CELL_SIZE } from '../Constants';
 import { TargetingService } from '../Services/TargetingService';
 import { EnemyService } from '../Services/EnemyService';
 import { TowerService } from '../Services/TowerService';
 import { ProjectilePool } from '../Services/ProjectilePool';
+
+// ── Bounce animation constants ───────────────────────────────────────────────
+const BOUNCE_DURATION = 0.35;  // total bounce time in seconds
+const BOUNCE_OVERSHOOT = 1.25; // peak scale multiplier
 
 @component()
 export class TowerController extends Component {
@@ -30,6 +35,8 @@ export class TowerController extends Component {
   private _cooldown: number = 0;
   private _ready: boolean = false;
   private _stats: ITowerStats = { damage: 0, range: 0, fireRate: 1, projectileSpeed: 1, props: {} };
+  private _bouncing: boolean = false;
+  private _bounceElapsed: number = 0;
 
   @property() barrel: Maybe<Entity> = null;
 
@@ -45,6 +52,9 @@ export class TowerController extends Component {
     this._row      = p.row;
     this._cooldown = 0;
     this._ready    = true;
+    this._bouncing = true;
+    this._bounceElapsed = 0;
+    this._transform.localScale = Vec3.zero;
     this._refreshStats();
   }
 
@@ -58,6 +68,23 @@ export class TowerController extends Component {
     if (!this._ready) return;
 
     const dt = p.deltaTime;
+
+    // Bounce animation: scale 0 → overshoot → settle at CELL_SIZE
+    if (this._bouncing) {
+      this._bounceElapsed += dt;
+      const t = Math.min(this._bounceElapsed / BOUNCE_DURATION, 1);
+      // Ease-out elastic: overshoot then settle
+      const s = t < 0.5
+        ? BOUNCE_OVERSHOOT * (t / 0.5)               // 0 → overshoot
+        : BOUNCE_OVERSHOOT + (1 - BOUNCE_OVERSHOOT) * ((t - 0.5) / 0.5); // overshoot → 1
+      const scale = s * CELL_SIZE;
+      this._transform.localScale = new Vec3(scale, scale, scale);
+      if (t >= 1) {
+        this._bouncing = false;
+        this._transform.localScale = new Vec3(CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
+    }
+
     if (this._cooldown > 0) this._cooldown -= dt;
 
     const pos = this._transform.worldPosition;
@@ -68,7 +95,9 @@ export class TowerController extends Component {
       const target = EnemyService.get().get(targetId);
       if (target) {
         const barrelT = this.barrel.getComponent(TransformComponent);
-        if (barrelT) barrelT.lookAt(new Vec3(target.worldX, barrelT.worldPosition.y, target.worldZ), Vec3.up);
+        if (barrelT) {
+          barrelT.lookAt(new Vec3(target.worldX, barrelT.worldPosition.y, target.worldZ), Vec3.up);
+        }
       }
     }
 

@@ -180,6 +180,14 @@ export namespace Events {
   export class RestartGamePayload {}
   export const RestartGame = new LocalEvent<RestartGamePayload>('EvRestartGame', RestartGamePayload);
 
+  // Skip build phase → immediately start wave
+  export class SkipBuildPayload {}
+  export const SkipBuild = new LocalEvent<SkipBuildPayload>('EvSkipBuild', SkipBuildPayload);
+
+  // Tower spawn bounce (sent to newly placed tower entity)
+  export class TowerSpawnedPayload { col: number = 0; row: number = 0; }
+  export const TowerSpawned = new LocalEvent<TowerSpawnedPayload>('EvTowerSpawned', TowerSpawnedPayload);
+
 }
 
 // ─── UI Events ────────────────────────────────────────────────────────────────
@@ -189,7 +197,10 @@ export namespace UiEvents {
   @serializable() export class SellTowerTapPayload      { readonly parameter: string = ''; }
   @serializable() export class UpgradeTowerTapPayload   { readonly parameter: string = ''; }
 
+  @serializable() export class SkipWaveTapPayload         { readonly parameter: string = ''; }
+
   export const towerShopTap    = new UiEvent('TowerShopTapEvent',                             TowerShopTapPayload);
   export const sellTowerTap    = new UiEvent('TowerUpgradeMenuViewModel-onSellTowerTap',    SellTowerTapPayload);
   export const upgradeTowerTap = new UiEvent('TowerUpgradeMenuViewModel-onUpgradeTowerTap', UpgradeTowerTapPayload);
+  export const skipWaveTap     = new UiEvent('GameHudViewModel-onSkipWaveTap',               SkipWaveTapPayload);
 }

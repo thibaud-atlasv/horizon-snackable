@@ -9,13 +9,13 @@
 // ─── Grid ─────────────────────────────────────────────────────────────────────
 
 export const GRID_COLS = 16;
-export const GRID_ROWS = 26;
+export const GRID_ROWS = 22;
 export const CELL_SIZE = 0.5; // world units per cell
 
 // col → Z axis (horizontal, left/right on screen)
 // row → X axis (vertical, top/bottom on screen)
-export const GRID_ORIGIN_X = -((GRID_ROWS - 1) / 2) * CELL_SIZE; // -5.5 — top row X
-export const GRID_ORIGIN_Z = -((GRID_COLS - 1) / 2) * CELL_SIZE; // -4.0 — left col Z
+export const GRID_ORIGIN_X = -((GRID_ROWS - 1) / 2) * CELL_SIZE; // -5.75 — top row X
+export const GRID_ORIGIN_Z = -((GRID_COLS - 1) / 2) * CELL_SIZE; // -3.75 — left col Z
 
 // Y position for ground-level entities (towers, enemies, tiles)
 export const GROUND_Y = 0;
@@ -31,6 +31,7 @@ export const ENEMY_SPAWN_INTERVAL  = 0.35; // seconds between enemy spawns withi
 export const START_GOLD  = 150;
 export const START_LIVES = 20;
 export const WAVE_BONUS_GOLD = 25; // flat gold awarded at end of each wave
+export const INCOME_RATE = 0.10;   // 10% of gold on hand → bonus at wave end
 
 // ─── Enemy scaling ────────────────────────────────────────────────────────────
 
@@ -42,8 +43,9 @@ export const SELL_RATIO = 0.6; // fraction of totalInvested refunded on sell
 
 // ─── Projectile ───────────────────────────────────────────────────────────────
 
-export const PATH_TILE_POOL_SIZE   = 220; // max path cells (BFS can meander across full grid)
+export const PARTICLE_POOL_SIZE    = 150;
 export const PROJECTILE_HIT_RADIUS = 0.3; // world units — distance to trigger hit detection
+export const PROJECTILE_PARTICLE_INTERVAL = 0.015;
 export const PROJECTILE_SCALE      = 0.25; // world units — visual size of spawned projectiles
 export const PROJECTILE_POOL_SIZE  = 30;   // pre-spawned projectile instances
 export const PROJECTILE_POOL_Y     = -100; // off-screen park position Y
@@ -55,8 +57,8 @@ export const HEALTHBAR_DEPTH       = 0.02; // world units (flat)
 
 // ─── Theme colors ────────────────────────────────────────────────────────────
 
-export const GROUND_COLOR    = '#1a2e3d'; // deep blue-teal
-export const PATH_CELL_COLOR = '#c87832'; // warm copper-amber
+export const GROUND_COLOR    = '#2d5a27'; // vibrant grass green
+export const PATH_CELL_COLOR = '#c4823a'; // warm sandy earth
 
 /** Convert a CSS hex color string to normalized { r, g, b } in [0, 1]. */
 export function hexColor(hex: string): { r: number; g: number; b: number } {

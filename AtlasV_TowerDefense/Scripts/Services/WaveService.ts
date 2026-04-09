@@ -15,7 +15,7 @@ import { Service, EventService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
 import { Events, GamePhase } from '../Types';
-import { WAVE_BUILD_DURATION, WAVE_CLEAR_DURATION, WAVE_BONUS_GOLD, ENEMY_SPAWN_INTERVAL } from '../Constants';
+import { WAVE_BUILD_DURATION, WAVE_CLEAR_DURATION, WAVE_BONUS_GOLD, ENEMY_SPAWN_INTERVAL, INCOME_RATE } from '../Constants';
 import { LEVEL_DEFS } from '../Defs/LevelDefs';
 import { EnemyService } from './EnemyService';
 import { ResourceService } from './ResourceService';
@@ -74,6 +74,13 @@ export class WaveService extends Service {
     this._tickSpawn(dt);
   }
 
+  @subscribe(Events.SkipBuild)
+  onSkipBuild(_p: Events.SkipBuildPayload): void {
+    if (this._phase === GamePhase.Build) {
+      this._timer = 0; // next tick() will call _enterWave()
+    }
+  }
+
   @subscribe(Events.EnemyDied)
   onEnemyDied(_p: Events.EnemyDiedPayload): void {
     this._checkWaveClear();
@@ -101,6 +108,8 @@ export class WaveService extends Service {
     if (EnemyService.get().count > 0) return;
 
     ResourceService.get().earn(WAVE_BONUS_GOLD);
+    const incomeBonus = Math.floor(ResourceService.get().gold * INCOME_RATE);
+    if (incomeBonus > 0) ResourceService.get().earn(incomeBonus);
     this._waveIndex++;
 
     const doneP = new Events.WaveCompletedPayload();
@@ -131,6 +140,12 @@ export class WaveService extends Service {
       }
     }
     this._totalInWave = this._spawnQueue.length;
+
+    // Fisher-Yates shuffle — mixes enemy types for chaotic, fun waves
+    for (let i = this._spawnQueue.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this._spawnQueue[i], this._spawnQueue[j]] = [this._spawnQueue[j], this._spawnQueue[i]];
+    }
 
     const startP = new Events.WaveStartedPayload();
     startP.waveIndex = this._waveIndex;

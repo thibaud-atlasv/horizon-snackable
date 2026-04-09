@@ -23,6 +23,7 @@ export namespace Assets {
   export const EnemyBoss  = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
 
   // ── Shared ────────────────────────────────────────────────────────────────
+  export const Particles       = new TemplateAsset('@Templates/Cube.hstf');
   export const Projectile      = new TemplateAsset('@Templates/Projectile.hstf');
   export const RangeIndicator  = new TemplateAsset('@Templates/RangeIndicator.hstf');
   export const HealthBar       = new TemplateAsset('@Templates/HealthBar.hstf');

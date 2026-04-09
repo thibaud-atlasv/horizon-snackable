@@ -17,6 +17,7 @@ Core tension: strategic placement (choke points, range overlap) vs. economy mana
 | Target | Mobile portrait, local single-player |
 | Grid | 18×24 cells × 0.5 world units = **9×12 world units**, centered on origin |
 | Play area | Grid ~70% screen height; HUD top ~10%, Shop bottom ~20% |
+| Ground | Tiled cartoon grass texture (Unlit material, UV scale 6×4) on 11×8 plane; dark border plane behind |
 
 ---
 
@@ -70,9 +71,11 @@ Scripts/
     ProjectilePool      — pre-spawned projectile pool (30 entities)
     HealthBarService    — pre-spawned health bar pool (30 entities)
     FloatingTextService — pools floating text entities; shows gold on death, crit multiplier on hit
+    CameraShakeService  — shakes camera when an enemy reaches the end (life lost feedback)
 
   Components/
     GameManager         — onStart prewarm, onUpdate tick, game start/end/restart
+    TDGroundTextureController — Applies tiled grass texture to ground plane at start
     ClientSetup         — camera (Fixed mode), FocusedInteraction enable
     TowerController     — per-frame targeting + firing
     EnemyController     — path follow, TakeDamage handler, die/reach-end
@@ -188,7 +191,7 @@ Idle → Build (5s) → Wave → WaveClear (0.5s) → Build → … → Victory
 | `InitProjectile` | `targetEnemyId, damage, speed, props` | ProjectileController |
 | `TakeDamage` | `enemyId, damage, props` | EnemyController, SlowService, FloatingTextService |
 | `EnemyDied` | `enemyId, reward, worldX, worldZ` | FloatingTextService, ResourceService |
-| `EnemyReachedEnd` | `enemyId` | GameManager |
+| `EnemyReachedEnd` | `enemyId` | GameManager, CameraShakeService |
 | `TowerSelected` | `col, row, defId, tier, choices` | TowerUpgradeMenuHud |
 | `TowerDeselected` | — | TowerUpgradeMenuHud |
 | `TowerSold` | `col, row, refund` | TowerService |
