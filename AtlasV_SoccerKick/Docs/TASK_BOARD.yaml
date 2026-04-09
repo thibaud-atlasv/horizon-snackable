@@ -1,0 +1,58 @@
+tasks:
+  - name: Football/Soccer Ball Model
+    status: done
+    summary: Imported realistic soccer ball mesh with classic black/white pattern
+    files: [Templates/Ball.hstf]
+
+  - name: Penalty Area Ground
+    status: done
+    summary: Created penalty box with green grass surface, white boundary lines, penalty spot, and arc using 17 primitive entities
+    files: [space.hstf]
+
+  - name: Cartoon Soccer Goal
+    status: done
+    summary: Generated voxel-style cartoon soccer goal mesh with posts, crossbar and net pattern
+    files: [Models/SoccerGoal/SoccerGoal_remeshed.glb, space.hstf]
+
+  - name: Restore Goal Posts
+    status: done
+    summary: Re-added cube-based goal posts (left, right, crossbar) as dimension reference markers
+    files: [space.hstf]
+
+  - name: Voxel Goalkeeper
+    status: done
+    summary: Created voxel goalkeeper with 10 primitive cubes (head, torso, arms, gloves, legs, shins) in goalkeeper colors
+    files: [Templates/GoalKeeper.hstf]
+
+  - name: Feedback UI System
+    status: done
+    summary: Created animated feedback UI with GOAL/SAVED/MISS messages, elastic scale animations, shake wobble, and fade effects
+    files: [Scripts/Events/ShotFeedbackEvents.ts, Scripts/Components/ShotFeedbackDisplayComponent.ts, ui/ShotFeedbackPanel.xaml, Scripts/Components/GameManager.ts]
+
+  - name: Soccer Kick Title Texture
+    status: in_progress
+    subtasks:
+      - name: Generate title image with "Soccer Kick" text and football-themed background, apply to plane
+        status: in_progress
+
+  - name: Custom HUD UI
+    status: done
+    summary: Created sporty HUD with score display, 6 shot indicator dots, and combo multiplier
+    files: [Scripts/Components/SoccerKickHudComponent.ts, ui/SoccerKickHud.xaml, space.hstf]
+
+  - name: HUD Layout Redesign
+    status: done
+    summary: Resized elements x3, repositioned layout (score top-left in cartouche, shots top-center, combo top-right), added central instruction text
+    files: [Scripts/Components/SoccerKickHudComponent.ts, ui/SoccerKickHud.xaml, Scripts/Types.ts]
+
+  - name: HUD Fine-Tuning
+    status: done
+    summary: Moved shots down 50px, centered score below shots with fixed 450px width cartouche and rounder corners (radius 40)
+    files: [ui/SoccerKickHud.xaml]
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding: []
+  failed_attempts: []
+
+notes: []

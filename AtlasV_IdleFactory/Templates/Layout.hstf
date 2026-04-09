@@ -1,0 +1,711 @@
+{
+    "version": 6,
+    "entities": [
+        {
+            "id": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9",
+            "name": "Layout",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "1cffc648-527f-401a-8496-c266ac596f77",
+            "name": "TruckRoad",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "11153413136039239113",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "0716550a-836b-48c9-abd7-969828381f5f",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -2.25
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "dfe82014-8318-4f19-9a29-6594e867d86a",
+            "name": "ConveyorBelt",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "6307589226348683828",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "b10d064d-e1e4-41a4-9d98-bc495e2169e8",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": -1.769920825958252,
+                                        "y": -0.20000018179416657,
+                                        "z": 1.243783950805664
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "63f0d6c6-7040-483f-ba38-759eea31cd61",
+            "name": "Warehouse",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "1112773817070852603",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "b37fd3e1-ed3c-480b-a7b7-6a2ef4926959",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": -0.01992087811231613,
+                                        "y": -0.1500001847743988,
+                                        "z": -2.256216049194336
+                                    },
+                                    "localRotation": {
+                                        "x": -0.0,
+                                        "y": 3.1415927410125734,
+                                        "z": 0.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "8ed43eff-7bba-4e9a-9057-85d09b055198",
+            "name": "Truck",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14451003616332658423",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "c0c114f5-a21d-4144-9c58-085898bf3a1a",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -3.6268911361694338
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "26d877f2-8ec9-45b6-ac98-82ea2de4c24a",
+            "name": "Truck(1)",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14451003616332658423",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "c0c114f5-a21d-4144-9c58-085898bf3a1a",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -3.6268911361694338
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "TruckController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "27219068287696221",
+                                    "ingestionId": "15723952415534365210",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "truckIndex": 1.0
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "e48f1490-0b0d-427e-b681-898e6f5387f3",
+            "name": "Truck(2)",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14451003616332658423",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "c0c114f5-a21d-4144-9c58-085898bf3a1a",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -3.6268911361694338
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "TruckController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "27219068287696221",
+                                    "ingestionId": "15723952415534365210",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "truckIndex": 2.0
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "c2fe3def-d3af-4416-8c49-1d577650a15d",
+            "name": "Truck(3)",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14451003616332658423",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "c0c114f5-a21d-4144-9c58-085898bf3a1a",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -3.6268911361694338
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "TruckController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "27219068287696221",
+                                    "ingestionId": "15723952415534365210",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "truckIndex": 3.0
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "04730fe0-d194-4391-8d3a-f18c3c922e75",
+            "name": "Truck(4)",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14451003616332658423",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "c0c114f5-a21d-4144-9c58-085898bf3a1a",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -3.6268911361694338
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "TruckController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "27219068287696221",
+                                    "ingestionId": "15723952415534365210",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "truckIndex": 4.0
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "ae6cc266-250f-4ac5-a0b2-ba3793c9d2e9",
+            "name": "Truck(5)",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14451003616332658423",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "c0c114f5-a21d-4144-9c58-085898bf3a1a",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -3.6268911361694338
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "TruckController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "27219068287696221",
+                                    "ingestionId": "15723952415534365210",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "truckIndex": 5.0
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "5d95d79b-0e7d-4d9b-974e-e735aa75be99",
+            "name": "ProductionModule_Blue",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14382997953168530420",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "dda4f847-5355-47d1-99fd-f2ddc1677074",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.41136518120765688,
+                                        "y": 0.0,
+                                        "z": -0.25600001215934756
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "c08995d7-cfb1-48f2-9f16-048227f6d441",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.28999999165534975,
+                                        "g": 0.5600000023841858,
+                                        "b": 0.8500000238418579,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "18bd7cd1-0bf7-4aad-ba29-a6ee8ef817dc",
+            "name": "ProductionModule_Green",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14382997953168530420",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "dda4f847-5355-47d1-99fd-f2ddc1677074",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.41136518120765688,
+                                        "y": 0.0,
+                                        "z": 1.24399995803833
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "ProductionModuleController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "27219068287696221",
+                                    "ingestionId": "5745499674487685305",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "moduleIndex": 1.0
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "20d1bbf2-7967-4a53-8b5a-10ab8121480a",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.3490196168422699,
+                                        "g": 0.3803921639919281,
+                                        "b": 0.3607843220233917,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "7aacf834-6b47-429b-a3e5-7ac516477771",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.250980406999588,
+                                        "g": 0.27843138575553896,
+                                        "b": 0.250980406999588,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "c08995d7-cfb1-48f2-9f16-048227f6d441",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.49000000953674319,
+                                        "g": 0.8299999833106995,
+                                        "b": 0.12999999523162843,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "77d9c1f0-4309-404e-986a-396735ee6366",
+            "name": "ProductionModule_Red",
+            "type": {
+                "packageOrRemoteId": "27219068287696221",
+                "ingestionId": "14382997953168530420",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "dda4f847-5355-47d1-99fd-f2ddc1677074",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.41136518120765688,
+                                        "y": 0.0,
+                                        "z": 2.74399995803833
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "ProductionModuleController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "27219068287696221",
+                                    "ingestionId": "5745499674487685305",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "moduleIndex": 2.0
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "7aacf834-6b47-429b-a3e5-7ac516477771",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.27843138575553896,
+                                        "g": 0.250980406999588,
+                                        "b": 0.250980406999588,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "c08995d7-cfb1-48f2-9f16-048227f6d441",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 0.8199999928474426,
+                                        "g": 0.009999999776482582,
+                                        "b": 0.10999999940395355,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "1cffc648-527f-401a-8496-c266ac596f77",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "dfe82014-8318-4f19-9a29-6594e867d86a",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "63f0d6c6-7040-483f-ba38-759eea31cd61",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "8ed43eff-7bba-4e9a-9057-85d09b055198",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "26d877f2-8ec9-45b6-ac98-82ea2de4c24a",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "e48f1490-0b0d-427e-b681-898e6f5387f3",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "c2fe3def-d3af-4416-8c49-1d577650a15d",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "04730fe0-d194-4391-8d3a-f18c3c922e75",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "ae6cc266-250f-4ac5-a0b2-ba3793c9d2e9",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "5d95d79b-0e7d-4d9b-974e-e735aa75be99",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "18bd7cd1-0bf7-4aad-ba29-a6ee8ef817dc",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "77d9c1f0-4309-404e-986a-396735ee6366",
+            "destination": "33d52a6e-f917-4a2d-a8e2-7138d40b02a9"
+        }
+    ]
+}

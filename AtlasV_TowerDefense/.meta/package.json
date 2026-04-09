@@ -1,0 +1,15 @@
+{
+    "id": "26631398616455768",
+    "author": "emporiumofwonders",
+    "name": "AtlasV_TowerDefense",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.13.2"
+        }
+    ]
+}

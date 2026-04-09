@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Soccer Kick 3D</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
+
+  body {
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    font-family: 'Arial Rounded MT Bold', 'Nunito', Arial, sans-serif;
+  }
+
+  #wrap {
+    position: relative;
+    width: min(420px, 100vw);
+    height: min(750px, 100vh);
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.6);
+  }
+
+  #c { display:block; width:100%; height:100%; }
+
+  /* ── HUD ── */
+  #hud {
+    position: absolute; top:0; left:0; right:0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 14px 16px 0;
+    pointer-events: none; z-index: 10;
+  }
+  .pill {
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 100px;
+    padding: 5px 14px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .pill-lbl { font-size:10px; font-weight:900; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:1px; }
+  .pill-val { font-size:22px; color:#fff; font-weight:900; text-shadow: 0 2px 0 rgba(0,0,0,0.5); line-height:1; }
+  #shots-dots { display:flex; gap:4px; align-items:center; padding: 8px 14px; }
+  .dot { width:9px; height:9px; border-radius:50%; background:#FFD600; border:2px solid rgba(0,0,0,0.3); transition:all .2s; }
+  .dot.used { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.1); }
+
+  /* ── POWER BAR ── */
+  #power-wrap {
+    position: absolute; bottom: 120px; left:50%; transform:translateX(-50%);
+    width: 160px; pointer-events:none; z-index:10;
+    opacity:0; transition: opacity .15s;
+  }
+  #power-wrap.show { opacity:1; }
+  #power-bg { height:10px; background:rgba(0,0,0,0.4); border-radius:10px; border:2px solid rgba(255,255,255,0.2); overflow:hidden; }
+  #power-bar { height:100%; width:0%; border-radius:8px; transition: background .1s; }
+  #power-label { text-align:center; font-size:11px; font-weight:900; color:rgba(255,255,255,0.7); margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+
+  /* ── SWIPE HINT ── */
+  #hint {
+    position:absolute; bottom:80px; left:50%; transform:translateX(-50%);
+    color:rgba(255,255,255,0.75); font-size:13px; font-weight:900;
+    text-transform:uppercase; letter-spacing:1.5px;
+    pointer-events:none; z-index:10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    animation: bob 1.4s ease-in-out infinite alternate;
+  }
+  @keyframes bob { from{transform:translateX(-50%) translateY(0)} to{transform:translateX(-50%) translateY(-5px)} }
+
+  /* ── FEEDBACK TEXT ── */
+  #feedback {
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%) scale(0);
+    font-size:38px; font-weight:900; color:#FFD600;
+    text-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255,214,0,0.6);
+    pointer-events:none; z-index:20; white-space:nowrap;
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+    opacity:0; text-align:center; line-height:1.2;
+  }
+  #feedback.show { transform:translate(-50%,-50%) scale(1); opacity:1; }
+
+  /* ── COMBO FLASH ── */
+  #combo-flash {
+    position:absolute; top:30%; left:50%; transform:translate(-50%,-50%) scale(0);
+    font-size:44px; font-weight:900; color:#FF6B35;
+    text-shadow: 0 4px 0 rgba(0,0,0,0.5);
+    pointer-events:none; z-index:21; white-space:nowrap;
+    opacity:0; transition: transform .15s cubic-bezier(.34,1.56,.64,1), opacity .25s;
+  }
+  #combo-flash.show { transform:translate(-50%,-50%) scale(1); opacity:1; }
+
+  /* ── SCREENS ── */
+  .screen {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; z-index:30;
+    transition: opacity .3s;
+  }
+  .screen.hidden { opacity:0; pointer-events:none; }
+
+  #scr-start { background: linear-gradient(160deg,#0d1b3e 0%,#1a3a2a 100%); }
+
+  .title {
+    font-size:58px; font-weight:900; color:#fff;
+    text-shadow: 0 6px 0 rgba(0,0,0,0.4);
+    line-height:.95; text-align:center; margin-bottom:6px;
+  }
+  .subtitle {
+    font-size:13px; font-weight:900; color:rgba(255,255,255,0.5);
+    text-transform:uppercase; letter-spacing:3px; margin-bottom:40px;
+  }
+  .btn {
+    background:#FFD600; color:#1a1a1a;
+    font-size:22px; font-weight:900;
+    border:none; border-radius:100px;
+    padding:14px 44px; cursor:pointer;
+    box-shadow: 0 6px 0 #b89a00, 0 8px 24px rgba(0,0,0,0.4);
+    transition: transform .1s, box-shadow .1s;
+    -webkit-tap-highlight-color: transparent; outline:none;
+  }
+  .btn:active { transform:translateY(4px); box-shadow:0 2px 0 #b89a00; }
+
+  #scr-gameover { background:rgba(0,0,0,0.88); backdrop-filter:blur(10px); }
+  .go-score { font-size:80px; font-weight:900; color:#FFD600; text-shadow:0 6px 0 rgba(0,0,0,0.4); line-height:1; }
+  .go-lbl { font-size:12px; font-weight:900; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
+  .go-title { font-size:36px; font-weight:900; color:#fff; margin-bottom:2px; }
+  .go-stats { display:flex; gap:16px; margin:16px 0 32px; }
+  .go-stat { background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.12); border-radius:14px; padding:10px 18px; text-align:center; }
+  .go-stat-v { font-size:26px; font-weight:900; color:#fff; }
+  .go-stat-l { font-size:10px; font-weight:900; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:1px; }
+  .stars { font-size:32px; margin-bottom:20px; letter-spacing:4px; }
+
+  /* Particles canvas overlay */
+  #particles { position:absolute; inset:0; pointer-events:none; z-index:15; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <canvas id="particles"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="pill"><span class="pill-lbl">Score</span><span class="pill-val" id="hud-score">0</span></div>
+    <div class="pill" id="shots-dots"></div>
+    <div class="pill"><span class="pill-lbl">Combo</span><span class="pill-val" id="hud-combo">x1</span></div>
+  </div>
+
+  <!-- Power bar -->
+  <div id="power-wrap"><div id="power-bg"><div id="power-bar"></div></div><div id="power-label">Puissance</div></div>
+
+  <!-- Hint -->
+  <div id="hint">⚽ Swipe pour tirer</div>
+
+  <!-- Feedback -->
+  <div id="feedback"></div>
+  <div id="combo-flash"></div>
+
+  <!-- START -->
+  <div class="screen" id="scr-start">
+    <div class="title">⚽<br>SOCCER<br>KICK</div>
+    <div class="subtitle">3D Edition</div>
+    <button class="btn" id="btn-start">JOUER</button>
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="screen hidden" id="scr-gameover">
+    <div class="go-lbl">Fin du match</div>
+    <div class="go-score" id="go-score">0</div>
+    <div class="stars" id="go-stars">⭐⭐⭐</div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="go-stat-v" id="go-goals">0</div><div class="go-stat-l">Buts</div></div>
+      <div class="go-stat"><div class="go-stat-v" id="go-acc">0%</div><div class="go-stat-l">Précision</div></div>
+      <div class="go-stat"><div class="go-stat-v" id="go-combo">x1</div><div class="go-stat-l">Meilleur combo</div></div>
+    </div>
+    <button class="btn" id="btn-restart">REJOUER</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ================================================================
+// AI_EDITABLE: CONFIG
+// ================================================================
+const CFG = {
+  SHOTS:          6,
+  BALL_SPEED:     0.38,    // base speed multiplier from swipe
+  GRAVITY:        0.012,   // downward pull per frame
+  GK_SPEED:       0.055,   // horizontal units/frame while reacting
+  GK_IDLE_SPEED:  0.018,   // patrol speed
+  GK_REACTION_MS: 260,     // ms before GK moves
+  GK_DIVE_CHANCE: 0.72,    // probability to dive on fast/corner shots
+  COMBO_THRESHOLD:3,
+  PTS_GOAL:       100,
+  PTS_CORNER:     1.8,     // multiplier for corner goals
+  // AI_EDITABLE: colors
+  SKY_TOP:   0x5bc8f5,
+  SKY_BOT:   0x2196A0,
+  GRASS:     0x3d9140,
+  GRASS_ALT: 0x358638,
+  POST:      0xffffff,
+  BALL_COL:  0xffffff,
+  GK_SHIRT:  0xff6b35,
+  GK_PANTS:  0x1565c0,
+  GK_SKIN:   0xfdbcb4,
+  // AI_EDITABLE: goal texts
+  GOAL_TX: ['GOAL! 🎉','MAGNIFIQUE! ✨','BANGER! 🔥','TOP CORNER! 💥','OLÉÉÉ! ⚡'],
+  SAVE_TX: ['ARRÊTÉ! 🧤','IL A PLONGÉ! 💪','GARDIEN EN FEU! 🔥'],
+  MISS_TX: ['RATÉ! 😅','TROP À CÔTÉ 😬','PRESQUE! 😤'],
+};
+
+// ================================================================
+// THREE.JS SETUP
+// ================================================================
+const wrap = document.getElementById('wrap');
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+function resize() {
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+  camera.aspect = wrap.clientWidth / wrap.clientHeight;
+  camera.updateProjectionMatrix();
+}
+
+// Camera: slightly elevated, looking at the goal
+const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 200);
+camera.position.set(0, 3.0, 13);
+camera.lookAt(0, 1.2, 0);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(CFG.SKY_TOP);
+scene.fog = new THREE.Fog(CFG.SKY_TOP, 30, 80);
+
+// Lights
+const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambient);
+const sun = new THREE.DirectionalLight(0xfffde7, 1.1);
+sun.position.set(4, 18, 12);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 80;
+sun.shadow.camera.left = -16; sun.shadow.camera.right = 16;
+sun.shadow.camera.top = 20; sun.shadow.camera.bottom = -20;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xb3e5fc, 0.3);
+fill.position.set(-5, 5, -5);
+scene.add(fill);
+
+// ================================================================
+// FIELD
+// ================================================================
+// Main grass plane
+const fieldGeo = new THREE.PlaneGeometry(30, 40, 10, 10);
+const fieldMat = new THREE.MeshLambertMaterial({ color: CFG.GRASS });
+const field = new THREE.Mesh(fieldGeo, fieldMat);
+field.rotation.x = -Math.PI/2;
+field.receiveShadow = true;
+scene.add(field);
+
+// Grass stripes
+for(let i = 0; i < 8; i++) {
+  if(i % 2 === 0) continue;
+  const stripe = new THREE.Mesh(
+    new THREE.PlaneGeometry(30, 4),
+    new THREE.MeshLambertMaterial({ color: CFG.GRASS_ALT })
+  );
+  stripe.rotation.x = -Math.PI/2;
+  stripe.position.set(0, 0.005, -12 + i * 4);
+  stripe.receiveShadow = true;
+  scene.add(stripe);
+}
+
+// Penalty spot (at ball start position)
+const spotGeo = new THREE.CircleGeometry(0.08, 16);
+const spotMat = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.4, transparent: true });
+const spot = new THREE.Mesh(spotGeo, spotMat);
+spot.rotation.x = -Math.PI/2; spot.position.set(0, 0.01, 9.0);
+scene.add(spot);
+
+// ================================================================
+// GOAL
+// ================================================================
+const GOAL_W = 5.5, GOAL_H = 2.4, POST_R = 0.07, GOAL_DEPTH = 1.4;
+const postMat = new THREE.MeshLambertMaterial({ color: CFG.POST });
+
+function makePost(x, y, z, w, h, d) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry ? 
+    new THREE.BoxGeometry(w, h, d) :
+    new THREE.BoxGeometry(w, h, d), postMat);
+  m.position.set(x,y,z);
+  m.castShadow = true;
+  scene.add(m);
+  return m;
+}
+
+// Left post
+makePost(-GOAL_W/2, GOAL_H/2, 0, POST_R*2, GOAL_H, POST_R*2);
+// Right post
+makePost( GOAL_W/2, GOAL_H/2, 0, POST_R*2, GOAL_H, POST_R*2);
+// Crossbar
+makePost(0, GOAL_H, 0, GOAL_W + POST_R*2, POST_R*2, POST_R*2);
+// Back post left
+makePost(-GOAL_W/2, GOAL_H/2, -GOAL_DEPTH, POST_R*2, GOAL_H, POST_R*2);
+// Back post right
+makePost( GOAL_W/2, GOAL_H/2, -GOAL_DEPTH, POST_R*2, GOAL_H, POST_R*2);
+// Top back bar
+makePost(0, GOAL_H, -GOAL_DEPTH, GOAL_W + POST_R*2, POST_R*2, POST_R*2);
+// Top side bars
+makePost(-GOAL_W/2, GOAL_H, -GOAL_DEPTH/2, POST_R*2, POST_R*2, GOAL_DEPTH);
+makePost( GOAL_W/2, GOAL_H, -GOAL_DEPTH/2, POST_R*2, POST_R*2, GOAL_DEPTH);
+
+// Net (grid of lines via LineSegments)
+function makeNet() {
+  const pts = [];
+  const cols = 14, rows = 8;
+  const w = GOAL_W, h = GOAL_H, d = GOAL_DEPTH;
+  // Back net (z = -GOAL_DEPTH)
+  for(let i=0;i<=cols;i++){
+    const x = -w/2 + i*(w/cols);
+    pts.push(x,0,-d, x,h,-d);
+  }
+  for(let j=0;j<=rows;j++){
+    const y = j*(h/rows);
+    pts.push(-w/2,y,-d, w/2,y,-d);
+  }
+  // Side nets
+  for(let side of [-1,1]) {
+    const sx = side * w/2;
+    for(let k=0;k<=rows;k++){
+      const y=k*(h/rows);
+      pts.push(sx,y,0, sx,y,-d);
+    }
+    for(let k=0;k<=5;k++){
+      const z=-k*(d/5);
+      pts.push(sx,0,z, sx,h,z);
+    }
+  }
+  // Top net
+  for(let i=0;i<=cols;i++){
+    const x=-w/2+i*(w/cols);
+    pts.push(x,h,0, x,h,-d);
+  }
+  for(let k=0;k<=5;k++){
+    const z=-k*(d/5);
+    pts.push(-w/2,h,z, w/2,h,z);
+  }
+  const buf = new Float32Array(pts);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(buf,3));
+  const mat = new THREE.LineBasicMaterial({ color:0xcccccc, opacity:0.5, transparent:true });
+  scene.add(new THREE.LineSegments(geo,mat));
+}
+makeNet();
+
+// ================================================================
+// GOALKEEPER
+// ================================================================
+const gkGroup = new THREE.Group();
+scene.add(gkGroup);
+
+function makeMesh(geo, color, castShadow=true) {
+  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({color}));
+  m.castShadow = castShadow;
+  return m;
+}
+
+// Body parts (cartoon proportions)
+const gkBody  = makeMesh(new THREE.BoxGeometry(0.55, 0.6, 0.28), CFG.GK_SHIRT);
+const gkHead  = makeMesh(new THREE.BoxGeometry(0.36, 0.36, 0.32), CFG.GK_SKIN);
+const gkLegL  = makeMesh(new THREE.BoxGeometry(0.22, 0.5, 0.22), CFG.GK_PANTS);
+const gkLegR  = makeMesh(new THREE.BoxGeometry(0.22, 0.5, 0.22), CFG.GK_PANTS);
+
+gkBody.position.set(0, 0.75, 0);
+gkHead.position.set(0, 1.3, 0);
+gkLegL.position.set(-0.15, 0.25, 0);
+gkLegR.position.set( 0.15, 0.25, 0);
+
+// Eyes
+const eyeGeo = new THREE.BoxGeometry(0.07,0.07,0.04);
+const eyeMat = new THREE.MeshBasicMaterial({color:0x111111});
+const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+eyeL.position.set(-0.09, 1.34, 0.17);
+eyeR.position.set( 0.09, 1.34, 0.17);
+
+// Floating hands (Mickey Mouse style — no arms)
+const handGeo = new THREE.BoxGeometry(0.28, 0.28, 0.18);
+const handMat = new THREE.MeshLambertMaterial({color: 0xFFEB3B});
+const handL = new THREE.Mesh(handGeo, handMat);
+const handR = new THREE.Mesh(handGeo, handMat);
+handL.position.set(-0.62, 0.72, 0.05);
+handR.position.set( 0.62, 0.72, 0.05);
+handL.castShadow = true;
+handR.castShadow = true;
+
+[gkBody,gkHead,gkLegL,gkLegR,eyeL,eyeR,handL,handR].forEach(m=>gkGroup.add(m));
+
+// GK state
+const gk = {
+  x: 0,           // current X position
+  targetX: 0,     // target X  
+  reacting: false,
+  diving: false,
+  diveDir: 0,
+  diveT: 0,       // dive animation t [0..1]
+  idleT: 0,       // time for idle sway
+  reset() {
+    this.x=0; this.targetX=0;
+    this.reacting=false; this.diving=false;
+    this.diveDir=0; this.diveT=0;
+    gkGroup.position.set(0, 0, 0.6);
+    gkGroup.rotation.set(0,0,0);
+    gkGroup.position.y=0;
+  }
+};
+
+// ================================================================
+// BALL
+// ================================================================
+const ballGeo = new THREE.SphereGeometry(0.28, 16, 16);
+// Soccer ball texture via canvas
+function makeBallTexture() {
+  const cv = document.createElement('canvas'); cv.width=256; cv.height=256;
+  const cx2 = cv.getContext('2d');
+  cx2.fillStyle='#fff'; cx2.fillRect(0,0,256,256);
+  cx2.fillStyle='#111';
+  // Pentagon patches (simplified)
+  const patches = [
+    [128,128,38],[128,40,26],[35,88,26],[36,182,26],[128,220,26],[220,88,26],[221,182,26]
+  ];
+  patches.forEach(([px,py,r]) => {
+    cx2.beginPath();
+    for(let i=0;i<5;i++){
+      const a=(i/5)*Math.PI*2-Math.PI/2;
+      i===0?cx2.moveTo(px+Math.cos(a)*r,py+Math.sin(a)*r):cx2.lineTo(px+Math.cos(a)*r,py+Math.sin(a)*r);
+    }
+    cx2.closePath(); cx2.fill();
+  });
+  return new THREE.CanvasTexture(cv);
+}
+const ballMat = new THREE.MeshLambertMaterial({ map: makeBallTexture() });
+const ballMesh = new THREE.Mesh(ballGeo, ballMat);
+ballMesh.castShadow = true;
+scene.add(ballMesh);
+
+// Ball shadow on grass
+const shadowGeo = new THREE.CircleGeometry(0.22, 16);
+const shadowMat = new THREE.MeshBasicMaterial({color:0x000000, opacity:0.25, transparent:true});
+const ballShadow = new THREE.Mesh(shadowGeo, shadowMat);
+ballShadow.rotation.x = -Math.PI/2;
+scene.add(ballShadow);
+
+const ball = {
+  pos: new THREE.Vector3(0, 0.28, 9.0),
+  vel: new THREE.Vector3(0,0,0),
+  spin: new THREE.Vector3(0,0,0),
+  active: false,
+  reset() {
+    this.pos.set(0, 0.28, 9.0);
+    this.vel.set(0,0,0);
+    this.spin.set(0,0,0);
+    this.active = false;
+    ballMesh.rotation.set(0,0,0);
+  }
+};
+
+// ================================================================
+// PARTICLES (2D canvas overlay)
+// ================================================================
+const pCanvas = document.getElementById('particles');
+const pCtx = pCanvas.getContext('2d');
+const parts = [];
+
+function resizeParticles() {
+  pCanvas.width  = wrap.clientWidth;
+  pCanvas.height = wrap.clientHeight;
+}
+
+function spawnParticles(screenX, screenY, color, count=22) {
+  for(let i=0;i<count;i++) {
+    const a = Math.random()*Math.PI*2;
+    const s = 2+Math.random()*7;
+    parts.push({ x:screenX, y:screenY, vx:Math.cos(a)*s, vy:Math.sin(a)*s-3,
+      life:1, decay:0.018+Math.random()*0.018, r:4+Math.random()*7,
+      color, rot:Math.random()*Math.PI*2 });
+  }
+}
+
+function updateParticles() {
+  pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+  for(let i=parts.length-1;i>=0;i--) {
+    const p=parts[i];
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.18;
+    p.life-=p.decay;
+    if(p.life<=0){ parts.splice(i,1); continue; }
+    pCtx.save();
+    pCtx.globalAlpha=p.life;
+    pCtx.fillStyle=p.color;
+    pCtx.beginPath();
+    pCtx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
+    pCtx.fill();
+    pCtx.restore();
+  }
+}
+
+// Project 3D position to 2D screen
+function toScreen(v3) {
+  const v = v3.clone().project(camera);
+  return {
+    x: (v.x+1)/2 * wrap.clientWidth,
+    y: (-v.y+1)/2 * wrap.clientHeight
+  };
+}
+
+// ================================================================
+// GAME STATE
+// ================================================================
+let state = 'start';
+let score=0, shotsLeft=CFG.SHOTS, goals=0, combo=0, bestCombo=1, comboMulti=1;
+
+// ================================================================
+// FEEDBACK
+// ================================================================
+let fbTimeout=null;
+function showFeedback(txt, color='#FFD600') {
+  const el=document.getElementById('feedback');
+  el.textContent=txt; el.style.color=color;
+  el.classList.add('show');
+  clearTimeout(fbTimeout);
+  fbTimeout=setTimeout(()=>el.classList.remove('show'),1300);
+}
+
+function showCombo() {
+  const el=document.getElementById('combo-flash');
+  el.textContent=`🔥 COMBO x${comboMulti}!`;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),900);
+}
+
+function updateHUD() {
+  document.getElementById('hud-score').textContent=score;
+  document.getElementById('hud-combo').textContent=comboMulti>1?`x${comboMulti}`:'x1';
+  const d=document.getElementById('shots-dots');
+  d.innerHTML='';
+  for(let i=0;i<CFG.SHOTS;i++){
+    const dot=document.createElement('div');
+    dot.className='dot'+(i>=shotsLeft?' used':'');
+    d.appendChild(dot);
+  }
+}
+
+// ================================================================
+// SWIPE INPUT
+// ================================================================
+let swipeStart=null, swipeCur=null, dragging=false;
+
+function getPos(e, preferChanged=false) {
+  const r=wrap.getBoundingClientRect();
+  const list = preferChanged
+    ? (e.changedTouches||e.touches)
+    : (e.touches&&e.touches.length?e.touches:e.changedTouches);
+  const src=(list&&list.length)?list[0]:e;
+  if(!src||src.clientX===undefined) return null;
+  return { x:src.clientX-r.left, y:src.clientY-r.top };
+}
+
+function onDown(e) {
+  if(state!=='aim' && state!=='result') return;
+  const pos=getPos(e);
+  if(!pos) return;
+  // Accept swipe from lower 55% of screen
+  if(pos.y < wrap.clientHeight*0.45) return;
+  // Snap ball back to start position on touch
+  clearTimeout(resultTimeout);
+  ball.reset();
+  gk.reset();
+  ballMesh.position.copy(ball.pos);
+  ballShadow.position.set(ball.pos.x, 0.01, ball.pos.z);
+  ballShadow.scale.set(1,1,1);
+  state = 'aim';
+  document.getElementById('hint').style.opacity='1';
+  swipeStart=pos; swipeCur=pos; dragging=true;
+  document.getElementById('power-wrap').classList.add('show');
+}
+
+function onMove(e) {
+  if(!dragging||!swipeStart) return;
+  const pos=getPos(e);
+  if(!pos) return;
+  swipeCur=pos;
+  // Update power bar
+  const dy=swipeStart.y-pos.y;
+  const power=Math.max(0,Math.min(1,dy/(wrap.clientHeight*0.25)));
+  const bar=document.getElementById('power-bar');
+  bar.style.width=(power*100)+'%';
+  bar.style.background=power<0.4?'#4CAF50':power<0.75?'#FFD600':'#FF5252';
+}
+
+function onUp(e) {
+  if(!dragging||!swipeStart||state!=='aim') return;
+  const pos=getPos(e,true);
+  dragging=false;
+  document.getElementById('power-wrap').classList.remove('show');
+  document.getElementById('power-bar').style.width='0%';
+
+  if(!pos) { swipeStart=null; return; }
+
+  const dx=pos.x-swipeStart.x;
+  const dy=pos.y-swipeStart.y; // positive = swipe down = no shot
+  const dist=Math.sqrt(dx*dx+dy*dy);
+
+  // Only fire if swiped upward enough
+  const upDist=swipeStart.y-pos.y;
+  if(upDist>15) {
+    shoot(dx, upDist, dist);
+  }
+  swipeStart=null; swipeCur=null;
+}
+
+wrap.addEventListener('mousedown', onDown);
+wrap.addEventListener('mousemove', onMove);
+wrap.addEventListener('mouseup',   e=>{e.preventDefault();onUp(e);});
+wrap.addEventListener('touchstart', e=>{
+  if(e.target.closest('button')) return; // let buttons handle themselves
+  e.preventDefault(); onDown(e);
+},{passive:false});
+wrap.addEventListener('touchmove',  e=>{
+  if(e.target.closest('button')) return;
+  e.preventDefault(); onMove(e);
+},{passive:false});
+wrap.addEventListener('touchend',   e=>{
+  if(e.target.closest('button')) return;
+  e.preventDefault(); onUp(e);
+},{passive:false});
+
+// ================================================================
+// SHOOT
+// ================================================================
+function shoot(dx, upDist, totalDist) {
+  const W=wrap.clientWidth, H=wrap.clientHeight;
+  // Normalize
+  const power  = Math.min(1, upDist / (H*0.25));      // 0..1
+  const sideRatio = dx / (W*0.5);                      // -1..1 (left/right aim)
+  const speed  = 0.12 + power * CFG.BALL_SPEED;
+
+  // Shoot toward goal: vz negative = toward goal
+  // vx: side aim; vy: arc height based on power
+  ball.vel.set(
+    sideRatio * speed * 1.1,
+    0.08 + power * 0.22,   // upward arc
+    -(speed * 1.0)
+  );
+  ball.spin.set(
+    speed * 4,             // forward topspin
+    sideRatio * -2,
+    0
+  );
+  ball.active = true;
+  state = 'flying';
+  document.getElementById('hint').style.opacity='0';
+
+  // GK reacts after delay
+  setTimeout(()=>{
+    if(state!=='flying') return;
+    gk.reacting=true;
+    // Predict ball landing X
+    const tToGoal = Math.abs(ball.pos.z / ball.vel.z);
+    const landX = ball.pos.x + ball.vel.x * tToGoal;
+    const clamp = GOAL_W/2 - 0.4;
+    gk.targetX = Math.max(-clamp, Math.min(clamp, landX));
+
+    // Dive decision: fast shot or near corner
+    const cornerDist = Math.min(Math.abs(landX-(GOAL_W/2)), Math.abs(landX+GOAL_W/2));
+    const isFast = Math.abs(ball.vel.z) > 0.28;
+    const isCorner = cornerDist < GOAL_W*0.25;
+    if((isFast||isCorner) && Math.random()<CFG.GK_DIVE_CHANCE) {
+      gk.diving=true;
+      gk.diveDir=landX>0?1:-1;
+    }
+  }, CFG.GK_REACTION_MS);
+}
+
+// ================================================================
+// GOAL CHECK — 3D hitbox
+// ================================================================
+function checkGoal() {
+  const p=ball.pos;
+  const inX = p.x > -(GOAL_W/2-POST_R) && p.x < (GOAL_W/2-POST_R);
+  const inY = p.y > 0.1 && p.y < GOAL_H-POST_R;
+
+  // Check GK collision first (ball passes through GK zone z=1.0 to z=-0.5)
+  if(p.z < 1.0 && p.z > -0.5 && inX && inY) {
+    const gkX=gkGroup.position.x;
+    let gkHalfW=0.32, gkHalfH=1.85;
+    if(gk.diving) {
+      gkHalfW = 0.95 + gk.diveT * 0.4;
+      gkHalfH = 0.55 + gk.diveT * 0.3;
+    }
+    const hitGK = (
+      p.x > gkX-gkHalfW && p.x < gkX+gkHalfW &&
+      p.y > 0.05 && p.y < (gk.diving ? gkHalfH*2 : gkHalfH)
+    );
+    if(hitGK) { onSave(); return true; }
+  }
+
+  // Goal line crossed
+  const inZ = p.z < 0.1 && p.z > -(GOAL_DEPTH+0.1);
+  if(!inZ) return false;
+
+  if(inX && inY) {
+    onGoal(p.x); return true;
+  }
+
+  // Post / crossbar
+  const hitPost = (
+    (Math.abs(p.x-(GOAL_W/2)) < 0.15 || Math.abs(p.x+GOAL_W/2) < 0.15) && inY
+  ) || (inX && Math.abs(p.y-GOAL_H)<0.15);
+  if(hitPost) { onPostHit(); return true; }
+
+  return false;
+}
+
+// ================================================================
+// EVENTS
+// ================================================================
+let resultTimeout=null;
+
+function onGoal(bx) {
+  state='result';
+  combo++; if(combo>bestCombo) bestCombo=combo;
+  comboMulti = combo>=CFG.COMBO_THRESHOLD ? Math.min(combo,6) : 1;
+  if(combo===CFG.COMBO_THRESHOLD || (combo>CFG.COMBO_THRESHOLD && combo%1===0)) showCombo();
+  goals++;
+
+  const isCorner = Math.abs(bx) > GOAL_W/2*0.65;
+  const multi = (isCorner?CFG.PTS_CORNER:1) * comboMulti;
+  score += Math.round(CFG.PTS_GOAL * multi);
+  updateHUD();
+
+  const tx=CFG.GOAL_TX[Math.floor(Math.random()*CFG.GOAL_TX.length)];
+  const extra=(isCorner?' +CORNER!':'')+(comboMulti>1?` x${comboMulti}`:'');
+  showFeedback(tx+extra, '#FFD600');
+
+  const sp=toScreen(ball.pos);
+  spawnParticles(sp.x,sp.y,'#FFD600',32);
+  spawnParticles(sp.x,sp.y,'#FF6B35',16);
+  screenShake(7,400);
+
+  // Ball goes INTO net (keep forward momentum, just dampen and slow)
+  ball.vel.z *= 0.25; ball.vel.x *= 0.4; ball.vel.y = Math.abs(ball.vel.y)*0.3;
+
+  resultTimeout=setTimeout(nextShot,1500);
+}
+
+function onSave() {
+  state='result';
+  combo=0; comboMulti=1;
+  updateHUD();
+  showFeedback(CFG.SAVE_TX[Math.floor(Math.random()*CFG.SAVE_TX.length)],'#FF6B35');
+  const sp=toScreen(ball.pos);
+  spawnParticles(sp.x,sp.y,'#FF6B35',18);
+  // Push ball clearly in front of GK so it never looks like a goal
+  ball.pos.z = Math.max(ball.pos.z, 0.9);
+  ball.vel.z = Math.abs(ball.vel.z) * 0.5 + 0.08; // bounce back toward player
+  ball.vel.x *= -0.4;
+  ball.vel.y = 0.1;
+  resultTimeout=setTimeout(nextShot,1300);
+}
+
+function onPostHit() {
+  state='result';
+  combo=0; comboMulti=1; updateHUD();
+  showFeedback('POTEAU! 😱','#fff');
+  ball.vel.x*=-0.6; ball.vel.z*=-0.4;
+  resultTimeout=setTimeout(nextShot,1300);
+}
+
+function onMiss() {
+  state='result';
+  combo=0; comboMulti=1; updateHUD();
+  showFeedback(CFG.MISS_TX[Math.floor(Math.random()*CFG.MISS_TX.length)],'#fff');
+  resultTimeout=setTimeout(nextShot,1000);
+}
+
+function nextShot() {
+  shotsLeft--;
+  updateHUD();
+  if(shotsLeft<=0){ setTimeout(showGameOver,400); return; }
+  ball.reset();
+  gk.reset();
+  state='aim';
+  document.getElementById('hint').style.opacity='1';
+}
+
+function showGameOver() {
+  state='gameover';
+  document.getElementById('go-score').textContent=score;
+  document.getElementById('go-goals').textContent=goals;
+  document.getElementById('go-acc').textContent=Math.round(goals/CFG.SHOTS*100)+'%';
+  document.getElementById('go-combo').textContent='x'+bestCombo;
+  const acc=goals/CFG.SHOTS;
+  document.getElementById('go-stars').textContent=acc>=0.8?'⭐⭐⭐':acc>=0.5?'⭐⭐':'⭐';
+  document.getElementById('scr-gameover').classList.remove('hidden');
+}
+
+function resetGame() {
+  score=0; shotsLeft=CFG.SHOTS; goals=0; combo=0; bestCombo=1; comboMulti=1;
+  ball.reset(); gk.reset();
+  parts.length=0;
+  updateHUD();
+  document.getElementById('hint').style.opacity='1';
+  state='aim';
+}
+
+// ================================================================
+// SCREEN SHAKE
+// ================================================================
+let shakeEnd=0, shakeAmt=0;
+function screenShake(amt,dur){ shakeAmt=amt; shakeEnd=Date.now()+dur; }
+
+// ================================================================
+// GK ANIMATION UPDATE
+// ================================================================
+function updateGK(dt) {
+  gk.idleT += dt;
+
+  if(gk.diving) {
+    gk.diveT = Math.min(gk.diveT+dt*1.8, 1);
+    const t=gk.diveT;
+    // Translate sideways and slightly up then down
+    gkGroup.position.x = gk.x + gk.diveDir * t * 1.6;
+    gkGroup.position.y = Math.sin(t*Math.PI)*0.6;
+    // Rotate full body horizontal (barrel roll)
+    gkGroup.rotation.z = -gk.diveDir * t * Math.PI*0.52;
+  } else if(gk.reacting) {
+    // Move toward target
+    const diff = gk.targetX - gk.x;
+    const step = Math.min(Math.abs(diff), CFG.GK_SPEED);
+    gk.x += Math.sign(diff)*step;
+    gkGroup.position.x = gk.x;
+    gkGroup.position.y = 0;
+    // Lean in direction of movement
+    gkGroup.rotation.z = -Math.sign(diff)*0.1;
+    // Run bob
+    gkBody.position.y = 0.75 + Math.sin(gk.idleT*18)*0.04;
+    gkHead.position.y = 1.3  + Math.sin(gk.idleT*18)*0.04;
+  } else {
+    // Idle sway
+    const sway = Math.sin(gk.idleT*1.1)*((GOAL_W/2)-0.8);
+    const diff = sway - gk.x;
+    const step = Math.min(Math.abs(diff), CFG.GK_IDLE_SPEED);
+    gk.x += Math.sign(diff)*step;
+    gkGroup.position.x = gk.x;
+    gkGroup.position.y = 0;
+    gkGroup.rotation.z = Math.sign(diff)*0.05;
+    // Idle breath bob + hands sway
+    gkBody.position.y = 0.75 + Math.sin(gk.idleT*2.5)*0.02;
+    gkHead.position.y = 1.3  + Math.sin(gk.idleT*2.5)*0.02;
+    handL.position.set(-0.62 + Math.sin(gk.idleT*2.1)*0.05, 0.72 + Math.sin(gk.idleT*1.8)*0.06, 0.05);
+    handR.position.set( 0.62 + Math.sin(gk.idleT*2.1+1)*0.05, 0.72 + Math.sin(gk.idleT*1.8+0.5)*0.06, 0.05);
+  }
+}
+
+// ================================================================
+// BALL PHYSICS UPDATE
+// ================================================================
+function updateBall(dt) {
+  if(!ball.active) return;
+
+  ball.vel.y -= CFG.GRAVITY;
+  ball.pos.addScaledVector(ball.vel, 1);
+  ballMesh.position.copy(ball.pos);
+
+  // Spin visual
+  ballMesh.rotation.x -= ball.vel.z * 0.8;
+  ballMesh.rotation.z -= ball.vel.x * 0.8;
+
+  // Shadow follows ball on ground
+  ballShadow.position.set(ball.pos.x, 0.01, ball.pos.z);
+  const shadowScale = Math.max(0.1, 1 - ball.pos.y*0.15);
+  ballShadow.scale.set(shadowScale, shadowScale, shadowScale);
+
+  if(state==='flying') {
+    // Check goal
+    if(ball.pos.z <= 0.1) {
+      if(checkGoal()) return;
+      // Missed (went past without hitting goal)
+      if(ball.pos.z < -(GOAL_DEPTH+0.3)) { onMiss(); return; }
+    }
+    // Ground bounce miss — only when still far from goal; near goal let checkGoal handle it
+    if(ball.pos.y <= 0.28 && ball.vel.y<0 && ball.pos.z > 2.0) {
+      ball.pos.y = 0.28;
+      ball.vel.y = Math.abs(ball.vel.y) * 0.5;
+      ball.vel.x *= 0.85; ball.vel.z *= 0.85;
+      if(Math.abs(ball.vel.z) < 0.04) { onMiss(); return; }
+    }
+    // Near goal but too slow — bounce and check speed
+    if(ball.pos.y <= 0.28 && ball.vel.y<0 && ball.pos.z <= 2.0 && ball.pos.z > 0.1) {
+      ball.pos.y = 0.28;
+      ball.vel.y = Math.abs(ball.vel.y) * 0.4;
+      ball.vel.x *= 0.8; ball.vel.z *= 0.8;
+      if(Math.abs(ball.vel.z) < 0.02 && Math.abs(ball.vel.y) < 0.02) { onMiss(); return; }
+    }
+    // Ball nearly stopped anywhere (catch-all to prevent stuck rounds)
+    const spd = Math.abs(ball.vel.x)+Math.abs(ball.vel.y)+Math.abs(ball.vel.z);
+    if(spd < 0.015 && ball.pos.z > 0.1) { onMiss(); return; }
+    // Way off to side
+    if(Math.abs(ball.pos.x)>8) { onMiss(); return; }
+  }
+
+  if(state==='result') {
+    // Bounce on ground
+    if(ball.pos.y <= 0.28) {
+      ball.pos.y=0.28;
+      ball.vel.y=Math.abs(ball.vel.y)*0.45;
+      ball.vel.x*=0.82; ball.vel.z*=0.82;
+    }
+    // Bounce off net back wall
+    if(ball.pos.z < -(GOAL_DEPTH-0.1)) {
+      ball.vel.z=Math.abs(ball.vel.z)*0.4;
+    }
+  }
+}
+
+// ================================================================
+// RENDER LOOP
+// ================================================================
+let last=0;
+function animate(ts) {
+  requestAnimationFrame(animate);
+  const dt=Math.min((ts-last)/16.67, 3); last=ts;
+
+  updateGK(dt * 0.016);
+  if(state==='flying'||state==='result') updateBall(dt);
+
+  // Always keep mesh in sync with ball.pos (covers 'aim' state too)
+  ballMesh.position.copy(ball.pos);
+  ballShadow.position.set(ball.pos.x, 0.01, ball.pos.z);
+  updateParticles();
+
+  // Screen shake
+  if(Date.now()<shakeEnd) {
+    const p=1-(shakeEnd-Date.now())/400;
+    camera.position.x = (Math.random()-0.5)*shakeAmt*0.04*(1-p);
+    camera.position.y = 3.0+(Math.random()-0.5)*shakeAmt*0.04*(1-p);
+  } else {
+    camera.position.x=0; camera.position.y=3.0;
+  }
+
+  // Aim indicator: tilt camera slightly based on swipe
+  if(state==='aim' && swipeCur && swipeStart) {
+    const sx=(swipeCur.x-swipeStart.x)/wrap.clientWidth;
+    camera.position.x = sx*0.3;
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ================================================================
+// INIT
+// ================================================================
+document.getElementById('btn-start').addEventListener('click',()=>{
+  document.getElementById('scr-start').classList.add('hidden');
+  resetGame();
+});
+document.getElementById('btn-restart').addEventListener('click',()=>{
+  document.getElementById('scr-gameover').classList.add('hidden');
+  resetGame();
+});
+
+window.addEventListener('resize',()=>{ resize(); resizeParticles(); });
+resize(); resizeParticles();
+updateHUD();
+animate(0); // start render loop immediately
+</script>
+</body>
+</html>

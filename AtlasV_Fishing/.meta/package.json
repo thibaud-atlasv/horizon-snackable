@@ -1,0 +1,15 @@
+{
+    "id": "26220234944285836",
+    "author": "emporiumofwonders",
+    "name": "AtlasV_Fishing",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.13.2"
+        }
+    ]
+}

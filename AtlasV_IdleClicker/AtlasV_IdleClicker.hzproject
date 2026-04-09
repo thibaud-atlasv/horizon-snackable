@@ -1,0 +1,52 @@
+{
+    "id": "5f0e0a93-e38e-4b3d-98ad-a19f5d2cbbb4",
+    "defaultTemplateAssetId": {
+        "packageOrRemoteId": "34671314339183839",
+        "ingestionId": "3359749526746898564",
+        "targetId": "2719744159"
+    },
+    "organizationId": "661087583756217",
+    "organizationName": "Emporium of Wonders",
+    "organizationScope": "emporiumofwonders",
+    "worldId": "26159796980358082",
+    "collisionLayers": [
+        "Player",
+        "World",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+    ],
+    "playerSettings": {
+        "avatarMax": 1,
+        "screenOrientation": "Portrait"
+    },
+    "editorVersion": "77.0.1.1.217",
+    "remotePackageId": "34671314339183839"
+}

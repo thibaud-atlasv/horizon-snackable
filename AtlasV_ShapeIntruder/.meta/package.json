@@ -1,0 +1,15 @@
+{
+    "id": "26069794316053886",
+    "author": "emporiumofwonders",
+    "name": "AtlasV_ShapeIntruder",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.12.1"
+        }
+    ]
+}

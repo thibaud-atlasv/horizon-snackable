@@ -1,0 +1,15 @@
+{
+    "id": "26904326832536512",
+    "author": "emporiumofwonders",
+    "name": "AtlasV_Breakout",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.13.2"
+        }
+    ]
+}

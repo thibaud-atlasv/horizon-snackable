@@ -1,0 +1,15 @@
+{
+    "id": "34671314339183839",
+    "author": "emporiumofwonders",
+    "name": "AtlasV_IdleClicker",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "*"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.13.2"
+        }
+    ]
+}

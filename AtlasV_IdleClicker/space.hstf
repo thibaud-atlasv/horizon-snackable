@@ -1,0 +1,492 @@
+{
+    "version": 6,
+    "entities": [
+        {
+            "id": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9",
+            "name": "StartingWorld",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::WorldPlayerConfigPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "playerTemplateAsset": {
+                                "packageOrRemoteId": "34671314339183839",
+                                "ingestionId": "17464296456364702112",
+                                "targetId": "2719744159"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::PhysicsScenePlatformComponent",
+                        "version": 5,
+                        "data": {
+                            "playerCollisionEventEmitterMode": "OwnerAndServer"
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "28ee1ed7-cc04-4aee-a9a5-ed9d38176c92",
+            "name": "SpawnPoint",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::SpawnPointPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "stateEnabled": true,
+                            "allowStart": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": -100.0,
+                                "z": -2.0
+                            },
+                            "localRotation": {
+                                "x": 0.0,
+                                "y": 3.1415927410125734,
+                                "z": 0.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "bd76900a-4e88-44d6-b2fb-ccc4a94f5f8b",
+            "name": "FloorPlane",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 1.7484555314695172e-7,
+                                "y": -0.30000001192092898,
+                                "z": -2.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 3.141592502593994,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "24149709574657735",
+                                "ingestionId": "17011626391517186959",
+                                "targetId": "2296024383"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                        "version": 8,
+                        "data": {
+                            "type": "StaticCollision"
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColliderMeshPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "meshAsset": {
+                                "packageOrRemoteId": "24149709574657735",
+                                "ingestionId": "17011626391517186959",
+                                "targetId": "778026262"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "24149709574657735",
+                                    "ingestionId": "17011626391517186959",
+                                    "targetId": "2319418581"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "b5cb3abc-421d-4c68-8968-aaabb1c2a788",
+            "name": "TapButtonUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "34671314339183839",
+                                "ingestionId": "3041974272957178356",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "TapButtonUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "34671314339183839",
+                            "ingestionId": "13408490947723544099",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "7c227d94-9e4b-4e3b-acb4-ae89d5da0c72",
+            "name": "Game",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "GameManager",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "34671314339183839",
+                            "ingestionId": "12774929493161441445",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "ClientSetup",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "34671314339183839",
+                            "ingestionId": "10783458602451660412",
+                            "targetId": "4237980480"
+                        },
+                        "data": {
+                            "cameraAnchor": "808aec1f-6830-4bb0-98d0-d0083392f178"
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "808aec1f-6830-4bb0-98d0-d0083392f178",
+            "name": "Camera",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 10.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CameraPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "cameraMode": "Fixed"
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "a1e4fbb5-6f1c-4841-a82e-71615083a9d5",
+            "name": "GoldCounterUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "34671314339183839",
+                                "ingestionId": "8017935974432239366",
+                                "targetId": "2149638574"
+                            },
+                            "renderOrderOffset": 10
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "GoldCounterDisplay",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "34671314339183839",
+                            "ingestionId": "10123428119535495025",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "adb2d6e0-1ff5-492c-8042-bfa08d338dcf",
+            "name": "FloatingTextUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "34671314339183839",
+                                "ingestionId": "18022672287849644351",
+                                "targetId": "2149638574"
+                            },
+                            "renderOrderOffset": 1
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "FloatingTextUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "34671314339183839",
+                            "ingestionId": "7539320197411346565",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "5667df73-34c6-4c4a-a904-390db61b8cc6",
+            "name": "ActionListUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "34671314339183839",
+                                "ingestionId": "3099087490787529407",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true,
+                            "renderOrderOffset": -10
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "ActionListUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "34671314339183839",
+                            "ingestionId": "3645987342898496204",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "642e983a-ff0c-4f15-8ae2-197a4b739e37",
+            "name": "ProgressBarsUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "34671314339183839",
+                                "ingestionId": "14743194896381742133",
+                                "targetId": "2149638574"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "ProgressBarsUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "34671314339183839",
+                            "ingestionId": "8551956351383941483",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "28ee1ed7-cc04-4aee-a9a5-ed9d38176c92",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "bd76900a-4e88-44d6-b2fb-ccc4a94f5f8b",
+            "destination": "28ee1ed7-cc04-4aee-a9a5-ed9d38176c92"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "b5cb3abc-421d-4c68-8968-aaabb1c2a788",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "7c227d94-9e4b-4e3b-acb4-ae89d5da0c72",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "808aec1f-6830-4bb0-98d0-d0083392f178",
+            "destination": "7c227d94-9e4b-4e3b-acb4-ae89d5da0c72"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "a1e4fbb5-6f1c-4841-a82e-71615083a9d5",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "adb2d6e0-1ff5-492c-8042-bfa08d338dcf",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "5667df73-34c6-4c4a-a904-390db61b8cc6",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "642e983a-ff0c-4f15-8ae2-197a4b739e37",
+            "destination": "98f87fa2-4ea9-401e-a4a4-c0564cfd86c9"
+        }
+    ]
+}

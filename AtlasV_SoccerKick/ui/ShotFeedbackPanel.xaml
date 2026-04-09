@@ -1,0 +1,68 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      Background="Transparent">
+
+    <!-- Main container with visibility binding -->
+    <Grid x:Name="MainContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid.Visibility>
+            <Binding Path="IsVisible">
+                <Binding.Converter>
+                    <BooleanToVisibilityConverter/>
+                </Binding.Converter>
+            </Binding>
+        </Grid.Visibility>
+
+        <!-- Animated content container with transforms and opacity -->
+        <Grid x:Name="AnimatedContainer" 
+              Opacity="{Binding Path=Opacity}"
+              RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="{Binding Path=ScaleX}" ScaleY="{Binding Path=ScaleY}"/>
+                    <TranslateTransform X="{Binding Path=TranslateX}" Y="{Binding Path=TranslateY}"/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- Main feedback text with outline effect -->
+                <Grid x:Name="FeedbackTextContainer" HorizontalAlignment="Center">
+                    <!-- Text outline/stroke layer (rendered behind) -->
+                    <TextBlock x:Name="FeedbackTextOutline"
+                               Text="{Binding Path=FeedbackText}"
+                               FontFamily="Roboto"
+                               FontSize="96"
+                               FontWeight="Black"
+                               Stroke="#FF1A1A1A"
+                               StrokeThickness="8"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                    
+                    <!-- Main text layer with dynamic color -->
+                    <TextBlock x:Name="FeedbackTextMain"
+                               Text="{Binding Path=FeedbackText}"
+                               FontFamily="Roboto"
+                               FontSize="96"
+                               FontWeight="Black"
+                               Foreground="{Binding Path=TextColor}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Points text (shown below main text for goals) -->
+                <TextBlock x:Name="PointsText"
+                           Text="{Binding Path=PointsText}"
+                           FontFamily="Roboto"
+                           FontSize="48"
+                           FontWeight="Bold"
+                           Foreground="#FFFFFFFF"
+                           Stroke="#FF1A1A1A"
+                           StrokeThickness="4"
+                           Opacity="{Binding Path=PointsOpacity}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>
