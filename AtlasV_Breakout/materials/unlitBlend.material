@@ -1,0 +1,18 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "unlit (2)",
+    "shaderAssetId": {
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "18157220368666114631",
+        "targetId": "2708897769"
+    },
+    "baseMaterialAssetId": {
+        "packageOrRemoteId": "26904326832536512",
+        "ingestionId": "6044079188968600105",
+        "targetId": "157013062"
+    }
+}

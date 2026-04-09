@@ -44,7 +44,7 @@
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
-                                "y": 0.0,
+                                "y": -14.83133316040039,
                                 "z": 0.0
                             },
                             "localRotation": {
@@ -96,6 +96,7 @@
                                 "class": "horizon::platform_api::CameraPlatformComponent",
                                 "version": 2,
                                 "data": {
+                                    "cameraMode": "Custom",
                                     "fieldOfView": 10.0
                                 }
                             }
@@ -223,6 +224,106 @@
                 }
             ],
             "attributes": []
+        },
+        {
+            "id": "306458b4-592a-4ab6-80d5-17e078a69eb4",
+            "name": "Plane",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.03340009227395058,
+                                "y": -14.93316650390625,
+                                "z": -0.01936374232172966
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "24407058055595655",
+                                "ingestionId": "7277538467424364748",
+                                "targetId": "2768521373"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "halfExtents": {
+                                "x": 0.5,
+                                "y": 0.009999999776482582,
+                                "z": 0.5
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                        "version": 8,
+                        "data": {
+                            "type": "StaticCollision"
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColorPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "color": {
+                                "r": 1.0,
+                                "g": 1.0,
+                                "b": 1.0,
+                                "a": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "24407058055595655",
+                                    "ingestionId": "7277538467424364748",
+                                    "targetId": "382290158"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
         }
     ],
     "relationships": [
@@ -240,6 +341,11 @@
             "relationshipType": "RelationChildOf",
             "source": "3a40f49b-c76c-4aff-8a72-b0433ee15a64",
             "destination": "fe7865a5-6881-49c6-9267-02d58b1c809e/4999e886-63f5-42c2-a39a-f98d786b71aa"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "306458b4-592a-4ab6-80d5-17e078a69eb4",
+            "destination": "9a40f381-025a-4e6f-9954-7cb666ae330f"
         }
     ]
 }

@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "entities": [
         {
             "id": "9d119418-2e9f-43d1-afcc-e3b53ca52d5b",
@@ -10,20 +10,6 @@
                 "targetId": "2719744159"
             },
             "deltas": [
-                {
-                    "sourceId": "ec859a24-a822-40de-a86c-817ae089c7b4",
-                    "components": [
-                        {
-                            "dataType": "horizon::DataDefinitionAsset",
-                            "data": {
-                                "class": "horizon::platform_api::PlayerPlatformComponent",
-                                "version": 14,
-                                "data": null
-                            }
-                        }
-                    ],
-                    "attributes": []
-                },
                 {
                     "sourceId": "989a5d78-6092-46ea-b633-751d7e31222e",
                     "components": null

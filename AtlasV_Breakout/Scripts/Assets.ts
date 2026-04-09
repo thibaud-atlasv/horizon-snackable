@@ -18,3 +18,6 @@ export const PowerUpAssets = {
   BigPaddle:    new TemplateAsset('../Templates/GameplayObjects/BigPaddle.hstf'),
   StickyPaddle: new TemplateAsset('../Templates/GameplayObjects/StickyPaddle.hstf'),
 } as const;
+
+
+export const Particle = new TemplateAsset('../Templates/Particle.hstf');

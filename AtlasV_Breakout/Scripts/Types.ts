@@ -48,6 +48,7 @@ export namespace Events
 
   export class BrickDestroyedPayload {
     readonly position: Vec3 = Vec3.zero;
+    readonly color: Color = Color.white;
   }
   export const BrickDestroyed = new LocalEvent<BrickDestroyedPayload>('EvBrickDestroyed', BrickDestroyedPayload);
 

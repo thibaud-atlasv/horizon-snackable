@@ -1,11 +1,15 @@
 import { component, Component, EventService, ExecuteOn, NetworkingService, OnEntityStartEvent, OnWorldUpdateEvent, OnWorldUpdateEventPayload, property, subscribe } from 'meta/worlds';
 import { Events, HUDEvents } from './Types';
 import { LEVELS, type LevelConfig } from './LevelConfig';
+import { CameraShakeService } from './Services/CameraShakeService';
+import { VfxService } from './Services/VfxService';
 
 @component()
 export class GameManager extends Component {
   @property()
   private maxLives: number = 3;
+  private _cameraShake : CameraShakeService = CameraShakeService.get();
+  private _vfxService : VfxService = VfxService.get();
 
   private _lives: number = 3;
   private _currentLevel: number = 0;
@@ -20,6 +24,7 @@ export class GameManager extends Component {
     if (!this._isClient) return;
     this._lives = this.maxLives;
     this._initLevelState(LEVELS[0]);
+    this._vfxService.prewarm();
     // Initial spawn is handled by LevelLayout.onStart (level 0 by default).
     // LoadLevel is only emitted on subsequent level changes.
     EventService.sendLocally(HUDEvents.UpdateLevel, { level: 1 });

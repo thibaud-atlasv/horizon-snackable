@@ -1,4 +1,4 @@
-import { component, EventService, property, Vec3 } from 'meta/worlds';
+import { Color, component, EventService, property, Vec3 } from 'meta/worlds';
 import { Events, type IBrick, type ICollider } from '../Types';
 import { CollisionManager } from '../CollisionManager';
 import { Brick } from './Brick';
@@ -40,7 +40,7 @@ export class ExplosiveBrick extends Brick {
     const pos = this._transform.worldPosition;
     this._destroyAdjacentBricks(pos);
     this._flash(() => {
-      EventService.sendLocally(Events.BrickDestroyed, { position: pos });
+      EventService.sendLocally(Events.BrickDestroyed, { position: pos, color: Color.red });
       _explodingBricks.delete(this);
       this.entity.destroy();
     });

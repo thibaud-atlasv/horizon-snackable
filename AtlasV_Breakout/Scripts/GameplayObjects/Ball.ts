@@ -4,6 +4,7 @@ import { BOUNDS } from '../Constants';
 import { CollisionManager } from '../CollisionManager';
 import { StickyBallState } from './StickyBallState';
 import { LEVELS, LEVEL_DEFAULTS, DEFAULT_PALETTE, type ColorPalette, type GameplaySettings, type PhysicsSettings } from '../LevelConfig';
+import { VfxService } from '../Services/VfxService';
 
 @component()
 export class Ball extends Component implements ICollider {
@@ -30,7 +31,7 @@ export class Ball extends Component implements ICollider {
   }
 
   @property()
-  private ballSpeed: number = 7.5;
+  private ballSpeed: number = 10.5;
 
   private _isClient = false;
 
@@ -232,6 +233,9 @@ export class Ball extends Component implements ICollider {
     const speed = Math.sqrt(this._velocity.x ** 2 + this._velocity.y ** 2);
     const steps = Math.min(8, Math.max(1, Math.ceil((speed * dt) / r)));
     const subDt = dt / steps;
+
+    const color = this._colorComponent?.color ?? Color.white;
+    VfxService.get().spawnTrail(initPos.x, initPos.y, initPos.z, color.r, color.g, color.b);
 
     for (let s = 0; s < steps; s++) {
       let vx = this._velocity.x;

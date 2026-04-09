@@ -11,6 +11,7 @@ import {
   EventService,
   property,
   Vec3,
+  Quaternion,
   NetworkingService
 } from 'meta/worlds';
 import { Events, PowerUpType, type ICollider, type Rect } from '../Types';
@@ -43,6 +44,7 @@ export class PowerUp extends Component implements ICollider {
 
   private _isActive: boolean = false;
   private _pulseTime: number = 0;
+  private _spinAngle: number = 0;
   private _isClient = false;
 
   @subscribe(OnEntityStartEvent, { execution: ExecuteOn.Everywhere })
@@ -103,6 +105,12 @@ export class PowerUp extends Component implements ICollider {
     }
     
     this.transform.worldPosition = new Vec3(pos.x, newY, pos.z);
+
+    // Spin around Y axis
+    this._spinAngle += dt * 300;
+    console.log("Spin angle:", this._spinAngle);  
+    this.transform.localRotation = Quaternion.fromEuler(new Vec3(0, this._spinAngle, 0));
+
     CollisionManager.get().checkAgainst(this);
   }
 

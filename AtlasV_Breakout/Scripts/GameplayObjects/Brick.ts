@@ -94,6 +94,7 @@ export class Brick extends Component implements IBrick {
     this._flash(() => {
       EventService.sendLocally(Events.BrickDestroyed, {
         position: this._transform.worldPosition,
+        color : this._colorComponent?.color ?? Color.white,
       });
       this.entity.destroy();
     });

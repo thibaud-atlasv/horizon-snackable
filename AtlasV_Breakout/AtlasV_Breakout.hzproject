@@ -48,5 +48,6 @@
         "screenOrientation": "Portrait"
     },
     "updatePackageAuthorOnOrgChange": true,
-    "editorVersion": "75.0.0.17.108"
+    "editorVersion": "77.0.1.1.217",
+    "remotePackageId": "26904326832536512"
 }
