@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "entities": [
         {
             "id": "4999e886-63f5-42c2-a39a-f98d786b71aa",
@@ -8,7 +8,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -39,7 +39,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -87,7 +87,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -135,6 +135,18 @@
                         "data": {}
                     },
                     "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "LeaderboardManager",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26904326832536512",
+                            "ingestionId": "720426581885074773",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
                 }
             ],
             "attributes": []
@@ -146,7 +158,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -184,7 +196,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localScale": {
                                 "x": 1.0,
@@ -256,7 +268,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -294,7 +306,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -370,7 +382,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -419,22 +431,22 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
                                 "y": 0.0,
-                                "z": -2.0
+                                "z": 1.0
                             },
                             "localRotation": {
                                 "x": 0.0,
-                                "y": 1.5707963705062867,
-                                "z": 1.5707963705062867
+                                "y": 3.1415927410125734,
+                                "z": 0.0
                             },
                             "localScale": {
-                                "x": 17.0,
+                                "x": 1.0,
                                 "y": 1.0,
-                                "z": 10.0
+                                "z": 1.0
                             }
                         }
                     },
@@ -442,19 +454,47 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::MeshPlatformComponent",
-                        "version": 11,
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
                         "data": {
-                            "mesh": {
-                                "packageOrRemoteId": "24407058055595655",
-                                "ingestionId": "7277538467424364748",
-                                "targetId": "2768521373"
+                            "xaml": {
+                                "packageOrRemoteId": "26904326832536512",
+                                "ingestionId": "12561620966062076308",
+                                "targetId": "2149638574"
                             },
-                            "lightingParams": {
-                                "class": "horizon::platform_api::LightingParams",
-                                "data": {
-                                    "diffuseGISource": "LightProbes"
-                                }
+                            "vrPanelWidth": 10.0,
+                            "vrPanelHeight": 18.0,
+                            "vrLayoutWidth": 900,
+                            "vrLayoutHeight": 1600
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "3ab1a82f-0a46-437d-84ce-8057987e2745",
+            "name": "ComboHUD",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26904326832536512",
+                                "ingestionId": "14898148021174257138",
+                                "targetId": "2149638574"
                             }
                         }
                     },
@@ -462,14 +502,41 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::ColorPlatformComponent",
-                        "version": 2,
+                        "class": "ComboHUDViewModel",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26904326832536512",
+                            "ingestionId": "18311460051909248711",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "6bb4ee31-c8f8-4df5-8302-5c18ae20740f",
+            "name": "HighScoreHUD",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
                         "data": {
-                            "color": {
-                                "r": 0.0,
-                                "g": 0.0,
-                                "b": 0.0,
-                                "a": 1.0
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26904326832536512",
+                                "ingestionId": "16644555637827624427",
+                                "targetId": "2149638574"
                             }
                         }
                     },
@@ -477,17 +544,13 @@
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::MaterialPlatformComponent",
-                        "version": 1,
-                        "data": {
-                            "materials": [
-                                {
-                                    "packageOrRemoteId": "26904326832536512",
-                                    "ingestionId": "6044079188968600105",
-                                    "targetId": "157013062"
-                                }
-                            ]
-                        }
+                        "class": "HighScoreHUDViewModel",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26904326832536512",
+                            "ingestionId": "13817227302601721639",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
                     },
                     "dataType": "horizon::DataDefinitionAsset"
                 }
@@ -534,6 +597,16 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "d80616ab-34a8-477e-9fce-549af98e952f",
+            "destination": "4999e886-63f5-42c2-a39a-f98d786b71aa"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "3ab1a82f-0a46-437d-84ce-8057987e2745",
+            "destination": "4999e886-63f5-42c2-a39a-f98d786b71aa"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "6bb4ee31-c8f8-4df5-8302-5c18ae20740f",
             "destination": "4999e886-63f5-42c2-a39a-f98d786b71aa"
         }
     ]

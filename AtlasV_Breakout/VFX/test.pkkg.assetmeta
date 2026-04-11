@@ -1,0 +1,8 @@
+{
+    "class": "horizon::AssetMetadata",
+    "version": 1,
+    "data": {
+        "id": "8220376213822375340",
+        "pipelineVersion": 1
+    }
+}

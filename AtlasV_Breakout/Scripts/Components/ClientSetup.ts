@@ -15,7 +15,7 @@ import {
   type Entity,
   type OnPlayerCreateEventPayload,
 } from 'meta/worlds';
-import { CameraShakeService } from './Services/CameraShakeService';
+import { CameraShakeService } from '../Services/CameraShakeService';
 
 @component()
 export class ClientSetup extends Component {

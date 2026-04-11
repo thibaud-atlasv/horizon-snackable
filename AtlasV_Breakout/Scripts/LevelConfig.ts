@@ -165,12 +165,12 @@ export const LEVELS: LevelConfig[] = [
   //
   {
     brickTemplates: {
-      'P': { asset: BrickAssets.Normal, hits: 3, colors: { 3: [1.000, 0.3254, 0.5647], 2: [1.000, 0.901, 0.000], 1: [0.000, 0.784, 1.000] } }, // rose
-      'O': { asset: BrickAssets.Normal, hits: 3, colors: { 3: [1.000, 0.419, 0.207], 2: [0.223, 1.000, 0.078], 1: [0.654, 0.545, 0.980] } }, // orange
-      'J': { asset: BrickAssets.Normal, hits: 2, colors: { 2: [1.000, 0.901, 0.000], 1: [0.000, 0.784, 1.000] } }, // jaune
-      'V': { asset: BrickAssets.Normal, hits: 2, colors: { 2: [0.223, 1.000, 0.078], 1: [0.654, 0.545, 0.980] } }, // vert
-      'B': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.000, 0.784, 1.000] } }, // bleu
-      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.654, 0.545, 0.980] } }, // mauve
+      'P': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.176, 0.471] } }, // magenta néon #FF2D78
+      'O': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.420, 0.102] } }, // orange vif #FF6B1A
+      'J': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.878, 0.102] } }, // jaune électrique #FFE01A
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.102, 1.000, 0.369] } }, // vert néon #1AFF5E
+      'B': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.102, 0.624, 1.000] } }, // bleu électrique #1A9FFF
+      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.706, 0.290, 1.000] } }, // violet néon #B44AFF
     },
     grid: [
       'PPPPPPPP',
@@ -181,150 +181,345 @@ export const LEVELS: LevelConfig[] = [
       'MMMMMMMM',
     ].join('\n'),
     brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
-    powerUpSpawnChance: 0.25,
-    powerUps: [
-      { type: PowerUpType.BigPaddle,    weight: 2, powerUpDuration: 10 },
-      { type: PowerUpType.StickyPaddle, weight: 1, powerUpDuration: 8  },
-    ],
+    powerUpSpawnChance: 0,
     physics: {
       ballSpeedMultiplier: 1,
       paddleLerpFactor: 0.88,
       ballSpeedIncrementPerBrick: 0.2,
     },
     palette: {
-      background: [0.027, 0.031, 0.059], // #07080F
-      ball:       [1.000, 1.000, 1.000], // #FFFFFF
-      paddle:     [0.000, 0.961, 1.000], // #00F5FF
+      background: [0.020, 0.020, 0.031], // #050508 noir pur
+      ball:       [0.000, 1.000, 0.933], // #00FFEE cyan vif
+      paddle:     [1.000, 1.000, 1.000], // #FFFFFF blanc pur
     },
   },
 
   // ── Level 1: Diamond ──────────────────────────────────────────────────────
-  //
-  //   . . . . 1 . . . .
-  //   . . . 1 1 1 . . .
-  //   . . 1 1 1 1 1 . .
-  //   . 1 1 1 1 1 1 1 .
-  //   1 1 1 1 1 1 1 1 1
-  //   . 1 1 1 1 1 1 1 .
-  //   . . 1 1 1 1 1 . .
-  //   . . . 1 1 1 . . .
-  //   . . . . 1 . . . .
-  //
   {
     brickTemplates: {
-      '1': { asset: BrickAssets.Normal, hits: 1 },
+      'R': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.118, 0.118] } }, // red
+      'O': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.420, 0.102] } }, // orange
+      'J': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.878, 0.102] } }, // yellow
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.102, 1.000, 0.369] } }, // green
+      'C': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.102, 0.878, 1.000] } }, // cyan
     },
     grid: [
-      '000010000',
-      '000111000',
-      '001111100',
-      '011111110',
-      '111111111',
-      '011111110',
-      '001111100',
-      '000111000',
-      '000010000',
+      '0000R0000',
+      '000ROR000',
+      '00ROJOR00',
+      '0ROJVJOR0',
+      'ROJVCVJOR',
+      '0ROJVJOR0',
+      '00ROJOR00',
+      '000ROR000',
+      '0000R0000',
     ].join('\n'),
-    brickWidth: 0.9, brickHeight: 0.4, paddingX: 0.05, paddingY: 0.1, startY: 6.5,
-    powerUpSpawnChance: 0.2,
-    powerUps: [
-      { type: PowerUpType.BigPaddle,    weight: 2, powerUpDuration: 12 },
-      { type: PowerUpType.StickyPaddle, weight: 1, powerUpDuration: 8  },
-    ],
-    palette: {
-      background:   [0.02, 0.04, 0.12], // night blue
-      ball:         [0.88, 0.97, 1.00], // icy blue
-      paddle:       [0.22, 0.62, 0.92], // sky blue
-    },
-    // standard sizes for the introduction
-  },
-
-  // ── Level 2: Fortress ─────────────────────────────────────────────────────
-  //
-  //   2 2 2 2 2 2 2 2 2   ← outer wall (2 hits)
-  //   2 . . . . . . . 2
-  //   2 . 1 1 1 1 1 . 2   ← interior (1 hit)
-  //   2 1 1 1 1 1 1 1 2
-  //   2 . 1 1 1 1 1 . 2
-  //   2 . . . . . . . 2
-  //   2 2 2 2 2 2 2 2 2
-  //
-  {
-    brickTemplates: {
-      '1': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.40, 0.88, 0.30] } }, // lime
-      '2': { asset: BrickAssets.Normal, hits: 2 },
-    },
-    grid: [
-      '222222222',
-      '200000002',
-      '201111102',
-      '211111112',
-      '201111102',
-      '200000002',
-      '222222222',
-    ].join('\n'),
-    brickWidth: 0.9, brickHeight: 0.4, paddingX: 0.05, paddingY: 0.1, startY: 6.5,
-    powerUpSpawnChance: 0.25,
-    powerUps: [
-      { type: PowerUpType.BigPaddle,    weight: 1, powerUpDuration: 10 },
-      { type: PowerUpType.StickyPaddle, weight: 3, powerUpDuration: 6  },
-    ],
-    physics: { ballSpeedMultiplier: 1.15 },
-    palette: {
-      background:   [0.02, 0.07, 0.03], // green night
-      ball:         [0.98, 0.92, 0.68], // warm cream
-      paddle:       [0.15, 0.72, 0.40], // forest green
-    },
-    gameplay: {
-      paddleWidthMultiplier: 0.88, // slightly narrower paddle
-    },
-  },
-
-  // ── Level 3: Target ───────────────────────────────────────────────────────
-  //
-  //   3 3 3 3 3 3 3 3 3   ← outer ring  (3 hits)
-  //   3 2 2 2 2 2 2 2 3   ← middle ring (2 hits)
-  //   3 2 1 1 1 1 1 2 3   ← inner ring  (1 hit)
-  //   3 2 1 . . . 1 2 3   ← empty center
-  //   3 2 1 1 1 1 1 2 3
-  //   3 2 2 2 2 2 2 2 3
-  //   3 3 3 3 3 3 3 3 3
-  //
-  {
-    brickTemplates: {
-      '1': { asset: BrickAssets.Normal, hits: 1 },
-      '2': { asset: BrickAssets.Normal, hits: 2 },
-      '3': { asset: BrickAssets.Normal, hits: 3 },
-    },
-    grid: [
-      '333333333',
-      '322222223',
-      '321111123',
-      '321000123',
-      '321111123',
-      '322222223',
-      '333333333',
-    ].join('\n'),
-    brickWidth: 0.9, brickHeight: 0.4, paddingX: 0.05, paddingY: 0.1, startY: 6.5,
-    powerUpSpawnChance: 0.35,
-    powerUps: [
-      { type: PowerUpType.BigPaddle,    weight: 2, powerUpDuration: 10 },
-      { type: PowerUpType.StickyPaddle, weight: 1, powerUpDuration: 5  },
-    ],
-    victory: { kind: 'bricksDestroyed', count: 35 },
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
     physics: {
-      ballSpeedMultiplier: 1.3,
-      gravity: 1.2,
-      bounceRandomness: 0.06,
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
     },
     palette: {
-      background:         [0.04, 0.01, 0.10], // deep space
-      ball:               [0.05, 0.92, 0.88], // electric cyan
-      paddle:             [0.18, 0.42, 0.98], // electric blue
+      background: [0.020, 0.020, 0.031],
+      ball:       [0.000, 1.000, 0.933],
+      paddle:     [1.000, 1.000, 1.000],
     },
-    gameplay: {
-      ballSizeMultiplier:   0.82, // smaller ball
-      paddleWidthMultiplier: 0.80, // narrower paddle
+  },
+
+  // ── Level 2: Checkerboard ────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'P': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.176, 0.471] } }, // hot pink
+      'C': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.000, 0.950, 0.950] } }, // cyan
+    },
+    grid: [
+      'P0C0P0C0P',
+      '0C0P0C0P0',
+      'P0C0P0C0P',
+      '0C0P0C0P0',
+      'P0C0P0C0P',
+      '0C0P0C0P0',
+      'P0C0P0C0P',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.040, 0.010, 0.050],
+      ball:       [1.000, 1.000, 0.200],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 3: Invader ─────────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.200, 1.000, 0.200] } }, // neon green
+      'E': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.200, 0.200] } }, // red eyes
+    },
+    grid: [
+      '00V000V00',
+      '000V0V000',
+      '00VVVVV00',
+      '0VV0V0VV0',
+      'VVVVVVVVV',
+      'V0VVVVV0V',
+      'V0V000V0V',
+      '000VV0000',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.010, 0.020, 0.010],
+      ball:       [0.200, 1.000, 0.200],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 4: Zigzag ──────────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'R': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.118, 0.200] } },
+      'O': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.500, 0.000] } },
+      'J': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.900, 0.000] } },
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.000, 1.000, 0.400] } },
+      'B': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.000, 0.600, 1.000] } },
+      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.800, 0.200, 1.000] } },
+    },
+    grid: [
+      'RRRR00000',
+      '00OOOO000',
+      '0000JJJJ0',
+      '00VVVV000',
+      'BBBB00000',
+      '00MMMM000',
+      '0000RRRR0',
+      '00OOOO000',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.020, 0.010, 0.040],
+      ball:       [1.000, 0.400, 1.000],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 5: Heart ───────────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'P': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.100, 0.400] } }, // hot pink
+      'R': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.300, 0.500] } }, // rose
+      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.900, 0.100, 0.600] } }, // magenta
+    },
+    grid: [
+      '0RR000RR0',
+      'RMMR0RMMR',
+      'RMPPMPPMR',
+      'RMPPPPPPR',
+      '0RPPPPPR0',
+      '00RPPPRO0',
+      '000RPR000',
+      '0000R0000',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.050, 0.010, 0.030],
+      ball:       [1.000, 0.700, 0.800],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 6: Pyramid ─────────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'R': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.150, 0.150] } },
+      'O': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.500, 0.050] } },
+      'J': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.850, 0.050] } },
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.050, 1.000, 0.350] } },
+      'B': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.100, 0.500, 1.000] } },
+      'I': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.300, 0.100, 0.900] } },
+      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.750, 0.200, 1.000] } },
+    },
+    grid: [
+      '0000M0000',
+      '000IMI000',
+      '00BIMIB00',
+      '0VBIMIOV0',
+      'JVBIMIBVJ',
+      'OJVBIBVJO',
+      'ROJVBVJOR',
+      'RROJVJORR',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.030, 0.020, 0.010],
+      ball:       [1.000, 0.900, 0.500],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 7: Columns ─────────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'R': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.118, 0.200] } },
+      'O': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.450, 0.050] } },
+      'J': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.900, 0.050] } },
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.050, 1.000, 0.350] } },
+      'B': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.050, 0.550, 1.000] } },
+      'I': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.300, 0.100, 0.900] } },
+      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.800, 0.200, 1.000] } },
+    },
+    grid: [
+      'R0O0J0V0B',
+      'R0O0J0V0B',
+      'R0O0J0V0B',
+      'R0O0J0V0B',
+      'R0O0J0V0B',
+      'R0O0J0V0B',
+      'R0O0J0V0B',
+      'R0O0J0V0B',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.010, 0.010, 0.030],
+      ball:       [1.000, 1.000, 1.000],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 8: Cross ───────────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'G': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.843, 0.000] } }, // gold
+      'W': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 1.000, 1.000] } }, // white
+      'C': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.000, 0.900, 0.900] } }, // cyan
+    },
+    grid: [
+      '000CCC000',
+      '000CWC000',
+      '000CWC000',
+      'CCCGWGCCC',
+      'CWWWGWWWC',
+      'CCCGWGCCC',
+      '000CWC000',
+      '000CWC000',
+      '000CCC000',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.010, 0.020, 0.040],
+      ball:       [1.000, 0.843, 0.000],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 9: Stripes diagonales ──────────────────────────────────────────
+  {
+    brickTemplates: {
+      'R': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.150, 0.250] } },
+      'O': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.500, 0.000] } },
+      'J': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.900, 0.100] } },
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.100, 1.000, 0.400] } },
+      'B': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.100, 0.550, 1.000] } },
+      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.750, 0.250, 1.000] } },
+    },
+    grid: [
+      'RMOJVBRMO',
+      'MOJVBRMOJ',
+      'OJVBRMOJV',
+      'JVBRMOJVB',
+      'VBRMOJVBR',
+      'BRMOJVBRM',
+      'RMOJVBRMO',
+      'MOJVBRMOJ',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.020, 0.010, 0.050],
+      ball:       [0.000, 1.000, 1.000],
+      paddle:     [1.000, 1.000, 1.000],
+    },
+  },
+
+  // ── Level 10: Rings ──────────────────────────────────────────────────────
+  {
+    brickTemplates: {
+      'P': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.176, 0.471] } },
+      'O': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.420, 0.102] } },
+      'J': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.000, 0.878, 0.102] } },
+      'V': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.102, 1.000, 0.369] } },
+      'B': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.102, 0.624, 1.000] } },
+      'M': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.706, 0.290, 1.000] } },
+    },
+    grid: [
+      '0PPPPPPP0',
+      'PP00000PP',
+      'P0JJJJJ0P',
+      'P0J000J0P',
+      'P0J0B0J0P',
+      'P0J000J0P',
+      'P0JJJJJ0P',
+      'PP00000PP',
+      '0PPPPPPP0',
+    ].join('\n'),
+    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    powerUpSpawnChance: 0,
+    physics: {
+      ballSpeedMultiplier: 1,
+      paddleLerpFactor: 0.88,
+      ballSpeedIncrementPerBrick: 0.2,
+    },
+    palette: {
+      background: [0.020, 0.020, 0.031],
+      ball:       [0.000, 1.000, 0.933],
+      paddle:     [1.000, 1.000, 1.000],
     },
   },
 

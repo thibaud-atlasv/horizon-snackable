@@ -7,6 +7,13 @@ import { LEVELS, LEVEL_DEFAULTS, DEFAULT_PALETTE, type ColorPalette } from '../L
 
 type ActiveEffect = { effect: IPowerUpEffect; timers: number[]; };
 
+// ── Squash & Stretch config ──────────────────────────────────────────────────
+const SQUASH_SCALE_X = 1.3;   // wider on impact
+const SQUASH_SCALE_Y = 0.7;   // flatter on impact
+const SQUASH_DURATION = 0.08; // seconds to reach squash
+const RECOVER_DURATION = 0.15; // seconds to spring back
+const STRETCH_FACTOR = 0.08;  // how much horizontal speed affects stretch
+
 /**
  * Paddle Component
  *
@@ -37,6 +44,12 @@ export class Paddle extends Component implements ICollider {
   private _flashUntil = 0;
   private _lerpFactor: number = LEVEL_DEFAULTS.paddleLerpFactor;
   private _isClient = false;
+
+  // Squash & stretch state
+  private _squashTimer = 0;       // > 0 = squashing, counts down
+  private _recoverTimer = 0;      // > 0 = recovering from squash
+  private _prevX = 0;             // previous frame X for velocity-based stretch
+  private _smoothVelocity = 0;    // smoothed horizontal velocity
 
   @subscribe(OnEntityStartEvent)
   onStart() {
@@ -90,6 +103,9 @@ export class Paddle extends Component implements ICollider {
       this._colorComponent.color = new Color(1, 1, 1, 1);
       this._flashUntil = Date.now() + 50;
     }
+    // Trigger squash on ball impact
+    this._squashTimer = SQUASH_DURATION;
+    this._recoverTimer = 0;
   }
 
   @subscribe(Events.ResetRound)
@@ -198,14 +214,46 @@ export class Paddle extends Component implements ICollider {
   @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
   onUpdate(payload: OnWorldUpdateEventPayload): void {
     if (!this._isClient) return;
-    this.updatePowerups(payload.deltaTime);
+    const dt = payload.deltaTime;
+    this.updatePowerups(dt);
 
     // Move paddle
     const current = this._transform.worldPosition;
     const dx = this._targetPosition.x - current.x;
     const newX = current.x + dx * this._lerpFactor;
-    const halfwidth = this._transform.localScale.x * 0.5;
+    const halfwidth = this._normalScale.x * 0.5; // use base scale for bounds
     const clampedX = Math.max(BOUNDS.x + halfwidth, Math.min(BOUNDS.x + BOUNDS.w - halfwidth, newX));
     this._transform.worldPosition = new Vec3(clampedX, current.y, current.z);
+
+    // ── Squash & Stretch ──────────────────────────────────────────────────
+    let scaleX = this._normalScale.x;
+    let scaleY = this._normalScale.y;
+
+    // Movement-based stretch: paddle elongates horizontally when moving fast
+    const rawVelocity = (clampedX - this._prevX) / Math.max(dt, 0.001);
+    this._prevX = clampedX;
+    // Smooth velocity to avoid jitter from lerp
+    this._smoothVelocity += (rawVelocity - this._smoothVelocity) * 0.15;
+    const stretchAmount = Math.min(Math.abs(this._smoothVelocity) * STRETCH_FACTOR, 0.3);
+    scaleX += stretchAmount;
+    scaleY -= stretchAmount * 0.3; // slight vertical compression when stretching
+
+    // Impact squash: overrides stretch briefly
+    if (this._squashTimer > 0) {
+      this._squashTimer -= dt;
+      const t = 1 - (this._squashTimer / SQUASH_DURATION); // 0→1
+      scaleX = this._normalScale.x * (1 + (SQUASH_SCALE_X - 1) * t);
+      scaleY = this._normalScale.y * (1 + (SQUASH_SCALE_Y - 1) * t);
+      if (this._squashTimer <= 0) {
+        this._recoverTimer = RECOVER_DURATION;
+      }
+    } else if (this._recoverTimer > 0) {
+      this._recoverTimer -= dt;
+      const t = Math.max(this._recoverTimer / RECOVER_DURATION, 0); // 1→0
+      scaleX = this._normalScale.x * (1 + (SQUASH_SCALE_X - 1) * t) + stretchAmount;
+      scaleY = this._normalScale.y * (1 + (SQUASH_SCALE_Y - 1) * t);
+    }
+
+    this._transform.localScale = new Vec3(scaleX, scaleY, this._normalScale.z);
   }
 }

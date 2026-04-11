@@ -128,12 +128,52 @@
                                 "class": "horizon::platform_api::TransformPlatformComponent",
                                 "version": 3,
                                 "data": {
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": -1.0
+                                    },
+                                    "localRotation": {
+                                        "x": -0.0,
+                                        "y": -3.141592502593994,
+                                        "z": 0.0
+                                    },
                                     "localScale": {
-                                        "x": 25.0,
-                                        "y": 1.0,
-                                        "z": 20.0
+                                        "x": 21.0,
+                                        "y": 21.0,
+                                        "z": 1.0
                                     }
                                 }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "BackgroundAnimViewModel",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "26904326832536512",
+                                    "ingestionId": "13755572542628131063",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {}
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "3ab1a82f-0a46-437d-84ce-8057987e2745",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "ComboManager",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "26904326832536512",
+                                    "ingestionId": "17497723815283374747",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {}
                             }
                         }
                     ],
@@ -324,6 +364,41 @@
                 }
             ],
             "attributes": []
+        },
+        {
+            "id": "4afe2aeb-1410-4dab-a456-d39c8a288ca9",
+            "name": "PKFX",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::VfxPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "vfxAsset": {
+                                "packageOrRemoteId": "26904326832536512",
+                                "ingestionId": "14404034401559175445",
+                                "targetId": "1153353245"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
         }
     ],
     "relationships": [
@@ -345,6 +420,11 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "306458b4-592a-4ab6-80d5-17e078a69eb4",
+            "destination": "9a40f381-025a-4e6f-9954-7cb666ae330f"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "4afe2aeb-1410-4dab-a456-d39c8a288ca9",
             "destination": "9a40f381-025a-4e6f-9954-7cb666ae330f"
         }
     ]

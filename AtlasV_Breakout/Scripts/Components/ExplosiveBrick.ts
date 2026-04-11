@@ -38,18 +38,22 @@ export class ExplosiveBrick extends Brick {
   /** Destroys adjacent bricks then self. Called by triggerDestruction and onCollision (via base HP logic). */
   protected override onDestroyBrick(): void {
     const pos = this._transform.worldPosition;
-    this._destroyAdjacentBricks(pos);
+    const adjacent = this._queryAdjacentBricks(pos);
+    EventService.sendLocally(Events.ExplosionChain, {
+      position: pos,
+      chainSize: adjacent.length + 1,
+    });
+    for (const brick of adjacent) brick.triggerDestruction();
     this._flash(() => {
       EventService.sendLocally(Events.BrickDestroyed, { position: pos, color: Color.red });
       _explodingBricks.delete(this);
-      this.entity.destroy();
+      this._park();
     });
   }
 
-  private _destroyAdjacentBricks(center: Vec3): void {
-    CollisionManager.get()
+  private _queryAdjacentBricks(center: Vec3): IBrick[] {
+    return CollisionManager.get()
       .query(center.x, center.y, this.explosionRadius)
-      .filter((c): c is IBrick => c.colliderTag === 'brick' && c !== (this as ICollider))
-      .forEach(brick => brick.triggerDestruction());
+      .filter((c): c is IBrick => c.colliderTag === 'brick' && c !== (this as ICollider));
   }
 }

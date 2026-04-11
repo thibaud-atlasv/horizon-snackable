@@ -1,0 +1,61 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      d:DesignWidth="900" d:DesignHeight="1600">
+
+    <!-- Static Background for Breakout Game Play Area -->
+    <!-- Dark purple/deep blue base with subtle neon casino hints -->
+    
+    <Grid>
+        <!-- Layer 1: Main vertical gradient - Dark purple to deep blue -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                <GradientStop Color="#FF0A0612" Offset="0"/>
+                <GradientStop Color="#FF0D0A1A" Offset="0.2"/>
+                <GradientStop Color="#FF100D22" Offset="0.4"/>
+                <GradientStop Color="#FF0E0B1E" Offset="0.6"/>
+                <GradientStop Color="#FF0A0816" Offset="0.8"/>
+                <GradientStop Color="#FF060410" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        
+        <!-- Layer 2: Very subtle magenta hint at top edge -->
+        <Border BorderBrush="#FF00FFE8" BorderThickness="2,2,2,2" Opacity="0.5" Visibility="Hidden"/>
+        
+        <!-- Layer 3: Very subtle cyan hint at bottom edge -->
+        
+        <!-- Layer 4: Very subtle hot pink hint on left edge -->
+        
+        <!-- Layer 5: Very subtle gold hint on right edge -->
+        
+        <!-- Layer 6: Corner accent - top left (magenta/cyan blend) -->
+        
+        <!-- Layer 7: Corner accent - top right (hot pink) -->
+        
+        <!-- Layer 8: Corner accent - bottom left (cyan) -->
+        
+        <!-- Layer 9: Corner accent - bottom right (gold) -->
+        
+        <!-- Layer 10: Very subtle center vignette for depth -->
+        
+        <!-- ========== DYNAMIC OVERLAY LAYERS (bound to BackgroundAnimViewModelData) ========== -->
+        
+        <!-- Full-screen color overlay -->
+        <Border Background="{Binding overlayColor}" 
+                Opacity="{Binding overlayOpacity}"
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch">
+            <Border.OpacityMask>
+                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                    <GradientStop Color="White" Offset="0"/>
+                    <GradientStop Color="White" Offset="0.4"/>
+                    <GradientStop Color="Transparent" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.OpacityMask>
+        </Border>
+        
+
+    </Grid>
+</Page>

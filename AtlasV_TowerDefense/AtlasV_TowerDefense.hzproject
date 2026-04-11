@@ -8,6 +8,7 @@
     "organizationId": "661087583756217",
     "organizationName": "Emporium of Wonders",
     "organizationScope": "emporiumofwonders",
+    "worldId": "26393423520315981",
     "collisionLayers": [
         "Player",
         "World",
@@ -46,6 +47,6 @@
         "avatarMax": 1,
         "screenOrientation": "Portrait"
     },
-    "updatePackageAuthorOnOrgChange": true,
-    "editorVersion": "77.0.1.1.217"
+    "editorVersion": "77.0.1.1.217",
+    "remotePackageId": "26631398616455768"
 }

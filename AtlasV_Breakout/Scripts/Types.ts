@@ -1,4 +1,4 @@
-import { Color, LocalEvent, NetworkEvent, serializable, Vec3, type Entity } from "meta/worlds";
+import { Color, LocalEvent, NetworkEvent, property, serializable, Vec3, type Entity } from "meta/worlds";
 
 export type RGB = [r: number, g: number, b: number];
 
@@ -35,6 +35,13 @@ export enum PowerUpType {
   StickyPaddle = 1,
 }
 
+export enum RevealStyle {
+  Pop = 0,       // scale bounce (back-out overshoot)
+  DropIn = 1,    // fall from above with bounce
+  Spin = 2,      // spin in while scaling up
+  Stretch = 3,   // stretch horizontally then vertically
+}
+
 export namespace Events
 {
   export class RestartPayload {}
@@ -46,11 +53,20 @@ export namespace Events
   export class BallLostPayload {}
   export const BallLost = new LocalEvent<BallLostPayload>('EvBallLost', BallLostPayload);
 
+  export class LevelClearedPayload {}
+  export const LevelCleared = new LocalEvent<LevelClearedPayload>('EvLevelCleared', LevelClearedPayload);
+
   export class BrickDestroyedPayload {
     readonly position: Vec3 = Vec3.zero;
     readonly color: Color = Color.white;
   }
   export const BrickDestroyed = new LocalEvent<BrickDestroyedPayload>('EvBrickDestroyed', BrickDestroyedPayload);
+
+  /** Fired by a brick when its death animation is done — pool can recycle the entity. */
+  export class BrickRecyclePayload {
+    readonly entity: Entity | null = null;
+  }
+  export const BrickRecycle = new LocalEvent<BrickRecyclePayload>('EvBrickRecycle', BrickRecyclePayload);
 
   export class PowerUpCollectedPayload {
     readonly powerUpType: PowerUpType = PowerUpType.BigPaddle;
@@ -76,8 +92,40 @@ export namespace Events
     readonly hits: number = 1;
     readonly indestructible: boolean = false;
     readonly colors: BrickColorPalette | undefined = undefined;
+    /** Delay in seconds before the brick reveal animation starts. */
+    readonly revealDelay: number = 0;
+    /** Which reveal animation style to use. */
+    readonly revealStyle: RevealStyle = RevealStyle.Pop;
   }
   export const InitBrick = new LocalEvent<InitBrickPayload>('EvInitBrick', InitBrickPayload);
+
+  /** Fired on non-lethal brick hit (for shake/particles). */
+  export class BrickHitPayload {
+    readonly position: Vec3 = Vec3.zero;
+    readonly color: Color = Color.white;
+  }
+  export const BrickHit = new LocalEvent<BrickHitPayload>('EvBrickHit', BrickHitPayload);
+
+  /** Fired when ball hits the paddle (for squash/sparks). */
+  export class PaddleHitPayload {
+    readonly position: Vec3 = Vec3.zero;
+    readonly ballVelocityX: number = 0;
+    readonly ballVelocityY: number = 0;
+  }
+  export const PaddleHit = new LocalEvent<PaddleHitPayload>('EvPaddleHit', PaddleHitPayload);
+
+  /** Fired when an explosive brick chain starts (for big freeze/shake). */
+  export class ExplosionChainPayload {
+    readonly position: Vec3 = Vec3.zero;
+    readonly chainSize: number = 1;
+  }
+  export const ExplosionChain = new LocalEvent<ExplosionChainPayload>('EvExplosionChain', ExplosionChainPayload);
+
+  /** Fired when a coin is absorbed by the paddle vacuum. */
+  export class CoinCollectedPayload {
+    readonly value: number = 1;
+  }
+  export const CoinCollected = new LocalEvent<CoinCollectedPayload>('EvCoinCollected', CoinCollectedPayload);
 }
 
 /**
@@ -89,11 +137,6 @@ export namespace HUDEvents {
     readonly score: number = 0;
   }
   export const UpdateScore = new LocalEvent<UpdateScorePayload>('EvHUDUpdateScore', UpdateScorePayload);
-
-  export class UpdateLevelPayload {
-    readonly level: number = 1;
-  }
-  export const UpdateLevel = new LocalEvent<UpdateLevelPayload>('EvHUDUpdateLevel', UpdateLevelPayload);
 
   export class UpdateLivesPayload {
     readonly lives: number = 3;
@@ -107,4 +150,95 @@ export namespace HUDEvents {
 
   export class HideMessagePayload {}
   export const HideMessage = new LocalEvent<HideMessagePayload>('EvHUDHideMessage', HideMessagePayload);
+}
+
+/**
+ * Background animation events and payloads.
+ * Any system can dispatch IntensifyBackground to pulse the background color overlay.
+ */
+export namespace BackgroundEvents {
+  export class IntensifyBackgroundPayload {
+    /** Intensity of the pulse, 0-1. */
+    readonly intensity: number = 0;
+    /** Duration of the pulse in seconds. */
+    readonly durationSeconds: number = 0.5;
+  }
+  export const IntensifyBackground = new LocalEvent<IntensifyBackgroundPayload>(
+    'EvBackgroundIntensify',
+    IntensifyBackgroundPayload,
+  );
+}
+
+/**
+ * Combo HUD events and payloads.
+ * Other systems dispatch these events; the ComboHUDViewModel subscribes to update the combo UI.
+ */
+export namespace ComboHUDEvents {
+  export class IncrementComboPayload {}
+  export const IncrementCombo = new LocalEvent<IncrementComboPayload>('EvComboIncrement', IncrementComboPayload);
+
+  export class ResetComboPayload {}
+  export const ResetCombo = new LocalEvent<ResetComboPayload>('EvComboReset', ResetComboPayload);
+}
+
+/**
+ * High Score HUD events and payloads.
+ * GameManager dispatches ShowHighScores on game over; HighScoreHUDViewModel subscribes to render.
+ */
+@serializable()
+export class HighScoreEntry {
+  @property()
+  readonly rank: number = -1;
+  @property()
+  readonly name: string = '';
+  @property()
+  readonly score: number = 0;
+  @property()
+  readonly isCurrentPlayer: boolean = false;
+}
+
+export namespace HighScoreHUDEvents {
+  export class ShowHighScoresPayload {
+    readonly entries: readonly HighScoreEntry[] = [];
+  }
+  export const ShowHighScores = new LocalEvent<ShowHighScoresPayload>('EvHighScoreShow', ShowHighScoresPayload);
+
+  export class HideHighScoresPayload {}
+  export const HideHighScores = new LocalEvent<HideHighScoresPayload>('EvHighScoreHide', HideHighScoresPayload);
+}
+
+/**
+ * Leaderboard events.
+ * GameManager sends LeaderboardSubmitScore (NetworkEvent) on game over.
+ * LeaderboardManager listens server-side for submission and client-side for data readiness.
+ */
+export namespace LeaderboardEvents {
+  @serializable()
+  export class LeaderboardSubmitScorePayload {
+    @property()
+    readonly score: number = 0;
+  }
+  export const LeaderboardSubmitScore = new NetworkEvent<LeaderboardSubmitScorePayload>(
+    'EvLeaderboardSubmitScore',
+    LeaderboardSubmitScorePayload,
+  );
+
+  @serializable()
+  export class LeaderboardEntriesFetchedPayload {
+    @property()
+    readonly entries: readonly HighScoreEntry[] = [];
+    //readonly entriesJson: string = '[]';
+    @property()
+    readonly playerRank: number = -1;
+  }
+  export const LeaderboardEntriesFetched = new NetworkEvent<LeaderboardEntriesFetchedPayload>(
+    'EvLeaderboardEntriesFetched',
+    LeaderboardEntriesFetchedPayload,
+  );
+
+  export class LeaderboardDisplayRequestPayload {}
+  export const LeaderboardDisplayRequest = new LocalEvent<LeaderboardDisplayRequestPayload>(
+    'EvLeaderboardDisplayRequest',
+    LeaderboardDisplayRequestPayload,
+  );
 }

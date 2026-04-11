@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "entities": [
         {
             "id": "f19469c4-1e19-438d-902f-76db131a2587",
@@ -8,7 +8,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 2,
+                        "version": 3,
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
@@ -23,7 +23,7 @@
                             "localScale": {
                                 "x": 1.0,
                                 "y": 0.5,
-                                "z": 0.10000000149011612
+                                "z": 0.4605642557144165
                             }
                         }
                     },

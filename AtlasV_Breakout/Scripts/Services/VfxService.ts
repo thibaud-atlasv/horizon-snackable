@@ -15,11 +15,14 @@ import type { OnWorldUpdateEventPayload } from 'meta/worlds';
 import { ExecuteOn } from 'meta/worlds';
 import { Events } from '../Types';
 import { Particle } from '../Assets';
-import { PARTICLE_POOL_SIZE } from '../Constants';
+import {
+  PARTICLE_POOL_SIZE, TRAIL_POOL_SIZE,
+  VFX_TRAIL_SCALE, VFX_TRAIL_LIFE,
+  VFX_IMPACT_COUNT, VFX_PARTICLE_GRAVITY,
+} from '../Constants';
 
 const PARK_POS = new Vec3(0, -100, 0);
 const WHITE = new Color(1, 1, 1, 1);
-const FLASH_DURATION = 0.08; // 80ms white flash
 
 interface IParticle {
   entity: Entity;
@@ -48,10 +51,22 @@ export class VfxService extends Service {
   private _particles: IParticle[] = [];
   private _flashes: IFlash[] = [];
 
+  // ── Trail: dedicated circular pool (no splice, no sharing) ────────────────
+  private _trailPool: Entity[] = [];
+  private _trailIndex: number = 0;
+  private _trailAges: Float32Array = new Float32Array(0);
+  private _trailLifes: Float32Array = new Float32Array(0);
+  private _trailScales: Float32Array = new Float32Array(0);
+  private _trailR: Float32Array = new Float32Array(0);
+  private _trailG: Float32Array = new Float32Array(0);
+  private _trailB: Float32Array = new Float32Array(0);
+
   async prewarm(): Promise<void> {
     if (NetworkingService.get().isServerContext()) return;
+
+    const totalCount = PARTICLE_POOL_SIZE + TRAIL_POOL_SIZE;
     const entities = await Promise.all(
-      Array.from({ length: PARTICLE_POOL_SIZE }, () =>
+      Array.from({ length: totalCount }, () =>
         WorldService.get().spawnTemplate({
           templateAsset: Particle,
           position: PARK_POS,
@@ -61,19 +76,47 @@ export class VfxService extends Service {
         }).catch((e: unknown) => { console.error(e); return null; }),
       ),
     );
-    for (const e of entities) { if (e) this._pool.push(e); }
+
+    // First TRAIL_POOL_SIZE go to the trail pool, rest to general particles
+    let trailCount = 0;
+    let particleCount = 0;
+    for (const e of entities) {
+      if (!e) continue;
+      if (trailCount < TRAIL_POOL_SIZE) {
+        this._trailPool.push(e);
+        trailCount++;
+      } else {
+        this._pool.push(e);
+        particleCount++;
+      }
+    }
+
+    // Init trail SOA buffers
+    const n = this._trailPool.length;
+    this._trailAges   = new Float32Array(n);
+    this._trailLifes  = new Float32Array(n);
+    this._trailScales = new Float32Array(n);
+    this._trailR      = new Float32Array(n);
+    this._trailG      = new Float32Array(n);
+    this._trailB      = new Float32Array(n);
+    // Mark all as expired
+    this._trailAges.fill(999);
+    this._trailLifes.fill(1);
   }
 
-  // ── trail ───────────────────────────────────────────────────────
+  // ── Trail ─────────────────────────────────────────────────────────────────
 
-  spawnTrail(worldX: number, worldY: number, worldZ: number, r: number, g: number, b: number): void {
-    const entity = this._acquireParticle();
-    if (!entity) return;
+  spawnTrail(size: number, worldX: number, worldY: number, worldZ: number, r: number, g: number, b: number): void {
+    if (this._trailPool.length === 0) return;
 
+    const i = this._trailIndex;
+    this._trailIndex = (i + 1) % this._trailPool.length;
+
+    const entity = this._trailPool[i];
     const tc = entity.getComponent(TransformComponent);
     if (tc) {
       tc.worldPosition = new Vec3(worldX, worldY, worldZ);
-      tc.localScale = new Vec3(0.04, 0.04, 0.04);
+      tc.localScale = new Vec3(VFX_TRAIL_SCALE, VFX_TRAIL_SCALE, VFX_TRAIL_SCALE);
     }
     const color = new Color(r, g, b, 0.8);
     const cc = entity.getComponent(ColorComponent);
@@ -83,15 +126,39 @@ export class VfxService extends Service {
       if (c) c.color = color;
     }
 
-    this._particles.push({
-      entity,
-      vx: 0, vy: 0, vz: 0,
-      age: 0,
-      life: 0.15,
-      r, g, b,
-      a: 0.1,
-      baseScale: 0.3,
-    });
+    this._trailAges[i]   = 0;
+    this._trailLifes[i]  = VFX_TRAIL_LIFE;
+    this._trailScales[i] = size;
+    this._trailR[i] = r;
+    this._trailG[i] = g;
+    this._trailB[i] = b;
+  }
+
+  // ── Public single particle spawn (used by JuiceService) ──────────────────
+
+  spawnParticle(
+    x: number, y: number, z: number,
+    vx: number, vy: number, vz: number,
+    r: number, g: number, b: number,
+    life: number, baseScale: number,
+  ): void {
+    const entity = this._acquireParticle();
+    if (!entity) return;
+
+    const tc = entity.getComponent(TransformComponent);
+    if (tc) {
+      tc.worldPosition = new Vec3(x, y, z);
+      tc.localScale = new Vec3(baseScale, baseScale, baseScale);
+    }
+    const color = new Color(r, g, b, 1);
+    const cc = entity.getComponent(ColorComponent);
+    if (cc) cc.color = color;
+    for (const child of entity.getChildrenWithComponent(ColorComponent)) {
+      const c = child.getComponent(ColorComponent);
+      if (c) c.color = color;
+    }
+
+    this._particles.push({ entity, vx, vy, vz, age: 0, life, r, g, b, baseScale });
   }
 
   // ── Death explosion ───────────────────────────────────────────────────────
@@ -116,11 +183,37 @@ export class VfxService extends Service {
       }
     }
 
-    // Update particles
+    // ── Trail pool update (no splice, pure circular) ─────────────────────
+    for (let i = 0; i < this._trailPool.length; i++) {
+      this._trailAges[i] += dt;
+      if (this._trailAges[i] >= this._trailLifes[i]) {
+        // Park expired trail particles
+        const tc = this._trailPool[i].getComponent(TransformComponent);
+        if (tc && tc.worldPosition.y > -50) {
+          tc.worldPosition = PARK_POS;
+        }
+        continue;
+      }
+      const frac = Math.max(0, 1 - this._trailAges[i] / this._trailLifes[i]);
+      const sc = this._trailScales[i] * frac;
+      const entity = this._trailPool[i];
+      const tc = entity.getComponent(TransformComponent);
+      if (tc) tc.localScale = new Vec3(sc, sc, sc);
+      // Fade alpha
+      const alpha = 0.1 * frac;
+      const cc = entity.getComponent(ColorComponent);
+      if (cc) cc.color = new Color(this._trailR[i], this._trailG[i], this._trailB[i], alpha);
+      for (const child of entity.getChildrenWithComponent(ColorComponent)) {
+        const c = child.getComponent(ColorComponent);
+        if (c) c.color = new Color(this._trailR[i], this._trailG[i], this._trailB[i], alpha);
+      }
+    }
+
+    // ── General particles update ─────────────────────────────────────────
     for (let i = this._particles.length - 1; i >= 0; i--) {
       const p = this._particles[i];
       p.age += dt;
-      p.vy -= 9.8 * dt; // gravity
+      p.vy -= VFX_PARTICLE_GRAVITY * dt;
 
       const tc = p.entity.getComponent(TransformComponent);
       if (tc) {
@@ -150,11 +243,16 @@ export class VfxService extends Service {
   @subscribe(Events.Restart)
   onRestart(_p: Events.RestartPayload): void {
     for (const p of this._particles) this._parkParticle(p.entity);
+    // Park all trail particles
+    for (let i = 0; i < this._trailPool.length; i++) {
+      this._trailAges[i] = 999;
+      this._parkParticle(this._trailPool[i]);
+    }
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
   private _spawnImpactParticles(worldX: number, worldY: number, worldZ: number, r: number, g: number, b: number): void {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < VFX_IMPACT_COUNT; i++) {
       const entity = this._acquireParticle();
       if (!entity) break;
 

@@ -1,8 +1,8 @@
 import { component, Component, ExecuteOn, NetworkingService, NetworkMode, OnEntityStartEvent, Quaternion, subscribe, TransformComponent, type Maybe, Vec3, WorldService } from 'meta/worlds';
-import { Events, PowerUpType } from './Types';
-import { LEVELS, LEVEL_DEFAULTS, type PowerUpConfig } from './LevelConfig';
-import { PowerUpAssets } from './Assets';
-import { PowerUp } from './GameplayObjects/PowerUp';
+import { Events, PowerUpType } from '../Types';
+import { LEVELS, LEVEL_DEFAULTS, type PowerUpConfig } from '../LevelConfig';
+import { PowerUpAssets } from '../Assets';
+import { PowerUp } from './PowerUp';
 
 @component()
 export class PowerUpManager extends Component {
@@ -40,10 +40,9 @@ export class PowerUpManager extends Component {
   }
 
   @subscribe(Events.BrickDestroyed)
-  private onBrickDestroyed(payload: Events.BrickDestroyedPayload): void {
-    if (NetworkingService.get().isServerContext()) return;
-    if (Math.random() > this._spawnChance) return;
-    this._spawnPowerUp(payload.position);
+  private onBrickDestroyed(_payload: Events.BrickDestroyedPayload): void {
+    // Power-ups disabled — coin + combo system replaces them.
+    return;
   }
 
   private _selectRandom(): PowerUpConfig {

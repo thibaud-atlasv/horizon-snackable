@@ -1,0 +1,89 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent" d:DesignWidth="900" d:DesignHeight="1600">
+
+    <!-- Combo Counter HUD Overlay -->
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+        <!-- Main combo container with visibility, opacity, scale, and shake transforms -->
+        <Grid x:Name="ComboContainer" Opacity="{Binding Path=comboOpacity}" RenderTransformOrigin="0.5,0.5">
+            <!-- Visibility binding -->
+            <Grid.Visibility>
+                <Binding Path="showCombo">
+                    <Binding.Converter>
+                        <BooleanToVisibilityConverter/>
+                    </Binding.Converter>
+                </Binding>
+            </Grid.Visibility>
+            
+            <!-- Scale and Translate transforms -->
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="{Binding Path=comboScale}" ScaleY="{Binding Path=comboScale}"/>
+                    <TranslateTransform X="{Binding Path=shakeX}" Y="{Binding Path=shakeY}"/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+            
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- COMBO label text -->
+                <TextBlock x:Name="ComboLabel"
+                           Text="COMBO"
+                           FontFamily="Roboto"
+                           FontSize="40"
+                           FontWeight="Bold"
+                           Foreground="{Binding Path=comboColor}"
+                           Opacity="0.7"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                
+                <!-- Combo number container (glow + main text) -->
+                <Grid HorizontalAlignment="Center">
+                    <!-- Glow effect: larger semi-transparent text behind main text -->
+                    <TextBlock x:Name="ComboGlow"
+                               Text="{Binding Path=comboText}"
+                               FontFamily="Roboto"
+                               FontSize="220"
+                               FontWeight="Bold"
+                               Opacity="0.4"
+                               TextAlignment="Center"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                <GradientStop Offset="0" Color="{Binding Path=comboColorTop}"/>
+                                <GradientStop Offset="1" Color="{Binding Path=comboColorBottom}"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>
+                        <TextBlock.Visibility>
+                            <Binding Path="showGlow">
+                                <Binding.Converter>
+                                    <BooleanToVisibilityConverter/>
+                                </Binding.Converter>
+                            </Binding>
+                        </TextBlock.Visibility>
+                    </TextBlock>
+                    
+                    <!-- Main combo number text -->
+                    <TextBlock x:Name="ComboNumber"
+                               Text="{Binding Path=comboText}"
+                               FontFamily="Roboto"
+                               FontSize="200"
+                               FontWeight="Bold"
+                               TextAlignment="Center"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                <GradientStop Offset="0" Color="{Binding Path=comboColorTop}"/>
+                                <GradientStop Offset="1" Color="{Binding Path=comboColorBottom}"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

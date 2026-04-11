@@ -1,10 +1,12 @@
 import { Color, ColorComponent, component, Component, EventService, ExecuteOn, NetworkingService, OnEntityStartEvent, OnFocusedInteractionInputEventPayload, OnFocusedInteractionInputStartedEvent, OnWorldUpdateEvent, OnWorldUpdateEventPayload, property, subscribe, TransformComponent, Vec3, type Maybe } from 'meta/worlds';
 import { Events, type ICollider, type Rect } from '../Types';
-import { BOUNDS } from '../Constants';
+import { BALL_SIZE, BALL_SPEED_BASE, BOUNDS } from '../Constants';
 import { CollisionManager } from '../CollisionManager';
 import { StickyBallState } from './StickyBallState';
 import { LEVELS, LEVEL_DEFAULTS, DEFAULT_PALETTE, type ColorPalette, type GameplaySettings, type PhysicsSettings } from '../LevelConfig';
 import { VfxService } from '../Services/VfxService';
+import { JuiceService } from '../Services/JuiceService';
+import { BallPowerService } from '../Services/BallPowerService';
 
 @component()
 export class Ball extends Component implements ICollider {
@@ -13,11 +15,13 @@ export class Ball extends Component implements ICollider {
   private _colorComponent: Maybe<ColorComponent> = null;
   private _velocity: Vec3 = Vec3.zero;
   private _sticky = new StickyBallState();
-  private _baseScale: Vec3 = Vec3.one;
+  private _baseScale: Vec3 = Vec3.one.mul(BALL_SIZE);
 
   readonly colliderTag = 'ball';
 
   private _isIdle = true;
+  private _locked = false;   // true during level-clear/game-over — blocks input
+  private _piercesLeft = 0;  // remaining pierces this frame (reset each update)
 
   // ── Per-level physics ────────────────────────────────────────────────────
   private _speedMultiplier: number = LEVEL_DEFAULTS.ballSpeedMultiplier;
@@ -27,11 +31,11 @@ export class Ball extends Component implements ICollider {
   private _speedIncrementPerBrick: number = LEVEL_DEFAULTS.ballSpeedIncrementPerBrick;
 
   private get _effectiveSpeed(): number {
-    return this.ballSpeed * this._speedMultiplier + this._speedBonus;
+    return (this.ballSpeed * this._speedMultiplier + this._speedBonus)
+      * BallPowerService.get().speedMultiplier;
   }
 
-  @property()
-  private ballSpeed: number = 10.5;
+  private ballSpeed: number = BALL_SPEED_BASE;
 
   private _isClient = false;
 
@@ -42,7 +46,6 @@ export class Ball extends Component implements ICollider {
     this.entity.requestOwnership();
     this._transform = this.entity.getComponent(TransformComponent)!;
     this._resetPosition = this._transform.worldPosition;
-    this._baseScale = this._transform.localScale;
 
     const children = this.entity.getChildrenWithComponent(ColorComponent);
     this._colorComponent = children.length > 0
@@ -89,6 +92,7 @@ export class Ball extends Component implements ICollider {
 
   @subscribe(OnFocusedInteractionInputStartedEvent)
   onTouchStarted(_payload: OnFocusedInteractionInputEventPayload): void {
+    if (this._locked) return;
     if (this._sticky.isStuck || this._isIdle) {
       this._launch();
       return;
@@ -117,6 +121,15 @@ export class Ball extends Component implements ICollider {
     this._speedBonus += this._speedIncrementPerBrick;
   }
 
+  @subscribe(Events.LevelCleared)
+  private onLevelCleared(): void {
+    this._velocity = Vec3.zero;
+    this._isIdle = true;
+    this._locked = true;
+    // Hide off-screen
+    this._transform.worldPosition = new Vec3(0, -100, 0);
+  }
+
   private _launch(): void {
     this._isIdle = false;
     EventService.sendLocally(Events.ReleaseBall, {});
@@ -141,6 +154,12 @@ export class Ball extends Component implements ICollider {
 
       this._transform.worldPosition = new Vec3(pos.x, paddleBounds.y + paddleBounds.h + r, pos.z);
 
+      EventService.sendLocally(Events.PaddleHit, {
+        position: new Vec3(pos.x, paddleBounds.y + paddleBounds.h, pos.z),
+        ballVelocityX: this._velocity.x,
+        ballVelocityY: this._velocity.y,
+      });
+
       if (this._sticky.tryStick(other, pos.x)) return;
 
       this._bounceOffPaddle(paddleBounds, pos.x);
@@ -148,6 +167,13 @@ export class Ball extends Component implements ICollider {
     }
 
     if (other.colliderTag === 'brick') {
+      // Pierce: skip the bounce, ball tears through — costs combo
+      if (this._piercesLeft > 0) {
+        this._piercesLeft--;
+        BallPowerService.get().consumePierce();
+        return;
+      }
+
       const brickBounds = other.getColliderBounds();
       const pos = this._transform.worldPosition;
       const r = this._transform.localScale.x * 0.5;
@@ -162,11 +188,8 @@ export class Ball extends Component implements ICollider {
       let vy = this._velocity.y;
 
       if (overlapX < overlapY) {
-        // Side collision — only flip if the ball is actually moving toward the brick horizontally.
-        // This prevents a double-bounce when the ball is already exiting (e.g. after a lag spike).
         if ((vx > 0 && pos.x < brickCx) || (vx < 0 && pos.x > brickCx)) vx = -vx;
       } else {
-        // Top/bottom collision — only flip if moving toward the brick vertically.
         if ((vy > 0 && pos.y < brickCy) || (vy < 0 && pos.y > brickCy)) vy = -vy;
       }
       [vx, vy] = this._withBounceRandomness(vx, vy);
@@ -198,6 +221,7 @@ export class Ball extends Component implements ICollider {
   @subscribe(Events.ResetRound)
   private onResetRound(): void {
     this._velocity = Vec3.zero;
+    this._locked = false;
     setTimeout(() => { this._reset(); }, 200);
   }
 
@@ -205,6 +229,7 @@ export class Ball extends Component implements ICollider {
     this._transform.worldPosition = this._resetPosition;
     this._velocity = Vec3.zero;
     this._isIdle = true;
+    this._locked = false;
     this._sticky.reset();
     this._speedBonus = 0;
   }
@@ -214,6 +239,7 @@ export class Ball extends Component implements ICollider {
   @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
   onUpdate(payload: OnWorldUpdateEventPayload): void {
     if (!this._isClient) return;
+    if (JuiceService.get().frozen) return;
 
     const initPos = this._transform.worldPosition;
     const r = this._transform.localScale.x * 0.5;
@@ -227,6 +253,7 @@ export class Ball extends Component implements ICollider {
     if (this._isIdle) return;
 
     const dt = payload.deltaTime;
+    this._piercesLeft = BallPowerService.get().pierceCount;
 
     // Split movement into substeps so the ball never travels more than one radius per step.
     // This prevents tunneling through bricks and ensures checkAgainst fires at intermediate positions.
@@ -235,7 +262,7 @@ export class Ball extends Component implements ICollider {
     const subDt = dt / steps;
 
     const color = this._colorComponent?.color ?? Color.white;
-    VfxService.get().spawnTrail(initPos.x, initPos.y, initPos.z, color.r, color.g, color.b);
+    VfxService.get().spawnTrail(r*2, initPos.x, initPos.y, initPos.z, color.r, color.g, color.b);
 
     for (let s = 0; s < steps; s++) {
       let vx = this._velocity.x;
