@@ -1,8 +1,9 @@
 import { component, Component, EventService, NetworkingService, NetworkMode, OnEntityStartEvent, subscribe, Quaternion, TransformComponent, Vec3, WorldService, type Entity, property, ColorComponent, type Maybe, Color } from 'meta/worlds';
 import { Events, RevealStyle } from '../Types';
-import { LEVELS, LEVEL_DEFAULTS, type LevelConfig } from '../LevelConfig';
+import { LEVELS, LEVEL_DEFAULTS, Title, type LevelConfig } from '../LevelConfig';
 import { BrickAssets } from '../Assets';
 import { BRICK_POOL_SIZE } from '../Constants';
+import { Brick } from './Brick';
 
 const PARK_POS = new Vec3(0, -100, 0);
 
@@ -24,7 +25,7 @@ export class LevelLayout extends Component {
     this._backgroundColor = this.background?.getComponent(ColorComponent);
 
     await this._prewarmPool();
-    this._layoutLevel(LEVELS[0]);
+    this._layoutLevel(Title);
   }
 
   @subscribe(Events.LoadLevel)
@@ -46,18 +47,18 @@ export class LevelLayout extends Component {
           position: PARK_POS,
           scale: Vec3.zero,
           rotation: Quaternion.identity,
-        }).catch((e: unknown) => { console.error('[LevelLayout] Pool spawn error', e); return null; }),
+        }).catch(() => null),
       ),
     );
     for (const e of entities) {
       if (e) this._pool.push(e);
     }
     this._poolReady = true;
-    console.log(`[LevelLayout] Brick pool ready: ${this._pool.length} entities`);
   }
 
   private _acquire(): Entity | null {
-    return this._pool.pop() ?? null;
+    const entity = this._pool.pop() ?? null;
+    return entity;
   }
 
   private _release(entity: Entity): void {
@@ -122,10 +123,7 @@ export class LevelLayout extends Component {
         if (!template) continue;
 
         const entity = this._acquire();
-        if (!entity) {
-          console.warn('[LevelLayout] Brick pool exhausted!');
-          return;
-        }
+        if (!entity) return;
 
         const x = originX + c * (brickWidth + paddingX);
         const tc = entity.getComponent(TransformComponent);
@@ -144,6 +142,7 @@ export class LevelLayout extends Component {
           colors: template.colors,
           revealDelay: delay,
           revealStyle,
+          titleAnim: config === Title,
         }, { eventTarget: entity });
       }
     }

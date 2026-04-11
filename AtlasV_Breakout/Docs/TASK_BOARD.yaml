@@ -1,4 +1,14 @@
 tasks:
+  - name: Score Reveal Animation + Border Fix
+    status: done
+    summary: Visibility moved to outer Border (hides everything), punchy spring animation (scale 0→1.15→1 + fade-in) on reveal
+    files: [Scripts/Components/GameHUDViewModel.ts, UI/GameHUD.xaml]
+
+  - name: Hide Score Until First LoadLevel
+    status: done
+    summary: Score hidden by default, revealed on first Events.LoadLevel via showScore binding
+    files: [Scripts/Components/GameHUDViewModel.ts, UI/GameHUD.xaml]
+
   - name: Fix Hearts Binding
     status: done
     summary: Fixed DataTriggers to reference correct heart names and control their own visibility

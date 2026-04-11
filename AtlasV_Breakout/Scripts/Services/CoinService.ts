@@ -15,7 +15,7 @@ import {
   Vec3,
 } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload } from 'meta/worlds';
-import { Events } from '../Types';
+import { ComboHUDEvents, Events } from '../Types';
 import {
   BOUNDS,
   COINS_PER_BRICK, COIN_MIN, COIN_SCATTER, COIN_INITIAL_VY, COIN_GRAVITY, COIN_Z,
@@ -80,6 +80,18 @@ export class CoinService extends Service {
 
   // ── Update ─────────────────────────────────────────────────────────────
 
+  private _comboCount = 0;
+  @subscribe(Events.PaddleHit)
+  onPaddleHit(p: Events.PaddleHitPayload): void {
+    if (p.ballVelocityY === 0) return;
+    this._comboCount = 0;
+  }
+
+  @subscribe(ComboHUDEvents.IncrementCombo)
+  onIncrementCombo(_payload: ComboHUDEvents.IncrementComboPayload): void {
+    this._comboCount++;
+  }
+
   @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
   private _onUpdate(p: OnWorldUpdateEventPayload): void {
     const dt = p.deltaTime;
@@ -101,7 +113,8 @@ export class CoinService extends Service {
 
       // ── Collect: instant burst + score ─────────────────────────────
       if (dist < COLLECT_RADIUS) {
-        EventService.sendLocally(Events.CoinCollected, { value: COIN_VALUE });
+        const value = Math.floor(COIN_VALUE * (1 + this._comboCount * 0.5));
+        EventService.sendLocally(Events.CoinCollected, { value: value });
 
         // Golden burst at collection point
         for (let b = 0; b < COIN_BURST_COUNT; b++) {
@@ -110,7 +123,7 @@ export class CoinService extends Service {
           vfx.spawnParticle(
             coin.x, coin.y, COIN_Z,
             Math.cos(angle) * speed, Math.sin(angle) * speed, 0,
-            COIN_COLOR[0], COIN_COLOR[1], COIN_COLOR[2],
+            COIN_COLOR[0], COIN_COLOR[1], COIN_COLOR[2], COIN_COLOR[3],
             0.15, 0.08,
           );
         }
@@ -181,7 +194,7 @@ export class CoinService extends Service {
       vfx.spawnParticle(
         coin.x, coin.y, COIN_Z,
         0, 0, 0,
-        COIN_COLOR[0], COIN_COLOR[1], COIN_COLOR[2],
+        COIN_COLOR[0], COIN_COLOR[1], COIN_COLOR[2], COIN_COLOR[3],
         0.02,
         COIN_SCALE * fadeIn,
       );

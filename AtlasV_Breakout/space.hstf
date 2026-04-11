@@ -74,6 +74,48 @@
             },
             "deltas": [
                 {
+                    "sourceId": "2f187760-1ff2-4412-92c4-64bf4d323a4f",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 1.0,
+                                        "g": 0.949999988079071,
+                                        "b": 0.8500000238418579,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "7dda61a0-378b-4b20-88a5-e3169643433b",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 1.0,
+                                        "g": 0.8399999737739563,
+                                        "b": 0.0,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
                     "sourceId": "cee97f6a-7f36-4e37-9532-48dc423bf392",
                     "components": [
                         {
@@ -139,9 +181,9 @@
                                         "z": 0.0
                                     },
                                     "localScale": {
-                                        "x": 21.0,
-                                        "y": 21.0,
-                                        "z": 1.0
+                                        "x": 16.5,
+                                        "y": 16.5,
+                                        "z": 1.0444444417953492
                                     }
                                 }
                             }
@@ -364,41 +406,6 @@
                 }
             ],
             "attributes": []
-        },
-        {
-            "id": "4afe2aeb-1410-4dab-a456-d39c8a288ca9",
-            "name": "PKFX",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 3,
-                        "data": {
-                            "localPosition": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::VfxPlatformComponent",
-                        "version": 2,
-                        "data": {
-                            "vfxAsset": {
-                                "packageOrRemoteId": "26904326832536512",
-                                "ingestionId": "14404034401559175445",
-                                "targetId": "1153353245"
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
         }
     ],
     "relationships": [
@@ -420,11 +427,6 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "306458b4-592a-4ab6-80d5-17e078a69eb4",
-            "destination": "9a40f381-025a-4e6f-9954-7cb666ae330f"
-        },
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "4afe2aeb-1410-4dab-a456-d39c8a288ca9",
             "destination": "9a40f381-025a-4e6f-9954-7cb666ae330f"
         }
     ]

@@ -34,12 +34,8 @@ export class CameraShakeService extends Service {
   /** Call once from ClientSetup after camera is initialised. */
   init(cameraEntity: Entity): void {
     this._transform = cameraEntity.getComponent(TransformComponent);
-    if (!this._transform) {
-      console.error('[CameraShakeService] Camera entity has no TransformComponent');
-      return;
-    }
+    if (!this._transform) return;
     this._originalPos = this._transform.localPosition;
-    console.log('[CameraShakeService] Initialised with camera entity');
   }
 
   /** Trigger a shake. intensity = max offset in world units, duration in seconds. */
@@ -64,7 +60,6 @@ export class CameraShakeService extends Service {
 
   @subscribe(Events.BallLost)
   onBallLost(_p: Events.BallLostPayload): void {
-    console.log('[CameraShakeService] triggering shake');
     this.shake(0.15, 0.3);
   }
 

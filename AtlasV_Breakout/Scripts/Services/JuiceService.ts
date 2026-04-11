@@ -97,7 +97,7 @@ export class JuiceService extends Service {
       vfx.spawnParticle(
         pos.x + spread * 0.1, pos.y + 0.1, pos.z,
         spread, upSpeed, 0,
-        1, 1, 1,  // white sparks
+        1, 1, 1, 1,  // white sparks
         0.15 + Math.random() * 0.1,
         0.06,
       );
@@ -113,7 +113,7 @@ export class JuiceService extends Service {
       vfx.spawnParticle(
         pos.x, pos.y, pos.z,
         Math.cos(angle) * speed, Math.sin(angle) * speed, 1 + Math.random(),
-        color.r, color.g, color.b,
+        color.r, color.g, color.b, 1,
         0.2 + Math.random() * 0.1,
         0.05,
       );

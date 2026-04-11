@@ -21,8 +21,8 @@ export type ColorPalette = {
 
 /** Palette used when none is defined in the level. */
 export const DEFAULT_PALETTE: Required<ColorPalette> = {
-  ball:       [1.00, 1.00, 1.00],
-  paddle:     [1.00, 1.00, 1.00],
+  ball: [1.00, 1.00, 1.00],
+  paddle: [1.00, 1.00, 1.00],
   background: [0.04, 0.04, 0.06], // near black
 };
 
@@ -133,8 +133,8 @@ export type LevelConfig = {
 export const LEVEL_DEFAULTS = {
   brickWidth: 1.2,
   brickHeight: 0.4,
-  paddingX: 0.1,
-  paddingY: 0.1,
+  paddingX: 0.1125,
+  paddingY: 0.1125,
   startY: 4,
   powerUpSpawnChance: 0.2,
   powerUpDuration: 10,
@@ -142,7 +142,7 @@ export const LEVEL_DEFAULTS = {
   gravity: 0,
   bounceRandomness: 0,
   paddleSpeedMultiplier: 1,
-  paddleLerpFactor: 1,
+  paddleLerpFactor: 0.88,
   ballSpeedIncrementPerBrick: 0,
   ballSizeMultiplier: 1,
   paddleWidthMultiplier: 1,
@@ -151,6 +151,59 @@ export const LEVEL_DEFAULTS = {
 // ---------------------------------------------------------------------------
 // Level data
 // ---------------------------------------------------------------------------
+
+export const Title: LevelConfig = {
+  // ── Title Screen ─────────────────────────────────────────────────────────
+  //
+  //   BRICK IT DOWN  —  police pixel 3×5, dégradé sur 15 lignes
+  //
+  //   Couloir chromatique calqué sur l'UI (or → hot pink → magenta → cyan) :
+  //   pas de vert, pas de lime — même palette que le score et le "tap to start"
+  //
+  brickTemplates: {
+    '1': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.00, 0.85, 0.12] } }, // or
+    '2': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.00, 0.62, 0.12] } }, // or-orange
+    '3': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.00, 0.38, 0.12] } }, // orange-rouge
+    '4': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.00, 0.15, 0.12] } }, // rouge
+    '5': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.00, 0.12, 0.33] } }, // rouge-rose
+    '6': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.00, 0.12, 0.57] } }, // hot pink
+    '7': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [1.00, 0.12, 0.80] } }, // hot pink-magenta
+    '8': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.96, 0.12, 1.00] } }, // magenta
+    '9': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.73, 0.12, 1.00] } }, // magenta-violet
+    'a': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.49, 0.12, 1.00] } }, // violet
+    'b': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.26, 0.12, 1.00] } }, // violet-bleu
+    'c': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.12, 0.22, 1.00] } }, // bleu
+    'd': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.12, 0.46, 1.00] } }, // bleu-cyan
+    'e': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.12, 0.69, 1.00] } }, // bleu clair
+    'f': { asset: BrickAssets.Normal, hits: 1, colors: { 1: [0.12, 0.93, 1.00] } }, // cyan
+  },
+    grid: [
+      '111  111  1  11 1 1',
+      '2  2 2  2 2 2   22',
+      '333  333  3 3   3',
+      '4  4 4 4  4 4   44',
+      '555  5  5 5  55 5 5',
+  
+      '',
+      '        6 666',
+      '        7  7 ',
+      '        8  8 ',
+      '        9  9 ',
+      '',
+      'aaa   aa  a   a a  a',
+      'b  b b  b b   b bb b',
+      'c  c c  c c   c c cc',
+      'd  d d  d d d d d  d',
+      'eee   ee   e e  e  e',
+    ].join('\n'),
+
+    brickWidth: 0.36,
+    brickHeight: 0.33,
+    paddingX: 0.08,
+    paddingY: 0.08,
+    startY: 5,
+
+};
 
 export const LEVELS: LevelConfig[] = [
 
@@ -180,17 +233,16 @@ export const LEVELS: LevelConfig[] = [
       'BBBBBBBB',
       'MMMMMMMM',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
     physics: {
       ballSpeedMultiplier: 1,
       paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
     },
     palette: {
-      background: [0.020, 0.020, 0.031], // #050508 noir pur
-      ball:       [0.000, 1.000, 0.933], // #00FFEE cyan vif
-      paddle:     [1.000, 1.000, 1.000], // #FFFFFF blanc pur
+      background: [0.020, 0.020, 0.031],
+      ball: [1.000, 0.84, 0.85],
+      paddle: [1.000, 0.84, 0.000],
     },
   },
 
@@ -214,17 +266,16 @@ export const LEVELS: LevelConfig[] = [
       '000ROR000',
       '0000R0000',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
     physics: {
       ballSpeedMultiplier: 1,
       paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
     },
     palette: {
       background: [0.020, 0.020, 0.031],
-      ball:       [0.000, 1.000, 0.933],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [0.000, 1.000, 0.933],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -243,17 +294,16 @@ export const LEVELS: LevelConfig[] = [
       '0C0P0C0P0',
       'P0C0P0C0P',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
     physics: {
       ballSpeedMultiplier: 1,
       paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
     },
     palette: {
       background: [0.040, 0.010, 0.050],
-      ball:       [1.000, 1.000, 0.200],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [1.000, 1.000, 0.200],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -273,17 +323,12 @@ export const LEVELS: LevelConfig[] = [
       'V0V000V0V',
       '000VV0000',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.010, 0.020, 0.010],
-      ball:       [0.200, 1.000, 0.200],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [0.200, 1.000, 0.200],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -307,17 +352,12 @@ export const LEVELS: LevelConfig[] = [
       '0000RRRR0',
       '00OOOO000',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.020, 0.010, 0.040],
-      ball:       [1.000, 0.400, 1.000],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [1.000, 0.400, 1.000],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -338,17 +378,12 @@ export const LEVELS: LevelConfig[] = [
       '000RPR000',
       '0000R0000',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.050, 0.010, 0.030],
-      ball:       [1.000, 0.700, 0.800],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [1.000, 0.700, 0.800],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -373,17 +408,12 @@ export const LEVELS: LevelConfig[] = [
       'ROJVBVJOR',
       'RROJVJORR',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.030, 0.020, 0.010],
-      ball:       [1.000, 0.900, 0.500],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [1.000, 0.900, 0.500],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -408,17 +438,12 @@ export const LEVELS: LevelConfig[] = [
       'R0O0J0V0B',
       'R0O0J0V0B',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.010, 0.010, 0.030],
-      ball:       [1.000, 1.000, 1.000],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [1.000, 1.000, 1.000],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -440,17 +465,12 @@ export const LEVELS: LevelConfig[] = [
       '000CWC000',
       '000CCC000',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.010, 0.020, 0.040],
-      ball:       [1.000, 0.843, 0.000],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [1.000, 0.843, 0.000],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -474,17 +494,12 @@ export const LEVELS: LevelConfig[] = [
       'RMOJVBRMO',
       'MOJVBRMOJ',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.020, 0.010, 0.050],
-      ball:       [0.000, 1.000, 1.000],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [0.000, 1.000, 1.000],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 
@@ -509,17 +524,12 @@ export const LEVELS: LevelConfig[] = [
       'PP00000PP',
       '0PPPPPPP0',
     ].join('\n'),
-    brickWidth: 1.00, brickHeight: 0.80, paddingX: 0.11, paddingY: 0.11, startY: 6.5,
+    brickWidth: 0.9, brickHeight: 0.80, paddingX: 0.1125, paddingY: 0.1125, startY: 6.5,
     powerUpSpawnChance: 0,
-    physics: {
-      ballSpeedMultiplier: 1,
-      paddleLerpFactor: 0.88,
-      ballSpeedIncrementPerBrick: 0.2,
-    },
     palette: {
       background: [0.020, 0.020, 0.031],
-      ball:       [0.000, 1.000, 0.933],
-      paddle:     [1.000, 1.000, 1.000],
+      ball: [0.000, 1.000, 0.933],
+      paddle: [1.000, 1.000, 1.000],
     },
   },
 

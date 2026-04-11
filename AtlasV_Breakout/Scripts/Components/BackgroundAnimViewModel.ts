@@ -65,8 +65,6 @@ export class BackgroundAnimViewModel extends Component {
     this._intervalId = setInterval(() => {
       this._tick();
     }, TICK_MS);
-
-    console.log('[BackgroundAnimViewModel] Initialized');
   }
 
   @subscribe(OnEntityDestroyEvent)

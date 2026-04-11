@@ -35,6 +35,11 @@ export class Brick extends Component implements IBrick {
   private _deathScale: Vec3 = Vec3.one;
   private _deathCallback: (() => void) | null = null;
 
+  // Title idle animation state
+  private _titleAnim = false;
+  private _idleAge = 0;
+  private _idlePhaseOffset = 0; // per-brick random phase so they don't all move in sync
+
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
@@ -48,6 +53,11 @@ export class Brick extends Component implements IBrick {
 
     // Don't register yet — wait until reveal finishes so the ball can't hit invisible bricks
   }
+  
+  @subscribe(Events.LoadLevel)
+  private onLoadLevel(payload: Events.LoadLevelPayload): void {
+    this._park();
+  }
 
   @subscribe(Events.InitBrick)
   private _onInit(payload: Events.InitBrickPayload): void {
@@ -56,6 +66,11 @@ export class Brick extends Component implements IBrick {
     this._hitsRemaining = payload.hits;
     this._brickColors = payload.colors;
     this._updateColor();
+
+    // Title idle animation — phase offset derived from Y so rows are in sync
+    this._titleAnim = payload.titleAnim ?? false;
+    this._idleAge = 0;
+    this._idlePhaseOffset = this._targetPosition.y * 1.8;
 
     // Start reveal animation
     this._targetScale = this._transform.localScale;
@@ -131,7 +146,6 @@ export class Brick extends Component implements IBrick {
    * Override to replace or extend the destruction sequence.
    */
   protected onDestroyBrick(): void {
-    console.log("[Brick] Destroyed");
     // Fire event immediately so scoring/VFX react instantly
     EventService.sendLocally(Events.BrickDestroyed, {
       position: this._transform.worldPosition,
@@ -148,7 +162,10 @@ export class Brick extends Component implements IBrick {
 
   @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
   private _onRevealUpdate(p: OnWorldUpdateEventPayload): void {
-    if (!this._revealing) return;
+    if (!this._revealing) {
+      this._tickTitleIdle(p.deltaTime);
+      return;
+    }
 
     // Wait for the staggered delay
     if (this._revealDelay > 0) {
@@ -180,6 +197,36 @@ export class Brick extends Component implements IBrick {
       this._transform.localScale = this._targetScale;
       this._transform.localRotation = Quaternion.identity;
       CollisionManager.get().register(this);
+    }
+
+  }
+
+  private _tickTitleIdle(dt: number): void {
+    if (!this._titleAnim || this._dying) return;
+
+    // Scale pulse + brightness pulse, independent frequencies per brick
+    // Phase offset per brick keeps the grid organic, not uniform
+    this._idleAge += dt;
+    const phase = this._idleAge * 3.0 + this._idlePhaseOffset;
+
+    // Scale: ±20% breathe
+    const scalePulse = 1.0 + 0.05 * Math.sin(phase);
+    this._transform.localScale = new Vec3(
+      this._targetScale.x * scalePulse,
+      this._targetScale.y * scalePulse,
+      this._targetScale.z * scalePulse,
+    );
+
+    // Brightness: 0.3 → 1.0, slightly offset frequency
+    const brightness = 0.5 + 0.5 * (0.5 + 0.2 * Math.sin(phase * 2.3));
+    if (this._colorComponent) {
+      const c = this._baseColor;
+      this._colorComponent.color = new Color(
+        c.r * brightness,
+        c.g * brightness,
+        c.b * brightness,
+        1,
+      );
     }
   }
 
@@ -286,6 +333,7 @@ export class Brick extends Component implements IBrick {
     this._transform.localRotation = Quaternion.identity;
     this._revealing = false;
     this._dying = false;
+    this._titleAnim = false;
     EventService.sendLocally(Events.BrickRecycle, { entity: this.entity });
   }
 

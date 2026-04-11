@@ -5,7 +5,6 @@ import {
   ExecuteOn,
   LeaderboardsService,
   NetworkingService,
-  OnEntityStartEvent,
   OnPlayerCreateEvent,
   OnPlayerCreateEventPayload,
   PlayerService,
@@ -41,11 +40,6 @@ export class LeaderboardManager extends Component {
   // Whether the display has been requested (game over state)
   private _isDisplaying: boolean = false;
 
-  @subscribe(OnEntityStartEvent, { execution: ExecuteOn.Everywhere })
-  onStart(): void {
-    console.log('[LeaderboardManager] Initialized');
-  }
-
   // —— Server-side: pre-fetch on player join ——————————————————————————————————
 
   @subscribe(OnPlayerCreateEvent, { execution: ExecuteOn.Everywhere })
@@ -53,7 +47,6 @@ export class LeaderboardManager extends Component {
     if (!NetworkingService.get().isServerContext()) return;
     if (!payload.entity) return;
 
-    console.log('[LeaderboardManager] Server: player created, pre-fetching leaderboard');
     await this._serverFetchAndBroadcast(payload.entity);
   }
 
@@ -62,13 +55,9 @@ export class LeaderboardManager extends Component {
   @subscribe(LeaderboardEvents.LeaderboardSubmitScore, { execution: ExecuteOn.Everywhere })
   async onSubmitScore(payload: LeaderboardEvents.LeaderboardSubmitScorePayload): Promise<void> {
     if (!NetworkingService.get().isServerContext()) return;
-    console.log(`[LeaderboardManager] Server received score submission: ${payload.score}`);
     try {
       const players = PlayerService.get().getAllPlayers();
-      if (players.length === 0) {
-        console.error('[LeaderboardManager] No players found for score submission');
-        return;
-      }
+      if (players.length === 0) return;
       const player = players[0];
       const existingEntry = await LeaderboardsService.get().fetchEntryForPlayer(
         player,
@@ -140,7 +129,6 @@ export class LeaderboardManager extends Component {
   @subscribe(LeaderboardEvents.LeaderboardDisplayRequest, { execution: ExecuteOn.Everywhere })
   async onDisplayRequest(): Promise<void> {
     if (NetworkingService.get().isServerContext()) return;
-    console.log('[LeaderboardManager] Client received display request');
     this._isDisplaying = true;
     if (this._cachedEntries.length > 0) {
       EventService.sendLocally(HighScoreHUDEvents.ShowHighScores, { entries: this._cachedEntries });
@@ -148,7 +136,7 @@ export class LeaderboardManager extends Component {
     }
 
     // Cache empty — fallback: try fetchEntryForPlayer (works on client)
-    console.log('[LeaderboardManager] Cache empty, trying client-side fallback');
+    EventService.sendLocally(HighScoreHUDEvents.ShowHighScores, { entries: [] });
     try {
       const player = PlayerService.get().getLocalPlayer();
       if (player) {

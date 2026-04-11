@@ -10,7 +10,7 @@ import {
   UiViewModel,
 } from 'meta/worlds';
 
-import { HUDEvents } from '../Types';
+import { Events, HUDEvents } from '../Types';
 
 const ANIM_INTERVAL_MS = 30;
 const SCALE_PUNCH = 1.3;
@@ -21,13 +21,20 @@ const SETTLE_SPEED = 0.15;
 const BOUNCE_INTERVAL_MS = 35;
 const BOUNCE_SPEED = 10;
 const BOUNCE_RANGE_X = 250;
-const BOUNCE_RANGE_Y = 650;
+const BOUNCE_RANGE_Y = 1300;
 const SQUASH_SCALE_X = 1.1;
 const SQUASH_SCALE_Y = 0.9;
-const SQUASH_RECOVER_SPEED = 0.12;
+const SQUASH_RECOVER_SPEED = 0.32;
 const ROTATION_PUNCH = 0; // degrees on bounce hit
 const ROTATION_RECOVER_SPEED = 0.1;
 const COLOR_PHASE_SPEED = 0.005;
+
+// Reveal animation constants
+const REVEAL_INTERVAL_MS = 16;
+const REVEAL_DURATION_MS = 500;
+const REVEAL_OVERSHOOT = 1.15;
+const REVEAL_DAMPING = 5;
+const REVEAL_FREQUENCY = 2.5;
 
 const VERBOSE_LOG = false;
 
@@ -49,6 +56,9 @@ export class GameHUDViewModelData extends UiViewModel {
   centerTextScaleY: number = 1;
   centerTextRotation: number = 0;
   centerTextColorPhase: number = 0;
+  showScore: boolean = false;
+  scoreBarScale: number = 0;
+  scoreBarOpacity: number = 0;
 }
 
 /**
@@ -64,12 +74,17 @@ export class GameHUDViewModelData extends UiViewModel {
 export class GameHUDViewModel extends Component {
   private _viewModel = new GameHUDViewModelData();
   private _targetScore: number = 0;
+  private _scoreRevealed: boolean = false;
   private _animIntervalId: number | null = null;
   private _animTick: number = 0;
   private _settling: boolean = false;
 
   // Bounce animation state
   private _bounceIntervalId: number | null = null;
+
+  // Reveal animation state
+  private _revealIntervalId: number | null = null;
+  private _revealElapsed: number = 0;
   private _bounceDirection: number = 1; // 1 = right, -1 = left
   private _bounceDirectionY: number = 1; // 1 = down, -1 = up
   private _squashing: boolean = false;
@@ -83,13 +98,13 @@ export class GameHUDViewModel extends Component {
     if (customUi) {
       customUi.dataContext = this._viewModel;
     }
-    console.log('[GameHUDViewModel] Initialized');
   }
 
   @subscribe(OnEntityDestroyEvent)
   onDestroy(): void {
     this._clearAnimInterval();
     this._clearBounceInterval();
+    this._clearRevealInterval();
   }
 
   // ── Event subscriptions ────────────────────────────────────
@@ -122,6 +137,15 @@ export class GameHUDViewModel extends Component {
     this._viewModel.centerText = payload.message.toUpperCase();
     this._viewModel.showCenterText = true;
     this._startBounce();
+  }
+
+  @subscribe(Events.LoadLevel)
+  onLoadLevel(_payload: Events.LoadLevelPayload): void {
+    if (!this._scoreRevealed) {
+      this._scoreRevealed = true;
+      this._viewModel.showScore = true;
+      this._startRevealAnimation();
+    }
   }
 
   @subscribe(HUDEvents.HideMessage)
@@ -318,6 +342,46 @@ export class GameHUDViewModel extends Component {
       if (VERBOSE_LOG) {
         console.log('[GameHUDViewModel] Animation interval cleared');
       }
+    }
+  }
+
+  // ── Reveal animation ──────────────────────────────────────
+
+  private _startRevealAnimation(): void {
+    this._clearRevealInterval();
+    this._revealElapsed = 0;
+    this._viewModel.scoreBarScale = 0;
+    this._viewModel.scoreBarOpacity = 0;
+
+    this._revealIntervalId = setInterval(() => {
+      this._tickReveal();
+    }, REVEAL_INTERVAL_MS);
+  }
+
+  private _tickReveal(): void {
+    this._revealElapsed += REVEAL_INTERVAL_MS;
+    const t = Math.min(this._revealElapsed / REVEAL_DURATION_MS, 1.0);
+
+    // Damped spring: 1 - cos(t * π * freq) * e^(-t * damping)
+    const spring = 1.0 - Math.cos(t * Math.PI * REVEAL_FREQUENCY) * Math.exp(-t * REVEAL_DAMPING);
+    // Map spring [0..overshoot..1] — scale from 0 → overshoot → 1
+    this._viewModel.scoreBarScale = spring * REVEAL_OVERSHOOT * (1.0 - t) + spring * t;
+
+    // Quick opacity fade-in over first 40% of duration
+    this._viewModel.scoreBarOpacity = Math.min(1.0, t / 0.4);
+
+    if (t >= 1.0) {
+      this._viewModel.scoreBarScale = 1.0;
+      this._viewModel.scoreBarOpacity = 1.0;
+      this._clearRevealInterval();
+    }
+  }
+
+  private _clearRevealInterval(): void {
+    if (this._revealIntervalId !== null) {
+      clearInterval(this._revealIntervalId);
+      this._revealIntervalId = null;
+      this._revealElapsed = 0;
     }
   }
 

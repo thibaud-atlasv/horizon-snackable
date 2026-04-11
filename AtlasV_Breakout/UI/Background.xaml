@@ -22,7 +22,7 @@
         </Grid.Background>
         
         <!-- Layer 2: Very subtle magenta hint at top edge -->
-        <Border BorderBrush="#FF00FFE8" BorderThickness="2,2,2,2" Opacity="0.5" Visibility="Hidden"/>
+        <Border BorderBrush="#FF00FFE8" BorderThickness="2,2,2,2" Opacity="0.5"/>
         
         <!-- Layer 3: Very subtle cyan hint at bottom edge -->
         

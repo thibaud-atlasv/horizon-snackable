@@ -68,8 +68,6 @@ export class Paddle extends Component implements ICollider {
     this._normalScale = this._transform.localScale;
 
     CollisionManager.get().register(this);
-    this._lerpFactor = LEVELS[0].physics?.paddleLerpFactor ?? LEVEL_DEFAULTS.paddleLerpFactor;
-    this._applyPalette(LEVELS[0].palette);
   }
 
   @subscribe(Events.LoadLevel)
@@ -192,22 +190,6 @@ export class Paddle extends Component implements ICollider {
         }
       }
     }
-
-    // ── Color cycling ─────────────────────────────────────────────────────
-    if (this._colorComponent && Date.now() >= this._flashUntil) {
-      const effects = [...this._activeEffects.values()];
-      if (effects.length === 0) {
-        this._colorComponent.color = this._baseColor;
-      } else {
-        this._colorSlotTimer -= deltaTime;
-        if (this._colorSlotTimer <= 0) {
-          this._colorSlot = (this._colorSlot + 1) % effects.length;
-          this._colorSlotTimer = Paddle.COLOR_SLOT_DURATION;
-        }
-        this._colorSlot = Math.min(this._colorSlot, effects.length - 1);
-        this._colorComponent.color = effects[this._colorSlot].effect.color;
-      }
-    }
   }
 
 
@@ -216,6 +198,12 @@ export class Paddle extends Component implements ICollider {
     if (!this._isClient) return;
     const dt = payload.deltaTime;
     this.updatePowerups(dt);
+
+    // Restore base color after flash
+    if (this._flashUntil > 0 && Date.now() >= this._flashUntil) {
+      if (this._colorComponent) this._colorComponent.color = this._baseColor;
+      this._flashUntil = 0;
+    }
 
     // Move paddle
     const current = this._transform.worldPosition;

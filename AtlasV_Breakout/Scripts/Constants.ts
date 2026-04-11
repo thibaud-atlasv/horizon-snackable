@@ -11,11 +11,11 @@ export const BOUNDS: Rect = {
 };
 
 // ── Particle pool ───────────────────────────────────────────────────────────
-export const PARTICLE_POOL_SIZE = 200;
+export const PARTICLE_POOL_SIZE = 170;
 export const TRAIL_POOL_SIZE    = 30;
 
 // ── Brick pool ─────────────────────────────────────────────────────────────
-export const BRICK_POOL_SIZE = 80;
+export const BRICK_POOL_SIZE = 106;
 
 // ── Brick: death animation ──────────────────────────────────────────────────
 export const DEATH_DURATION   = 0.15;   // seconds to shrink + spin
@@ -47,8 +47,8 @@ export const SUPER_VACUUM_FORCE = 25.0;
 export const SUPER_VACUUM_MAX   = 12.0;
 
 // ── Coin: visual ────────────────────────────────────────────────────────────
-export const COIN_COLOR: [number, number, number] = [1.0, 0.85, 0.2];
-export const COIN_SCALE        = 0.15;
+export const COIN_COLOR: [number, number, number, number] = [1.0, 0.85, 0.2, 1];
+export const COIN_SCALE        = 0.25;
 export const COIN_MAX_LIFE     = 6.0;
 export const COIN_VALUE        = 10;
 export const COIN_BURST_COUNT  = 3;
@@ -73,7 +73,8 @@ export const BRICK_CRACK_COUNT  = 2;
 // ── VFX ─────────────────────────────────────────────────────────────────────
 export const VFX_FLASH_DURATION = 0.08;  // 80ms white flash
 export const VFX_TRAIL_SCALE    = 0.08;
-export const VFX_TRAIL_LIFE     = 0.15;
+export const VFX_TRAIL_LIFE     = 0.25;
+export const VFX_TRAIL_INTERVAL = 0.02;
 export const VFX_TRAIL_ALPHA    = 0.1;
 export const VFX_IMPACT_COUNT   = 3;
 export const VFX_PARTICLE_GRAVITY = 9.8;
@@ -81,10 +82,10 @@ export const VFX_PARTICLE_GRAVITY = 9.8;
 // ── Ball power: speed scaling ───────────────────────────────────────────────
 export const BALL_SPEED_BASE        = 8.5;
 export const BALL_SIZE              = 0.5;
-export const POWER_SPEED_SCALE      = 0.1;
-export const POWER_SPEED_RATE       = 0.6;
-export const POWER_MAX_SPEED_BASE   = 1.2;
-export const POWER_PIERCE_SPEED_BONUS = 0.08;
+export const POWER_SPEED_SCALE      = 0.621; // = 1 / log(1 + 20 * RATE), so mult=2.0 at heat=20
+export const POWER_SPEED_RATE       = 0.2;
+export const POWER_MAX_SPEED_BASE   = 2.0;   // reached at pierce-max heat (20)
+export const POWER_PIERCE_SPEED_BONUS = 0.0; // speed is fully driven by heat curve
 
 // ── Ball power: pierce thresholds ───────────────────────────────────────────
 // combo needed → max pierces per frame

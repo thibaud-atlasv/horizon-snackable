@@ -73,7 +73,7 @@ export class VfxService extends Service {
           rotation: Quaternion.identity,
           scale: new Vec3(0.08, 0.08, 0.08),
           networkMode: NetworkMode.LocalOnly,
-        }).catch((e: unknown) => { console.error(e); return null; }),
+        }).catch(() => null),
       ),
     );
 
@@ -139,7 +139,7 @@ export class VfxService extends Service {
   spawnParticle(
     x: number, y: number, z: number,
     vx: number, vy: number, vz: number,
-    r: number, g: number, b: number,
+    r: number, g: number, b: number, a :number,
     life: number, baseScale: number,
   ): void {
     const entity = this._acquireParticle();
@@ -150,7 +150,7 @@ export class VfxService extends Service {
       tc.worldPosition = new Vec3(x, y, z);
       tc.localScale = new Vec3(baseScale, baseScale, baseScale);
     }
-    const color = new Color(r, g, b, 1);
+    const color = new Color(r, g, b, a);
     const cc = entity.getComponent(ColorComponent);
     if (cc) cc.color = color;
     for (const child of entity.getChildrenWithComponent(ColorComponent)) {
@@ -280,43 +280,6 @@ export class VfxService extends Service {
         life: 0.3 + Math.random() * 0.1,
         r, g, b,
         baseScale: 0.08,
-      });
-    }
-  }
-
-  private _spawnDeathParticles(worldX: number, worldY: number, worldZ: number): void {
-    for (let i = 0; i < 6; i++) {
-      const entity = this._acquireParticle();
-      if (!entity) break;
-
-      const angle = (i / 6) * Math.PI * 2 + Math.random() * 0.5;
-      const speed = 2 + Math.random() * 1.5;
-
-      const tc = entity.getComponent(TransformComponent);
-      if (tc) {
-        tc.worldPosition = new Vec3(worldX, worldY, worldZ);
-        tc.localScale = new Vec3(0.12, 0.12, 0.12);
-      }
-      // Bright warm explosion colors
-      const r = 0.9 + Math.random() * 0.1;
-      const g = 0.3 + Math.random() * 0.4;
-      const b = 0.05 + Math.random() * 0.1;
-      const cc = entity.getComponent(ColorComponent);
-      if (cc) cc.color = new Color(r, g, b, 1);
-      for (const child of entity.getChildrenWithComponent(ColorComponent)) {
-        const c = child.getComponent(ColorComponent);
-        if (c) c.color = new Color(r, g, b, 1);
-      }
-
-      this._particles.push({
-        entity,
-        vx: Math.cos(angle) * speed,
-        vy: 3 + Math.random() * 2,
-        vz: Math.sin(angle) * speed,
-        age: 0,
-        life: 0.45 + Math.random() * 0.15,
-        r, g, b,
-        baseScale: 0.12,
       });
     }
   }

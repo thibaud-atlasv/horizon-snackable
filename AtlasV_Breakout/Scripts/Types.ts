@@ -96,6 +96,8 @@ export namespace Events
     readonly revealDelay: number = 0;
     /** Which reveal animation style to use. */
     readonly revealStyle: RevealStyle = RevealStyle.Pop;
+    /** If true, brick enters idle title-screen animation after reveal. */
+    readonly titleAnim: boolean = false;
   }
   export const InitBrick = new LocalEvent<InitBrickPayload>('EvInitBrick', InitBrickPayload);
 
@@ -171,6 +173,7 @@ export namespace BackgroundEvents {
 
 /**
  * Combo HUD events and payloads.
+ * Combo = bricks destroyed in a single launch (resets on paddle hit / BallLost).
  * Other systems dispatch these events; the ComboHUDViewModel subscribes to update the combo UI.
  */
 export namespace ComboHUDEvents {
@@ -179,6 +182,19 @@ export namespace ComboHUDEvents {
 
   export class ResetComboPayload {}
   export const ResetCombo = new LocalEvent<ResetComboPayload>('EvComboReset', ResetComboPayload);
+}
+
+/**
+ * Heat events and payloads.
+ * Heat = total bricks destroyed since last BallLost / Restart (never resets on paddle hit).
+ * Consumed by BallPowerService to drive speed scaling and pierce thresholds.
+ */
+export namespace HeatEvents {
+  export class IncrementHeatPayload {}
+  export const IncrementHeat = new LocalEvent<IncrementHeatPayload>('EvHeatIncrement', IncrementHeatPayload);
+
+  export class ResetHeatPayload {}
+  export const ResetHeat = new LocalEvent<ResetHeatPayload>('EvHeatReset', ResetHeatPayload);
 }
 
 /**
@@ -227,7 +243,6 @@ export namespace LeaderboardEvents {
   export class LeaderboardEntriesFetchedPayload {
     @property()
     readonly entries: readonly HighScoreEntry[] = [];
-    //readonly entriesJson: string = '[]';
     @property()
     readonly playerRank: number = -1;
   }

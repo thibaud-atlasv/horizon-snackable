@@ -1,275 +1,210 @@
 # World Overview Report
 
 ## Summary
-This world contains a **classic Breakout/Arkanoid arcade game** implemented in Meta Horizon Studio. The game features a paddle controlled by touch input, a ball that bounces around the play area, and destructible bricks arranged in a grid pattern. The game includes lives system, level completion detection, and automatic restart mechanics.
+
+A **mobile-first portrait Breakout** built for Meta Horizon Worlds. Features a touch-controlled paddle, physics ball with substepped AABB collisions, a pooled brick grid, combo + heat power scaling, coin vacuum scoring, and a full juice layer (hit freeze, camera shake, particles, animations).
 
 ---
 
 ## Scene Structure (space.hstf)
 
 ### Main Entities
-1. **StartingWorld** (Root) - Position: (0, 0, 0)
-   - **SpawnPoint** - Position: (0, -100, -2)
-   - **ClientSetup** - Position: (0, 0, 100)
-     - Handles camera setup and focused interaction mode
-   - **Background** - Position: (0, 0, 0)
-   - **Paddle** - Position: (0, -7, 0)
-     - Child: Cube (visual mesh)
-     - Scale: (1, 0.2, 0.2) - horizontal bar shape
-   - **Ball** - Position: (0, -6.5, 0)
-     - Child: Sphere (visual mesh)
-     - Scale: (0.2, 0.2, 0.2) - small sphere
-   - **Manager** - Position: (-3.45, 5.35, 0)
-     - Contains game management components
+- **SpawnPoint** — Position: (0, -100, -2)
+- **ClientSetup** — Camera initialization + focused interaction mode
+- **Background** — Background color target (ColorComponent driven by level palette)
+- **Paddle** — Position: (0, -7, 0) — horizontal bar, child Cube mesh
+- **Ball** — Position: (0, -6.5, 0) — child Sphere mesh
+- **Manager** — Hosts `GameManager`, `LevelLayout`, `ComboManager`, `LeaderboardManager`
 
 ---
 
 ## Game Systems
 
-### 1. **GameManager Component**
-**Location:** `scripts/GameManager.ts`
-**Attached to:** Manager entity
+### GameManager
+**File:** `Scripts/Components/GameManager.ts`
 
-**Responsibilities:**
-- Tracks player lives (default: 3 lives)
-- Handles ball lost events (decrements lives, triggers reset)
-- Detects level completion (when all bricks destroyed)
-- Triggers game restart when lives run out or level complete
-
-**Key Properties:**
-- `maxLives: number = 3` - Maximum lives per game
-
-**Events Handled:**
-- `Events.BallLost` - Decrements lives, resets round
-- `Events.BrickDestroyed` - Checks if all bricks cleared
+- Tracks lives (`maxLives` property, default 1)
+- On `BallLost`: decrements lives → game over (leaderboard) or reset round
+- On `BrickDestroyed`: checks victory condition
+- On `LevelCleared`: activates super vacuum, waits for all coins, then advances
+- On tap: starts game from title screen or dismisses high scores
+- Level progression: cycles through all 11 levels infinitely; stays on current level on death
 
 ---
 
-### 2. **Paddle Component**
-**Location:** `scripts/Paddle.ts`
-**Attached to:** Paddle entity
+### Paddle
+**File:** `Scripts/Components/Paddle.ts`
 
-**Responsibilities:**
-- Player-controlled paddle movement via touch/ray input
-- Collision detection with ball
-- Boundary clamping to keep paddle in play area
-- Reset to starting position on round reset
-
-**Key Properties:**
-- `paddleSpeed: number = 15` - Movement speed (currently set to 15)
-- Implements `ICollider` interface with tag `'paddle'`
-
-**Movement System:**
-- Uses raycasting from touch input to determine target position
-- Smoothly interpolates to target position
-- Clamps position within game bounds (±4.5 units horizontally)
+- Touch-raycasting target position, lerped per frame (`paddleLerpFactor`, default 0.88)
+- Clamped within `BOUNDS` using base scale (not squash scale)
+- Squash & stretch: impact squash on ball hit + movement stretch proportional to speed
+- Generic power-up effects via `PaddleEffects.ts` factory; effects have independent timers
+- Color: set by level palette; white flash on ball contact (50ms)
 
 ---
 
-### 3. **Ball Component**
-**Location:** `scripts/Ball.ts`
-**Attached to:** Ball entity
+### Ball
+**File:** `Scripts/Components/Ball.ts`
 
-**Responsibilities:**
-- Ball physics and movement
-- Collision detection and response (walls, paddle, bricks)
-- Launch on touch input
-- Boundary detection (ball lost at bottom)
-
-**Key Properties:**
-- `ballSpeed: number = 5` - Base speed (currently set to 0, likely needs configuration)
-- Implements `ICollider` interface with tag `'ball'`
-
-**Physics Behavior:**
-- Starts idle, launches on first touch with velocity (0.6x, 0.8y) * speed
-- Bounces off left/right/top walls
-- Reflects off paddle with angle based on hit position (±60° range)
-- Bounces off bricks (determines side hit for proper reflection)
-- Triggers `BallLost` event when falling below bottom boundary
+- Base speed: 8.5 units/s, scaled by `BallPowerService.speedMultiplier`
+- 8-substep physics per frame to prevent tunneling
+- Wall bounce (left/right/top), paddle bounce (angle from hit position, ±60°), brick bounce (axis determined by penetration depth)
+- Sticky mode: sticks to paddle, released on tap (`StickyBallState.ts`)
+- Pierce: at high heat, passes through bricks without bouncing (consumes heat)
+- Fires `PaddleHit`, `BrickHit`, `BrickDestroyed`, `BallLost`
 
 ---
 
-### 4. **Brick Component**
-**Location:** `scripts/Brick.ts`
-**Attached to:** Brick template instances
+### Brick
+**File:** `Scripts/Components/Brick.ts`
 
-**Responsibilities:**
-- Collision detection with ball
-- Self-destruction on hit
-- Unregisters from collision system on destruction
-
-**Key Properties:**
-- Implements `ICollider` interface with tag `'brick'`
-
----
-
-### 5. **LevelLayout Component**
-**Location:** `scripts/LevelLayout.ts`
-**Attached to:** Manager entity
-
-**Responsibilities:**
-- Spawns brick grid based on pattern string
-- Manages brick lifecycle (spawn/destroy)
-- Handles level restart
-
-**Key Properties:**
-- `brickTemplate: TemplateAsset` - Reference to Brick.hstf template
-- `gridPattern: string = "111111\n111111\n111111"` - Grid layout (1=brick, 0=empty)
-- `brickWidth: number = 1.2` - Individual brick width
-- `brickHeight: number = 0.4` - Individual brick height
-- `paddingX: number = 0.1` - Horizontal spacing
-- `paddingY: number = 0.1` - Vertical spacing
-- `startY: number = 4` - Top row Y position
-
-**Current Configuration:**
-- Default pattern: 3 rows of 6 bricks each (18 total bricks)
-- Currently set to spawn only 1 brick (pattern = "1")
-- Bricks spawn as `NetworkMode.LocalOnly` (client-side only)
+- Pool-based (106 entities pre-warmed by `LevelLayout`)
+- HP, color-by-HP, indestructible flag — initialized via `Events.InitBrick`
+- 4 reveal animation styles: Pop, DropIn, Spin, Stretch
+- Death animation: scale-down + z-rotation (0.15s, 12 rad/s)
+- Title idle animation: scale + brightness pulse (per-brick random phase)
+- Collision disabled during reveal; re-registered when animation completes
+- Fires `BrickRecycle` when parked — pool reclaims the entity
 
 ---
 
-### 6. **CollisionManager (Singleton)**
-**Location:** `scripts/CollisionManager.ts`
+### ExplosiveBrick
+**File:** `Scripts/Components/ExplosiveBrick.ts`
 
-**Responsibilities:**
-- Central collision detection system
-- Registers/unregisters colliders
-- Performs AABB (Axis-Aligned Bounding Box) overlap checks
-- Runs collision checks every 33ms (~30 FPS)
-
-**Key Methods:**
-- `register(collider)` - Add collider to system
-- `unregister(collider)` - Remove collider from system
-- `checkCollisions()` - Performs pairwise collision checks
-- `countByTag(tag)` - Counts colliders by tag (used for brick counting)
+- Extends `Brick`; on destruction queries neighbors within radius and calls `triggerDestruction()` on each `IBrick`
+- Loop guard prevents infinite chain recursion
+- Fires `Events.ExplosionChain` with chain size for scaled juice
 
 ---
 
-### 7. **ClientSetup Component**
-**Location:** `scripts/ClientSetup.ts`
-**Attached to:** ClientSetup entity
+### LevelLayout
+**File:** `Scripts/Components/LevelLayout.ts`
 
-**Responsibilities:**
-- Sets up fixed camera view
-- Enables focused interaction mode (disables emotes/exit buttons)
-
-**Key Properties:**
-- `camera?: Entity` - Optional camera entity reference
-- `initDelay: number = 0` - Delay before setup (in seconds)
+- Pre-warms 106 brick entities at start; parks them at (0, -100, 0)
+- On `LoadLevel`: parks all active bricks, spawns new layout after 200ms delay
+- Layout driven by ASCII grid in `LevelConfig`; per-cell char maps to `BrickTemplate`
+- Random reveal style + random stagger pattern chosen per level transition (4 styles × 5 patterns)
+- Background color applied from level palette
 
 ---
 
-## Game Constants
+### CollisionManager
+**File:** `Scripts/CollisionManager.ts`
 
-**Location:** `scripts/Constants.ts`
+- Lazy singleton; AABB `register`/`unregister`/`query`
+- Ball drives collision detection via `checkAgainst(this)` each substep
+- Stationary bricks don't self-check — ball finds them
 
-```typescript
-HEIGHT = 16
-WIDTH = 9
-BOUNDS = { x: -4.5, y: -8, w: 9, h: 16 }
+---
+
+## Coin & Scoring
+
+### CoinService
+**File:** `Scripts/Services/CoinService.ts`
+
+- 1–3 coins per destroyed brick (virtual particles rendered via VfxService pool)
+- Shmup-style vacuum: direct radial pull within 3.5-unit radius; tangential velocity killed aggressively (no orbiting)
+- Super vacuum on level clear: full-screen pull until all coins collected
+- Instant collection at `COLLECT_RADIUS` (0.5 units): fires `CoinCollected` + golden burst
+
+### BallPowerService
+**File:** `Scripts/Services/BallPowerService.ts`
+
+- Heat = bricks destroyed since last life lost (survives paddle hits)
+- Speed: logarithmic curve, capped at 2.0× base speed
+- Pierce thresholds: heat ≥ 5 → 1 pierce, ≥ 10 → 2, ≥ 20 → 3
+- Pierce is consumable: each brick pierced costs 2 heat points (self-limiting)
+
+### ComboManager
+**File:** `Scripts/Components/ComboManager.ts`
+
+- Combo: resets on paddle hit or ball lost
+- Heat: resets only on ball lost / restart
+- Drives `ComboHUDViewModel` and `BallPowerService` via events
+
+### LeaderboardManager
+**File:** `Scripts/Components/LeaderboardManager.ts`
+
+- Server: pre-fetches leaderboard on player join; re-fetches after score submission
+- Broadcasts via `LeaderboardEntriesFetched` (NetworkEvent) to all clients
+- Client: caches received entries; displays on `LeaderboardDisplayRequest`
+- Fallback: if cache empty, fetches player's own entry client-side
+- Leaderboard name: `"score"`, 10 entries centered around current player rank
+
+---
+
+## Juice Layer
+
+### JuiceService
+**File:** `Scripts/Services/JuiceService.ts`
+
+| Event | Freeze | Shake |
+|---|---|---|
+| BrickHit | 20ms | intensity 0.04, 80ms |
+| BrickDestroyed | 40ms | intensity 0.08, 150ms |
+| PaddleHit | — | intensity 0.03, 60ms |
+| ExplosionChain | 50–100ms (chain-scaled) | intensity 0.25×scale, 350ms |
+| BallLost | 60ms | intensity 0.20, 350ms |
+
+### VfxService
+**File:** `Scripts/Services/VfxService.ts`
+
+- 170 general particles + 30 trail particles (separate circular pools, pre-warmed by GameManager)
+- General pool: impact bursts (3 per hit), paddle sparks (4 per hit), coin collect burst (3 per collect)
+- Trail pool: circular write, fade by age — ball motion trail
+- Flash system: white color override with timer-based restore
+
+### CameraShakeService
+**File:** `Scripts/Services/CameraShakeService.ts`
+
+- Decaying amplitude shake; offset applied to camera transform each frame
+
+---
+
+## HUD & UI
+
+| Component | Description |
+|---|---|
+| `GameHUDViewModel` | Score (casino roll-up + scale punch + glow), lives hearts, center text (DVD-bounce "Tap to start") with squash/color cycling |
+| `ComboHUDViewModel` | Combo counter — pop-in/grow/fade; color tiers cyan→pink→magenta→gold at 2/5/10/15 |
+| `BackgroundAnimViewModel` | Dynamic hue-cycling overlay, pulses on brick destroy; top-concentrated gradient |
+| `HighScoreHUDViewModel` | Leaderboard table on game over — staggered slide-in, gold/silver/bronze ranks, current player highlighted |
+
+---
+
+## Power-Up System (built, disabled in level configs)
+
+| Component | Description |
+|---|---|
+| `PowerUpManager` | Spawn pool + per-level chance/type selection |
+| `PowerUp` | Falling pickup; collected on paddle overlap |
+| `PaddleEffects` | `BigPaddle` (scale), `StickyPaddle` (sticky state) |
+| `StickyBallState` | Ball attachment state machine |
+
+---
+
+## Constants (`Scripts/Constants.ts`)
+
+```
+BOUNDS: { x: -4.5, y: -8, w: 9, h: 16 }
+BALL_SPEED_BASE: 8.5
+BRICK_POOL_SIZE: 106
+PARTICLE_POOL_SIZE: 170
+TRAIL_POOL_SIZE: 30
 ```
 
-Play area spans from -4.5 to +4.5 horizontally and -8 to +8 vertically.
-
 ---
 
-## Event System
+## Event System (`Scripts/Types.ts`)
 
-**Location:** `scripts/Types.ts`
+All cross-component communication uses typed local or network events. Key namespaces:
 
-### Network Events:
-1. **Restart** - Triggers full game restart (resets lives, respawns bricks)
-2. **ResetRound** - Resets ball and paddle positions
-3. **BallLost** - Fired when ball falls below bottom boundary
-4. **BrickDestroyed** - Fired when a brick is destroyed
-
----
-
-## Game Flow
-
-1. **Initialization:**
-   - Camera set to fixed view
-   - Focused interaction enabled
-   - Paddle, ball, and bricks register with CollisionManager
-   - Bricks spawn based on grid pattern
-
-2. **Gameplay Loop:**
-   - Player touches screen to launch ball
-   - Player drags to move paddle horizontally
-   - Ball bounces off walls, paddle, and bricks
-   - Bricks destroyed on contact
-   - Ball lost triggers life decrement
-
-3. **Win Condition:**
-   - All bricks destroyed → Restart event → New level spawns
-
-4. **Lose Condition:**
-   - Lives reach 0 → Restart event → Lives reset to max
-
----
-
-## Current Configuration Issues
-
-### Potential Problems:
-1. **Ball speed set to 0** - Ball won't move (needs to be set to ~5)
-2. **Brick grid pattern = "1"** - Only spawns 1 brick instead of full grid
-3. **Brick dimensions = 0** - Bricks may not render properly (width/height/padding all 0)
-4. **LevelLayout startY = 0** - Bricks may spawn at wrong position
-
-### Recommended Fixes:
-- Set `Ball.ballSpeed` to 5 or higher
-- Set `LevelLayout.gridPattern` to proper pattern (e.g., "111111\n111111\n111111")
-- Set `LevelLayout.brickWidth` to 1.2
-- Set `LevelLayout.brickHeight` to 0.4
-- Set `LevelLayout.paddingX` and `paddingY` to 0.1
-- Set `LevelLayout.startY` to 4
-
----
-
-## Technical Architecture
-
-### Networking:
-- Game runs **client-side only** (all components check `isServerContext()` and return early)
-- Bricks spawn as `NetworkMode.LocalOnly`
-- Uses `NetworkEvent` for internal event communication (though could use `LocalEvent`)
-
-### Collision System:
-- Custom AABB collision detection (not using physics engine)
-- Interface-based design (`ICollider`)
-- Tag-based collision filtering
-- Polling-based at 30 FPS
-
-### Input:
-- Uses `FocusedInteractionService` for touch input
-- Raycasting from touch position to game plane (Z=0)
-- Touch-to-launch mechanic for ball
-
----
-
-## Templates
-
-1. **space.hstf** - Main game scene
-2. **Brick.hstf** - Individual brick template (spawned dynamically)
-3. **player.hstf** - Player template (not used in current game)
-
----
-
-## Summary of What Works
-
-✅ **Implemented:**
-- Touch-controlled paddle movement
-- Ball physics and bouncing
-- Collision detection system
-- Brick destruction
-- Lives system
-- Level completion detection
-- Automatic restart mechanics
-- Fixed camera view
-
-⚠️ **Needs Configuration:**
-- Ball speed property
-- Brick grid layout
-- Brick dimensions and spacing
-- Starting Y position for bricks
-
-This is a fully functional Breakout game that just needs proper property configuration to work correctly!
+| Namespace | Purpose |
+|---|---|
+| `Events` | Core gameplay (BallLost, BrickDestroyed, LoadLevel, ResetRound, etc.) |
+| `HUDEvents` | Score, lives, center text |
+| `ComboHUDEvents` | Combo increment/reset |
+| `HeatEvents` | Heat increment/reset (drives BallPowerService) |
+| `HighScoreHUDEvents` | Show/hide leaderboard overlay |
+| `LeaderboardEvents` | Score submission (NetworkEvent) and entries fetch (NetworkEvent) |
+| `BackgroundEvents` | Background pulse trigger |

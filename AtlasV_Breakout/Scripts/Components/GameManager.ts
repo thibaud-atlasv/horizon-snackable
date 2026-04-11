@@ -1,6 +1,6 @@
 import { component, Component, EventService, ExecuteOn, NetworkingService, OnEntityStartEvent, OnFocusedInteractionInputStartedEvent, OnWorldUpdateEvent, OnWorldUpdateEventPayload, property, subscribe } from 'meta/worlds';
 import { Events, HUDEvents, HighScoreHUDEvents, LeaderboardEvents } from '../Types';
-import { LEVELS, type LevelConfig } from '../LevelConfig';
+import { LEVELS, Title, type LevelConfig } from '../LevelConfig';
 import { CameraShakeService } from '../Services/CameraShakeService';
 import { VfxService } from '../Services/VfxService';
 import { JuiceService } from '../Services/JuiceService';
@@ -17,7 +17,7 @@ export class GameManager extends Component {
   private _coinService : CoinService = CoinService.get();
   private _ballPower : BallPowerService = BallPowerService.get();
 
-  private _lives: number = 3;
+  private _lives: number = 1;
   private _score: number = 0;
   private _currentLevel: number = 0;
   private _bricksDestroyedThisLevel: number = 0;
@@ -27,13 +27,14 @@ export class GameManager extends Component {
   private _showingHighScores: boolean = false;
   private _waitingForCoins = false;
   private _transitionDelay = 0;
+  private _showingTitleScreen: boolean = true;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     this._isClient = !NetworkingService.get().isServerContext();
     if (!this._isClient) return;
     this._lives = this.maxLives;
-    this._initLevelState(LEVELS[0]);
+    this._showingTitleScreen = true;
     this._vfxService.prewarm();
     // Initial spawn is handled by LevelLayout.onStart (level 0 by default).
     // LoadLevel is only emitted on subsequent level changes.
@@ -78,7 +79,6 @@ export class GameManager extends Component {
       // Game over — freeze ball, show high scores (tap to dismiss)
       this._showingHighScores = true;
       EventService.sendLocally(Events.LevelCleared, {}); // freeze ball in place
-
       EventService.sendLocally(LeaderboardEvents.LeaderboardDisplayRequest, {});
       // Submit score to the leaderboard — server will process and trigger async update
       EventService.sendGlobally(LeaderboardEvents.LeaderboardSubmitScore, { score: this._score });
@@ -185,13 +185,17 @@ export class GameManager extends Component {
 
   @subscribe(OnFocusedInteractionInputStartedEvent)
   onTap(): void {
-    if (this._showingHighScores) {
+    if (this._showingTitleScreen) {
+      EventService.sendLocally(HUDEvents.HideMessage, {});
+      this._loadLevel(0);
+    } else if (this._showingHighScores) {
       this._dismissHighScoresAndRestart();
     }
   }
 
   private _loadLevel(index: number): void {
     this._currentLevel = index;
+    this._showingTitleScreen = false;
     this._initLevelState(LEVELS[index]);
     EventService.sendLocally(Events.LoadLevel, { levelIndex: index });
     EventService.sendLocally(HUDEvents.UpdateLives, { lives: this._lives });

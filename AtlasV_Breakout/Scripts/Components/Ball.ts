@@ -1,6 +1,6 @@
 import { Color, ColorComponent, component, Component, EventService, ExecuteOn, NetworkingService, OnEntityStartEvent, OnFocusedInteractionInputEventPayload, OnFocusedInteractionInputStartedEvent, OnWorldUpdateEvent, OnWorldUpdateEventPayload, property, subscribe, TransformComponent, Vec3, type Maybe } from 'meta/worlds';
 import { Events, type ICollider, type Rect } from '../Types';
-import { BALL_SIZE, BALL_SPEED_BASE, BOUNDS } from '../Constants';
+import { BALL_SIZE, BALL_SPEED_BASE, BOUNDS, REVEAL_DROP_DURATION, REVEAL_DURATION, VFX_TRAIL_INTERVAL } from '../Constants';
 import { CollisionManager } from '../CollisionManager';
 import { StickyBallState } from './StickyBallState';
 import { LEVELS, LEVEL_DEFAULTS, DEFAULT_PALETTE, type ColorPalette, type GameplaySettings, type PhysicsSettings } from '../LevelConfig';
@@ -15,7 +15,8 @@ export class Ball extends Component implements ICollider {
   private _colorComponent: Maybe<ColorComponent> = null;
   private _velocity: Vec3 = Vec3.zero;
   private _sticky = new StickyBallState();
-  private _baseScale: Vec3 = Vec3.one.mul(BALL_SIZE);
+  private _baseScale: number = BALL_SIZE;
+  private _scaleMultiplier: number = LEVEL_DEFAULTS.ballSizeMultiplier;
 
   readonly colliderTag = 'ball';
 
@@ -29,6 +30,7 @@ export class Ball extends Component implements ICollider {
   private _bounceRandomness: number = LEVEL_DEFAULTS.bounceRandomness;
   private _speedBonus: number = 0;
   private _speedIncrementPerBrick: number = LEVEL_DEFAULTS.ballSpeedIncrementPerBrick;
+  private _revealing = REVEAL_DURATION;
 
   private get _effectiveSpeed(): number {
     return (this.ballSpeed * this._speedMultiplier + this._speedBonus)
@@ -53,14 +55,12 @@ export class Ball extends Component implements ICollider {
       : this.entity.getComponent(ColorComponent);
 
     CollisionManager.get().register(this);
-    this._applyPhysics(LEVELS[0].physics ?? {});
-    this._applyPalette(LEVELS[0].palette);
-    this._applyGameplay(LEVELS[0].gameplay);
   }
 
   @subscribe(Events.LoadLevel)
   private onLoadLevel(payload: Events.LoadLevelPayload): void {
     const config = LEVELS[payload.levelIndex];
+    this._revealing = REVEAL_DURATION;
     this._applyPhysics(config.physics ?? {});
     this._applyPalette(config.palette);
     this._applyGameplay(config.gameplay);
@@ -80,12 +80,15 @@ export class Ball extends Component implements ICollider {
   }
 
   private _applyGameplay(g: GameplaySettings | undefined): void {
-    const m = g?.ballSizeMultiplier ?? LEVEL_DEFAULTS.ballSizeMultiplier;
-    this._transform.localScale = new Vec3(
-      this._baseScale.x * m,
-      this._baseScale.y * m,
-      this._baseScale.z,
-    );
+    this._scaleMultiplier = g?.ballSizeMultiplier ?? LEVEL_DEFAULTS.ballSizeMultiplier;
+    this._updateScale();
+  }
+
+  private _updateScale()
+  {
+    const reveal = 1-(Math.max(this._revealing, 0) / REVEAL_DURATION);
+    const m = this._baseScale * this._scaleMultiplier * reveal;
+    this._transform.localScale = Vec3.one.mul(m);
   }
 
   // ── Input ─────────────────────────────────────────────────────────────────
@@ -113,6 +116,8 @@ export class Ball extends Component implements ICollider {
 
   @subscribe(Events.BallLost)
   private onBallLost(): void {
+    this._isIdle = true;
+    this._velocity = Vec3.zero;
     this._sticky.reset();
   }
 
@@ -234,12 +239,22 @@ export class Ball extends Component implements ICollider {
     this._speedBonus = 0;
   }
 
+
   // ── Update ────────────────────────────────────────────────────────────────
+
+  private _trailTimer = 0;
 
   @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
   onUpdate(payload: OnWorldUpdateEventPayload): void {
     if (!this._isClient) return;
     if (JuiceService.get().frozen) return;
+
+    if (this._revealing > 0)
+    {
+      this._updateScale();
+      this._revealing -= (payload.deltaTime * 2);
+      return;
+    }
 
     const initPos = this._transform.worldPosition;
     const r = this._transform.localScale.x * 0.5;
@@ -262,7 +277,13 @@ export class Ball extends Component implements ICollider {
     const subDt = dt / steps;
 
     const color = this._colorComponent?.color ?? Color.white;
-    VfxService.get().spawnTrail(r*2, initPos.x, initPos.y, initPos.z, color.r, color.g, color.b);
+    if (this._trailTimer > VFX_TRAIL_INTERVAL)
+    {
+      VfxService.get().spawnTrail(r*2, initPos.x, initPos.y, initPos.z, color.r, color.g, color.b);
+      this._trailTimer = Math.max(0, this._trailTimer - VFX_TRAIL_INTERVAL);
+    }
+    else
+      this._trailTimer += dt;
 
     for (let s = 0; s < steps; s++) {
       let vx = this._velocity.x;

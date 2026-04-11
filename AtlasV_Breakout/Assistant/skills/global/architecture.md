@@ -8,8 +8,9 @@ include: always
 
 ## Execution Model
 
-All gameplay runs **locally on the client**. Server context is never used.
-Every component must guard against server execution at the top of `onStart`:
+All gameplay runs **locally on the client**. Server context is never used for game logic — only `LeaderboardManager` has server-side code for leaderboard submission and fetch.
+
+Every component guards against server execution at the top of `onStart`:
 
 ```typescript
 @subscribe(OnEntityStartEvent)
@@ -25,36 +26,53 @@ Spawned entities always use `NetworkMode.LocalOnly`.
 
 ## Folder Structure
 
-Each game or feature lives in its own folder under `Scripts/`:
-
 ```
 Scripts/
-  FeatureName/
-    Types.ts              ← enums, interfaces, events, payloads
-    Constants.ts          ← shared constants for this feature
-    FeatureManager.ts     ← orchestration component
-    CollisionManager.ts   ← optional: pure logic manager (singleton)
-    GameplayObjects/
-      Foo.ts
-      Bar.ts
-  ClientSetup.ts          ← global client entry point
+  Assets.ts             ← TemplateAsset references (bricks, particles, power-ups)
+  CollisionManager.ts   ← AABB singleton, register/unregister/query
+  Constants.ts          ← All shared tuning values (bounds, physics, juice, vfx)
+  LevelConfig.ts        ← Level definitions (Title + 11 levels), defaults, types
+  Types.ts              ← All enums, interfaces, event namespaces + payloads
+
+  Components/
+    Ball.ts
+    Brick.ts
+    ClientSetup.ts
+    ComboHUDViewModel.ts
+    ComboManager.ts
+    ExplosiveBrick.ts
+    GameHUDViewModel.ts
+    GameManager.ts
+    HighScoreHUDViewModel.ts
+    LevelLayout.ts
+    Paddle.ts
+    PaddleEffects.ts
+    PowerUp.ts
+    PowerUpManager.ts
+    StickyBallState.ts
+
+  Services/
+    BallPowerService.ts
+    CameraShakeService.ts
+    CoinService.ts
+    JuiceService.ts
+    LeaderboardManager.ts
+    VfxService.ts
 ```
 
 - One class per file. File name = class name.
-- `Types.ts` and `Constants.ts` must not import from other files in the same feature.
-- Cross-feature code goes in a `Shared/` folder at the `Scripts/` root.
+- `Types.ts` and `Constants.ts` do not import from sibling files.
 
 ---
 
 ## Communication Pattern
 
-Components **do not hold references to each other**. They communicate exclusively via local events.
+Components **do not hold references to each other**. They communicate exclusively via typed local events.
 
-- Components subscribe to events with `@subscribe(Events.Foo)`.
-- Components dispatch events with `EventService.sendLocally(Events.Foo, payload)`.
-- This keeps every component independently testable and replaceable.
+- Subscribe: `@subscribe(Events.Foo)`
+- Dispatch: `EventService.sendLocally(Events.Foo, payload)`
 
-Non-component managers (e.g. `CollisionManager`) use the lazy singleton pattern and are accessed via `Manager.get()`. They must implement `dispose()` to reset state on restart.
+Non-component singletons (`CollisionManager`, `VfxService`, `CoinService`, etc.) use the lazy singleton pattern and are accessed via `Manager.get()`.
 
 ---
 
@@ -62,7 +80,7 @@ Non-component managers (e.g. `CollisionManager`) use the lazy singleton pattern 
 
 | Scope | Location |
 |---|---|
-| Shared across multiple files | `Constants.ts` at feature root |
-| Specific to one component | `@property()` field on that component, tunable in the inspector |
+| Shared across multiple files | `Constants.ts` |
+| Tunable per-instance in inspector | `@property()` field on the component |
 
 Never hardcode a value that appears in more than one place.

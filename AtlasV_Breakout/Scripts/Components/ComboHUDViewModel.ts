@@ -90,7 +90,6 @@ export class ComboHUDViewModel extends Component {
       customUi.dataContext = this._viewModel;
     }
     this._initialized = true;
-    console.log('[ComboHUDViewModel] Initialized');
   }
 
   // TEST: Reset visual combo on paddle hit (does NOT affect piercing/BallPowerService)
@@ -105,7 +104,6 @@ export class ComboHUDViewModel extends Component {
 
   @subscribe(ComboHUDEvents.IncrementCombo)
   onIncrementCombo(_payload: ComboHUDEvents.IncrementComboPayload): void {
-    console.log("[ComboHUDViewModel] IncrementCombo event received");
     if (!this._initialized) return;
 
     this._comboCount++;
@@ -139,7 +137,6 @@ export class ComboHUDViewModel extends Component {
     if (!this._initialized) return;
     if (this._comboCount === 0) return;
 
-    console.log(`[ComboHUDViewModel] Combo reset from ${this._comboCount}`);
     this._isFading = true;
     this._isAnimating = true;
   }
