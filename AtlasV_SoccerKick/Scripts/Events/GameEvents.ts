@@ -45,6 +45,18 @@ export const GameResetEvent = new LocalEvent<GameResetPayload>(
   GameResetPayload,
 );
 
+// ── Points Ready (casino roll-up complete — HUD may now animate score) ───────
+
+export class PointsReadyPayload {
+  score:      number = 0;  // new total score
+  comboMulti: number = 1;
+}
+
+export const PointsReadyEvent = new LocalEvent<PointsReadyPayload>(
+  'EvPointsReady',
+  PointsReadyPayload,
+);
+
 // ── Aim Started (finger touched down in Aim phase) ───────────────────────────
 
 export class AimStartedPayload {}

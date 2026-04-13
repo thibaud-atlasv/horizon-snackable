@@ -115,6 +115,7 @@ Snackable: simple, satisfying, short.
 | `ShotFeedbackDisplayComponent` | Scene entity (Game) | Subscribes to shot outcome events, drives animated center-screen feedback UI |
 | `SoccerKickHudComponent` | Scene entity (SoccerKickHud) | Polls GameStateService each frame, drives persistent HUD showing score, shot dots, and combo multiplier |
 | `GameOverStatsComponent` | Scene entity (GameOverStats) | Full-screen game over overlay with animated stats (score, goals, accuracy, star rating) and replay button |
+| `ConfettiExplosionUIComponent` | Scene entity (ConfettiExplosion) | Full-screen confetti explosion overlay triggered via LocalEvent or direct `trigger()` call |
 
 ### Events
 
@@ -199,17 +200,37 @@ Snackable: simple, satisfying, short.
   - Miss → 6 brown/green dust puffs at ground level
 - Requires `@Templates/Particle.hstf` in MHS (small sphere, ColorComponent on root and children)
 
+### Confetti Explosion Overlay
+- **XAML**: `ui/ConfettiExplosion.xaml` — Full-screen transparent overlay for confetti explosion effects
+- **Attached to**: ConfettiExplosion entity in space.hstf
+- **Layout**: Full-screen Canvas (1920×1080) with ItemsControl-based dynamic confetti pieces
+  - ItemsControl bound to `confettiItems` array of sub-ViewModels
+  - Canvas ItemsPanel for absolute positioning
+  - DataTemplate renders each piece as a Rectangle with bound transforms
+- **ViewModel**: `ConfettiExplosionViewModel` with `confettiItems` array of `ConfettiPieceItemViewModel`:
+  - `PieceX`, `PieceY` (number) — TranslateTransform position
+  - `PieceRot` (number) — RotateTransform angle
+  - `PieceOpacity` (number) — Rectangle opacity (0-1)
+  - `PieceColor` (string) — Rectangle fill color (hex string like '#FFD700')
+  - `PieceWidth`, `PieceHeight` (number) — Rectangle dimensions in pixels
+  - `PieceSkewAngle` (number) — SkewTransform AngleX for perspective effect
+  - `PieceVisible` (boolean) — Visibility toggle via BooleanToVisibilityConverter
+- **Trigger methods**:
+  - `ConfettiExplosionTriggerEvent` (LocalEvent with `count` payload) — send from any script with `{ count: N }` to control piece quantity (default 30)
+  - `trigger(count)` public method on `ConfettiExplosionUIComponent` — direct call with dynamic piece count
+- **Animation**: Pieces fall from top with random speeds (400-900 px/s), horizontal sinusoidal drift, rotation, and fade near bottom. Hidden when all pieces exit screen. 8-color vibrant palette (gold, red, blue, green, pink, purple, orange, cyan). renderOrderOffset=10 ensures confetti renders on top.
+
 ### Game Over Stats Overlay
-- **XAML**: `ui/GameOverStats.xaml` — Full-screen overlay for end-of-round stats display
-- **Layout**: Semi-transparent dark overlay (#CC000000) with centered card (~800px wide)
-  - **Card**: Rounded corners (30px), dark green gradient background (#1B5E20 to #004D40)
-  - **Title**: "GAME OVER" with white text and dark outline
-  - **Stats section**: Three rows showing ACCURACY, GOALS, and SCORE (labels in gray, values in white)
-  - **Star rating**: 3 stars (★ Unicode) with individual visibility, color, and scale bindings for pop-in animation
-  - **Replay button**: Large green rounded button (#4CAF50, 400×80px) with scale/opacity animation bindings
-- **ViewModel bindings**: OverlayVisible, CardScaleX/Y, CardOpacity, ScoreText, GoalsText, AccuracyText, Star1/2/3Visible, Star1/2/3Color, Star1/2/3Scale, ReplayButtonOpacity, ReplayButtonScale
+- **XAML**: `ui/GameOverStats.xaml` — Full-screen mobile portrait overlay for end-of-round stats display
+- **Layout**: Full-screen semi-transparent dark overlay (#CC000000) with centered content (no card border)
+  - **Title**: "END OF MATCH" in large bold white text (~60px)
+  - **Score**: Very large centered score display (~130px bold white)
+  - **Star rating**: 3 stars (★ Unicode, ~80px each) in horizontal row with individual visibility, color, and scale bindings for pop-in animation
+  - **Stats cartouches**: 3 equal-width rounded badges (CornerRadius 15, #66000000 background) showing GOALS, PRECISION, and BEST COMBO with gray labels and white values
+  - **Replay button**: Large golden rounded button (#FFD700, CornerRadius 30, 400×80px) with "PLAY AGAIN" text in dark color (#1A1A1A)
+- **ViewModel bindings**: OverlayVisible, CardScaleX/Y, CardOpacity, ScoreText, GoalsText, PrecisionText, BestComboText, Star1/2/3Visible, Star1/2/3Color, Star1/2/3Scale, ReplayButtonOpacity, ReplayButtonScale
 - **Event binding**: `events.onReplayClickEvent` for replay button Command
-- **Animation**: All animations driven from TypeScript via ViewModel property updates (no XAML storyboards)
+- **Animation**: Content container uses CardScaleX/Y and CardOpacity for entrance animation; all animations driven from TypeScript via ViewModel property updates (no XAML storyboards)
 
 ## Not yet implemented
 

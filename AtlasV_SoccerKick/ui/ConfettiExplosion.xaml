@@ -1,0 +1,39 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent" d:DesignWidth="1080" d:DesignHeight="1920">
+
+    <Page.Resources>
+        <!-- BooleanToVisibilityConverter for PieceVisible binding -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+
+        <!-- ItemsPanel using Canvas for absolute positioning -->
+        <ItemsPanelTemplate x:Key="CanvasItemsPanel">
+            <Canvas/>
+        </ItemsPanelTemplate>
+
+        <!-- DataTemplate for each confetti piece -->
+        <DataTemplate x:Key="ConfettiPieceTemplate">
+            <Rectangle Width="{Binding Path=PieceWidth}"
+                       Height="{Binding Path=PieceHeight}"
+                       Fill="{Binding Path=PieceColor}"
+                       Opacity="{Binding Path=PieceOpacity}"
+                       Visibility="{Binding Path=PieceVisible, Converter={StaticResource BoolToVisConverter}}"
+                       RenderTransformOrigin="0.5,0.5">
+                <Rectangle.RenderTransform>
+                    <TransformGroup>
+                        <SkewTransform AngleX="{Binding Path=PieceSkewAngle}"/>
+                        <RotateTransform Angle="{Binding Path=PieceRot}"/>
+                        <TranslateTransform X="{Binding Path=PieceX}" Y="{Binding Path=PieceY}"/>
+                    </TransformGroup>
+                </Rectangle.RenderTransform>
+            </Rectangle>
+        </DataTemplate>
+    </Page.Resources>
+    <Grid x:Name="ConfettiCanvas">
+        <ItemsControl ItemsSource="{Binding Path=confettiItems}" ItemsPanel="{StaticResource CanvasItemsPanel}" ItemTemplate="{StaticResource ConfettiPieceTemplate}" Margin="0,0,1080,1920"/>
+    </Grid>
+</Page>

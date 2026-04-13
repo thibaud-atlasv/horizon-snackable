@@ -17,6 +17,7 @@ import {
   PhaseChangedEvent, PhaseChangedPayload,
   GameResetEvent, GameResetPayload,
 } from '../Events/GameEvents';
+import { TOTAL_SHOTS } from '../Constants';
 
 // ── UiEvent for Replay button click ──────────────────────────────────
 const onReplayClickEvent = new UiEvent('GameOverStatsViewModel-onReplayClick');
@@ -50,7 +51,7 @@ const VERBOSE_LOG = false;
  * Component Ownership: Not Networked
  *
  * Displays a full-screen game over stats overlay after all 6 shots.
- * Shows accuracy %, goals, total score, star rating, and a replay button.
+ * Shows score, goals (X/6), precision %, best combo, star rating, and a replay button.
  * Subscribes to PhaseChangedEvent to detect GameOver and GameResetEvent to hide.
  * Drives frame-by-frame animation via OnWorldUpdateEvent.
  */
@@ -59,15 +60,16 @@ class GameOverStatsViewModel extends UiViewModel {
   // Overlay visibility
   OverlayVisible: boolean = false;
 
-  // Card animation
+  // Card animation (content container scale/opacity)
   CardScaleX: number = 0;
   CardScaleY: number = 0;
   CardOpacity: number = 0;
 
   // Stats text (count-up animation targets)
   ScoreText: string = '0';
-  GoalsText: string = '0';
-  AccuracyText: string = '0%';
+  GoalsText: string = '0/6';
+  PrecisionText: string = '0%';
+  BestComboText: string = 'x0';
 
   // Star visibility (pop in one by one)
   Star1Visible: boolean = false;
@@ -103,6 +105,7 @@ export class GameOverStatsComponent extends Component {
   private _targetScore = 0;
   private _targetGoals = 0;
   private _targetAccuracy = 0;
+  private _targetBestCombo = 0;
   private _starCount = 0;
 
   // Count-up interpolation
@@ -116,6 +119,7 @@ export class GameOverStatsComponent extends Component {
     this._customUi = this.entity.getComponent(CustomUiComponent);
     if (this._customUi) {
       this._customUi.dataContext = this._viewModel;
+      this._customUi.isVisible = false;
     }
     // Ensure overlay is hidden initially
     this._viewModel.OverlayVisible = false;
@@ -126,7 +130,8 @@ export class GameOverStatsComponent extends Component {
   @subscribe(PhaseChangedEvent, { execution: ExecuteOn.Everywhere })
   onPhaseChanged(p: PhaseChangedPayload): void {
     if (p.phase === GamePhase.GameOver) {
-      console.log('[GameOverStatsComponent] GameOver detected, starting animation');
+      if (this._customUi)
+        this._customUi.isVisible = true;
       this._captureStats();
       this._startAnimation();
     }
@@ -190,6 +195,7 @@ export class GameOverStatsComponent extends Component {
     this._targetScore = snap.score;
     this._targetGoals = snap.goals;
     this._targetAccuracy = snap.accuracy; // 0..1
+    this._targetBestCombo = snap.bestCombo;
 
     // Star rating: accuracy >= 0.80 → 3★, >= 0.50 → 2★, else 1★
     if (snap.accuracy >= 0.80) {
@@ -201,7 +207,7 @@ export class GameOverStatsComponent extends Component {
     }
 
     if (VERBOSE_LOG) {
-      console.log(`[GameOverStatsComponent] Stats: score=${snap.score}, goals=${snap.goals}, accuracy=${snap.accuracy}, stars=${this._starCount}`);
+      console.log(`[GameOverStatsComponent] Stats: score=${snap.score}, goals=${snap.goals}, accuracy=${snap.accuracy}, bestCombo=${snap.bestCombo}, stars=${this._starCount}`);
     }
   }
 
@@ -216,8 +222,9 @@ export class GameOverStatsComponent extends Component {
     this._viewModel.CardScaleY = 0;
     this._viewModel.CardOpacity = 0;
     this._viewModel.ScoreText = '0';
-    this._viewModel.GoalsText = '0';
-    this._viewModel.AccuracyText = '0%';
+    this._viewModel.GoalsText = `0/${TOTAL_SHOTS}`;
+    this._viewModel.PrecisionText = '0%';
+    this._viewModel.BestComboText = 'x0';
     this._viewModel.Star1Visible = false;
     this._viewModel.Star2Visible = false;
     this._viewModel.Star3Visible = false;
@@ -237,6 +244,8 @@ export class GameOverStatsComponent extends Component {
   }
 
   private _hideOverlay(): void {
+    if (this._customUi)
+      this._customUi.isVisible = false;
     this._animPhase = GameOverAnimPhase.Idle;
     this._phaseElapsed = 0;
     this._viewModel.OverlayVisible = false;
@@ -279,21 +288,22 @@ export class GameOverStatsComponent extends Component {
     const newGoals = Math.round(easedT * this._targetGoals);
     if (newGoals !== this._currentGoalsDisplay) {
       this._currentGoalsDisplay = newGoals;
-      this._viewModel.GoalsText = `${newGoals}`;
+      this._viewModel.GoalsText = `${newGoals}/${TOTAL_SHOTS}`;
     }
 
-    // Count up accuracy
+    // Count up precision (same as old accuracy but renamed)
     const newAccuracy = Math.round(easedT * this._targetAccuracy * 100);
     if (newAccuracy !== this._currentAccuracyDisplay) {
       this._currentAccuracyDisplay = newAccuracy;
-      this._viewModel.AccuracyText = `${newAccuracy}%`;
+      this._viewModel.PrecisionText = `${newAccuracy}%`;
     }
 
     if (t >= 1) {
       // Snap to final values
       this._viewModel.ScoreText = `${this._targetScore}`;
-      this._viewModel.GoalsText = `${this._targetGoals}`;
-      this._viewModel.AccuracyText = `${Math.round(this._targetAccuracy * 100)}%`;
+      this._viewModel.GoalsText = `${this._targetGoals}/${TOTAL_SHOTS}`;
+      this._viewModel.PrecisionText = `${Math.round(this._targetAccuracy * 100)}%`;
+      this._viewModel.BestComboText = `x${this._targetBestCombo}`;
       this._advancePhase(GameOverAnimPhase.StarsPopIn);
     }
   }

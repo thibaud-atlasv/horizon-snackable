@@ -82,25 +82,10 @@ export class ClientSetup extends Component {
 
   @subscribe(OnFocusedInteractionInputStartedEvent)
   onTouchStart(p: OnFocusedInteractionInputEventPayload): void {
-    const state = GameStateService.get();
-    const phase = state.phase;
+    const phase = GameStateService.get().phase;
 
-    // Tap to restart after game over
-    if (phase === GamePhase.GameOver) {
-      state.reset();
-      BallService.get().reset();
-      GoalkeeperService.get().reset();
-      return;
-    }
-
-    if (phase !== GamePhase.Aim && phase !== GamePhase.Result) return;
-
-    // If in Result phase, snap ball + GK back for next attempt
-    if (phase === GamePhase.Result) {
-      BallService.get().reset();
-      GoalkeeperService.get().reset();
-      state.setPhase(GamePhase.Aim);
-    }
+    // Only allow aiming in Aim phase — GameOver waits for Replay button
+    if (phase !== GamePhase.Aim) return;
 
     this._startX = p.screenPosition.x;
     this._startY = p.screenPosition.y;

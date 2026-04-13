@@ -21,7 +21,7 @@
     <!-- Main Full-Width Grid Layout -->
     <Grid>
         <!-- Top Section Container -->
-        <Grid VerticalAlignment="Top" Margin="0,120,0,0">
+        <Grid VerticalAlignment="Top" Margin="0,140,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -44,7 +44,10 @@
                             Margin="0,50,0,0">
                 
                 <!-- Shot 1 -->
-                <Grid x:Name="Shot1Container" Margin="12,0">
+                <Grid x:Name="Shot1Container" Margin="12,0" RenderTransformOrigin="0.5,0.5" Opacity="{Binding Path=Shot1Opacity}">
+                    <Grid.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding Path=Shot1Scale}" ScaleY="{Binding Path=Shot1Scale}"/>
+                    </Grid.RenderTransform>
                     <Ellipse x:Name="Shot1Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
@@ -63,7 +66,10 @@
                 </Grid>
 
                 <!-- Shot 2 -->
-                <Grid x:Name="Shot2Container" Margin="12,0">
+                <Grid x:Name="Shot2Container" Margin="12,0" RenderTransformOrigin="0.5,0.5" Opacity="{Binding Path=Shot2Opacity}">
+                    <Grid.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding Path=Shot2Scale}" ScaleY="{Binding Path=Shot2Scale}"/>
+                    </Grid.RenderTransform>
                     <Ellipse x:Name="Shot2Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
@@ -82,7 +88,10 @@
                 </Grid>
 
                 <!-- Shot 3 -->
-                <Grid x:Name="Shot3Container" Margin="12,0">
+                <Grid x:Name="Shot3Container" Margin="12,0" RenderTransformOrigin="0.5,0.5" Opacity="{Binding Path=Shot3Opacity}">
+                    <Grid.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding Path=Shot3Scale}" ScaleY="{Binding Path=Shot3Scale}"/>
+                    </Grid.RenderTransform>
                     <Ellipse x:Name="Shot3Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
@@ -101,7 +110,10 @@
                 </Grid>
 
                 <!-- Shot 4 -->
-                <Grid x:Name="Shot4Container" Margin="12,0">
+                <Grid x:Name="Shot4Container" Margin="12,0" RenderTransformOrigin="0.5,0.5" Opacity="{Binding Path=Shot4Opacity}">
+                    <Grid.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding Path=Shot4Scale}" ScaleY="{Binding Path=Shot4Scale}"/>
+                    </Grid.RenderTransform>
                     <Ellipse x:Name="Shot4Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
@@ -120,7 +132,10 @@
                 </Grid>
 
                 <!-- Shot 5 -->
-                <Grid x:Name="Shot5Container" Margin="12,0">
+                <Grid x:Name="Shot5Container" Margin="12,0" RenderTransformOrigin="0.5,0.5" Opacity="{Binding Path=Shot5Opacity}">
+                    <Grid.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding Path=Shot5Scale}" ScaleY="{Binding Path=Shot5Scale}"/>
+                    </Grid.RenderTransform>
                     <Ellipse x:Name="Shot5Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
@@ -139,7 +154,10 @@
                 </Grid>
 
                 <!-- Shot 6 -->
-                <Grid x:Name="Shot6Container" Margin="12,0">
+                <Grid x:Name="Shot6Container" Margin="12,0" RenderTransformOrigin="0.5,0.5" Opacity="{Binding Path=Shot6Opacity}">
+                    <Grid.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding Path=Shot6Scale}" ScaleY="{Binding Path=Shot6Scale}"/>
+                    </Grid.RenderTransform>
                     <Ellipse x:Name="Shot6Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
@@ -189,74 +207,59 @@
             </Grid>
 
             <!-- Row 1: Score Cartouche Badge - Centered below shot indicators -->
-            <Grid x:Name="ScoreCartouche" 
-                  Grid.Row="1" 
-                  HorizontalAlignment="Center" 
+            <Grid x:Name="ScoreCartouche"
+                  Grid.Row="1"
                   VerticalAlignment="Top"
-                  Margin="0,30,0,0">
+                  RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform>
+                    <ScaleTransform ScaleX="{Binding Path=ScoreScale}" ScaleY="{Binding Path=ScoreScale}"/>
+                </Grid.RenderTransform>
                 
                 <!-- Semi-transparent dark badge background with fixed width and more rounded corners -->
-                <Border Background="#AA000000" 
-                        CornerRadius="40" 
-                        Padding="36,24" Width="500">
-                    <StackPanel HorizontalAlignment="Center">
-                        <!-- SCORE label -->
-                        <TextBlock Text="SCORE"
-                                   FontFamily="Roboto"
-                                   FontSize="48"
-                                   FontWeight="Medium"
-                                   Foreground="#CCFFFFFF"
-                                   HorizontalAlignment="Center"/>
-                        
-                        <!-- Score number with outline effect -->
-                        <Grid HorizontalAlignment="Center" Margin="0,8,0,0">
-                            <!-- Score text outline layer -->
-                            <TextBlock x:Name="ScoreTextOutline"
-                                       Text="{Binding Path=ScoreText}"
-                                       FontFamily="Roboto"
-                                       FontWeight="Black"
-                                       Stroke="#FF1A1A1A"
-                                       StrokeThickness="12"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" FontSize="150"/>
-                            
-                            <!-- Score main text layer -->
-                            <TextBlock x:Name="ScoreTextMain"
-                                       Text="{Binding Path=ScoreText}"
-                                       FontFamily="Roboto"
-                                       FontWeight="Black"
-                                       Foreground="#FFFFFFFF"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" FontSize="150"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                <Border CornerRadius="40" 
+                        Padding="36,24" Width="500" Background="#00000000"/>
+                <Grid Margin="0,8,0,0" HorizontalAlignment="Center">
+                    <TextBlock x:Name="ScoreTextOutline" Text="{Binding Path=ScoreText}" FontFamily="Roboto" FontWeight="Black" Stroke="#FF1A1A1A" StrokeThickness="12" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="250"/>
+                    <TextBlock x:Name="ScoreTextMain" Text="{Binding Path=ScoreText}" FontFamily="Roboto" FontWeight="Black" Foreground="{Binding Path=ScoreColor}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="250"/>
+                </Grid>
             </Grid>
         </Grid>
 
         <!-- CENTER: Instruction Text -->
         <Grid x:Name="InstructionContainer"
               HorizontalAlignment="Center"
-              Visibility="{Binding Path=InstructionVisible, Converter={StaticResource BoolToVisConverter}}" VerticalAlignment="Bottom">
+              VerticalAlignment="Center"
+              Margin="0,200,0,0"
+              Opacity="{Binding Path=InstructionOpacity}"
+              Visibility="{Binding Path=InstructionVisible, Converter={StaticResource BoolToVisConverter}}">
+            
+            <!-- RenderTransform for vertical bobbing animation -->
+            <Grid.RenderTransform>
+                <TranslateTransform Y="{Binding Path=InstructionTranslateY}"/>
+            </Grid.RenderTransform>
+            
+            <!-- Instruction text shadow layer (offset for drop shadow effect) -->
             
             <!-- Instruction text outline layer -->
             <TextBlock x:Name="InstructionTextOutline"
                        Text="{Binding Path=InstructionText}"
                        FontFamily="Roboto"
                        FontWeight="Bold"
+                       TextWrapping="Wrap"
                        Stroke="#FF1A1A1A"
                        StrokeThickness="6"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center" FontSize="200" TextWrapping="Wrap"/>
+                       VerticalAlignment="Center" FontSize="120"/>
             
             <!-- Instruction main text layer -->
             <TextBlock x:Name="InstructionTextMain"
                        Text="{Binding Path=InstructionText}"
                        FontFamily="Roboto"
                        FontWeight="Bold"
+                       TextWrapping="Wrap"
                        Foreground="#FFFFFFFF"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center" FontSize="200" TextWrapping="Wrap"/>
+                       VerticalAlignment="Center" FontSize="120"/>
         </Grid>
     </Grid>
 </Page>
