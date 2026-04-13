@@ -4,7 +4,7 @@
       Background="Transparent">
 
     <!-- Main container with visibility binding -->
-    <Grid x:Name="MainContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid x:Name="MainContainer">
         <Grid.Visibility>
             <Binding Path="IsVisible">
                 <Binding.Converter>
@@ -14,11 +14,12 @@
         </Grid.Visibility>
 
         <!-- Animated content container with transforms and opacity -->
-        <Grid x:Name="AnimatedContainer" 
+        <Grid x:Name="AnimatedContainer"
               Opacity="{Binding Path=Opacity}"
               RenderTransformOrigin="0.5,0.5">
             <Grid.RenderTransform>
                 <TransformGroup>
+                    <SkewTransform AngleX="{Binding Path=SkewX}"/>
                     <ScaleTransform ScaleX="{Binding Path=ScaleX}" ScaleY="{Binding Path=ScaleY}"/>
                     <TranslateTransform X="{Binding Path=TranslateX}" Y="{Binding Path=TranslateY}"/>
                 </TransformGroup>
@@ -31,18 +32,18 @@
                     <TextBlock x:Name="FeedbackTextOutline"
                                Text="{Binding Path=FeedbackText}"
                                FontFamily="Roboto"
-                               FontSize="96"
+                               FontSize="{Binding Path=FontSize}"
                                FontWeight="Black"
                                Stroke="#FF1A1A1A"
-                               StrokeThickness="8"
+                               StrokeThickness="{Binding Path=StrokeThickness}"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
-                    
+
                     <!-- Main text layer with dynamic color -->
                     <TextBlock x:Name="FeedbackTextMain"
                                Text="{Binding Path=FeedbackText}"
                                FontFamily="Roboto"
-                               FontSize="96"
+                               FontSize="{Binding Path=FontSize}"
                                FontWeight="Black"
                                Foreground="{Binding Path=TextColor}"
                                HorizontalAlignment="Center"
@@ -50,19 +51,25 @@
                 </Grid>
 
                 <!-- Points text (shown below main text for goals) -->
-                <TextBlock x:Name="PointsText"
-                           Text="{Binding Path=PointsText}"
-                           FontFamily="Roboto"
-                           FontSize="48"
-                           FontWeight="Bold"
-                           Foreground="#FFFFFFFF"
-                           Stroke="#FF1A1A1A"
-                           StrokeThickness="4"
-                           Opacity="{Binding Path=PointsOpacity}"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Margin="0,10,0,0"/>
             </StackPanel>
+        </Grid>
+        <!-- Points counter — slot-machine roll-up, independent from main sweep transform -->
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,620,0,0"
+              Opacity="{Binding Path=PointsOpacity}"
+              RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <ScaleTransform ScaleY="{Binding Path=PointsScaleY}"/>
+            </Grid.RenderTransform>
+            <TextBlock x:Name="PointsTextOutline"
+                       Text="{Binding Path=PointsText}"
+                       FontFamily="Roboto" FontSize="148" FontWeight="Bold"
+                       Stroke="#FF1A1A1A" StrokeThickness="10"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock x:Name="PointsText"
+                       Text="{Binding Path=PointsText}"
+                       FontFamily="Roboto" FontSize="148" FontWeight="Bold"
+                       Foreground="#FFFFD508"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>
     </Grid>
 </Page>

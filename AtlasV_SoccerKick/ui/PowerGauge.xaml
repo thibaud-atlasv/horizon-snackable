@@ -12,7 +12,15 @@
     </Page.Resources>
 
     <!-- Main Grid -->
-    <Grid>
+    <Grid Margin="28,-9,-28,9" RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform ScaleY="1.3"/>
+                <SkewTransform/>
+                <RotateTransform/>
+                <TranslateTransform/>
+            </TransformGroup>
+        </Grid.RenderTransform>
         <!-- Power Gauge Panel - positioned with margin to account for border extending outside -->
         <Grid x:Name="PowerGaugePanel"
               HorizontalAlignment="Left"
@@ -36,19 +44,6 @@
             
             <!-- Outer border path - offset 10px outward from fill area -->
             <!-- Drawn first (behind everything), stroke only -->
-            <Path Data="M20,520 
-                        Q20,525 25,525 
-                        L115,525 
-                        Q120,525 120,520 
-                        L145,20 
-                        Q146,10 140,10 
-                        L0,10 
-                        Q-6,10 -5,20 
-                        Z"
-                  Fill="Transparent"
-                  Stroke="#FF000000" 
-                  StrokeThickness="10"
-                  StrokeLineJoin="Round"/>
             
             <!-- Background dark fill Path (no stroke, with rounded corners) -->
             <!-- Matches the fill area exactly -->
@@ -61,7 +56,16 @@
                         L15,15 
                         Q9,15 10,25 
                         Z"
-                  Fill="#CC111111"/>
+                  Fill="#CC111111" StrokeThickness="10" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeDashCap="Round" d:IsShapeOutlineCentered="True" RenderTransformOrigin="0.5,0.5" Stroke="#C8000000">
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1.1" ScaleY="1.01"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Path.RenderTransform>
+            </Path>
             
             <!-- Container for the gradient fill area - 140x520 to match border bounds -->
             <Grid ClipToBounds="True" Width="140" Height="520">
@@ -80,7 +84,7 @@
                                 Q131,15 125,15 
                                 L15,15 
                                 Q9,15 10,25 
-                                Z">
+                                Z" Margin="0,-5,0,5">
                         <Path.Fill>
                             <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
                                 <!-- Bottom: Green -->

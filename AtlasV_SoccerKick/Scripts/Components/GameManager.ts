@@ -105,11 +105,16 @@ export class GameManager extends Component {
     state.setPhase(GamePhase.Result);
     const points = state.resolveShot(outcome, BallService.get().posX);
 
-    // Fire feedback event so UI can display GOAL!/MISS!/SAVED!
+    // Fire feedback first — ShotFeedbackDisplayComponent must be active
+    // before ScoreChangedEvent arrives so it can intercept and delay the HUD update.
     EventService.sendLocally(ShotFeedbackResultEvent, {
       outcome: outcome as number,
       pointsEarned: points,
     });
+
+    // Broadcast score after feedback — ShotFeedbackDisplayComponent will now
+    // see _casinoActive = true and hold the score until the roll-up completes.
+    state.broadcastScore();
 
     const delay = this._outcomeDelay(outcome);
     this._nextShotTimer = setTimeout(() => this._nextShot(), delay);

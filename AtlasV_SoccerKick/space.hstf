@@ -751,7 +751,7 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": -2.75,
+                                "x": -2.799999952316284,
                                 "y": 1.2000000476837159,
                                 "z": 0.0
                             },
@@ -839,7 +839,7 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": 2.75,
+                                "x": 2.799999952316284,
                                 "y": 1.2000000476837159,
                                 "z": 0.0
                             },
@@ -2994,7 +2994,7 @@
                                 "ingestionId": "15975212070847811848",
                                 "targetId": "2149638574"
                             },
-                            "isInteractable": false
+                            "isInteractable": true
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -3005,6 +3005,49 @@
                         "definitionAsset": {
                             "packageOrRemoteId": "26835398609386284",
                             "ingestionId": "5256069592871518101",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "39927298-a79c-4fce-a23e-c396d1b0e3e9",
+            "name": "ConfettiExplosion",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26835398609386284",
+                                "ingestionId": "389015377901784745",
+                                "targetId": "2149638574"
+                            },
+                            "renderOrderOffset": 10
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "ConfettiExplosionUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26835398609386284",
+                            "ingestionId": "3770005453277038815",
                             "targetId": "4237980480"
                         },
                         "data": {}
@@ -3234,6 +3277,11 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "73b365b8-640f-4302-b57d-3764a7f7b1a4",
+            "destination": "91eafcab-769c-43f4-96f4-b7df1346be65"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "39927298-a79c-4fce-a23e-c396d1b0e3e9",
             "destination": "91eafcab-769c-43f4-96f4-b7df1346be65"
         }
     ]

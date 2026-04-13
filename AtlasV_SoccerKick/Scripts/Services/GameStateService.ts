@@ -81,12 +81,16 @@ export class GameStateService extends Service {
       this._comboMulti = 1;
     }
 
+    return points;
+  }
+
+  /** Send ScoreChangedEvent with the current score state. Called by GameManager
+   *  after ShotFeedbackResultEvent so the feedback display is already active. */
+  broadcastScore(): void {
     EventService.sendLocally(ScoreChangedEvent, {
-      score: this._score,
+      score:      this._score,
       comboMulti: this._comboMulti,
     });
-
-    return points;
   }
 
   // ── Reset ────────────────────────────────────────────────────────────────────

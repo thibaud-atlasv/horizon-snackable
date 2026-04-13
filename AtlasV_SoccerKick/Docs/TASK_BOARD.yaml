@@ -75,6 +75,41 @@ tasks:
     summary: Full-screen end-of-round stats UI with elastic animations, accuracy/goals/score/stars display, and replay button
     files: [ui/GameOverStats.xaml, Scripts/Components/GameOverStatsComponent.ts, space.hstf]
 
+  - name: Game Over Screen Redesign
+    status: done
+    summary: Full mobile portrait layout - End of Match title, big score, stars, 3 stat cartouches (Goals/Precision/BestCombo), golden Play Again button
+    files: [ui/GameOverStats.xaml, Scripts/Components/GameOverStatsComponent.ts]
+
+  - name: Game Over Screen Scale x2
+    status: done
+    summary: Doubled all element sizes (fonts, dimensions, margins, spacing, corner radii)
+    files: [ui/GameOverStats.xaml]
+
+  - name: Game Over Screen Polish
+    status: done
+    summary: Smaller title, golden score with black outline, button outline + lower, stars as Path shapes, rounded frame container
+    files: [ui/GameOverStats.xaml]
+
+  - name: HUD Center Text Animation
+    status: done
+    summary: Smaller text (90px), drop shadow, slow looping sine-wave animation (bobbing + fade pulse)
+    files: [ui/SoccerKickHud.xaml, Scripts/Components/SoccerKickHudComponent.ts]
+
+  - name: Confetti Explosion UI
+    status: done
+    summary: 30-piece confetti system with varied colors, skew, fall speeds, drift, rotation - triggerable via event or direct call
+    files: [ui/ConfettiExplosion.xaml, Scripts/Components/ConfettiExplosionUIComponent.ts, space.hstf]
+
+  - name: Confetti Dynamic Items
+    status: done
+    summary: Converted to ItemsControl with dynamic count - trigger(count) spawns specified number of confetti pieces
+    files: [ui/ConfettiExplosion.xaml, Scripts/Components/ConfettiExplosionUIComponent.ts]
+
+  - name: Shot Counter Animations
+    status: done
+    summary: Explosion animation (scale up + fade out) on shot used, elastic pop-in animation staggered by 100ms on new round
+    files: [ui/SoccerKickHud.xaml, Scripts/Components/SoccerKickHudComponent.ts]
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []
