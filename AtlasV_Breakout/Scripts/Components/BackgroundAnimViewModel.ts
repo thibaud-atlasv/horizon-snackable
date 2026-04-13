@@ -21,8 +21,6 @@ const DECAY_RATE = 0.01;
 const IDLE_THRESHOLD_S = 1.5;
 const IDLE_DECAY_RATE = 0.015;
 
-const VERBOSE_LOG = false;
-
 /**
  * ViewModel exposing reactive properties for the background color animation overlay.
  * XAML binds to these properties; changes trigger automatic UI updates.
@@ -146,8 +144,5 @@ export class BackgroundAnimViewModel extends Component {
       this._decayPerTick = Math.max(DECAY_RATE, intensity / ticksInDuration);
     }
 
-    if (VERBOSE_LOG) {
-      console.log(`[BackgroundAnimViewModel] Pulse intensity=${intensity.toFixed(2)} duration=${durationSeconds}s`);
-    }
   }
 }

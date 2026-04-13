@@ -30,3 +30,18 @@ export namespace Assets {
   export const PathCell        = new TemplateAsset('@Templates/PathCell.hstf');
   export const FloatingText    = new TemplateAsset('@Templates/UI/FloatingText.hstf');
 }
+
+
+export namespace Tiles {
+  export const Grass = new TemplateAsset('@Models/FBX format/tile.fbx:template');
+  export const Hill = new TemplateAsset('@Models/FBX format/tile-hill.fbx:template');
+  export const Rock = new TemplateAsset('@Models/FBX format/tile-rock.fbx:template');
+  export const Tree = new TemplateAsset('@Models/FBX format/tile-tree.fbx:template');
+  export const TreeDouble = new TemplateAsset('@Models/FBX format/tile-tree-double.fbx:template');
+  export const TreeQuad = new TemplateAsset('@Models/FBX format/tile-tree-quad.fbx:template');
+  export const Crystal = new TemplateAsset('@Models/FBX format/tile-crystal.fbx:template');
+  
+  export const RightToLeftEnd = new TemplateAsset('@Models/FBX format/tile-spawn-end.fbx:template');
+  export const TopToRight = new TemplateAsset('@Models/FBX format/tile-corner-round.fbx:template');
+  export const LeftToRight = new TemplateAsset('@Models/FBX format/tile-straight.fbx:template');
+}

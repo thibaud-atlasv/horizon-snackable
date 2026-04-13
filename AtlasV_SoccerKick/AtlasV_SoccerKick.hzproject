@@ -45,8 +45,8 @@
     ],
     "playerSettings": {
         "avatarMax": 1,
-        "screenOrientation": "Portrait"
+        "screenOrientation": "Portrait",
+        "scalabilityProfile": {}
     },
-    "editorVersion": "77.0.1.0.128",
-    "remotePackageId": "26835398609386284"
+    "editorVersion": "77.0.1.1.217"
 }

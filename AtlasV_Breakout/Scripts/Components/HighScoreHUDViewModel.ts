@@ -24,8 +24,6 @@ const ARCADE_NAMES = [
 const REVEAL_INTERVAL_MS = 200;
 const SLIDE_DURATION = 0.4;
 const SLIDE_START_X = 1800;
-const VERBOSE_LOG = false;
-
 const COLOR_GOLD = '#FFD700';
 const COLOR_SILVER = '#C0C0C0';
 const COLOR_BRONZE = '#CD7F32';
@@ -98,7 +96,6 @@ export class HighScoreHUDViewModel extends Component {
     if (customUi) {
       customUi.dataContext = this._viewModel;
     }
-    console.log('[HighScoreHUDViewModel] Initialized');
   }
 
   @subscribe(OnEntityDestroyEvent)
@@ -108,7 +105,6 @@ export class HighScoreHUDViewModel extends Component {
 
   @subscribe(HighScoreHUDEvents.ShowHighScores)
   onShowHighScores(payload: HighScoreHUDEvents.ShowHighScoresPayload): void {
-    console.log(`[HighScoreHUDViewModel] ShowHighScores received, ${payload.entries.length} entries`);
     this._clearRevealInterval();
 
     // Pad entries to 10 with arcade-style filler names
@@ -168,7 +164,6 @@ export class HighScoreHUDViewModel extends Component {
 
   @subscribe(HighScoreHUDEvents.HideHighScores)
   onHideHighScores(_payload: HighScoreHUDEvents.HideHighScoresPayload): void {
-    console.log('[HighScoreHUDViewModel] HideHighScores received');
     this._clearRevealInterval();
     this._isAnimating = false;
     this._viewModel.showScreen = false;
@@ -218,9 +213,6 @@ export class HighScoreHUDViewModel extends Component {
     this._isAnimating = true;
     this._currentRevealIndex++;
 
-    if (VERBOSE_LOG) {
-      console.log(`[HighScoreHUDViewModel] Started slide for entry ${this._currentRevealIndex}`);
-    }
   }
 
   private _clearRevealInterval(): void {

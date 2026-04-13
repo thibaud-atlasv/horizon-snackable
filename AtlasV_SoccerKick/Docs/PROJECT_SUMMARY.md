@@ -14,7 +14,7 @@ Snackable: simple, satisfying, short.
 - **Aim**: Player swipes upward from the lower screen to shoot
 - **Flying**: Ball travels toward goal, GK reacts after a delay
 - **Result**: Outcome determined (Goal / Save / Post / Miss), ball bounces, then next shot
-- **GameOver**: Final score displayed. Tap anywhere to restart a new round.
+- **GameOver**: Stats overlay appears showing accuracy, goals, score, and star rating. Replay button or tap anywhere to restart.
 
 ## Round System
 
@@ -114,6 +114,7 @@ Snackable: simple, satisfying, short.
 | `GoalkeeperController` | Goalkeeper template | Syncs transform from GoalkeeperService |
 | `ShotFeedbackDisplayComponent` | Scene entity (Game) | Subscribes to shot outcome events, drives animated center-screen feedback UI |
 | `SoccerKickHudComponent` | Scene entity (SoccerKickHud) | Polls GameStateService each frame, drives persistent HUD showing score, shot dots, and combo multiplier |
+| `GameOverStatsComponent` | Scene entity (GameOverStats) | Full-screen game over overlay with animated stats (score, goals, accuracy, star rating) and replay button |
 
 ### Events
 
@@ -164,10 +165,54 @@ Snackable: simple, satisfying, short.
 - **ViewModel bindings**: ScoreText, Shot1Active through Shot6Active, ComboText, ComboVisible, InstructionText, InstructionVisible
 - **Style**: Sporty 3D realistic style, vivid dynamic colors (greens, whites, golds), transparent background, Roboto font
 
+### Power Gauge
+- **XAML**: `ui/PowerGauge.xaml` — ScreenSpace UI for a vertical power bar
+- **Attached to**: PowerGauge entity in space.hstf
+- **Layout**: Bottom-left positioned vertical bar with conical background shape
+  - Tapered/conical shape: narrower at bottom (~40px), wider at top (~120px), 500px tall
+  - Background: Dark semi-transparent conical Path (#CC111111) with subtle white stroke (#66FFFFFF, 2px)
+  - Gradient reveal: full-size gradient is clipped from bottom up (not resized), preserving color consistency
+  - Vertical gradient: green (#4CAF50) at bottom → yellow (#FFEB3B) in middle → red (#F44336) at top
+  - Height bound to `FillHeight` (0-500px), visibility bound to `GaugeVisible` (boolean)
+- **ViewModel bindings**: FillHeight (number), GaugeVisible (boolean)
+- **Public API** (from `PowerGaugeComponent`):
+  - `setFillLevel(level: number)` — 0 to 1
+  - `setVisible(visible: boolean)` — show/hide
+- **Integration**: Other scripts get a reference via `entity.getComponent(PowerGaugeComponent)` and call the public methods
+
+## Juice / Feedback Systems
+
+### CameraShakeService (`Scripts/Services/CameraShakeService.ts`)
+- `init(cameraEntity)` called from `ClientSetup` after camera setup
+- Subscribes to `ShotFeedbackResultEvent` and triggers a decaying random-offset shake:
+  - Goal → 0.25 intensity / 0.5s
+  - Save → 0.12 / 0.3s
+  - PostHit → 0.10 / 0.25s
+  - Miss → 0.05 / 0.15s
+
+### VfxService (`Scripts/Services/VfxService.ts`)
+- `prewarm()` called from `GameManager._spawnEntities()` — spawns `VFX_POOL_SIZE` (60) Particle entities off-screen
+- Subscribes to `ShotFeedbackResultEvent` and bursts particles at the relevant world position:
+  - Goal → 20 golden confetti at ball position inside the net
+  - Save → 10 white/blue particles at goal mouth centre
+  - PostHit → 8 white sparks at ball position (near post)
+  - Miss → 6 brown/green dust puffs at ground level
+- Requires `@Templates/Particle.hstf` in MHS (small sphere, ColorComponent on root and children)
+
+### Game Over Stats Overlay
+- **XAML**: `ui/GameOverStats.xaml` — Full-screen overlay for end-of-round stats display
+- **Layout**: Semi-transparent dark overlay (#CC000000) with centered card (~800px wide)
+  - **Card**: Rounded corners (30px), dark green gradient background (#1B5E20 to #004D40)
+  - **Title**: "GAME OVER" with white text and dark outline
+  - **Stats section**: Three rows showing ACCURACY, GOALS, and SCORE (labels in gray, values in white)
+  - **Star rating**: 3 stars (★ Unicode) with individual visibility, color, and scale bindings for pop-in animation
+  - **Replay button**: Large green rounded button (#4CAF50, 400×80px) with scale/opacity animation bindings
+- **ViewModel bindings**: OverlayVisible, CardScaleX/Y, CardOpacity, ScoreText, GoalsText, AccuracyText, Star1/2/3Visible, Star1/2/3Color, Star1/2/3Scale, ReplayButtonOpacity, ReplayButtonScale
+- **Event binding**: `events.onReplayClickEvent` for replay button Command
+- **Animation**: All animations driven from TypeScript via ViewModel property updates (no XAML storyboards)
+
 ## Not yet implemented
 
-- Start screen / Game Over screen with stats
+- Start screen
 - Combo flash overlay (visual celebration on combo ×3+)
-- Screen shake on goal
-- Particles (confetti on goal, dust on miss)
 - Audio

@@ -16,6 +16,7 @@ import { Assets } from '../Assets';
 import { GameStateService } from '../Services/GameStateService';
 import { BallService } from '../Services/BallService';
 import { GoalkeeperService } from '../Services/GoalkeeperService';
+import { VfxService } from '../Services/VfxService';
 
 @component()
 export class GameManager extends Component {
@@ -41,7 +42,7 @@ export class GameManager extends Component {
       templateAsset: Assets.Ball,
       position:  new Vec3(0, 0.28, 9.0),
       rotation:  Quaternion.identity,
-      scale:     new Vec3(0.56, 0.56, 0.56),
+      scale:     Vec3.one,
       networkMode: NetworkMode.LocalOnly,
     }).then(e => { this._ballEntity = e; }).catch(() => {});
 
@@ -52,6 +53,8 @@ export class GameManager extends Component {
       scale:     Vec3.one,
       networkMode: NetworkMode.LocalOnly,
     }).then(e => { this._gkEntity = e; }).catch(() => {});
+
+    VfxService.get().prewarm().catch(() => {});
 
     // Start game immediately
     GameStateService.get().reset();

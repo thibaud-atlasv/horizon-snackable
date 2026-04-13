@@ -164,6 +164,7 @@ Every interaction must have **layered feedback**. The checklist:
 - [x] **Background intensity API**: auto-triggers on brick destroy, explosions, combos, ball lost
 - [x] **Color palette escalation**: each level uses distinct intense neon palettes (80s arcade aesthetic)
 - [x] **Level intro animation**: randomized brick reveal with 4 styles × 5 patterns
+- [x] **Background music**: looping arcade synthwave music — starts on level load, fades out on game over, restarts on retry
 - [ ] **Background particles**: slow ambient drift to prevent static feel
 - [ ] **Trail intensity scaling**: ball trail grows with combo/power level
 

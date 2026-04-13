@@ -2,18 +2,28 @@
  * PathService — Waypoint path management, world coordinate conversion, and path tile spawning.
  *
  * Reads PATH_WAYPOINTS_LEVEL_0 from LevelDefs in onReady(). Builds ISubPath segments.
- * prewarm(): spawns one scaled tile entity per path segment (not per cell) for performance.
+ * prewarm(): spawns one tile per path cell using directional tile templates (straight/curve/grass).
  * getWorldPositionInSubPath(wpIndex, subT): interpolates world position along a segment.
  * getGlobalT(wpIndex, subT): converts segment position to global path progress (used for targeting).
  * isPathCell(col, row): checks if a grid cell is occupied by the path (blocks tower placement).
  * cellToWorld(col, row) / worldToCell(x, z): converts between grid coords and world coords.
  * Note: col → Z axis, row → X axis (row 0 = top of screen).
+ *
+ * Tile conventions (Y-up right-hand, col=Z, row=X):
+ *   LeftToRight    — straight tile, default open along Z axis (col direction).
+ *                    Rotate Y=90° to open along X axis (row direction).
+ *   TopToRight     — curve tile, default: entry from -X (top), exit to +Z (right).
+ *                    Rotations (Y, degrees): 0°=top→right, 90°=right→bottom, 180°=bottom→left, 270°=left→top.
+ *   RightToLeftEnd — end cap, default: open to +Z (right), closed to -Z (left).
+ *                    Spawn entry (row=0): open toward +X (down) → rotY=90°.
+ *                    Spawn exit  (row=GRID_ROWS-1): open toward -X (up) → rotY=270°.
+ *   Grass/variants — filler tiles for non-path cells, weighted random distribution.
  */
-import { Service, Vec3, WorldService, NetworkMode, Quaternion, NetworkingService, Color, ColorComponent } from 'meta/worlds';
+import { Service, Vec3, WorldService, NetworkMode, Quaternion, NetworkingService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
-import { CELL_SIZE, GRID_ROWS, GRID_ORIGIN_X, GRID_ORIGIN_Z, GROUND_Y, PATH_CELL_COLOR, hexColor } from '../Constants';
-import { Assets } from '../Assets';
+import { CELL_SIZE, GRID_COLS, GRID_ROWS, GRID_ORIGIN_X, GRID_ORIGIN_Z, GROUND_Y } from '../Constants';
+import { Tiles } from '../Assets';
 import { LEVEL_DEFS } from '../Defs/LevelDefs';
 
 interface IPathSegment {
@@ -47,34 +57,151 @@ export class PathService extends Service {
 
   async prewarm(): Promise<void> {
     if (NetworkingService.get().isServerContext()) return;
-    const pc = hexColor(PATH_CELL_COLOR);
-    const tileColor = new Color(pc.r, pc.g, pc.b);
 
-    await Promise.all(this._subPaths.map(async (sub) => {
-      const seg = sub.segments[0];
-      const cx = (seg.startX + seg.endX) / 2;
-      const cz = (seg.startZ + seg.endZ) / 2;
-      // extend by CELL_SIZE to fully cover both endpoint cells
-      const scaleX = Math.abs(seg.endX - seg.startX) + CELL_SIZE;
-      const scaleZ = Math.abs(seg.endZ - seg.startZ) + CELL_SIZE;
+    const spawns: Array<Promise<void>> = [];
 
-      const tile = await this._worldService.spawnTemplate({
-        templateAsset: Assets.PathCell,
-        position: new Vec3(cx, GROUND_Y + 0.01, cz),
-        rotation: Quaternion.identity,
-        scale: new Vec3(scaleX, 1, scaleZ),
-        networkMode: NetworkMode.LocalOnly,
-      }).catch((e: unknown) => { console.error(e); return null; });
-
-      if (tile) {
-        for (const child of tile.getChildren()) {
-          const c = child.getComponent(ColorComponent);
-          if (c) c.color = tileColor;
-        }
-        const c = tile.getComponent(ColorComponent);
-        if (c) c.color = tileColor;
+    // Spawn decoration tiles for every non-path cell (weighted random)
+    for (let row = 0; row < GRID_ROWS; row++) {
+      for (let col = 0; col < GRID_COLS; col++) {
+        if (this.isPathCell(col, row)) continue;
+        const pos = this.cellToWorld(col, row);
+        spawns.push(
+          this._worldService.spawnTemplate({
+            templateAsset: this._pickDecoTile(),
+            position: new Vec3(pos.x, GROUND_Y, pos.z),
+            rotation: Quaternion.identity,
+            scale: Vec3.one.mul(CELL_SIZE),
+            networkMode: NetworkMode.LocalOnly,
+          }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
+        );
       }
-    }));
+    }
+
+    // Spawn directional path tiles cell by cell
+    // Build a map from cell key → [inDir, outDir] for each path cell
+    // Directions: 0=+row(down-screen), 1=+col(right), 2=-row(up-screen), 3=-col(left)
+    const cellDirs = new Map<number, [number, number]>();
+    for (let i = 0; i < this._waypoints.length - 1; i++) {
+      const [c0, r0] = this._waypoints[i];
+      const [c1, r1] = this._waypoints[i + 1];
+      const dc = Math.sign(c1 - c0);
+      const dr = Math.sign(r1 - r0);
+      // outDir for this segment: dr>0 → 0 (down), dc>0 → 1 (right), dr<0 → 2 (up), dc<0 → 3 (left)
+      const outDir = dr > 0 ? 0 : dc > 0 ? 1 : dr < 0 ? 2 : 3;
+      const inDir  = (outDir + 2) % 4; // opposite
+
+      const steps = Math.max(Math.abs(c1 - c0), Math.abs(r1 - r0));
+      for (let step = 0; step <= steps; step++) {
+        const col = Math.round(c0 + (c1 - c0) * (step / steps));
+        const row = Math.round(r0 + (r1 - r0) * (step / steps));
+        const key = col * 100 + row;
+        const existing = cellDirs.get(key);
+        if (!existing) {
+          // First time seeing this cell — store incoming/outgoing from this segment
+          // For intermediate cells both in and out are the same direction pair
+          cellDirs.set(key, [inDir, outDir]);
+        } else {
+          // Corner cell: it was the endpoint of the previous segment (outDir recorded)
+          // and now it's the start of this segment — update outDir
+          cellDirs.set(key, [existing[0], outDir]);
+        }
+      }
+    }
+
+    // Identify entry/exit cells: first and last in-bounds cells of the path
+    const firstWp = this._waypoints[0];
+    const lastWp  = this._waypoints[this._waypoints.length - 1];
+    const entryKey = firstWp[0] * 100 + Math.max(0, firstWp[1]);
+    const exitKey  = lastWp[0]  * 100 + Math.min(GRID_ROWS - 1, lastWp[1]);
+
+    for (const [key, [inDir, outDir]] of cellDirs) {
+      const col = Math.floor(key / 100);
+      const row = key % 100;
+      // Skip out-of-bounds cells (entry/exit waypoints outside grid)
+      if (row < 0 || row >= GRID_ROWS || col < 0 || col >= GRID_COLS) continue;
+      const pos = this.cellToWorld(col, row);
+
+      // End-cap tiles: open toward the path, closed away from grid
+      // RightToLeftEnd default: open +Z (right), closed -Z (left)
+      // Entry row=0: path exits downward (+row = +X), cap closes upward → rotY=90
+      // Exit row=GRID_ROWS-1: path enters from above (-row = -X), cap closes downward → rotY=270
+      if (key === entryKey) {
+        spawns.push(
+          this._worldService.spawnTemplate({
+            templateAsset: Tiles.RightToLeftEnd,
+            position: new Vec3(pos.x, GROUND_Y, pos.z),
+            rotation: Quaternion.fromEuler(new Vec3(0, -90, 0)),
+            scale: Vec3.one.mul(CELL_SIZE),
+            networkMode: NetworkMode.LocalOnly,
+          }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
+        );
+        continue;
+      }
+      if (key === exitKey) {
+        spawns.push(
+          this._worldService.spawnTemplate({
+            templateAsset: Tiles.RightToLeftEnd,
+            position: new Vec3(pos.x, GROUND_Y, pos.z),
+            rotation: Quaternion.fromEuler(new Vec3(0, 90, 0)),
+            scale: Vec3.one.mul(CELL_SIZE),
+            networkMode: NetworkMode.LocalOnly,
+          }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
+        );
+        continue;
+      }
+
+      const isCurve = inDir !== outDir && (inDir + 2) % 4 !== outDir;
+      const { template, rotY } = isCurve
+        ? this._curveRotation(inDir, outDir)
+        : { template: Tiles.LeftToRight, rotY: (inDir === 0 || inDir === 2) ? 90 : 0 };
+
+      spawns.push(
+        this._worldService.spawnTemplate({
+          templateAsset: template,
+          position: new Vec3(pos.x, GROUND_Y, pos.z),
+          rotation: Quaternion.fromEuler(new Vec3(0, rotY, 0)),
+          scale: Vec3.one.mul(CELL_SIZE),
+          networkMode: NetworkMode.LocalOnly,
+        }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
+      );
+    }
+
+    await Promise.all(spawns);
+  }
+
+  // Returns the LeftToRight or TopToRight template + Y rotation for a curve cell.
+  // Directions: 0=down(+row), 1=right(+col), 2=up(-row), 3=left(-col)
+  // TopToRight default: entry from up (2), exit to right (1) → rotY=0
+  private _curveRotation(inDir: number, outDir: number): { template: typeof Tiles.TopToRight; rotY: number } {
+    // Normalize to canonical (inDir, outDir) pairs → rotY
+    const key = `${inDir},${outDir}`;
+    const rotMap: Record<string, number> = {
+      '2,1': 0,   //ok
+
+      '3,0': 180, 
+      '0,3': 90,
+      '1,2': -90,
+      // Reversed traversal (path goes the other way)
+      '1,0': -90,
+
+      '2,3': 90,
+      '3,2': 90, //ok
+      '0,1': -90,
+    };
+    return { template: Tiles.TopToRight, rotY: rotMap[key] ?? 0 };
+  }
+
+  // Weighted random decoration tile for non-path cells.
+  // Grass 60% · Tree 12% · Rock 10% · Hill 8% · TreeDouble 5% · Crystal 3% · TreeQuad 2%
+  private _pickDecoTile(): typeof Tiles.Grass {
+    const r = Math.random();
+    if (r < 0.85) return Tiles.Grass;
+    if (r < 0.90) return Tiles.Tree;
+    if (r < 0.92) return Tiles.Rock;
+    if (r < 0.94) return Tiles.Hill;
+    if (r < 0.96) return Tiles.TreeDouble;
+    if (r < 0.98) return Tiles.Crystal;
+    return Tiles.TreeQuad;
   }
 
   get totalLength(): number { return this._totalLength; }

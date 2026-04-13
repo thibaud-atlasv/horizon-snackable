@@ -44,3 +44,23 @@ export const GameResetEvent = new LocalEvent<GameResetPayload>(
   'EvGameReset',
   GameResetPayload,
 );
+
+// ── Aim Started (finger touched down in Aim phase) ───────────────────────────
+
+export class AimStartedPayload {}
+
+export const AimStartedEvent = new LocalEvent<AimStartedPayload>(
+  'EvAimStarted',
+  AimStartedPayload,
+);
+
+// ── Aim Updated (finger dragging — power in [0..1]) ──────────────────────────
+
+export class AimUpdatedPayload {
+  power: number = 0;
+}
+
+export const AimUpdatedEvent = new LocalEvent<AimUpdatedPayload>(
+  'EvAimUpdated',
+  AimUpdatedPayload,
+);

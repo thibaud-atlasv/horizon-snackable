@@ -228,6 +228,16 @@ tasks:
       - name: Pre-fetch leaderboard on OnPlayerCreateEvent
         status: done
 
+  - name: Arcade Background Music
+    status: parked
+    summary: Script and entity ready (BackgroundMusic.ts + entity in Breakout.hstf), awaiting audio file
+    files: [Scripts/Components/BackgroundMusic.ts, Templates/Breakout.hstf]
+
+  - name: Generate Game Sound Effects
+    status: done
+    summary: Discovered existing 100+ arcade sound library at Audio/Arcade_Sound_FX/ - no generation needed
+    files: [Audio/Arcade_Sound_FX/]
+
 chopping_block:
   disabled_systems:
     - Power-ups (BigPaddle, StickyPaddle) — built but disabled in current level configs (powerUpSpawnChance: 0)

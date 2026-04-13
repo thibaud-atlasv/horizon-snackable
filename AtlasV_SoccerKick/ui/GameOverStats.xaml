@@ -1,0 +1,253 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      Background="Transparent">
+
+    <!-- Full-screen overlay container with visibility binding -->
+    <Grid x:Name="OverlayContainer">
+        <Grid.Visibility>
+            <Binding Path="OverlayVisible">
+                <Binding.Converter>
+                    <BooleanToVisibilityConverter/>
+                </Binding.Converter>
+            </Binding>
+        </Grid.Visibility>
+
+        <!-- Semi-transparent dark background -->
+        <Rectangle Fill="#CC000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+        <!-- Centered card with scale and opacity animations -->
+        <Grid x:Name="CardContainer"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Opacity="{Binding Path=CardOpacity}"
+              RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="{Binding Path=CardScaleX}" ScaleY="{Binding Path=CardScaleY}"/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+
+            <!-- Card background with rounded corners -->
+            <Border x:Name="CardBorder"
+                    Width="800"
+                    CornerRadius="30"
+                    Padding="50">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#FF1B5E20" Offset="0"/>
+                        <GradientStop Color="#FF004D40" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <StackPanel HorizontalAlignment="Center">
+                    <!-- GAME OVER Title with outline effect -->
+                    <Grid x:Name="TitleContainer" HorizontalAlignment="Center" Margin="0,0,0,40">
+                        <!-- Text outline/stroke layer -->
+                        <TextBlock x:Name="TitleOutline"
+                                   Text="GAME OVER"
+                                   FontFamily="Roboto"
+                                   FontSize="72"
+                                   FontWeight="Bold"
+                                   Stroke="#FF1A1A1A"
+                                   StrokeThickness="6"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                        <!-- Main text layer -->
+                        <TextBlock x:Name="TitleMain"
+                                   Text="GAME OVER"
+                                   FontFamily="Roboto"
+                                   FontSize="72"
+                                   FontWeight="Bold"
+                                   Foreground="#FFFFFFFF"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Stats Section -->
+                    <StackPanel x:Name="StatsSection" HorizontalAlignment="Center" Margin="0,0,0,40">
+                        <!-- Accuracy Row -->
+                        <Grid Margin="0,10,0,10" Width="500">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="ACCURACY"
+                                       FontFamily="Roboto"
+                                       FontSize="36"
+                                       FontWeight="SemiBold"
+                                       Foreground="#FFAAAAAA"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Path=AccuracyText}"
+                                       FontFamily="Roboto"
+                                       FontSize="42"
+                                       FontWeight="Bold"
+                                       Foreground="#FFFFFFFF"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Goals Row -->
+                        <Grid Margin="0,10,0,10" Width="500">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="GOALS"
+                                       FontFamily="Roboto"
+                                       FontSize="36"
+                                       FontWeight="SemiBold"
+                                       Foreground="#FFAAAAAA"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Path=GoalsText}"
+                                       FontFamily="Roboto"
+                                       FontSize="42"
+                                       FontWeight="Bold"
+                                       Foreground="#FFFFFFFF"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Score Row -->
+                        <Grid Margin="0,10,0,10" Width="500">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="SCORE"
+                                       FontFamily="Roboto"
+                                       FontSize="36"
+                                       FontWeight="SemiBold"
+                                       Foreground="#FFAAAAAA"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Path=ScoreText}"
+                                       FontFamily="Roboto"
+                                       FontSize="42"
+                                       FontWeight="Bold"
+                                       Foreground="#FFFFFFFF"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Star Rating Row -->
+                    <StackPanel x:Name="StarRatingRow" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Center" 
+                                Margin="0,0,0,50">
+                        <!-- Star 1 -->
+                        <Grid x:Name="Star1Container" Margin="15,0,15,0" RenderTransformOrigin="0.5,0.5">
+                            <Grid.Visibility>
+                                <Binding Path="Star1Visible">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Grid.Visibility>
+                            <Grid.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="{Binding Path=Star1Scale}" ScaleY="{Binding Path=Star1Scale}"/>
+                                </TransformGroup>
+                            </Grid.RenderTransform>
+                            <TextBlock Text="&#x2605;"
+                                       FontSize="80"
+                                       FontWeight="Bold"
+                                       Foreground="{Binding Path=Star1Color}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Star 2 -->
+                        <Grid x:Name="Star2Container" Margin="15,0,15,0" RenderTransformOrigin="0.5,0.5">
+                            <Grid.Visibility>
+                                <Binding Path="Star2Visible">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Grid.Visibility>
+                            <Grid.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="{Binding Path=Star2Scale}" ScaleY="{Binding Path=Star2Scale}"/>
+                                </TransformGroup>
+                            </Grid.RenderTransform>
+                            <TextBlock Text="&#x2605;"
+                                       FontSize="80"
+                                       FontWeight="Bold"
+                                       Foreground="{Binding Path=Star2Color}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Star 3 -->
+                        <Grid x:Name="Star3Container" Margin="15,0,15,0" RenderTransformOrigin="0.5,0.5">
+                            <Grid.Visibility>
+                                <Binding Path="Star3Visible">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Grid.Visibility>
+                            <Grid.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="{Binding Path=Star3Scale}" ScaleY="{Binding Path=Star3Scale}"/>
+                                </TransformGroup>
+                            </Grid.RenderTransform>
+                            <TextBlock Text="&#x2605;"
+                                       FontSize="80"
+                                       FontWeight="Bold"
+                                       Foreground="{Binding Path=Star3Color}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Replay Button with scale and opacity animations -->
+                    <Grid x:Name="ReplayButtonContainer"
+                          HorizontalAlignment="Center"
+                          Opacity="{Binding Path=ReplayButtonOpacity}"
+                          RenderTransformOrigin="0.5,0.5">
+                        <Grid.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="{Binding Path=ReplayButtonScale}" ScaleY="{Binding Path=ReplayButtonScale}"/>
+                            </TransformGroup>
+                        </Grid.RenderTransform>
+
+                        <Button x:Name="ReplayButton"
+                                Command="{Binding Path=events.onReplayClickEvent}"
+                                Width="400"
+                                Height="80"
+                                Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="ButtonBorder"
+                                            Background="#FF4CAF50"
+                                            CornerRadius="25"
+                                            Width="400"
+                                            Height="80">
+                                        <TextBlock Text="REPLAY"
+                                                   FontFamily="Roboto"
+                                                   FontSize="36"
+                                                   FontWeight="Bold"
+                                                   Foreground="#FFFFFFFF"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

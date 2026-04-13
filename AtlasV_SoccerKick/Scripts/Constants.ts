@@ -57,6 +57,9 @@ export const GOAL_DEPTH        = 1.4;
 export const GOAL_POST_RADIUS  = 0.07;
 export const GOAL_HALF_W       = GOAL_WIDTH / 2;
 
+// Combined radius used for post / crossbar collision (post surface + ball surface)
+export const POST_HIT_RADIUS   = GOAL_POST_RADIUS + 0.28; // BALL_RADIUS = 0.28
+
 // ── Goalkeeper ───────────────────────────────────────────────────────────────
 
 export const GK_START_Z        = 0.6;  // standing distance in front of goal line
@@ -69,14 +72,17 @@ export const GK_DIVE_LATERAL   = 1.6;  // how far the dive moves sideways
 export const GK_DIVE_HEIGHT    = 0.6;  // peak vertical offset during dive
 
 // GK collision box (standing)
-export const GK_HALF_W         = 0.32;
-export const GK_STAND_H        = 1.85;
+// Sprite expected: 0.64 m wide, pivot at feet → top at 1.85 m
+export const GK_HALF_W         = 0.32; // half the sprite width
+export const GK_STAND_H        = 1.85; // full sprite height (pivot at Y=0)
+export const GK_FOOT_Y         = 0.10; // ignore the feet/ground fringe below this
 
 // GK collision box (diving) — expands with diveT
-export const GK_DIVE_HALF_W_BASE  = 0.95;
-export const GK_DIVE_HALF_W_GROW  = 0.4;
-export const GK_DIVE_H_BASE       = 0.55;
-export const GK_DIVE_H_GROW       = 0.3;
+// Sprite expected: body stretches to ~1.9 m wide and ~1.1 m tall at full dive
+export const GK_DIVE_HALF_W_BASE  = 0.55; // half-width at diveT=0 (arms out, not yet extended)
+export const GK_DIVE_HALF_W_GROW  = 0.40; // additional half-width at diveT=1  → total 0.95 m half, 1.9 m wide
+export const GK_DIVE_H_BASE       = 0.55; // hitbox height at diveT=0
+export const GK_DIVE_H_GROW       = 0.30; // additional height at diveT=1       → total 0.85 m tall
 
 // ── Swipe Input (normalised 0..1 screen coordinates) ─────────────────────────
 
@@ -95,3 +101,61 @@ export const GAME_OVER_DELAY   = 400;
 // ── Camera ───────────────────────────────────────────────────────────────────
 
 export const CAMERA_FOV        = 58;
+
+// ── Camera Shake ─────────────────────────────────────────────────────────────
+
+export const SHAKE_GOAL_INTENSITY   = 0.25;  // world units max offset
+export const SHAKE_GOAL_DURATION    = 0.5;   // seconds
+export const SHAKE_SAVE_INTENSITY   = 0.12;
+export const SHAKE_SAVE_DURATION    = 0.3;
+export const SHAKE_POST_INTENSITY   = 0.10;
+export const SHAKE_POST_DURATION    = 0.25;
+export const SHAKE_MISS_INTENSITY   = 0.05;
+export const SHAKE_MISS_DURATION    = 0.15;
+
+// ── VFX Particles ─────────────────────────────────────────────────────────────
+
+export const VFX_POOL_SIZE          = 60;    // total particle entities pre-spawned
+export const VFX_GRAVITY            = 4.0;   // downward accel (world units/s²)
+
+// Goal confetti burst
+export const VFX_GOAL_COUNT         = 20;
+export const VFX_GOAL_SPEED_MIN     = 2.5;
+export const VFX_GOAL_SPEED_MAX     = 5.0;
+export const VFX_GOAL_LIFE          = 0.9;
+export const VFX_GOAL_SCALE         = 0.12;
+
+// Save particles
+export const VFX_SAVE_COUNT         = 10;
+export const VFX_SAVE_SPEED_MIN     = 1.5;
+export const VFX_SAVE_SPEED_MAX     = 3.0;
+export const VFX_SAVE_LIFE          = 0.55;
+export const VFX_SAVE_SCALE         = 0.10;
+
+// Post sparks
+export const VFX_POST_COUNT         = 8;
+export const VFX_POST_SPEED_MIN     = 2.0;
+export const VFX_POST_SPEED_MAX     = 4.0;
+export const VFX_POST_LIFE          = 0.45;
+export const VFX_POST_SCALE         = 0.08;
+
+// Miss dust puff
+export const VFX_MISS_COUNT         = 6;
+export const VFX_MISS_SPEED_MIN     = 0.6;
+export const VFX_MISS_SPEED_MAX     = 1.4;
+export const VFX_MISS_LIFE          = 0.5;
+export const VFX_MISS_SCALE         = 0.14;
+
+// ── Ball Idle Animation ───────────────────────────────────────────────────────
+
+export const IDLE_PAUSE_DURATION  = 0.1;  // seconds of stillness before bounces start
+export const IDLE_BOUNCE_COUNT    = 3;    // number of bounces per cycle
+export const IDLE_BOUNCE_HEIGHT_0 = 0.55; // peak height of first bounce (world units)
+export const IDLE_BOUNCE_DECAY    = 0.48; // height multiplier per successive bounce
+export const IDLE_HALF_PERIOD_0   = 0.30; // half-period (up+down) of first bounce (s)
+export const IDLE_HALF_PERIOD_DECAY = 0.72; // half-period multiplier per bounce (slows down)
+export const IDLE_SQUASH_0        = 0.60; // Y scale at impact for first bounce
+export const IDLE_SQUASH_DECAY    = 0.80; // squash intensity multiplier per bounce
+export const IDLE_STRETCH_0       = 1.18; // Y scale at peak for first bounce
+export const IDLE_STRETCH_DECAY   = 0.85; // stretch intensity multiplier per bounce
+export const IDLE_SQUASH_FRAMES   = 0.06; // duration (s) of ground-contact squash flat

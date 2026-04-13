@@ -8,7 +8,7 @@
 
 // ─── Grid ─────────────────────────────────────────────────────────────────────
 
-export const GRID_COLS = 16;
+export const GRID_COLS = 14;
 export const GRID_ROWS = 22;
 export const CELL_SIZE = 0.5; // world units per cell
 

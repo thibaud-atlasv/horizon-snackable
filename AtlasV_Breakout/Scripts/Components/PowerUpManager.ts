@@ -60,10 +60,7 @@ export class PowerUpManager extends Component {
     const selected = this._selectRandom();
     const template = PowerUpAssets[PowerUpType[selected.type] as keyof typeof PowerUpAssets];
 
-    if (!template) {
-      console.log('[PowerUpManager] No template defined for type:', selected.type);
-      return;
-    }
+    if (!template) return;
 
     try {
       const entity = await WorldService.get().spawnTemplate({
@@ -80,8 +77,8 @@ export class PowerUpManager extends Component {
           powerUp.powerUpDuration = selected.powerUpDuration ?? LEVEL_DEFAULTS.powerUpDuration;
         }
       }
-    } catch (error) {
-      console.log('[PowerUpManager] Spawn failed:', error);
+    } catch {
+      // spawn failure is non-fatal
     }
   }
 }

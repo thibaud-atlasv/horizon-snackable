@@ -3,7 +3,7 @@ import {
   GK_START_Z, GK_SPEED, GK_IDLE_SPEED, GK_REACTION_MS,
   GK_DIVE_CHANCE, GK_DIVE_SPEED, GK_DIVE_LATERAL, GK_DIVE_HEIGHT,
   GOAL_HALF_W,
-  GK_HALF_W, GK_STAND_H,
+  GK_HALF_W, GK_STAND_H, GK_FOOT_Y,
   GK_DIVE_HALF_W_BASE, GK_DIVE_HALF_W_GROW,
   GK_DIVE_H_BASE, GK_DIVE_H_GROW,
 } from '../Constants';
@@ -86,7 +86,7 @@ export class GoalkeeperService extends Service {
 
     return (
       bx > this._x - halfW && bx < this._x + halfW &&
-      by > 0.05 && by < maxH
+      by > GK_FOOT_Y && by < maxH
     );
   }
 

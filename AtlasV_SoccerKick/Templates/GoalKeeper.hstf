@@ -121,10 +121,15 @@
                                 "y": 1.0499999523162842,
                                 "z": 0.0
                             },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
                             "localScale": {
-                                "x": 0.5199999809265137,
-                                "y": 0.6000000238418579,
-                                "z": 0.2800000011920929
+                                "x": 0.29084739089012148,
+                                "y": 0.5999999642372131,
+                                "z": 0.2799999713897705
                             }
                         }
                     },
@@ -194,85 +199,13 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": -0.3799999952316284,
+                                "x": -0.25,
                                 "y": 1.0499999523162842,
                                 "z": 0.0
                             },
-                            "localScale": {
-                                "x": 0.14000000059604646,
-                                "y": 0.5,
-                                "z": 0.14000000059604646
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::MeshPlatformComponent",
-                        "version": 11,
-                        "data": {
-                            "mesh": {
-                                "packageOrRemoteId": "24407058055595655",
-                                "ingestionId": "4707432788469128401",
-                                "targetId": "931111888"
-                            },
-                            "shadowParams": {
-                                "class": "horizon::platform_api::ShadowParams",
-                                "data": {
-                                    "castsShadows": true
-                                }
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::ColorPlatformComponent",
-                        "version": 2,
-                        "data": {
-                            "color": {
-                                "r": 0.8705882430076599,
-                                "g": 0.3686274588108063,
-                                "b": 0.12941177189350129,
-                                "a": 1.0
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::MaterialPlatformComponent",
-                        "version": 1,
-                        "data": {
-                            "materials": [
-                                {
-                                    "packageOrRemoteId": "26835398609386284",
-                                    "ingestionId": "6923924081590215865",
-                                    "targetId": "157013062"
-                                }
-                            ]
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
-        },
-        {
-            "id": "8dbb3e40-5b69-40bb-9f42-c3d6ae238eea",
-            "name": "GK_RightArm",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 3,
-                        "data": {
-                            "localPosition": {
-                                "x": 0.3799999952316284,
-                                "y": 1.0499999523162842,
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
                                 "z": 0.0
                             },
                             "localScale": {
@@ -348,14 +281,14 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": -0.3799999952316284,
-                                "y": 0.7200000286102295,
+                                "x": 0.0,
+                                "y": -0.6599998474121094,
                                 "z": 0.0
                             },
                             "localScale": {
-                                "x": 0.18000000715255738,
-                                "y": 0.1599999964237213,
-                                "z": 0.18000000715255738
+                                "x": 1.2857142686843873,
+                                "y": 0.3199999928474426,
+                                "z": 1.2857142686843873
                             }
                         }
                     },
@@ -416,6 +349,88 @@
             "attributes": []
         },
         {
+            "id": "8dbb3e40-5b69-40bb-9f42-c3d6ae238eea",
+            "name": "GK_RightArm",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.25,
+                                "y": 1.0499999523162842,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 0.14000000059604646,
+                                "y": 0.5,
+                                "z": 0.14000000059604646
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "24407058055595655",
+                                "ingestionId": "4707432788469128401",
+                                "targetId": "931111888"
+                            },
+                            "shadowParams": {
+                                "class": "horizon::platform_api::ShadowParams",
+                                "data": {
+                                    "castsShadows": true
+                                }
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColorPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "color": {
+                                "r": 0.8705882430076599,
+                                "g": 0.3686274588108063,
+                                "b": 0.12941177189350129,
+                                "a": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "26835398609386284",
+                                    "ingestionId": "6923924081590215865",
+                                    "targetId": "157013062"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
             "id": "7c2f8649-35ac-48a6-9dab-7d0b111ebee6",
             "name": "GK_RightGlove",
             "components": [
@@ -425,14 +440,14 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": 0.3799999952316284,
-                                "y": 0.7200000286102295,
+                                "x": 0.0,
+                                "y": -0.6599998474121094,
                                 "z": 0.0
                             },
                             "localScale": {
-                                "x": 0.18000000715255738,
-                                "y": 0.1599999964237213,
-                                "z": 0.18000000715255738
+                                "x": 1.2857142686843873,
+                                "y": 0.3199999928474426,
+                                "z": 1.2857142686843873
                             }
                         }
                     },
@@ -504,6 +519,11 @@
                             "localPosition": {
                                 "x": -0.14000000059604646,
                                 "y": 0.5,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
                                 "z": 0.0
                             },
                             "localScale": {
@@ -1023,6 +1043,101 @@
                 }
             ],
             "attributes": []
+        },
+        {
+            "id": "0c03a888-cd17-456c-8294-b439f3e0dc31",
+            "name": "Cube",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.9250000715255737,
+                                "z": -0.2812408208847046
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 0.6399999856948853,
+                                "y": 1.850000023841858,
+                                "z": 0.6399999856948853
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "24407058055595655",
+                                "ingestionId": "4707432788469128401",
+                                "targetId": "931111888"
+                            },
+                            "isVisibleSelf": false
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColliderBoxPlatformComponent",
+                        "version": 2,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                        "version": 8,
+                        "data": {
+                            "type": "StaticCollision"
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColorPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "color": {
+                                "r": 1.0,
+                                "g": 1.0,
+                                "b": 1.0,
+                                "a": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "24407058055595655",
+                                    "ingestionId": "4707432788469128401",
+                                    "targetId": "2197070581"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
         }
     ],
     "relationships": [
@@ -1043,18 +1158,18 @@
         },
         {
             "relationshipType": "RelationChildOf",
+            "source": "180d427b-7d4c-4ec2-8de0-1b2037d820a7",
+            "destination": "389812d7-4012-46b7-99de-13df832cab50"
+        },
+        {
+            "relationshipType": "RelationChildOf",
             "source": "8dbb3e40-5b69-40bb-9f42-c3d6ae238eea",
             "destination": "6c2d8872-a053-4ff4-ba65-8279b19fab24"
         },
         {
             "relationshipType": "RelationChildOf",
-            "source": "180d427b-7d4c-4ec2-8de0-1b2037d820a7",
-            "destination": "6c2d8872-a053-4ff4-ba65-8279b19fab24"
-        },
-        {
-            "relationshipType": "RelationChildOf",
             "source": "7c2f8649-35ac-48a6-9dab-7d0b111ebee6",
-            "destination": "6c2d8872-a053-4ff4-ba65-8279b19fab24"
+            "destination": "8dbb3e40-5b69-40bb-9f42-c3d6ae238eea"
         },
         {
             "relationshipType": "RelationChildOf",
@@ -1089,6 +1204,11 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "f14f938b-9871-4317-a7c6-627773c85f55",
+            "destination": "6c2d8872-a053-4ff4-ba65-8279b19fab24"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "0c03a888-cd17-456c-8294-b439f3e0dc31",
             "destination": "6c2d8872-a053-4ff4-ba65-8279b19fab24"
         }
     ]

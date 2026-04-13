@@ -36,8 +36,6 @@ const REVEAL_OVERSHOOT = 1.15;
 const REVEAL_DAMPING = 5;
 const REVEAL_FREQUENCY = 2.5;
 
-const VERBOSE_LOG = false;
-
 /**
  * ViewModel exposing reactive properties for HUD UI binding.
  * UI binds to these properties; changes trigger automatic UI updates.
@@ -115,10 +113,6 @@ export class GameHUDViewModel extends Component {
     this._settling = false;
     this._animTick = 0;
 
-    if (VERBOSE_LOG) {
-      console.log(`[GameHUDViewModel] Score target updated to ${this._targetScore}`);
-    }
-
     // Start animation interval if not already running
     if (this._animIntervalId === null) {
       this._animIntervalId = setInterval(() => {
@@ -170,9 +164,6 @@ export class GameHUDViewModel extends Component {
       this._tickBounce();
     }, BOUNCE_INTERVAL_MS);
 
-    if (VERBOSE_LOG) {
-      console.log('[GameHUDViewModel] Bounce animation started');
-    }
   }
 
   private _tickBounce(): void {
@@ -255,10 +246,6 @@ export class GameHUDViewModel extends Component {
     if (this._bounceIntervalId !== null) {
       clearInterval(this._bounceIntervalId);
       this._bounceIntervalId = null;
-
-      if (VERBOSE_LOG) {
-        console.log('[GameHUDViewModel] Bounce interval cleared');
-      }
     }
   }
 
@@ -338,10 +325,6 @@ export class GameHUDViewModel extends Component {
       this._animIntervalId = null;
       this._settling = false;
       this._animTick = 0;
-
-      if (VERBOSE_LOG) {
-        console.log('[GameHUDViewModel] Animation interval cleared');
-      }
     }
   }
 

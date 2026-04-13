@@ -26,8 +26,6 @@ const COLOR_HOT_PINK = '#FF69B4';
 const COLOR_MAGENTA = '#FF00FF';
 const COLOR_GOLD = '#FFD700';
 
-const VERBOSE_LOG = false;
-
 // Blend a hex color toward white (amt > 0) or black (amt < 0) by the given fraction [0..1].
 function _blendHex(hex: string, amt: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -127,9 +125,6 @@ export class ComboHUDViewModel extends Component {
 
     this._shakeTimer = this._comboCount >= 10 ? 0.15 : 0;
 
-    if (VERBOSE_LOG) {
-      console.log(`[ComboHUDViewModel] Combo incremented to ${this._comboCount}`);
-    }
   }
 
   @subscribe(ComboHUDEvents.ResetCombo)

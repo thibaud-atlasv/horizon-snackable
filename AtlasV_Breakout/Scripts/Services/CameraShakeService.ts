@@ -16,8 +16,6 @@ import {
 import type { Entity, Maybe, OnWorldUpdateEventPayload } from 'meta/worlds';
 import { Events } from '../Types';
 
-const VERBOSE_LOG = false;
-
 @service()
 export class CameraShakeService extends Service {
 
@@ -40,10 +38,7 @@ export class CameraShakeService extends Service {
 
   /** Trigger a shake. intensity = max offset in world units, duration in seconds. */
   shake(intensity: number, duration: number): void {
-    if (!this._transform) {
-      if (VERBOSE_LOG) console.log('[CameraShakeService] shake() called before init, ignoring');
-      return;
-    }
+    if (!this._transform) return;
     // Always store the current original pos when not already shaking
     // so stacked shakes don't drift
     if (!this._shaking) {
@@ -53,7 +48,6 @@ export class CameraShakeService extends Service {
     this._shakeDuration = duration;
     this._shakeEnd = WorldService.get().getWorldTime() + duration;
     this._shaking = true;
-    if (VERBOSE_LOG) console.log(`[CameraShakeService] Shake started: intensity=${intensity}, duration=${duration}`);
   }
 
   // ── Event handlers ────────────────────────────────────────────────
@@ -71,10 +65,8 @@ export class CameraShakeService extends Service {
     const remaining = this._shakeEnd - now;
 
     if (remaining <= 0) {
-      // Shake finished — restore exact original position
       this._transform.localPosition = this._originalPos;
       this._shaking = false;
-      if (VERBOSE_LOG) console.log('[CameraShakeService] Shake ended, position restored');
       return;
     }
 

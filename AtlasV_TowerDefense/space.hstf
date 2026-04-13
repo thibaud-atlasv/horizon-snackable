@@ -516,14 +516,14 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": -3.0,
-                                "y": 22.0,
+                                "x": -2.0,
+                                "y": 13.5,
                                 "z": 0.0
                             },
                             "localRotation": {
-                                "x": -1.483529806137085,
-                                "y": -1.5707978010177613,
-                                "z": 1.671303522243761e-7
+                                "x": -1.4835355281829835,
+                                "y": -1.5708011388778687,
+                                "z": -0.0000020517941266007257
                             },
                             "localScale": {
                                 "x": 1.0,
@@ -540,7 +540,7 @@
                         "version": 2,
                         "data": {
                             "cameraMode": "Custom",
-                            "fieldOfView": 38.0
+                            "fieldOfView": 60.0
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -595,7 +595,8 @@
                                 "packageOrRemoteId": "24407058055595655",
                                 "ingestionId": "7277538467424364748",
                                 "targetId": "2768521373"
-                            }
+                            },
+                            "isVisibleSelf": true
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -672,6 +673,7 @@
                                 "ingestionId": "7277538467424364748",
                                 "targetId": "2768521373"
                             },
+                            "isVisibleSelf": false,
                             "lightingParams": {
                                 "class": "horizon::platform_api::LightingParams",
                                 "data": {

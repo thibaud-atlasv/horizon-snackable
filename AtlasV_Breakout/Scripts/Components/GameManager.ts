@@ -6,6 +6,7 @@ import { VfxService } from '../Services/VfxService';
 import { JuiceService } from '../Services/JuiceService';
 import { CoinService } from '../Services/CoinService';
 import { BallPowerService } from '../Services/BallPowerService';
+import { AudioManager } from '../Services/AudioManager';
 
 @component()
 export class GameManager extends Component {
@@ -16,6 +17,8 @@ export class GameManager extends Component {
   private _juiceService : JuiceService = JuiceService.get();
   private _coinService : CoinService = CoinService.get();
   private _ballPower : BallPowerService = BallPowerService.get();
+  private _audioManager : AudioManager = AudioManager.get();
+  private _ballPowerBallPowerService = BallPowerService.get();
 
   private _lives: number = 1;
   private _score: number = 0;

@@ -4,10 +4,12 @@ import {
   CameraService, CameraMode,
   FocusedInteractionService,
   TransformComponent, CameraComponent,
+  EventService,
   ExecuteOn, component, property, subscribe,
   OnFocusedInteractionInputStartedEvent,
   OnFocusedInteractionInputMovedEvent,
   OnFocusedInteractionInputEndedEvent,
+  OnPlayerCreateEvent,
 } from 'meta/worlds';
 import type {
   Maybe, Entity,
@@ -18,6 +20,8 @@ import { SWIPE_DEAD_ZONE, SWIPE_POWER_RANGE, SWIPE_SIDE_RANGE } from '../Constan
 import { GameStateService } from '../Services/GameStateService';
 import { BallService } from '../Services/BallService';
 import { GoalkeeperService } from '../Services/GoalkeeperService';
+import { CameraShakeService } from '../Services/CameraShakeService';
+import { AimStartedEvent, AimUpdatedEvent } from '../Events/GameEvents';
 
 @component()
 export class ClientSetup extends Component {
@@ -28,8 +32,8 @@ export class ClientSetup extends Component {
   // ── Swipe tracking (normalised 0..1 screen coords) ──────────────────────────
 
   private _dragging = false;
-  private _startX   = 0;
-  private _startY   = 0;
+  private _startX = 0;
+  private _startY = 0;
 
   private _networkingService = NetworkingService.get();
 
@@ -40,23 +44,37 @@ export class ClientSetup extends Component {
     if (this._networkingService.isServerContext()) return;
     this._initCamera();
   }
+  
+  @subscribe(OnPlayerCreateEvent, { execution: ExecuteOn.Owner })
+  onPlayerCreted(): void {
+    if (this._networkingService.isServerContext()) return;
+    this._initCamera();
+  }
 
   private _initCamera(): void {
     setTimeout(() => {
       FocusedInteractionService.get().enableFocusedInteraction({
-        disableEmotesButton:    true,
+        disableEmotesButton: true,
         disableFocusExitButton: true,
       });
 
       const anchorTc = this.cameraAnchor?.getComponent(TransformComponent);
-      const cameraC  = this.cameraAnchor?.getComponent(CameraComponent);
+      const cameraC = this.cameraAnchor?.getComponent(CameraComponent);
 
-      CameraService.get().setCameraMode(CameraMode.Fixed, {
-        position: anchorTc?.worldPosition,
-        rotation: anchorTc?.worldRotation,
-        duration: 0,
-        fov:      cameraC?.fieldOfView ?? 58,
-      });
+      if (cameraC)
+        CameraService.get().setActiveCamera({ camera: cameraC })
+      else {
+        CameraService.get().setCameraMode(CameraMode.Fixed, {
+          position: anchorTc?.worldPosition,
+          rotation: anchorTc?.worldRotation,
+          duration: 0,
+          fov: 58,
+        });
+      }
+
+      if (this.cameraAnchor) {
+        CameraShakeService.get().init(this.cameraAnchor);
+      }
     }, this.initDelay * 1000);
   }
 
@@ -84,14 +102,18 @@ export class ClientSetup extends Component {
       state.setPhase(GamePhase.Aim);
     }
 
-    this._startX  = p.screenPosition.x;
-    this._startY  = p.screenPosition.y;
+    this._startX = p.screenPosition.x;
+    this._startY = p.screenPosition.y;
     this._dragging = true;
+    EventService.sendLocally(AimStartedEvent, {});
   }
 
   @subscribe(OnFocusedInteractionInputMovedEvent)
-  onTouchMove(_p: OnFocusedInteractionInputEventPayload): void {
-    // Power bar visual feedback will be handled by UI layer later
+  onTouchMove(p: OnFocusedInteractionInputEventPayload): void {
+    if (!this._dragging) return;
+    const dy = p.screenPosition.y - this._startY;
+    const power = Math.min(1, Math.abs(dy) / SWIPE_POWER_RANGE);
+    EventService.sendLocally(AimUpdatedEvent, { power });
   }
 
   @subscribe(OnFocusedInteractionInputEndedEvent)
@@ -103,14 +125,14 @@ export class ClientSetup extends Component {
 
     const endX = p.screenPosition.x;
     const endY = p.screenPosition.y;
-    const dx   = endX - this._startX;
-    const dy   = endY - this._startY;
+    const dx = endX - this._startX;
+    const dy = endY - this._startY;
     // screenPosition is normalised [0..1]; Y direction unknown — use abs
     const upDist = Math.abs(dy);
 
     if (upDist <= SWIPE_DEAD_ZONE) return;
 
-    const power     = Math.min(1, upDist / SWIPE_POWER_RANGE);
+    const power = Math.min(1, upDist / SWIPE_POWER_RANGE);
     const sideRatio = Math.max(-1, Math.min(1, dx / SWIPE_SIDE_RANGE));
 
     // Fire!

@@ -50,6 +50,31 @@ tasks:
     summary: Moved shots down 50px, centered score below shots with fixed 450px width cartouche and rounder corners (radius 40)
     files: [ui/SoccerKickHud.xaml]
 
+  - name: Power Gauge UI
+    status: done
+    summary: Vertical power gauge bottom-left with green-to-red gradient, code-controllable fill and visibility
+    files: [ui/PowerGauge.xaml, Scripts/Components/PowerGaugeComponent.ts, space.hstf]
+
+  - name: Power Gauge Enhancements
+    status: done
+    summary: Gradient reveal (ClipToBounds) + conical tapered shape (Path trapezoid)
+    files: [ui/PowerGauge.xaml]
+
+  - name: Power Gauge Polish
+    status: done
+    summary: Taller gauge (500px), conical background with subtle white border for grounded look
+    files: [ui/PowerGauge.xaml, Scripts/Components/PowerGaugeComponent.ts]
+
+  - name: Power Gauge Border Fix
+    status: done
+    summary: Outer border aligned with fill (10px offset), rounded corners with bezier curves
+    files: [ui/PowerGauge.xaml, Scripts/Components/PowerGaugeComponent.ts]
+
+  - name: Game Over Stats Screen
+    status: done
+    summary: Full-screen end-of-round stats UI with elastic animations, accuracy/goals/score/stars display, and replay button
+    files: [ui/GameOverStats.xaml, Scripts/Components/GameOverStatsComponent.ts, space.hstf]
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []

@@ -1,0 +1,100 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent">
+
+    <Page.Resources>
+        <!-- BooleanToVisibilityConverter for visibility bindings -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </Page.Resources>
+
+    <!-- Main Grid -->
+    <Grid>
+        <!-- Power Gauge Panel - positioned with margin to account for border extending outside -->
+        <Grid x:Name="PowerGaugePanel"
+              HorizontalAlignment="Left"
+              Visibility="{Binding Path=GaugeVisible, Converter={StaticResource BoolToVisConverter}}" 
+              VerticalAlignment="Center" 
+              Margin="50,0,0,0">
+            
+            <!-- 
+                Original fill path: M40,500 L0,0 L120,0 L80,500 Z
+                - Bottom-left: (40, 500)
+                - Top-left: (0, 0)  
+                - Top-right: (120, 0)
+                - Bottom-right: (80, 500)
+                
+                For rounded corners with radius ~15px, we use quadratic bezier curves.
+                For the outer border offset ~10px outward on all sides.
+                
+                Container is 140x520 to fit border (120+10+10 wide, 500+10+10 tall)
+                All paths offset by +10,+10 to center in the larger container.
+            -->
+            
+            <!-- Outer border path - offset 10px outward from fill area -->
+            <!-- Drawn first (behind everything), stroke only -->
+            <Path Data="M20,520 
+                        Q20,525 25,525 
+                        L115,525 
+                        Q120,525 120,520 
+                        L145,20 
+                        Q146,10 140,10 
+                        L0,10 
+                        Q-6,10 -5,20 
+                        Z"
+                  Fill="Transparent"
+                  Stroke="#FF000000" 
+                  StrokeThickness="10"
+                  StrokeLineJoin="Round"/>
+            
+            <!-- Background dark fill Path (no stroke, with rounded corners) -->
+            <!-- Matches the fill area exactly -->
+            <Path Data="M50,510 
+                        Q50,515 55,515 
+                        L85,515 
+                        Q90,515 90,510 
+                        L130,25 
+                        Q131,15 125,15 
+                        L15,15 
+                        Q9,15 10,25 
+                        Z"
+                  Fill="#CC111111"/>
+            
+            <!-- Container for the gradient fill area - 140x520 to match border bounds -->
+            <Grid ClipToBounds="True" Width="140" Height="520">
+                
+                <!-- Clip container: bottom-aligned, height bound to FillHeight -->
+                <!-- Note: FillHeight should now account for the 10px offset (max 510 instead of 500) -->
+                <Grid VerticalAlignment="Bottom" Height="{Binding Path=FillHeight}" ClipToBounds="True">
+                    <!-- Full-height tapered Path with rounded corners, bottom-aligned, gets clipped from top -->
+                    <!-- Same shape as dark background fill -->
+                    <Path VerticalAlignment="Bottom" 
+                          Data="M50,510 
+                                Q50,515 55,515 
+                                L85,515 
+                                Q90,515 90,510 
+                                L130,25 
+                                Q131,15 125,15 
+                                L15,15 
+                                Q9,15 10,25 
+                                Z">
+                        <Path.Fill>
+                            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                <!-- Bottom: Green -->
+                                <GradientStop Color="#FF4CAF50" Offset="0.0"/>
+                                <!-- Middle: Yellow -->
+                                <GradientStop Color="#FFFFEB3B" Offset="0.5"/>
+                                <!-- Top: Red -->
+                                <GradientStop Color="#FFF44336" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Path.Fill>
+                    </Path>
+                </Grid>
+                
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

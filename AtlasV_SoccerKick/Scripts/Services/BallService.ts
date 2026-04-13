@@ -10,7 +10,7 @@ import {
   RESULT_BOUNCE_VY, RESULT_BOUNCE_XZ, NET_BOUNCE_DAMP,
   SAVE_BOUNCE_Z, SAVE_BOUNCE_Z_MIN, SAVE_BOUNCE_X, SAVE_BOUNCE_VY,
   POST_BOUNCE_X, POST_BOUNCE_Z,
-  GOAL_HALF_W, GOAL_HEIGHT, GOAL_DEPTH, GOAL_POST_RADIUS,
+  GOAL_HALF_W, GOAL_HEIGHT, GOAL_DEPTH, GOAL_POST_RADIUS, POST_HIT_RADIUS,
 } from '../Constants';
 
 @service()
@@ -105,7 +105,8 @@ export class BallService extends Service {
   // ── Flying-phase logic ───────────────────────────────────────────────────────
 
   private _tickFlying(): ShotOutcome | null {
-    // Check goal plane when ball reaches z <= 0.1
+    // Sweep-based goal plane check: interpolate the exact Z=0 crossing to avoid
+    // tunneling when the ball moves faster than one frame's worth of depth.
     if (this._pz <= 0.1) {
       const outcome = this._checkGoalGeometry();
       if (outcome !== null) return outcome;
@@ -145,12 +146,18 @@ export class BallService extends Service {
   // ── Goal geometry only (no GK) ──────────────────────────────────────────────
 
   private _checkGoalGeometry(): ShotOutcome | null {
-    const inX = this._px > -(GOAL_HALF_W - GOAL_POST_RADIUS) &&
-                this._px <  (GOAL_HALF_W - GOAL_POST_RADIUS);
-    const inY = this._py > 0.1 && this._py < GOAL_HEIGHT - GOAL_POST_RADIUS;
-
     const inZ = this._pz < 0.1 && this._pz > -(GOAL_DEPTH + 0.1);
     if (!inZ) return null;
+
+    // Interpolate ball position to the exact goal-line plane (z=0) to avoid
+    // tunneling: evaluate geometry at the swept position, not the current one.
+    const t   = this._vz !== 0 ? -this._pz / this._vz : 0; // frames to reach z=0
+    const ex  = this._px - this._vx * t; // extrapolated X at z=0
+    const ey  = this._py - this._vy * t; // extrapolated Y at z=0
+
+    const inX = ex > -(GOAL_HALF_W - GOAL_POST_RADIUS) &&
+                ex <  (GOAL_HALF_W - GOAL_POST_RADIUS);
+    const inY = ey > BALL_RADIUS && ey < GOAL_HEIGHT - GOAL_POST_RADIUS;
 
     if (inX && inY) {
       // Ball enters the net — dampen velocity
@@ -160,13 +167,13 @@ export class BallService extends Service {
       return ShotOutcome.Goal;
     }
 
-    // Post / crossbar
-    const hitPost =
-      ((Math.abs(this._px - GOAL_HALF_W) < 0.15 ||
-        Math.abs(this._px + GOAL_HALF_W) < 0.15) && inY) ||
-      (inX && Math.abs(this._py - GOAL_HEIGHT) < 0.15);
+    // Post / crossbar: use POST_HIT_RADIUS (post radius + ball radius) for a
+    // physically correct contact distance instead of a flat threshold.
+    const hitLeftPost  = Math.abs(ex + GOAL_HALF_W) < POST_HIT_RADIUS && inY;
+    const hitRightPost = Math.abs(ex - GOAL_HALF_W) < POST_HIT_RADIUS && inY;
+    const hitCrossbar  = inX && Math.abs(ey - GOAL_HEIGHT) < POST_HIT_RADIUS;
 
-    if (hitPost) {
+    if (hitLeftPost || hitRightPost || hitCrossbar) {
       this._vx *= POST_BOUNCE_X;
       this._vz *= POST_BOUNCE_Z;
       return ShotOutcome.PostHit;
