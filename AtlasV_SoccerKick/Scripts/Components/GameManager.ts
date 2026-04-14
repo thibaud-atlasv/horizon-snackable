@@ -7,16 +7,19 @@ import {
 } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload, Maybe, Entity } from 'meta/worlds';
 import { ShotFeedbackResultEvent } from '../Events/ShotFeedbackEvents';
+import { GameResetEvent, GameResetPayload, KeeperDespawnEvent } from '../Events/GameEvents';
 import { GamePhase, ShotOutcome } from '../Types';
 import {
   NEXT_SHOT_GOAL_MS, NEXT_SHOT_SAVE_MS, NEXT_SHOT_POST_MS, NEXT_SHOT_MISS_MS,
   GAME_OVER_DELAY,
 } from '../Constants';
 import { Assets } from '../Assets';
+import { KEEPER_DEFS } from '../Defs/KeeperDefs';
 import { GameStateService } from '../Services/GameStateService';
 import { BallService } from '../Services/BallService';
 import { GoalkeeperService } from '../Services/GoalkeeperService';
 import { VfxService } from '../Services/VfxService';
+import { BallTrailService } from '../Services/BallTrailService';
 
 @component()
 export class GameManager extends Component {
@@ -24,6 +27,9 @@ export class GameManager extends Component {
   private _ballEntity: Maybe<Entity> = null;
   private _gkEntity:   Maybe<Entity> = null;
   private _nextShotTimer: ReturnType<typeof setTimeout> | null = null;
+  private _keeperSpawned = false;
+  private _lastKeeperIndex = -1;
+
 
   private _networkingService = NetworkingService.get();
 
@@ -46,15 +52,10 @@ export class GameManager extends Component {
       networkMode: NetworkMode.LocalOnly,
     }).then(e => { this._ballEntity = e; }).catch(() => {});
 
-    ws.spawnTemplate({
-      templateAsset: Assets.Goalkeeper,
-      position:  new Vec3(0, 0, 0.6),
-      rotation:  Quaternion.identity,
-      scale:     Vec3.one,
-      networkMode: NetworkMode.LocalOnly,
-    }).then(e => { this._gkEntity = e; }).catch(() => {});
+    this._spawnRandomKeeper().catch(() => {});
 
     VfxService.get().prewarm().catch(() => {});
+    BallTrailService.get().prewarm().catch(() => {});
 
     // Start game immediately
     GameStateService.get().reset();
@@ -103,13 +104,15 @@ export class GameManager extends Component {
   private _onShotResolved(outcome: ShotOutcome): void {
     const state = GameStateService.get();
     state.setPhase(GamePhase.Result);
-    const points = state.resolveShot(outcome, BallService.get().posX);
+    const ball = BallService.get();
+    const { points, bonusZone } = state.resolveShot(outcome, ball.posX, ball.posY);
 
     // Fire feedback first — ShotFeedbackDisplayComponent must be active
     // before ScoreChangedEvent arrives so it can intercept and delay the HUD update.
     EventService.sendLocally(ShotFeedbackResultEvent, {
       outcome: outcome as number,
       pointsEarned: points,
+      bonusZone,
     });
 
     // Broadcast score after feedback — ShotFeedbackDisplayComponent will now
@@ -144,6 +147,42 @@ export class GameManager extends Component {
     BallService.get().reset();
     GoalkeeperService.get().reset();
     state.setPhase(GamePhase.Aim);
+  }
+
+  // ── Keeper spawn ─────────────────────────────────────────────────────────────
+
+  private async _spawnRandomKeeper(): Promise<void> {
+    if (this._gkEntity) {
+      EventService.sendLocally(KeeperDespawnEvent, {});
+      this._gkEntity = null;
+    }
+    const count = KEEPER_DEFS.length;
+    let index: number;
+    if (this._lastKeeperIndex === -1) {
+      index = Math.floor(Math.random() * count);
+    } else {
+      index = Math.floor(Math.random() * (count - 1));
+      if (index >= this._lastKeeperIndex) index++;
+    }
+    this._lastKeeperIndex = index;
+    const def = KEEPER_DEFS[index];
+    GoalkeeperService.get().setDef(index);
+    this._gkEntity = await WorldService.get().spawnTemplate({
+      templateAsset: def.template,
+      position:      new Vec3(0, 0, 0.6),
+      rotation:      Quaternion.identity,
+      scale:         Vec3.one,
+      networkMode:   NetworkMode.LocalOnly,
+    });
+    this._keeperSpawned = true;
+  }
+
+  @subscribe(GameResetEvent)
+  onGameReset(_p: GameResetPayload): void {
+    if (this._networkingService.isServerContext()) return;
+    // Skip the first reset fired by _spawnEntities() — keeper is already spawning
+    if (!this._keeperSpawned) return;
+    this._spawnRandomKeeper().catch(() => {});
   }
 
   // ── Restart (called externally, e.g. from UI) ─────────────────────────────

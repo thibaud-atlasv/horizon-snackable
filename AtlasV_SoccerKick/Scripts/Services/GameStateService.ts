@@ -3,8 +3,9 @@ import { GamePhase, ShotOutcome } from '../Types';
 import type { IGameSnapshot } from '../Types';
 import {
   TOTAL_SHOTS, COMBO_THRESHOLD, MAX_COMBO_MULTI,
-  PTS_GOAL, PTS_CORNER_MULTI, CORNER_THRESHOLD,
-  GOAL_HALF_W,
+  PTS_GOAL, PTS_CORNER_MULTI, PTS_CHIP_MULTI,
+  CORNER_THRESHOLD, HEIGHT_THRESHOLD,
+  GOAL_HALF_W, GOAL_HEIGHT,
 } from '../Constants';
 import {
   ShotFiredEvent, PhaseChangedEvent,
@@ -61,8 +62,9 @@ export class GameStateService extends Service {
 
   // ── Shot resolution ──────────────────────────────────────────────────────────
 
-  resolveShot(outcome: ShotOutcome, ballX: number): number {
+  resolveShot(outcome: ShotOutcome, ballX: number, ballY: number): { points: number; bonusZone: string } {
     let points = 0;
+    let bonusZone = '';
 
     if (outcome === ShotOutcome.Goal) {
       this._combo++;
@@ -72,16 +74,26 @@ export class GameStateService extends Service {
         : 1;
       this._goals++;
 
-      const isCorner = Math.abs(ballX) > GOAL_HALF_W * CORNER_THRESHOLD;
-      const multi = (isCorner ? PTS_CORNER_MULTI : 1) * this._comboMulti;
-      points = Math.round(PTS_GOAL * multi);
+      const isHigh   = ballY  > GOAL_HEIGHT  * HEIGHT_THRESHOLD;
+      const isLateral = Math.abs(ballX) > GOAL_HALF_W * CORNER_THRESHOLD;
+
+      let zoneMult = 1;
+      if (isHigh && isLateral) {
+        bonusZone = 'CORNER';
+        zoneMult  = PTS_CORNER_MULTI;
+      } else if (isHigh && !isLateral) {
+        bonusZone = 'CHIP';
+        zoneMult  = PTS_CHIP_MULTI;
+      }
+
+      points = Math.round(PTS_GOAL * zoneMult * this._comboMulti);
       this._score += points;
     } else {
       this._combo = 0;
       this._comboMulti = 1;
     }
 
-    return points;
+    return { points, bonusZone };
   }
 
   /** Send ScoreChangedEvent with the current score state. Called by GameManager
@@ -89,6 +101,7 @@ export class GameStateService extends Service {
   broadcastScore(): void {
     EventService.sendLocally(ScoreChangedEvent, {
       score:      this._score,
+      combo:      this._combo,
       comboMulti: this._comboMulti,
     });
   }
