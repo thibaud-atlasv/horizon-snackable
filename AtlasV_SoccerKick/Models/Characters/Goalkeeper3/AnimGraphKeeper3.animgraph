@@ -1,0 +1,204 @@
+{
+    "version": 2,
+    "graphs": [
+        {
+            "name": "main",
+            "type": "stateMachine",
+            "outputs": [
+                {
+                    "name": "pose",
+                    "type": "pose"
+                }
+            ],
+            ".editor": {
+                "inputNode": {
+                    "position": [
+                        -150,
+                        -150
+                    ]
+                }
+            },
+            "startingState": "idle",
+            "states": [
+                {
+                    "name": "idle",
+                    "graph": "idle",
+                    "looping": true,
+                    ".editor": {
+                        "position": [
+                            -150,
+                            100
+                        ]
+                    }
+                },
+                {
+                    "name": "catch",
+                    "graph": "catch",
+                    ".editor": {
+                        "position": [
+                            -150,
+                            250
+                        ]
+                    }
+                }
+            ],
+            "transitions": [
+                {
+                    "from": "idle",
+                    "to": "catch",
+                    "event": "catch",
+                    "blendTimeSec": 0,
+                    "startPhase": 0.2
+                },
+                {
+                    "from": "catch",
+                    "to": "idle",
+                    "event": "idle"
+                }
+            ]
+        },
+        {
+            "name": "idle",
+            "type": "dataflow",
+            "inputs": [
+                {
+                    "name": "inputStatePhase",
+                    "type": "float"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "pose",
+                    "type": "pose"
+                }
+            ],
+            ".editor": {
+                "inputNode": {
+                    "position": [
+                        -250,
+                        150
+                    ]
+                },
+                "outputNode": {
+                    "position": [
+                        450,
+                        150
+                    ]
+                }
+            },
+            "nodes": [
+                {
+                    "name": "mixamo_com",
+                    "type": "sampleAnim",
+                    "members": {
+                        "animName": "mixamo.com",
+                        "looping": true
+                    },
+                    ".editor": {
+                        "position": [
+                            100,
+                            100
+                        ]
+                    }
+                }
+            ],
+            "links": [
+                [
+                    "mixamo_com:outputPose",
+                    ":pose"
+                ],
+                [
+                    ":inputStatePhase",
+                    "mixamo_com:inputPhase"
+                ]
+            ]
+        },
+        {
+            "name": "catch",
+            "type": "dataflow",
+            "inputs": [
+                {
+                    "name": "inputStatePhase",
+                    "type": "float"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "pose",
+                    "type": "pose"
+                }
+            ],
+            "nodes": [
+                {
+                    "name": "mixamo_com",
+                    "type": "getAnimationVariable",
+                    "members": {
+                        "variable": "mixamo.com_1"
+                    },
+                    ".editor": {
+                        "position": [
+                            50,
+                            100
+                        ]
+                    }
+                },
+                {
+                    "name": "sampleAnim",
+                    "type": "sampleAnim",
+                    ".editor": {
+                        "position": [
+                            400,
+                            250
+                        ]
+                    }
+                }
+            ],
+            "links": [
+                [
+                    "mixamo_com:outputAnim",
+                    "sampleAnim:inputClip"
+                ],
+                [
+                    ":inputStatePhase",
+                    "sampleAnim:inputPhase"
+                ],
+                [
+                    "sampleAnim:outputPose",
+                    ":pose"
+                ]
+            ]
+        }
+    ],
+    "variables": [
+        {
+            "type": "assetId",
+            "name": "mixamo.com",
+            "source": "remap",
+            "default": {
+                "packageOrRemoteId": "26835398609386284",
+                "ingestionId": "678676280069205973",
+                "targetId": "3596134716"
+            }
+        },
+        {
+            "type": "assetId",
+            "name": "mixamo.com_1",
+            "source": "remap",
+            "default": {
+                "packageOrRemoteId": "26835398609386284",
+                "ingestionId": "12060671479271875966",
+                "targetId": "3596134716"
+            }
+        }
+    ],
+    "hierarchy": {
+        "packageOrRemoteId": "26835398609386284",
+        "ingestionId": "678676280069205973",
+        "targetId": "2745964793"
+    },
+    "mesh": {
+        "packageOrRemoteId": "26835398609386284",
+        "ingestionId": "678676280069205973",
+        "targetId": "3730685233"
+    }
+}

@@ -40,6 +40,7 @@ import type {
   OnWorldUpdateEventPayload,
   Maybe,
 } from 'meta/worlds';
+import { PhaseChangedEvent, PhaseChangedPayload } from '../Events/GameEvents';
 
 // ── Trigger Event ────────────────────────────────────────────────────
 @serializable()
@@ -93,6 +94,8 @@ interface ConfettiPieceState {
   height: number;
   skewAngle: number;
   active: boolean;
+  age: number;
+  life: number;
 }
 
 // ── Sub-ViewModel for each confetti piece ────────────────────────────
@@ -122,6 +125,9 @@ export class ConfettiExplosionUIComponent extends Component {
   private _customUi: Maybe<CustomUiComponent> = null;
 
   private _animating = false;
+  private _fadeOutRequested = false;
+  private _fadeOutTime = 0;          // seconds since fade-out was requested
+  private readonly _FADE_OUT_DURATION = 0.4; // seconds
   private _pieces: ConfettiPieceState[] = [];
   private _itemVMs: ConfettiPieceItemViewModel[] = [];
 
@@ -140,9 +146,18 @@ export class ConfettiExplosionUIComponent extends Component {
     }
   }
 
+  // ── Phase changed → start fade out ────────────────────────────────
+
+  @subscribe(PhaseChangedEvent)
+  onPhaseChanged(_p: PhaseChangedPayload): void {
+    if (!this._animating) return;
+    this._fadeOutRequested = true;
+    this._fadeOutTime = 0;
+  }
+
   // ── Trigger (LocalEvent) ───────────────────────────────────────────
 
-  @subscribe(ConfettiExplosionTriggerEvent, { execution: ExecuteOn.Everywhere })
+  @subscribe(ConfettiExplosionTriggerEvent)
   onTriggerEvent(payload: ConfettiExplosionTriggerPayload): void {
     if (NetworkingService.get().isServerContext()) return;
     const count = payload.count > 0 ? payload.count : 100;
@@ -161,6 +176,8 @@ export class ConfettiExplosionUIComponent extends Component {
     if (!this._customUi) return;
     this._customUi.isVisible = true;
     this._animating = true;
+    this._fadeOutRequested = false;
+    this._fadeOutTime = 0;
 
     // Build new arrays of pieces and sub-ViewModels
     this._pieces = [];
@@ -175,11 +192,16 @@ export class ConfettiExplosionUIComponent extends Component {
       const slot = (i / count) * SCREEN_WIDTH;
       const spawnX = (slot + (Math.random() - 0.5) * (SCREEN_WIDTH / count) * 2 + SCREEN_WIDTH) % SCREEN_WIDTH;
 
+      const startY = -(Math.random() * SCREEN_HEIGHT * 0.6);
+      const speed  = 900 + Math.random() * 1100;
+      // life = time to travel from startY to OFF_SCREEN_BOTTOM
+      const life   = (OFF_SCREEN_BOTTOM - startY) / speed;
+
       const piece: ConfettiPieceState = {
         x: spawnX,
         startX: spawnX,
-        y: -(Math.random() * SCREEN_HEIGHT * 0.6), // stagger entries across top half
-        speed: 900 + Math.random() * 1100,          // 1800–4000 px/s fall speed
+        y: startY,
+        speed,
         rotation: Math.random() * 360,
         rotationSpeed: 300 + Math.random() * 700,   // 300–1000 deg/s
         driftPhase: Math.random() * Math.PI * 2,
@@ -190,6 +212,8 @@ export class ConfettiExplosionUIComponent extends Component {
         height: h,
         skewAngle: skew,
         active: true,
+        age: 0,
+        life,
       };
       this._pieces.push(piece);
 
@@ -219,12 +243,22 @@ export class ConfettiExplosionUIComponent extends Component {
 
     const dt = payload.deltaTime;
 
+    // Advance global fade-out timer
+    if (this._fadeOutRequested) {
+      this._fadeOutTime += dt;
+    }
+    const globalFadeOut = this._fadeOutRequested
+      ? Math.max(0, 1 - this._fadeOutTime / this._FADE_OUT_DURATION)
+      : 1;
+
     let anyActive = false;
     const pieceCount = this._pieces.length;
 
     for (let i = 0; i < pieceCount; i++) {
       const piece = this._pieces[i];
       if (!piece.active) continue;
+
+      piece.age += dt;
 
       // Fall downward
       piece.y += piece.speed * dt;
@@ -235,15 +269,17 @@ export class ConfettiExplosionUIComponent extends Component {
       // Advance rotation
       piece.rotation += piece.rotationSpeed * dt;
 
-      // Fade out as pieces approach bottom
-      let opacity = 1;
-      if (piece.y > SCREEN_HEIGHT * 0.75) {
-        opacity = Math.max(0, 1 - (piece.y - SCREEN_HEIGHT * 0.75) / (OFF_SCREEN_BOTTOM - SCREEN_HEIGHT * 0.75));
-      }
+      // Fade in quickly (first 10% of life), stay fully opaque until phase change
+      const t      = piece.age / piece.life;
+      const fadeIn = Math.min(1, t / 0.1);
+      const opacity = fadeIn * globalFadeOut;
 
       const vm = this._itemVMs[i];
 
-      if (piece.y > OFF_SCREEN_BOTTOM) {
+      const doneByLife    = piece.age >= piece.life;
+      const doneByFadeOut = this._fadeOutRequested && this._fadeOutTime >= this._FADE_OUT_DURATION;
+
+      if (doneByLife || doneByFadeOut) {
         piece.active = false;
         vm.PieceOpacity = 0;
         vm.PieceVisible = false;

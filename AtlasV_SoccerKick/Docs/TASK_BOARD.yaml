@@ -110,6 +110,11 @@ tasks:
     summary: Explosion animation (scale up + fade out) on shot used, elastic pop-in animation staggered by 100ms on new round
     files: [ui/SoccerKickHud.xaml, Scripts/Components/SoccerKickHudComponent.ts]
 
+  - name: Combo Text in Shot Feedback Panel
+    status: done
+    summary: Added red combo text with black outline below points in feedback panel, removed combo from HUD
+    files: [ui/ShotFeedbackPanel.xaml, Scripts/Components/ShotFeedbackDisplayComponent.ts, ui/SoccerKickHud.xaml, Scripts/Components/SoccerKickHudComponent.ts]
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []

@@ -36,7 +36,10 @@ interface IAnimProfile {
   pulseFreq:     number;  // Hz of the pulse
   bounceCount:   number;  // extra bounces during scale phase (0 = single elastic)
   fadeScaleGrow: number;  // scale increase during fade-out
-  fadeDriftY:    number;  // upward drift during fade-out
+  fadeDriftY:    number;  // upward drift during fade-out (negative = up, positive = down)
+  scaleYBias:    number;  // ScaleY multiplier relative to ScaleX during scale phase (1 = uniform)
+  dropY:         number;  // TranslateY offset applied during hold (positive = down)
+  rotationZ:     number;  // peak rotation (degrees) during scale phase, decays to 0
   // Stadium Sweep (GOAL only) — ignored when sweepMode = false
   sweepMode:     boolean;
   entryDur:      number;  // Phase 1: slide in from right
@@ -60,7 +63,94 @@ const PROFILE_DEFAULT: IAnimProfile = {
   pulseFreq:      0,
   bounceCount:    0,
   fadeScaleGrow:  0.3,
-  fadeDriftY:     20,
+  fadeDriftY:     -20,
+  scaleYBias:     1,
+  dropY:          0,
+  rotationZ:      0,
+  sweepMode:      false,
+  entryDur:       0,
+  exitDur:        0,
+  sweepX:         0,
+  entrySkew:      0,
+  exitSkew:       0,
+  impactScale:    0,
+  impactFontSize: 96,
+};
+
+// MISS: pop brutal + chute dramatique + légère rotation + fondu vers le bas
+// Ambiance: le tir part dans les étoiles, le texte "tombe" avec lui
+const PROFILE_MISS: IAnimProfile = {
+  scalePhaseDur:  0.14,   // pop-in rapide et sec
+  holdDur:        0.38,
+  fadeDur:        0.45,
+  overshoot:      2.8,    // plus violent que default
+  finalScale:     1.6,
+  shakeIntensity: 28,     // tremblement "oops"
+  shakeFreq:      28,     // fréquence élevée = nerveux
+  pulseAmp:       0,
+  pulseFreq:      0,
+  bounceCount:    1,      // un rebond extra pendant le pop
+  fadeScaleGrow:  0.5,    // s'étire en partant
+  fadeDriftY:     60,     // tombe vers le bas (positif = bas)
+  scaleYBias:     0.75,   // squash horizontal au pop (plus large que haut)
+  dropY:          25,     // se décale légèrement vers le bas pendant le hold
+  rotationZ:      8,      // légère rotation au pop-in
+  sweepMode:      false,
+  entryDur:       0,
+  exitDur:        0,
+  sweepX:         0,
+  entrySkew:      0,
+  exitSkew:       0,
+  impactScale:    0,
+  impactFontSize: 96,
+};
+
+// POST: vibration ultra-rapide "bruit de métal" + rebond multiple + froid
+// Ambiance: le poteau résonne, le texte vibre comme du métal frappé
+const PROFILE_POST: IAnimProfile = {
+  scalePhaseDur:  0.22,   // plus long pour loger les bounces
+  holdDur:        0.32,
+  fadeDur:        0.38,
+  overshoot:      2.5,
+  finalScale:     1.5,
+  shakeIntensity: 35,     // shake violent = résonance métal
+  shakeFreq:      38,     // très haute fréquence = vibration métallique
+  pulseAmp:       0.06,   // légère vibration résiduelle pendant le hold
+  pulseFreq:      12,     // fréquence haute = frémissement métal
+  bounceCount:    3,      // plusieurs rebonds = poteau qui résonne
+  fadeScaleGrow:  0.2,
+  fadeDriftY:     -15,    // dérive légèrement vers le haut
+  scaleYBias:     1.3,    // stretch vertical au pop (s'étire en hauteur)
+  dropY:          0,
+  rotationZ:      0,
+  sweepMode:      false,
+  entryDur:       0,
+  exitDur:        0,
+  sweepX:         0,
+  entrySkew:      0,
+  exitSkew:       0,
+  impactScale:    0,
+  impactFontSize: 96,
+};
+
+// SAVED: impact de gardien — écrase depuis le haut + shake violent + tient
+// Ambiance: le gardien plonge et bloque, l'écran encaisse le choc
+const PROFILE_SAVED: IAnimProfile = {
+  scalePhaseDur:  0.16,   // impact rapide et sec
+  holdDur:        0.52,   // tient plus longtemps = le gardien a tout arrêté
+  fadeDur:        0.42,
+  overshoot:      3.2,    // impact très fort
+  finalScale:     1.8,    // reste grand = présence dominante
+  shakeIntensity: 42,     // choc de gardien qui plonge
+  shakeFreq:      24,
+  pulseAmp:       0.08,   // pulsation triomphale pendant le hold
+  pulseFreq:      3,
+  bounceCount:    0,
+  fadeScaleGrow:  0.15,
+  fadeDriftY:     -25,    // remonte en partant
+  scaleYBias:     0.55,   // très aplati verticalement au pop = écrasement depuis le haut
+  dropY:          -10,    // légèrement au-dessus du centre = gardien qui se lève
+  rotationZ:      0,
   sweepMode:      false,
   entryDur:       0,
   exitDur:        0,
@@ -74,26 +164,29 @@ const PROFILE_DEFAULT: IAnimProfile = {
 // Stadium Sweep profile for GOAL
 // Phase layout: pass1(0.13s) → pass2(0.11s) → slam(0.10s) → explode(0.18s) → hold+exit(0.58s)
 const PROFILE_GOAL: IAnimProfile = {
-  scalePhaseDur:  0,      // unused in sweepMode
-  holdDur:        0.40,   // hold after explosion
-  fadeDur:        0,      // unused in sweepMode
-  overshoot:      3.8,    // explosion scale peak
-  finalScale:     2.0,    // resting scale during hold
-  shakeIntensity: 45,     // violent shake on explosion
-  shakeFreq:      22,
-  pulseAmp:       0.12,
-  pulseFreq:      4,
-  bounceCount:    0,
-  fadeScaleGrow:  0,
-  fadeDriftY:     0,
-  sweepMode:      true,
-  entryDur:       0.13,   // duration of each teaser pass
-  exitDur:        0.22,   // exit slide after hold
-  sweepX:         1100,   // well off-screen
-  entrySkew:      -22,    // lean into direction of travel
-  exitSkew:       18,
-  impactScale:    3.8,
-  impactFontSize: 260,    // fills screen — over the top
+  scalePhaseDur: 0, // unused in sweepMode
+  holdDur: 0.40, // hold after explosion
+  fadeDur: 0, // unused in sweepMode
+  overshoot: 3.8, // explosion scale peak
+  finalScale: 2.0, // resting scale during hold
+  shakeIntensity: 45, // violent shake on explosion
+  shakeFreq: 22,
+  pulseAmp: 0.12,
+  pulseFreq: 4,
+  bounceCount: 0,
+  fadeScaleGrow: 0,
+  fadeDriftY: 0,
+  sweepMode: true,
+  entryDur: 0.13, // duration of each teaser pass
+  exitDur: 0.22, // exit slide after hold
+  sweepX: 1100, // well off-screen
+  entrySkew: -22, // lean into direction of travel
+  exitSkew: 18,
+  impactScale: 3.8,
+  impactFontSize: 260,
+  scaleYBias: 0,
+  dropY: 0,
+  rotationZ: 0
 };
 
 /**
@@ -119,6 +212,10 @@ class ShotFeedbackViewModel extends UiViewModel {
   PointsScaleY: number = 1;   // slot-machine squash on fadeout
   FontSize: number = 96;
   StrokeThickness: number = 8;
+  ComboText: string = '';
+  ComboVisible: boolean = false;
+  ComboOpacity: number = 0;
+  RotationZ: number = 0;
 }
 
 @component()
@@ -143,6 +240,7 @@ export class ShotFeedbackDisplayComponent extends Component {
   // Pending score to forward once casino roll-up completes
   private _pendingScore      = -1;  // -1 = nothing pending
   private _pendingComboMulti = 1;
+  private _pendingBonusZone  = '';
 
   // Sweep mode phase boundaries (computed on shot start)
   private _swP1End    = 0;  // end of teaser pass 1 (R→L)
@@ -173,12 +271,28 @@ export class ShotFeedbackDisplayComponent extends Component {
         comboMulti: payload.comboMulti,
       });
     }
+
+    // Update combo display — show corner tag and/or combo multiplier
+    const combo      = payload.combo;
+    const hasCombo   = combo >= 2;
+    const bonusZone  = this._pendingBonusZone;
+    this._pendingBonusZone = '';
+
+    const parts: string[] = [];
+    if (bonusZone) parts.push(bonusZone);
+    if (hasCombo)  parts.push(`COMBO X${combo}`);
+
+    const showLine = parts.length > 0;
+    this._viewModel.ComboVisible = showLine;
+    this._viewModel.ComboText    = parts.join('  •  ');
+    this._viewModel.ComboOpacity = showLine ? 1 : 0;
   }
 
   @subscribe(ShotFeedbackResultEvent, { execution: ExecuteOn.Everywhere })
   onShotFeedback(payload: ShotFeedbackResultPayload): void {
-    const outcome = payload.outcome;
-    const points  = payload.pointsEarned;
+    const outcome   = payload.outcome;
+    const points    = payload.pointsEarned;
+    const bonusZone = payload.bonusZone;
 
     let text:  string;
     let color: string;
@@ -188,22 +302,30 @@ export class ShotFeedbackDisplayComponent extends Component {
       color = '#FFD700';
       this._profile = PROFILE_GOAL;
       this._currentPoints = points;
-      EventService.sendLocally(ConfettiExplosionTriggerEvent, { count: 30 });
+      EventService.sendLocally(ConfettiExplosionTriggerEvent, {count:50});
+      // Corner tag will be merged into ComboText via onScoreChanged
+      this._pendingBonusZone = bonusZone;
     } else if (outcome === OUTCOME_SAVE) {
       text  = 'SAVED!';
-      color = '#FF4444';
-      this._profile = PROFILE_DEFAULT;
+      color = '#CC1111';
+      this._profile = PROFILE_SAVED;
       this._currentPoints = 0;
+      this._viewModel.ComboVisible = false;
+      this._viewModel.ComboOpacity = 0;
     } else if (outcome === OUTCOME_POSTHIT) {
       text  = 'POST!';
-      color = '#FFFFFF';
-      this._profile = PROFILE_DEFAULT;
+      color = '#C8C8C8';
+      this._profile = PROFILE_POST;
       this._currentPoints = 0;
+      this._viewModel.ComboVisible = false;
+      this._viewModel.ComboOpacity = 0;
     } else {
       text  = 'MISS!';
-      color = '#FF6B35';
-      this._profile = PROFILE_DEFAULT;
+      color = '#FF5500';
+      this._profile = PROFILE_MISS;
       this._currentPoints = 0;
+      this._viewModel.ComboVisible = false;
+      this._viewModel.ComboOpacity = 0;
     }
 
     const pr = this._profile;
@@ -250,6 +372,9 @@ export class ShotFeedbackDisplayComponent extends Component {
       this._viewModel.PointsText    = '';
       this._viewModel.PointsOpacity = 0;
       this._viewModel.PointsScaleY  = 1;
+      this._viewModel.ComboVisible  = false;
+      this._viewModel.ComboText     = '';
+      this._viewModel.ComboOpacity  = 0;
     }
   }
 
@@ -269,9 +394,12 @@ export class ShotFeedbackDisplayComponent extends Component {
       this._viewModel.SkewX           = 0;
       this._viewModel.TranslateX      = 0;
       this._viewModel.TranslateY      = 0;
+      this._viewModel.RotationZ       = 0;
       this._viewModel.PointsOpacity   = 0;
       this._viewModel.FontSize        = 96;
       this._viewModel.StrokeThickness = 8;
+      this._viewModel.ComboOpacity    = 0;
+      this._viewModel.ComboVisible    = false;
       return;
     }
 
@@ -434,6 +562,7 @@ export class ShotFeedbackDisplayComponent extends Component {
     this._viewModel.SkewX         = 0;
     this._viewModel.Opacity       = 1;
     this._viewModel.PointsOpacity = this._currentPoints > 0 ? 1 : 0;
+    this._viewModel.ComboOpacity  = this._viewModel.ComboVisible ? 1 : 0;
   }
 
   /** Exit: slides out to left with speed-blur stretch. */
@@ -445,6 +574,7 @@ export class ShotFeedbackDisplayComponent extends Component {
     this._viewModel.ScaleY        = pr.finalScale - p * 0.25;
     this._viewModel.Opacity       = 1 - p * 0.3;
     this._viewModel.PointsOpacity = 1 - p;
+    this._viewModel.ComboOpacity  = this._viewModel.ComboVisible ? (1 - p) : 0;
     this._viewModel.TranslateY    = 0;
   }
 
@@ -461,9 +591,13 @@ export class ShotFeedbackDisplayComponent extends Component {
       scale = this._elasticOut(p) * pr.overshoot;
     }
 
+    // scaleYBias: 1 = uniform, <1 = squash (wide), >1 = stretch (tall)
     this._viewModel.ScaleX  = scale;
-    this._viewModel.ScaleY  = scale;
+    this._viewModel.ScaleY  = scale * (1 + (pr.scaleYBias - 1) * (1 - p));
     this._viewModel.Opacity = 1;
+
+    // Rotation: peak at start, decays to 0 as scale settles
+    this._viewModel.RotationZ = pr.rotationZ * (1 - p);
 
     // Shake
     const shakeDecay = 1 - p;
@@ -488,7 +622,9 @@ export class ShotFeedbackDisplayComponent extends Component {
     this._viewModel.ScaleY     = scale;
     this._viewModel.Opacity    = 1;
     this._viewModel.TranslateX = 0;
-    this._viewModel.TranslateY = 0;
+    // dropY settles in: full offset at start of hold, decays to 0
+    this._viewModel.TranslateY = pr.dropY * (1 - settleP);
+    this._viewModel.RotationZ  = 0;
   }
 
   // ── Phase 3: Fade-out + expand + drift ────────────────────────────────────
@@ -499,12 +635,15 @@ export class ShotFeedbackDisplayComponent extends Component {
 
     this._viewModel.Opacity       = 1 - easedFade;
     this._viewModel.PointsOpacity = 1 - easedFade;
+    this._viewModel.ComboOpacity  = this._viewModel.ComboVisible ? (1 - easedFade) : 0;
 
     const scale = pr.finalScale + easedFade * pr.fadeScaleGrow;
     this._viewModel.ScaleX     = scale;
     this._viewModel.ScaleY     = scale;
     this._viewModel.TranslateX = 0;
-    this._viewModel.TranslateY = -easedFade * pr.fadeDriftY;
+    // fadeDriftY: negative = up, positive = down
+    this._viewModel.TranslateY = easedFade * pr.fadeDriftY;
+    this._viewModel.RotationZ  = 0;
   }
 
   // ── Easing functions ──────────────────────────────────────────────────────

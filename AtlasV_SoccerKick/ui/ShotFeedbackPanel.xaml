@@ -4,7 +4,7 @@
       Background="Transparent">
 
     <!-- Main container with visibility binding -->
-    <Grid x:Name="MainContainer">
+    <Grid x:Name="MainContainer" Margin="1,0,-1,0">
         <Grid.Visibility>
             <Binding Path="IsVisible">
                 <Binding.Converter>
@@ -21,6 +21,7 @@
                 <TransformGroup>
                     <SkewTransform AngleX="{Binding Path=SkewX}"/>
                     <ScaleTransform ScaleX="{Binding Path=ScaleX}" ScaleY="{Binding Path=ScaleY}"/>
+                    <RotateTransform Angle="{Binding Path=RotationZ}"/>
                     <TranslateTransform X="{Binding Path=TranslateX}" Y="{Binding Path=TranslateY}"/>
                 </TransformGroup>
             </Grid.RenderTransform>
@@ -70,6 +71,25 @@
                        FontFamily="Roboto" FontSize="148" FontWeight="Bold"
                        Foreground="#FFFFD508"
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Combo text display -->
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,780,0,0"
+              Opacity="{Binding Path=ComboOpacity}">
+            <Grid.Visibility>
+                <Binding Path="ComboVisible">
+                    <Binding.Converter>
+                        <BooleanToVisibilityConverter/>
+                    </Binding.Converter>
+                </Binding>
+            </Grid.Visibility>
+            <TextBlock Text="{Binding Path=ComboText}"
+                       FontWeight="Black"
+                       Stroke="#FF1A1A1A" StrokeThickness="8"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="80" CharacterSpacing="-1" FontFamily="Anton" Visibility="Collapsed"/>
+            <TextBlock Text="{Binding Path=ComboText}"
+                       FontWeight="Black"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="80" CharacterSpacing="-1" FontFamily="Anton" Foreground="#FFB91B1B"/>
         </Grid>
     </Grid>
 </Page>

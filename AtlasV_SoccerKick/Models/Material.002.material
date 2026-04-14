@@ -1,0 +1,27 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "Material",
+    "attributes": [
+        {
+            "name": "lightingmode",
+            "value": {
+                "type": "String",
+                "stringValue": "Unlit"
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "33451255657851516",
+        "ingestionId": "12536732106106040758",
+        "targetId": "2708897769"
+    },
+    "baseMaterialAssetId": {
+        "packageOrRemoteId": "26835398609386284",
+        "ingestionId": "5949117671970341144",
+        "targetId": "1900562337"
+    }
+}

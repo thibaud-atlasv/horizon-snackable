@@ -48,5 +48,6 @@
         "screenOrientation": "Portrait",
         "scalabilityProfile": {}
     },
-    "editorVersion": "77.0.1.1.217"
+    "editorVersion": "77.0.1.1.217",
+    "remotePackageId": "26835398609386284"
 }
