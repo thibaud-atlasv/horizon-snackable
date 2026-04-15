@@ -1,0 +1,90 @@
+{
+    "version": 6,
+    "entities": [
+        {
+            "id": "b5b35a4a-8ec2-40bc-90da-8c04ff01f889",
+            "name": "Keeper3",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::AnimatorPlatformComponent",
+                        "version": 8,
+                        "data": {
+                            "animGraph": {
+                                "packageOrRemoteId": "26835398609386284",
+                                "ingestionId": "18203786165838903289",
+                                "targetId": "44653426"
+                            },
+                            "skeleton": {
+                                "packageOrRemoteId": "0",
+                                "ingestionId": "0",
+                                "targetId": "0"
+                            },
+                            "animations": [],
+                            "sockets": [
+                                {
+                                    "class": "horizon::animation::Socket",
+                                    "data": {
+                                        "socketName": "hips",
+                                        "jointName": "mixamorig_Hips"
+                                    }
+                                }
+                            ],
+                            "applyRootMotion": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "26835398609386284",
+                                "ingestionId": "3204097988258300720",
+                                "targetId": "3716990405"
+                            },
+                            "isVisibleSelf": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": []
+}

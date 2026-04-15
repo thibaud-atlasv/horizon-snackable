@@ -11,8 +11,6 @@
         <SolidColorBrush x:Key="ShotActiveBorderColor" Color="#FFFFFFFF"/>
         <SolidColorBrush x:Key="ShotInactiveColor" Color="#33FFFFFF"/>
         <SolidColorBrush x:Key="ShotInactiveBorderColor" Color="#66FFFFFF"/>
-        <SolidColorBrush x:Key="ComboColor" Color="#FFFFD700"/>
-        <SolidColorBrush x:Key="ComboOutlineColor" Color="#FF1A1A1A"/>
         
         <!-- BooleanToVisibilityConverter for visibility bindings -->
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
@@ -28,12 +26,20 @@
             </Grid.RowDefinitions>
             
             <!-- Row 0: Shot Indicators (center) and Combo (right) -->
-            <Grid Grid.Row="0" Height="173">
+            <Grid Grid.Row="0" Height="173" RenderTransformOrigin="0.5,0.5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Grid.RenderTransform>
 
                 <!-- TOP-CENTER: Shot Indicator Dots (scaled x3) - shifted down 50px -->
                 <StackPanel x:Name="ShotIndicators" 
@@ -51,8 +57,7 @@
                     <Ellipse x:Name="Shot1Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
-                             Stroke="#FFFFFFFF"
-                             StrokeThickness="6"/>
+                             StrokeThickness="6" Stroke="#FFFFFFFF"/>
                     <b:Interaction.Triggers>
                         <b:DataTrigger Binding="{Binding Path=Shot1Active}" Value="False">
                             <b:ChangePropertyAction TargetName="Shot1Dot" PropertyName="Fill" Value="#33FFFFFF"/>
@@ -73,8 +78,7 @@
                     <Ellipse x:Name="Shot2Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
-                             Stroke="#FFFFFFFF"
-                             StrokeThickness="6"/>
+                             StrokeThickness="6" Stroke="#FFFFFFFF"/>
                     <b:Interaction.Triggers>
                         <b:DataTrigger Binding="{Binding Path=Shot2Active}" Value="False">
                             <b:ChangePropertyAction TargetName="Shot2Dot" PropertyName="Fill" Value="#33FFFFFF"/>
@@ -95,8 +99,7 @@
                     <Ellipse x:Name="Shot3Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
-                             Stroke="#FFFFFFFF"
-                             StrokeThickness="6"/>
+                             StrokeThickness="6" Stroke="#FFFFFFFF"/>
                     <b:Interaction.Triggers>
                         <b:DataTrigger Binding="{Binding Path=Shot3Active}" Value="False">
                             <b:ChangePropertyAction TargetName="Shot3Dot" PropertyName="Fill" Value="#33FFFFFF"/>
@@ -117,8 +120,7 @@
                     <Ellipse x:Name="Shot4Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
-                             Stroke="#FFFFFFFF"
-                             StrokeThickness="6"/>
+                             StrokeThickness="6" Stroke="#FFFFFFFF"/>
                     <b:Interaction.Triggers>
                         <b:DataTrigger Binding="{Binding Path=Shot4Active}" Value="False">
                             <b:ChangePropertyAction TargetName="Shot4Dot" PropertyName="Fill" Value="#33FFFFFF"/>
@@ -139,8 +141,7 @@
                     <Ellipse x:Name="Shot5Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
-                             Stroke="#FFFFFFFF"
-                             StrokeThickness="6"/>
+                             StrokeThickness="6" Stroke="#FFFFFFFF"/>
                     <b:Interaction.Triggers>
                         <b:DataTrigger Binding="{Binding Path=Shot5Active}" Value="False">
                             <b:ChangePropertyAction TargetName="Shot5Dot" PropertyName="Fill" Value="#33FFFFFF"/>
@@ -161,8 +162,7 @@
                     <Ellipse x:Name="Shot6Dot"
                              Width="60" Height="60"
                              Fill="#FF4CAF50"
-                             Stroke="#FFFFFFFF"
-                             StrokeThickness="6"/>
+                             StrokeThickness="6" Stroke="#FFFFFFFF"/>
                     <b:Interaction.Triggers>
                         <b:DataTrigger Binding="{Binding Path=Shot6Active}" Value="False">
                             <b:ChangePropertyAction TargetName="Shot6Dot" PropertyName="Fill" Value="#33FFFFFF"/>
@@ -176,34 +176,7 @@
                 </Grid>
             </StackPanel>
 
-                <!-- TOP-RIGHT: Combo Text with Outline -->
-                <Grid x:Name="ComboContainer" 
-                      Grid.Column="2"
-                      HorizontalAlignment="Right" 
-                      VerticalAlignment="Top"
-                      Visibility="{Binding Path=ComboVisible, Converter={StaticResource BoolToVisConverter}}">
-                    
-                    <!-- Combo text outline layer -->
-                    <TextBlock x:Name="ComboTextOutline"
-                               Text="{Binding Path=ComboText}"
-                               FontFamily="Roboto"
-                               FontSize="144"
-                               FontWeight="Black"
-                               Stroke="#FF1A1A1A"
-                               StrokeThickness="15"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-                    
-                    <!-- Combo main text layer (gold) -->
-                    <TextBlock x:Name="ComboTextMain"
-                               Text="{Binding Path=ComboText}"
-                               FontFamily="Roboto"
-                               FontSize="144"
-                               FontWeight="Black"
-                               Foreground="#FFFFD700"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-                </Grid>
+
             </Grid>
 
             <!-- Row 1: Score Cartouche Badge - Centered below shot indicators -->
@@ -249,7 +222,7 @@
                        Stroke="#FF1A1A1A"
                        StrokeThickness="6"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center" FontSize="120"/>
+                       VerticalAlignment="Center" FontSize="170"/>
             
             <!-- Instruction main text layer -->
             <TextBlock x:Name="InstructionTextMain"
@@ -257,9 +230,8 @@
                        FontFamily="Roboto"
                        FontWeight="Bold"
                        TextWrapping="Wrap"
-                       Foreground="#FFFFFFFF"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center" FontSize="120"/>
+                       VerticalAlignment="Center" FontSize="170" Foreground="#C8FFFFFF"/>
         </Grid>
     </Grid>
 </Page>

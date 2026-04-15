@@ -92,8 +92,18 @@ export class BallController extends Component {
     // Fake shadow: follows ball XZ on the ground, shrinks as ball goes higher
     if (this._shadowTransform) {
       this._shadowTransform.localPosition = new Vec3(ball.posX, 0.01, ball.posZ);
-      const s = Math.max(0.1, 0.75 - ball.posY * 0.15);
-      this._shadowTransform.localScale = new Vec3(s, s, s);
+      const safeY = Math.max(0, ball.posY);
+      if (ball.active) {
+        const s = Math.max(0.1, 0.75 - safeY * 0.15);
+        this._shadowTransform.localScale = new Vec3(s, s, s);
+      } else {
+        // Idle: shadow widens on squash, shrinks as ball rises
+        const { height, scaleY } = this._evalIdleAnim(this._idleTime);
+        const scaleXZ = 1 / Math.sqrt(Math.max(0.01, scaleY));
+        const baseS = Math.max(0.1, 0.75 - height * 0.15);
+        const s = baseS * scaleXZ * 0.75;
+        this._shadowTransform.localScale = new Vec3(s, s, s);
+      }
     }
   }
 

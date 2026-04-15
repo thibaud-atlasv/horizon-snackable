@@ -1,5 +1,14 @@
 import { LocalEvent } from 'meta/worlds';
 
+// ── Keeper Despawn (sent to the keeper entity — it cleans up shadow + self) ──
+
+export class KeeperDespawnPayload {}
+
+export const KeeperDespawnEvent = new LocalEvent<KeeperDespawnPayload>(
+  'EvKeeperDespawn',
+  KeeperDespawnPayload,
+);
+
 // ── Shot Fired (ball just kicked — dots should update immediately) ───────────
 
 export class ShotFiredPayload {
@@ -26,6 +35,7 @@ export const PhaseChangedEvent = new LocalEvent<PhaseChangedPayload>(
 
 export class ScoreChangedPayload {
   score: number = 0;
+  combo: number = 0;
   comboMulti: number = 1;
 }
 

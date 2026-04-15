@@ -8,6 +8,7 @@ import { LocalEvent } from 'meta/worlds';
 export class ShotFeedbackResultPayload {
   outcome: number = 0;
   pointsEarned: number = 0;
+  bonusZone: string = '';  // 'CORNER' | 'CHIP' | ''
 }
 
 export const ShotFeedbackResultEvent = new LocalEvent<ShotFeedbackResultPayload>(

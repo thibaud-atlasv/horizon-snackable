@@ -1,17 +1,13 @@
 import { Service, service } from 'meta/worlds';
-import {
-  GK_START_Z, GK_SPEED, GK_IDLE_SPEED, GK_REACTION_MS,
-  GK_DIVE_CHANCE, GK_DIVE_SPEED, GK_DIVE_LATERAL, GK_DIVE_HEIGHT,
-  GOAL_HALF_W,
-  GK_HALF_W, GK_STAND_H, GK_FOOT_Y,
-  GK_DIVE_HALF_W_BASE, GK_DIVE_HALF_W_GROW,
-  GK_DIVE_H_BASE, GK_DIVE_H_GROW,
-} from '../Constants';
+import { GK_START_Z, GOAL_HALF_W } from '../Constants';
+import { KEEPER_DEFS, type IKeeperDef } from '../Defs/KeeperDefs';
 
 @service()
 export class GoalkeeperService extends Service {
 
   // ── State ────────────────────────────────────────────────────────────────────
+
+  private _def: IKeeperDef = KEEPER_DEFS[0];
 
   private _x        = 0;
   private _targetX  = 0;
@@ -27,17 +23,45 @@ export class GoalkeeperService extends Service {
 
   private _reactionTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // ── Def ──────────────────────────────────────────────────────────────────────
+
+  setDef(index: number): void {
+    this._def = KEEPER_DEFS[index];
+  }
+
+  get shadowBaseX(): number { return this._def.shadowBaseX; }
+
+
+  /** Returns the current collision box for debug visualisation (world-space center + half-extents + rotation). */
+  get obbDebug(): { cx: number; cy: number; rotZ: number; halfW: number; halfH: number } {
+    const halfW = this._def.halfW;
+    const halfH = (this._def.standH - this._def.footY) / 2;
+    // Standing center: mid-height between footY and standH
+    const standCY = this._def.footY + halfH;
+    if (this._diving) {
+      // Pivot is at the keeper's feet in world space (posX, posY).
+      // animDiveOffsetY compensates for extra Y translation baked into the FBX dive clip.
+      const localCY = standCY + this._def.animDiveOffsetY;
+      const cos = Math.cos(this._rotZ);
+      const sin = Math.sin(this._rotZ);
+      const cx = this._x - localCY * sin;
+      const cy = Math.max(halfH * 0.75, this._y + localCY * cos);
+      return { cx, cy, rotZ: this._rotZ, halfW, halfH };
+    }
+    return { cx: this._x, cy: standCY, rotZ: 0, halfW, halfH };
+  }
+
   // ── Read access ──────────────────────────────────────────────────────────────
 
-  get posX(): number   { return this._x; }
-  get posY(): number   { return this._y; }
-  get rotZ(): number   { return this._rotZ; }
+  get posX(): number    { return this._x; }
+  get posY(): number    { return this._y; }
+  get rotZ(): number    { return this._rotZ; }
   get diving(): boolean { return this._diving; }
-  get diveT(): number  { return this._diveT; }
+  get diveT(): number   { return this._diveT; }
   get diveDir(): number { return this._diveDir; }
-  get idleT(): number  { return this._idleT; }
+  get idleT(): number   { return this._idleT; }
   get reacting(): boolean { return this._reacting; }
-  get startZ(): number { return GK_START_Z; }
+  get startZ(): number  { return GK_START_Z; }
 
   // ── React to a kick ──────────────────────────────────────────────────────────
 
@@ -62,32 +86,52 @@ export class GoalkeeperService extends Service {
       const isFast   = Math.abs(ballVz) > 0.28;
       const isCorner = cornerDist < GOAL_HALF_W * 0.5;
 
-      if ((isFast || isCorner) && Math.random() < GK_DIVE_CHANCE) {
+      if ((isFast || isCorner) && Math.random() < this._def.diveChance) {
         this._diving  = true;
         this._diveDir = landX > 0 ? 1 : -1;
       }
-    }, GK_REACTION_MS);
+    }, this._def.reactionMs);
   }
 
   // ── Collision check (called by GameManager) ──────────────────────────────────
 
   /** Returns true if the ball at (bx, by) is within the GK's current hitbox. */
   checkSave(bx: number, by: number): boolean {
-    let halfW: number;
-    let maxH: number;
-
     if (this._diving) {
-      halfW = GK_DIVE_HALF_W_BASE + this._diveT * GK_DIVE_HALF_W_GROW;
-      maxH  = (GK_DIVE_H_BASE + this._diveT * GK_DIVE_H_GROW) * 2;
-    } else {
-      halfW = GK_HALF_W;
-      maxH  = GK_STAND_H;
+      return this._checkSaveOBB(bx, by);
     }
 
+    // Standing: simple AABB
     return (
-      bx > this._x - halfW && bx < this._x + halfW &&
-      by > GK_FOOT_Y && by < maxH
+      bx > this._x - this._def.halfW && bx < this._x + this._def.halfW &&
+      by > this._def.footY && by < this._def.standH
     );
+  }
+
+  /**
+   * OBB test for dive — rotates the ball position into the GK's local space
+   * (inverse of _rotZ around the box center), then does a standard AABB check.
+   */
+  private _checkSaveOBB(bx: number, by: number): boolean {
+    const halfW = this._def.halfW;
+    const halfH = (this._def.standH - this._def.footY) / 2;
+    const standCY = this._def.footY + halfH;
+
+    const localCY = standCY + this._def.animDiveOffsetY;
+    const cosR =  Math.cos(this._rotZ);
+    const sinR =  Math.sin(this._rotZ);
+    const cx = this._x - localCY * sinR;
+    const cy = Math.max(halfH * 0.75, this._y + localCY * cosR);
+
+    // Translate ball relative to box center
+    const dx = bx - cx;
+    const dy = by - cy;
+
+    // Rotate into box local space (inverse rotation = -_rotZ)
+    const lx  =  dx * cosR + dy * sinR;
+    const ly  = -dx * sinR + dy * cosR;
+
+    return Math.abs(lx) < halfW && Math.abs(ly) < halfH;
   }
 
   // ── Per-frame update ─────────────────────────────────────────────────────────
@@ -108,16 +152,16 @@ export class GoalkeeperService extends Service {
   }
 
   private _tickDive(step: number): void {
-    this._diveT = Math.min(this._diveT + step * (1 / 60) * GK_DIVE_SPEED, 1);
+    this._diveT = Math.min(this._diveT + step * (1 / 60) * this._def.diveSpeed, 1);
     const t = this._diveT;
-    this._x    = this._x + this._diveDir * t * GK_DIVE_LATERAL * step * (1 / 60) * 2;
-    this._y    = Math.sin(t * Math.PI) * GK_DIVE_HEIGHT;
+    this._x    = this._x + this._diveDir * t * this._def.diveLateral * step * (1 / 60) * 2;
+    this._y    = Math.sin(t * Math.PI) * this._def.diveHeight;
     this._rotZ = -this._diveDir * t * Math.PI * 0.52;
   }
 
   private _tickReact(step: number): void {
     const diff = this._targetX - this._x;
-    const move = Math.min(Math.abs(diff), GK_SPEED * step);
+    const move = Math.min(Math.abs(diff), this._def.speed * step);
     this._x += Math.sign(diff) * move;
     this._y = 0;
     this._rotZ = -Math.sign(diff) * 0.1;
@@ -126,7 +170,7 @@ export class GoalkeeperService extends Service {
   private _tickIdle(step: number): void {
     const sway = Math.sin(this._idleT * 1.1) * (GOAL_HALF_W - 0.8);
     const diff = sway - this._x;
-    const move = Math.min(Math.abs(diff), GK_IDLE_SPEED * step);
+    const move = Math.min(Math.abs(diff), this._def.idleSpeed * step);
     this._x += Math.sign(diff) * move;
     this._y = 0;
     this._rotZ = Math.sign(diff) * 0.05;

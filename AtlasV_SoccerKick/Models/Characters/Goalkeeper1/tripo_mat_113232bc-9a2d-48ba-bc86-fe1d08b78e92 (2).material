@@ -1,0 +1,26 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "tripo_mat_113232bc-9a2d-48ba-bc86-fe1d08b78e92 (2)",
+    "attributes": [
+        {
+            "name": "baseColorTex",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "26835398609386284",
+                    "ingestionId": "13293182286483759478",
+                    "targetId": "1850524962"
+                }
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "9623295632868937486",
+        "targetId": "2708897769"
+    }
+}

@@ -29,7 +29,7 @@
             </Grid.RenderTransform>
 
             <!-- Rounded frame container wrapping the main content -->
-            <Border CornerRadius="40" Background="#88000000" Padding="80,60">
+            <Border CornerRadius="40" Padding="80,60" BorderBrush="#FFFFC500" BorderThickness="10,10,10,10" Background="#DC093F10">
 
                 <!-- Main content vertical StackPanel -->
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

@@ -11,9 +11,10 @@ import {
   OnFocusedInteractionInputEndedEvent,
   OnPlayerCreateEvent,
 } from 'meta/worlds';
-import type {
-  Maybe, Entity,
-  OnFocusedInteractionInputEventPayload,
+import {
+  type Maybe, type Entity,
+  type OnFocusedInteractionInputEventPayload,
+  Color,
 } from 'meta/worlds';
 import { GamePhase } from '../Types';
 import { SWIPE_DEAD_ZONE, SWIPE_POWER_RANGE, SWIPE_SIDE_RANGE } from '../Constants';
@@ -44,7 +45,7 @@ export class ClientSetup extends Component {
     if (this._networkingService.isServerContext()) return;
     this._initCamera();
   }
-  
+
   @subscribe(OnPlayerCreateEvent, { execution: ExecuteOn.Owner })
   onPlayerCreted(): void {
     if (this._networkingService.isServerContext()) return;
@@ -57,6 +58,18 @@ export class ClientSetup extends Component {
         disableEmotesButton: true,
         disableFocusExitButton: true,
       });
+      FocusedInteractionService.get().setTapOptions(true, {
+      startColor: new Color(1, 1, 1, 1),
+      endColor: new Color(1, 1, 1, 0),
+      duration: 1,
+    });
+      FocusedInteractionService.get().setTrailOptions(true, {
+      startColor: new Color(1, 1, 1, 1),
+      endColor: new Color(1, 1, 1, 0),
+      startWidth: 4,
+      endWidth: 2,
+      length: 1,
+    });
 
       const anchorTc = this.cameraAnchor?.getComponent(TransformComponent);
       const cameraC = this.cameraAnchor?.getComponent(CameraComponent);

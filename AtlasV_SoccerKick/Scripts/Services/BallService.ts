@@ -124,13 +124,22 @@ export class BallService extends Service {
       if (Math.abs(this._vz) < 0.04) return ShotOutcome.Miss;
     }
 
-    // Ground bounce near goal
-    if (this._py <= BALL_RADIUS && this._vy < 0 && this._pz <= 2.0 && this._pz > 0.1) {
+    // Ground bounce near goal — only while still in front of the goal line
+    if (this._py <= BALL_RADIUS && this._vy < 0 && this._pz <= 2.0 && this._pz > 0) {
       this._py = BALL_RADIUS;
       this._vy = Math.abs(this._vy) * BOUNCE_VY_NEAR;
       this._vx *= BOUNCE_DAMP_NEAR;
       this._vz *= BOUNCE_DAMP_NEAR;
       if (Math.abs(this._vz) < 0.02 && Math.abs(this._vy) < 0.02) return ShotOutcome.Miss;
+    }
+
+    // Ground clamp inside goal volume — prevents tunneling through the floor
+    // on high-arc shots that fall nearly vertically into the goal mouth
+    if (this._py <= BALL_RADIUS && this._vy < 0 && this._pz <= 0 && this._pz > -GOAL_DEPTH) {
+      this._py = BALL_RADIUS;
+      this._vy = Math.abs(this._vy) * BOUNCE_VY_NEAR;
+      this._vx *= BOUNCE_DAMP_NEAR;
+      this._vz *= BOUNCE_DAMP_NEAR;
     }
 
     // Ball nearly stopped
@@ -194,14 +203,42 @@ export class BallService extends Service {
   // ── Result-phase bounce ──────────────────────────────────────────────────────
 
   private _tickResult(): void {
+    const inGoal = this._pz < 0 && this._pz > -GOAL_DEPTH &&
+                   this._py < GOAL_HEIGHT &&
+                   Math.abs(this._px) < GOAL_HALF_W;
+
+    // Ground clamp outside goal (save/post/miss bounce on the pitch)
+    if (!inGoal) {
+      if (this._py <= BALL_RADIUS && this._vy < 0) {
+        this._py = BALL_RADIUS;
+        this._vy = Math.abs(this._vy) * RESULT_BOUNCE_VY;
+        this._vx *= RESULT_BOUNCE_XZ;
+        this._vz *= RESULT_BOUNCE_XZ;
+      }
+      return;
+    }
+
+    // Ground bounce inside the net
     if (this._py <= BALL_RADIUS) {
       this._py = BALL_RADIUS;
       this._vy = Math.abs(this._vy) * RESULT_BOUNCE_VY;
       this._vx *= RESULT_BOUNCE_XZ;
       this._vz *= RESULT_BOUNCE_XZ;
     }
+
+    // Back net
     if (this._pz < -(GOAL_DEPTH - 0.1)) {
       this._vz = Math.abs(this._vz) * NET_BOUNCE_DAMP;
+    }
+
+    // Side nets
+    const netX = GOAL_HALF_W - BALL_RADIUS;
+    if (this._px > netX) {
+      this._px = netX;
+      this._vx = -Math.abs(this._vx) * NET_BOUNCE_DAMP;
+    } else if (this._px < -netX) {
+      this._px = -netX;
+      this._vx = Math.abs(this._vx) * NET_BOUNCE_DAMP;
     }
   }
 

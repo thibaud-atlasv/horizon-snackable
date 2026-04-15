@@ -154,6 +154,7 @@ Snackable: simple, satisfying, short.
 - **Features**: Large centered feedback text with dynamic color, scale/translate transforms for animations, points display for goals
 - **ViewModel bindings**: FeedbackText, TextColor, Opacity, ScaleX, ScaleY, TranslateX, TranslateY, IsVisible, PointsText, PointsOpacity
 - **Animation**: Data-driven profiles (IAnimProfile). GOAL uses an extreme variant (×3 overshoot, double bounce, pulse, heavy shake). Other outcomes use a standard juicy animation.
+- **Combo display**: Red "Combo xN" text (FontSize 100, black outline) appears below points counter when combo ≥ 2. Opacity tied to animation lifecycle (fades with points).
 
 ### Soccer Kick HUD
 - **XAML**: `ui/SoccerKickHud.xaml` — ScreenSpace UI for in-game HUD
@@ -161,9 +162,8 @@ Snackable: simple, satisfying, short.
 - **Layout**: Full-width Grid with three-column top row and centered instruction area
   - **Top-left**: Score cartouche badge (semi-transparent dark rounded badge with "SCORE" label and large score number)
   - **Top-center**: 6 shot indicator dots (scaled ×3: 60px ellipses with 6px stroke)
-  - **Top-right**: Combo multiplier text (scaled ×3: 144px gold text with dark outline)
   - **Center**: Instruction text (72px white text with dark outline, visibility-bound)
-- **ViewModel bindings**: ScoreText, Shot1Active through Shot6Active, ComboText, ComboVisible, InstructionText, InstructionVisible
+- **ViewModel bindings**: ScoreText, Shot1Active through Shot6Active, InstructionText, InstructionVisible
 - **Style**: Sporty 3D realistic style, vivid dynamic colors (greens, whites, golds), transparent background, Roboto font
 
 ### Power Gauge

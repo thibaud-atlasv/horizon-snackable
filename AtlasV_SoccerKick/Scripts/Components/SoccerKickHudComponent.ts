@@ -16,7 +16,6 @@ import { TOTAL_SHOTS } from '../Constants';
 import {
   ShotFiredEvent, ShotFiredPayload,
   PhaseChangedEvent, PhaseChangedPayload,
-  ScoreChangedEvent, ScoreChangedPayload,
   PointsReadyEvent, PointsReadyPayload,
   GameResetEvent, GameResetPayload,
 } from '../Events/GameEvents';
@@ -58,8 +57,6 @@ class SoccerKickHudViewModel extends UiViewModel {
   Shot4Opacity: number = 1;
   Shot5Opacity: number = 1;
   Shot6Opacity: number = 1;
-  ComboText: string = '';
-  ComboVisible: boolean = false;
   InstructionText: string = '';
   InstructionVisible: boolean = false;
   InstructionOpacity: number = 1;
@@ -153,15 +150,6 @@ export class SoccerKickHudComponent extends Component {
     this._updateDots(p.shotsLeft);
   }
 
-  // ── Score changed → combo display only (roll-up waits for PointsReady) ──
-
-  @subscribe(ScoreChangedEvent)
-  onScoreChanged(p: ScoreChangedPayload): void {
-    const showCombo = p.comboMulti > 1;
-    this._viewModel.ComboVisible = showCombo;
-    this._viewModel.ComboText    = showCombo ? `x${p.comboMulti}` : '';
-  }
-
   // ── Points ready (casino drained) → start score roll-up + pulse ────
 
   @subscribe(PointsReadyEvent)
@@ -205,8 +193,6 @@ export class SoccerKickHudComponent extends Component {
     this._viewModel.ScoreText  = '0';
     this._viewModel.ScoreScale = 1;
     this._viewModel.ScoreColor = '#FFFFFFFF';
-    this._viewModel.ComboVisible = false;
-    this._viewModel.ComboText = '';
 
     // Update dots first (sets all active = green colors)
     this._updateDots(p.shotsLeft);
