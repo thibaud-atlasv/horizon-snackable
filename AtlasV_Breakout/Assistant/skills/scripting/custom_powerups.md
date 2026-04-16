@@ -30,7 +30,7 @@ export enum PowerUpType {
 Create a class implementing `IPowerUpEffect` and register it in the factory.
 
 ```typescript
-// Scripts/GameplayObjects/PaddleEffects.ts
+// Scripts/Components/PaddleEffects.ts
 
 export class SlowBallEffect implements IPowerUpEffect {
   readonly stackable = false;
@@ -62,13 +62,20 @@ export function createPaddleEffect(type: PowerUpType): IPowerUpEffect {
 
 | Member | Type | Description |
 |---|---|---|
-| `stackable` | `boolean` | `true` → multiple pickups coexist with independent timers. `false` → picking up again resets the timer. |
+| `stackable` | `boolean` | `true` → multiple pickups coexist with independent timers (e.g. `BigPaddleEffect`: each stack adds +20% width via `onStackChanged`). `false` → picking up again resets the timer (e.g. `StickyPaddleEffect`). |
 | `color` | `Color` | Paddle tint displayed while this effect is active. |
 | `onStart(ctx)` | method | Called when the effect activates. |
 | `onEnd(ctx)` | method | Called when the timer expires or on round reset. |
-| `onStackChanged?(ctx, count)` | optional method | Only called when `stackable=true`, each time the stack count changes. |
+| `onStackChanged?(ctx, count)` | optional method | Only called when `stackable=true`, each time the stack count changes. Use for incremental effects (e.g. scale = `normalScale.x * (1 + count * 0.2)`). |
 
 `PaddleContext` exposes `transform`, `colorComponent`, and `normalScale` — use these for direct paddle manipulation (scale, color). Fire events for anything else (ball speed, etc.).
+
+### Existing effects reference
+
+| Effect | `stackable` | Behavior |
+|---|---|---|
+| `BigPaddleEffect` | `true` | Each stack adds +20% paddle width via `onStackChanged`. Green tint. |
+| `StickyPaddleEffect` | `false` | Ball sticks to paddle on contact. Yellow tint. Fires `StickyPaddleActivated/Deactivated` events. |
 
 ---
 
@@ -80,9 +87,9 @@ Add an entry to `PowerUpAssets` whose key **exactly matches the enum member name
 ```typescript
 // Scripts/Assets.ts
 export const PowerUpAssets = {
-  BigPaddle:    new TemplateAsset('../../Templates/GameplayObjects/PowerUp.hstf'),
-  StickyPaddle: new TemplateAsset('../../Templates/GameplayObjects/PowerUp.hstf'),
-  SlowBall:     new TemplateAsset('../../Templates/GameplayObjects/PowerUpSlowBall.hstf'),  // ← new
+  BigPaddle:    new TemplateAsset('@Templates/GameplayObjects/PowerUp.hstf'),
+  StickyPaddle: new TemplateAsset('@Templates/GameplayObjects/PowerUp.hstf'),
+  SlowBall:     new TemplateAsset('@Templates/GameplayObjects/PowerUpSlowBall.hstf'),  // ← new
 } as const;
 ```
 

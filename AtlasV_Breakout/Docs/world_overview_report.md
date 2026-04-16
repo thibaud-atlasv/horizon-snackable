@@ -161,6 +161,27 @@ A **mobile-first portrait Breakout** built for Meta Horizon Worlds. Features a t
 
 ---
 
+## Audio
+
+### AudioManager
+**File:** `Scripts/Services/AudioManager.ts`
+
+Centralized `@service()` singleton. Scene entities carry a `SoundComponent` + `AudioSource` pair; `AudioSource` calls `AudioManager.register(soundId, entity)` at startup. The manager stores a round-robin pool per sound ID and subscribes to all gameplay events.
+
+| Category | Sound IDs | Trigger |
+|---|---|---|
+| Ball | `sfx_paddle_hit`, `sfx_ball_launch`, `sfx_ball_lost` | `PaddleHit`, `ReleaseBall`, `BallLost` |
+| Bricks | `sfx_brick_hit`, `sfx_brick_destroyed`, `sfx_explosion_chain` | `BrickHit`, `BrickDestroyed`, `ExplosionChain` |
+| Power-ups | `sfx_powerup_collected`, `sfx_sticky_activated`, `sfx_sticky_deactivated` | `PowerUpCollected`, `StickyPaddleActivated/Deactivated` |
+| Coins | `sfx_coin_collected` | `CoinCollected` |
+| Combos | `sfx_combo_2/5/10/15` | `IncrementCombo` at threshold |
+| Heat | `sfx_heat_5/10/20` | `IncrementHeat` at exact level |
+| Game state | `music`, `sfx_level_start`, `sfx_level_cleared`, `sfx_game_over`, `sfx_restart`, `sfx_message_show` | Various lifecycle events |
+
+Music auto-starts on register, stops during gameplay (`LoadLevel`, fade 1s), resumes on game over (fade 1s).
+
+---
+
 ## HUD & UI
 
 | Component | Description |

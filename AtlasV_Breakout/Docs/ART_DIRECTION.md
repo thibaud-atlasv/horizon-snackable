@@ -52,20 +52,20 @@ Every `.hstf` template created for the project **must be registered in `Scripts/
 ```typescript
 // Scripts/Assets.ts
 export const BrickAssets = {
-  Normal:    new TemplateAsset('../../Templates/GameplayObjects/Brick.hstf'),
-  Explosive: new TemplateAsset('../../Templates/GameplayObjects/ExplosiveBrick.hstf'),
+  Normal:    new TemplateAsset('@Templates/GameplayObjects/Brick.hstf'),
+  Explosive: new TemplateAsset('@Templates/GameplayObjects/ExplosiveBrick.hstf'),
 } as const;
 
 export const PowerUpAssets = {
-  BigPaddle:    new TemplateAsset('../../Templates/GameplayObjects/BigPaddle.hstf'),
-  StickyPaddle: new TemplateAsset('../../Templates/GameplayObjects/StickyPaddle.hstf'),
+  BigPaddle:    new TemplateAsset('@Templates/GameplayObjects/BigPaddle.hstf'),
+  StickyPaddle: new TemplateAsset('@Templates/GameplayObjects/StickyPaddle.hstf'),
 } as const;
 ```
 
 **Rules:**
 - Group assets by object family (`BrickAssets`, `PowerUpAssets`, etc.)
 - The key name must match the corresponding enum or type name exactly (e.g. `PowerUpType.BigPaddle` → key `BigPaddle`)
-- Paths are relative to `Assets.ts` — always `../../Templates/…`
+- Paths use the `@Templates/…` alias (resolved by the Horizon bundler)
 - Never hardcode a `TemplateAsset` path directly inside a component or manager
 
 ---

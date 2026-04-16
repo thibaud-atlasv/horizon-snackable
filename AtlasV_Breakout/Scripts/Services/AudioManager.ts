@@ -56,6 +56,7 @@ export const SFX = {
   HEAT_20:              'sfx_heat_20',
 
   // Game state
+  MUSIC:                'music',
   LEVEL_START:          'sfx_level_start',
   LEVEL_CLEARED:        'sfx_level_cleared',
   GAME_OVER:            'sfx_game_over',
@@ -97,6 +98,8 @@ export class AudioManager extends Service {
     }
     this._sounds.get(soundId)!.push(sound);
     console.log(`[AudioManager] Registered: "${soundId}" (${this._sounds.get(soundId)!.length} instances)`);
+    if (soundId == SFX.MUSIC)
+      this.playMusic(SFX.MUSIC, 1);
   }
 
   private nextSound(soundId: string): SoundComponent | undefined {
@@ -109,12 +112,14 @@ export class AudioManager extends Service {
 
   // ── Playback interne ───────────────────────────────────────────────────────
 
-  private playSound(soundId: string, volume: number = 1, pitch: number = 1): void {
+  private playSound(soundId: string, volume?: number, pitch?: number): void {
     const sound = this.nextSound(soundId);
     if (!sound) return;
     sound.loop = false;
-    sound.playVolume = volume;
-    sound.minMaxPitch = new Vec2(pitch, pitch);
+    if (volume)
+      sound.playVolume = volume;
+    if (pitch)
+      sound.minMaxPitch = new Vec2(pitch, pitch);
     sound.play();
   }
 
@@ -164,7 +169,8 @@ export class AudioManager extends Service {
 
   @subscribe(Events.BrickDestroyed)
   onBrickDestroyed(_p: Events.BrickDestroyedPayload): void {
-    this.playSound(SFX.BRICK_DESTROYED);
+    const pitch = 0.85 + Math.random() * 0.3;
+    this.playSound(SFX.BRICK_DESTROYED, 1, pitch);
   }
 
   @subscribe(Events.ExplosionChain)
@@ -235,7 +241,7 @@ export class AudioManager extends Service {
   @subscribe(Events.LoadLevel)
   onLoadLevel(_p: Events.LoadLevelPayload): void {
     this.playSound(SFX.LEVEL_START);
-    this.playMusic(SFX.LEVEL_START); // remplacer par une clé MUSIC si besoin
+    this.stopMusic(SFX.MUSIC, 1);
   }
 
   @subscribe(Events.LevelCleared)
@@ -251,6 +257,7 @@ export class AudioManager extends Service {
   @subscribe(HighScoreHUDEvents.ShowHighScores)
   onGameOver(_p: HighScoreHUDEvents.ShowHighScoresPayload): void {
     this.playSound(SFX.GAME_OVER);
+    this.playMusic(SFX.MUSIC, 1);
   }
 
   @subscribe(HUDEvents.ShowMessage)

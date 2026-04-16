@@ -35,6 +35,7 @@ Scripts/
   Types.ts              ← All enums, interfaces, event namespaces + payloads
 
   Components/
+    BackgroundAnimViewModel.ts
     Ball.ts
     Brick.ts
     ClientSetup.ts
@@ -52,6 +53,7 @@ Scripts/
     StickyBallState.ts
 
   Services/
+    AudioManager.ts
     BallPowerService.ts
     CameraShakeService.ts
     CoinService.ts
@@ -72,7 +74,17 @@ Components **do not hold references to each other**. They communicate exclusivel
 - Subscribe: `@subscribe(Events.Foo)`
 - Dispatch: `EventService.sendLocally(Events.Foo, payload)`
 
-Non-component singletons (`CollisionManager`, `VfxService`, `CoinService`, etc.) use the lazy singleton pattern and are accessed via `Manager.get()`.
+Non-component singletons (`CollisionManager`, `VfxService`, `CoinService`, `AudioManager`, etc.) use the `@service()` decorator or the lazy singleton pattern and are accessed via `ServiceName.get()`.
+
+### Services vs Components
+
+| Type | Decorator | Lifecycle | Use for |
+|---|---|---|---|
+| **Service** | `@service()` extends `Service` | Singleton, auto-created by runtime | Stateless managers, event routing, pooling |
+| **Component** | `@component()` extends `Component` | Attached to a scene entity | Anything that needs a transform, properties, or entity ownership |
+
+`AudioManager`, `CameraShakeService`, `BallPowerService`, `JuiceService`, `VfxService`, `CoinService` are all services.
+`LeaderboardManager` is a component (needs entity ownership for network events).
 
 ---
 

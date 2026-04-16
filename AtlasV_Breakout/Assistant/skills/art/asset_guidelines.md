@@ -15,13 +15,13 @@ Every `.hstf` template created for the project must be registered in `Scripts/As
 import { TemplateAsset } from 'meta/worlds';
 
 export const BrickAssets = {
-  Normal:    new TemplateAsset('../../Templates/GameplayObjects/Brick.hstf'),
-  Explosive: new TemplateAsset('../../Templates/GameplayObjects/ExplosiveBrick.hstf'),
+  Normal:    new TemplateAsset('@Templates/GameplayObjects/Brick.hstf'),
+  Explosive: new TemplateAsset('@Templates/GameplayObjects/ExplosiveBrick.hstf'),
 } as const;
 
 export const PowerUpAssets = {
-  BigPaddle:    new TemplateAsset('../../Templates/GameplayObjects/BigPaddle.hstf'),
-  StickyPaddle: new TemplateAsset('../../Templates/GameplayObjects/StickyPaddle.hstf'),
+  BigPaddle:    new TemplateAsset('@Templates/GameplayObjects/BigPaddle.hstf'),
+  StickyPaddle: new TemplateAsset('@Templates/GameplayObjects/StickyPaddle.hstf'),
 } as const;
 ```
 
@@ -31,7 +31,7 @@ export const PowerUpAssets = {
 |---|---|
 | Group by object family (`BrickAssets`, `PowerUpAssets`, …) | Makes imports explicit and keeps the file scannable. |
 | Key name must match the enum or type name exactly | `PowerUpManager` and `LevelConfig` use the key as a lookup index — a mismatch causes a silent `undefined` at runtime. |
-| Paths relative to `Assets.ts` — always `../../Templates/…` | Horizon resolves template paths from the script file location. |
+| Paths use the `@Templates/…` alias | Horizon bundler resolves the `@` prefix to the project's Templates folder. |
 | Never hardcode a `TemplateAsset` path inside a component | Scattering paths makes renames and audits fragile. |
 
 ### Adding a new template
@@ -45,14 +45,14 @@ export const PowerUpAssets = {
 export const BrickAssets = {
   Normal:    new TemplateAsset('...'),
   Explosive: new TemplateAsset('...'),
-  Armored:   new TemplateAsset('../../Templates/GameplayObjects/ArmoredBrick.hstf'), // ← new
+  Armored:   new TemplateAsset('@Templates/GameplayObjects/ArmoredBrick.hstf'), // ← new
 } as const;
 
 // New power-up type
 export const PowerUpAssets = {
   BigPaddle:    new TemplateAsset('...'),
   StickyPaddle: new TemplateAsset('...'),
-  SlowBall:     new TemplateAsset('../../Templates/GameplayObjects/PowerUpSlowBall.hstf'), // ← new
+  SlowBall:     new TemplateAsset('@Templates/GameplayObjects/PowerUpSlowBall.hstf'), // ← new
 } as const;
 ```
 

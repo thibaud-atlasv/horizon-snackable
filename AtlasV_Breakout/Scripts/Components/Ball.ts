@@ -30,7 +30,11 @@ export class Ball extends Component implements ICollider {
   private _bounceRandomness: number = LEVEL_DEFAULTS.bounceRandomness;
   private _speedBonus: number = 0;
   private _speedIncrementPerBrick: number = LEVEL_DEFAULTS.ballSpeedIncrementPerBrick;
-  private _revealing = REVEAL_DURATION;
+
+  // ── Progressive difficulty ────────────────────────────────────────────────
+  private static readonly SPEED_INCREMENT_PER_LEVEL = 0.05;
+  private _clearedLevelsAccumulator: number = 0;
+  private _revealing = 0;
 
   private get _effectiveSpeed(): number {
     return (this.ballSpeed * this._speedMultiplier + this._speedBonus)
@@ -73,7 +77,8 @@ export class Ball extends Component implements ICollider {
   }
 
   private _applyPhysics(p: PhysicsSettings): void {
-    this._speedMultiplier        = p.ballSpeedMultiplier        ?? LEVEL_DEFAULTS.ballSpeedMultiplier;
+    this._speedMultiplier        = (p.ballSpeedMultiplier ?? LEVEL_DEFAULTS.ballSpeedMultiplier)
+                                   + this._clearedLevelsAccumulator * Ball.SPEED_INCREMENT_PER_LEVEL;
     this._gravity                = p.gravity                    ?? LEVEL_DEFAULTS.gravity;
     this._bounceRandomness       = p.bounceRandomness           ?? LEVEL_DEFAULTS.bounceRandomness;
     this._speedIncrementPerBrick = p.ballSpeedIncrementPerBrick ?? LEVEL_DEFAULTS.ballSpeedIncrementPerBrick;
@@ -116,6 +121,7 @@ export class Ball extends Component implements ICollider {
 
   @subscribe(Events.BallLost)
   private onBallLost(): void {
+    this._clearedLevelsAccumulator = 0;
     this._isIdle = true;
     this._velocity = Vec3.zero;
     this._sticky.reset();
@@ -128,6 +134,7 @@ export class Ball extends Component implements ICollider {
 
   @subscribe(Events.LevelCleared)
   private onLevelCleared(): void {
+    this._clearedLevelsAccumulator++;
     this._velocity = Vec3.zero;
     this._isIdle = true;
     this._locked = true;
@@ -226,7 +233,7 @@ export class Ball extends Component implements ICollider {
   @subscribe(Events.ResetRound)
   private onResetRound(): void {
     this._velocity = Vec3.zero;
-    this._locked = false;
+    this._locked = true;
     setTimeout(() => { this._reset(); }, 200);
   }
 

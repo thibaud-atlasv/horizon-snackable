@@ -144,7 +144,7 @@ export class LeaderboardManager extends Component {
           player,
           LEADERBOARD_API_NAME,
         );
-        if (myEntry) {
+        if (myEntry && this._isDisplaying) {
           const fallbackEntries: HighScoreEntry[] = [{
             rank: myEntry.rank,
             name: myEntry.playerAlias.length > 0 ? myEntry.playerAlias : 'YOU',
@@ -158,7 +158,9 @@ export class LeaderboardManager extends Component {
     } catch (error) {
       console.error('[LeaderboardManager] Client fallback failed:', error);
     }
-    EventService.sendLocally(HighScoreHUDEvents.ShowHighScores, { entries: [] });
+    if (this._isDisplaying) {
+      EventService.sendLocally(HighScoreHUDEvents.ShowHighScores, { entries: [] });
+    }
   }
 
   // —— Client-side: reset display state when high scores are hidden ————————

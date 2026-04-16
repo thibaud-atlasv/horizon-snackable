@@ -6,76 +6,99 @@ include: on-demand
 
 # Creating a Custom Brick
 
-The built-in `Brick` component covers HP, color, and destruction. For anything beyond that (explosion, split, teleport, shield, etc.) you need a custom component backed by its own template.
+The built-in `Brick` component covers HP, color, reveal animation, death animation, and pool recycling. For anything beyond that (explosion, split, teleport, shield, etc.) you create a **subclass** of `Brick`.
 
 ---
 
 ## Architecture overview
 
-`LevelLayout` spawns bricks using `template.asset`, then looks for a `Brick` component to call `init()`. If the entity has no `Brick` component, `init()` is simply skipped — the custom component is fully responsible for its own initialization.
+`LevelLayout` spawns all bricks from a shared pool of `BrickAssets.Normal` entities. Each entity carries a `Brick` component. For custom behavior, create a subclass that `extends Brick` and override the template methods.
 
-Collision detection is handled by `CollisionManager`, which operates on any object implementing `ICollider`. A custom brick registers itself at start and unregisters itself when destroyed.
+Bricks are **never destroyed** — they are pooled. On death, the brick plays its death animation, then calls `_park()` which moves it off-screen and fires `Events.BrickRecycle` so `LevelLayout` can reclaim it.
 
----
-
-## Step 1 — Create the template file
-
-Duplicate `Templates/GameplayObjects/Brick.hstf` and rename it (e.g. `BrickExplosive.hstf`). Attach your new component to it in place of (or alongside) `Brick`.
+Collision detection is handled by `CollisionManager`. Bricks register after their reveal animation completes and unregister on destruction.
 
 ---
 
-## Step 2 — Register the asset in Assets.ts
+## Option A — Different visuals, same logic
+
+If you only need a different mesh or material but the same HP/color/destruction behavior, keep the `Brick` component and use a separate template:
+
+1. Create a new `.hstf` in `Templates/GameplayObjects/`
+2. Attach the `Brick` component to it
+3. Register it in `Assets.ts`:
+   ```typescript
+   export const BrickAssets = {
+     Normal:    new TemplateAsset('@Templates/GameplayObjects/Brick.hstf'),
+     Explosive: new TemplateAsset('@Templates/GameplayObjects/ExplosiveBrick.hstf'),
+     Armored:   new TemplateAsset('@Templates/GameplayObjects/ArmoredBrick.hstf'),
+   } as const;
+   ```
+4. Use it in `LevelConfig.ts`:
+   ```typescript
+   'A': { asset: BrickAssets.Armored, hits: 3 },
+   ```
+
+---
+
+## Option B — Custom behavior (subclass)
+
+For bricks with custom logic, create a subclass of `Brick`. This is the pattern used by `ExplosiveBrick`.
+
+### Step 1 — Create the component
+
+Create `Scripts/Components/MyBrick.ts`:
 
 ```typescript
-// Scripts/Assets.ts
-export const BrickAssets = {
-  Normal:    new TemplateAsset('../../Templates/GameplayObjects/Brick.hstf'),
-  Explosive: new TemplateAsset('../../Templates/GameplayObjects/BrickExplosive.hstf'),
-} as const;
-```
-
----
-
-## Step 3 — Write the component
-
-The component must implement `ICollider` and manage its own `CollisionManager` lifecycle.
-
-```typescript
-import { component, Component, EventService, NetworkingService, OnEntityStartEvent, subscribe, TransformComponent } from 'meta/worlds';
-import { Events, type ICollider, type Rect } from '../Types';
+import { component, EventService, property } from 'meta/worlds';
+import { Events, type IBrick } from '../Types';
 import { CollisionManager } from '../CollisionManager';
+import { Brick } from './Brick';
 
 @component()
-export class BrickExplosive extends Component implements ICollider {
-  private _transform!: TransformComponent;
+export class MyBrick extends Brick {
 
-  readonly colliderTag = 'brick';
+  @property()
+  myParam: number = 1.0;
 
-  @subscribe(OnEntityStartEvent)
-  onStart(): void {
-    if (NetworkingService.get().isServerContext()) return;
-    this._transform = this.entity.getComponent(TransformComponent)!;
-    CollisionManager.get().register(this);
-  }
-
-  getColliderBounds(): Rect {
-    const pos = this._transform.worldPosition;
-    const hw = this._transform.localScale.x * 0.5;
-    const hh = this._transform.localScale.y * 0.5;
-    return { x: pos.x - hw, y: pos.y - hh, w: hw * 2, h: hh * 2 };
-  }
-
-  onCollision(other: ICollider): void {
-    if (other.colliderTag !== 'ball') return;
-
+  /**
+   * Override triggerDestruction for external destruction triggers
+   * (e.g. chain explosions). Add guards here if needed.
+   */
+  override triggerDestruction(): void {
     CollisionManager.get().unregister(this);
+    this.onDestroyBrick();
+  }
 
-    // Custom logic here — e.g. destroy neighbors, trigger effects, etc.
+  /**
+   * Override onDestroyBrick for custom destruction behavior.
+   * CollisionManager is already unregistered before this is called.
+   * MUST fire Events.BrickDestroyed and end with _park().
+   */
+  protected override onDestroyBrick(): void {
+    const pos = this._transform.worldPosition;
 
+    // Custom logic here — e.g. spawn projectiles, trigger effects, etc.
+
+    // Fire event so scoring/VFX/GameManager react
     EventService.sendLocally(Events.BrickDestroyed, {
-      position: this._transform.worldPosition,
+      position: pos,
+      color: this._baseColor,
     });
-    this.entity.destroy();
+
+    // Start death animation (inherited), which calls _park() when done
+    this._deathScale = this._transform.localScale;
+    this._deathAge = 0;
+    this._dying = true;
+    this._flash(() => {});
+  }
+
+  /**
+   * Override onHit for custom non-lethal hit behavior (optional).
+   */
+  protected override onHit(): void {
+    super.onHit(); // fires BrickHit event + flash + color update
+    // Additional logic on non-lethal hit
   }
 }
 ```
@@ -84,36 +107,72 @@ export class BrickExplosive extends Component implements ICollider {
 
 | Rule | Reason |
 |---|---|
-| Use `colliderTag = 'brick'` | `Ball.onCollision` checks for `'brick'` to resolve the bounce axis. |
-| Always call `CollisionManager.get().unregister(this)` before `entity.destroy()` | Prevents stale collider references. |
-| Always fire `Events.BrickDestroyed` on destruction | `GameManager` uses it to track victory conditions and lives. |
-| Skip server context in `onStart` | All collision logic is client-only. |
-| **If the object moves**, call `CollisionManager.get().checkAgainst(this)` at the end of `onUpdate` | The global interval-based check no longer exists. Each moving object drives its own collision detection. Stationary objects (bricks) don't need this — the ball drives detection against them. |
+| **Extend `Brick`**, don't write a standalone component | HP, color, reveal, death animation, and pool recycling are all inherited. Duplicating this logic is fragile. |
+| Use `override triggerDestruction()` | Entry point for external forced destruction (explosion chains). Add loop guards here if needed. |
+| Use `override onDestroyBrick()` | Called after `CollisionManager.unregister`. Custom destruction logic goes here. |
+| Always fire `Events.BrickDestroyed` on destruction | `GameManager` uses it to track victory conditions. `CoinService`, `JuiceService`, `ComboManager` all subscribe. |
+| Never call `entity.destroy()` | Bricks are pooled. Call `this._park()` to recycle, or let the inherited death animation do it automatically. |
+| `colliderTag` is always `'brick'` | Inherited from `Brick`. `Ball.onCollision` checks for `'brick'` to resolve bounce axis. |
+
+### Available protected members from Brick
+
+| Member | Type | Description |
+|---|---|---|
+| `_transform` | `TransformComponent` | Entity transform, set in `onStart` |
+| `_baseColor` | `Color` | Current brick color (for event payloads) |
+| `_park()` | method | Move off-screen, reset state, fire `BrickRecycle` |
+| `_flash(callback)` | method | White flash for 50ms, then call callback |
+| `onHit()` | method | Called on non-lethal hit (fires `BrickHit` + flash) |
+| `onDestroyBrick()` | method | Called on destruction (fires `BrickDestroyed` + death anim) |
+| `triggerDestruction()` | method | External entry point (unregisters collider + calls `onDestroyBrick`) |
 
 ---
 
-## Step 4 — Use the asset in LevelConfig.ts
+### Step 2 — Register the asset in Assets.ts
 
 ```typescript
-import { BrickAssets } from './Assets';
-
-brickTemplates: {
-  'E': { asset: BrickAssets.Explosive, hits: 1 },
-},
+export const BrickAssets = {
+  Normal:    new TemplateAsset('@Templates/GameplayObjects/Brick.hstf'),
+  Explosive: new TemplateAsset('@Templates/GameplayObjects/ExplosiveBrick.hstf'),
+  MyBrick:   new TemplateAsset('@Templates/GameplayObjects/MyBrick.hstf'),
+} as const;
 ```
 
-> `hits`, `indestructible`, and `colors` from `BrickTemplate` are only read by the built-in `Brick` component. For a fully custom component, manage those properties internally.
+---
+
+### Step 3 — Use in LevelConfig.ts
+
+```typescript
+'M': { asset: BrickAssets.MyBrick, hits: 2 },
+```
 
 ---
 
-## Step 5 — Attach the component to the template
+### Step 4 — Create the template
 
-Open `BrickExplosive.hstf` in the Horizon editor and attach `BrickExplosive` as a component. Remove the `Brick` component if the custom logic fully replaces it.
+1. Duplicate `Templates/GameplayObjects/Brick.hstf`
+2. Replace the `Brick` component with `MyBrick`
+3. Customize visuals as needed (the `Visuals` child carries the `ColorComponent`)
 
 ---
 
-## Coexistence with Brick
+## Reference: ExplosiveBrick
 
-If you only need different visuals (new asset, same HP/color logic), keep the `Brick` component on the template and omit a custom component entirely. `LevelLayout` will call `init()` as usual.
+`ExplosiveBrick` is the canonical example of a custom brick subclass:
 
-If you need **both** the standard HP system **and** extra behavior, keep `Brick` on the template and add your component alongside it. Listen to `Events.BrickDestroyed` or override `onCollision` via a separate component that does not re-register with `CollisionManager`.
+- Extends `Brick`
+- `override triggerDestruction()` — adds a loop guard via a module-level `Set` to prevent infinite chain recursion
+- `override onDestroyBrick()` — queries adjacent bricks via `CollisionManager.query()`, fires `Events.ExplosionChain`, then triggers their destruction before self-parking
+
+---
+
+## Checklist
+
+- [ ] Subclass extends `Brick` (not standalone `Component`)
+- [ ] `override triggerDestruction()` with any needed guards
+- [ ] `override onDestroyBrick()` with custom logic
+- [ ] `Events.BrickDestroyed` fired on destruction
+- [ ] No `entity.destroy()` — uses `_park()` or inherited death animation
+- [ ] Asset registered in `Assets.ts` with matching key
+- [ ] Template `.hstf` created with the custom component attached
+- [ ] Level config references the new brick type

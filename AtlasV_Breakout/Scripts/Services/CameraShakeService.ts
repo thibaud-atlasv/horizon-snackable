@@ -21,6 +21,7 @@ export class CameraShakeService extends Service {
 
   private _transform: Maybe<TransformComponent> = null;
   private _originalPos: Vec3 = Vec3.zero;
+  private _initialized: boolean = false;
 
   private _shaking: boolean = false;
   private _shakeIntensity: number = 0;
@@ -34,11 +35,12 @@ export class CameraShakeService extends Service {
     this._transform = cameraEntity.getComponent(TransformComponent);
     if (!this._transform) return;
     this._originalPos = this._transform.localPosition;
+    this._initialized = true;
   }
 
   /** Trigger a shake. intensity = max offset in world units, duration in seconds. */
   shake(intensity: number, duration: number): void {
-    if (!this._transform) return;
+    if (!this._initialized || !this._transform) return;
     // Always store the current original pos when not already shaking
     // so stacked shakes don't drift
     if (!this._shaking) {

@@ -116,6 +116,11 @@ Each level transition plays a **randomized reveal animation** — bricks don't j
 | `VfxService.ts` | Particle pool (200 entities) — brick explosions, ball trail, hit sparks, coin collect burst |
 | `CameraShakeService.ts` | Screen shake on impacts (variable intensity per event type) |
 
+### Audio
+| Script | Role |
+|---|---|
+| `AudioManager.ts` | Centralized `@service()` singleton — subscribes to all gameplay events and plays corresponding sounds via registered `SoundComponent` pools. Round-robin playback, dynamic pitch/volume, music fade control. See [AUDIO_MANAGER.md](AUDIO_MANAGER.md) |
+
 ### HUD & UI
 | Script | Role |
 |---|---|
@@ -164,7 +169,8 @@ Every interaction must have **layered feedback**. The checklist:
 - [x] **Background intensity API**: auto-triggers on brick destroy, explosions, combos, ball lost
 - [x] **Color palette escalation**: each level uses distinct intense neon palettes (80s arcade aesthetic)
 - [x] **Level intro animation**: randomized brick reveal with 4 styles × 5 patterns
-- [x] **Background music**: looping arcade synthwave music — starts on level load, fades out on game over, restarts on retry
+- [x] **Background music**: looping arcade synthwave music — auto-starts on register, stops during gameplay (fade 1s), resumes on game over (fade 1s)
+- [x] **Full sound design**: 22+ sound IDs covering ball, bricks, power-ups, coins, combos, heat milestones, and game state — managed by `AudioManager` service with round-robin pooling and dynamic pitch/volume
 - [ ] **Background particles**: slow ambient drift to prevent static feel
 - [ ] **Trail intensity scaling**: ball trail grows with combo/power level
 

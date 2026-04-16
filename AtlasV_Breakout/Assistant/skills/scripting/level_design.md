@@ -86,8 +86,8 @@ grid: [
 |---|---|---|
 | `brickWidth` | `1.2` | Width of a cell (world units). |
 | `brickHeight` | `0.4` | Height of a cell. |
-| `paddingX` | `0.1` | Horizontal gap between bricks. |
-| `paddingY` | `0.1` | Vertical gap between bricks. |
+| `paddingX` | `0.1125` | Horizontal gap between bricks. |
+| `paddingY` | `0.1125` | Vertical gap between bricks. |
 | `startY` | `4` | Y center of the first row. |
 
 To compute the total occupied width:
@@ -106,17 +106,12 @@ palette: {
   background: [0.04, 0.04, 0.08], // RGB 0–1
   ball:       [1.00, 1.00, 1.00],
   paddle:     [0.00, 0.96, 1.00],
-  brick: {
-    1: [0.20, 0.95, 0.20], // default color for 1 HP bricks without their own colors
-    2: [0.10, 0.50, 1.00],
-    3: [0.65, 0.00, 1.00],
-    indestructible: [0.55, 0.55, 0.55],
-  },
 },
 ```
 
-> Brick color resolution priority:
-> `brickTemplate.colors[hp]` → `palette.brick[hp]` → `DEFAULT_PALETTE.brick[hp]`
+**`ColorPalette` has three fields only**: `background`, `ball`, `paddle`. There is no `palette.brick` — brick colors are set exclusively via `brickTemplates[char].colors`.
+
+> Brick color resolution: `brickTemplate.colors[hp]` is the only source. If not set, the brick gets no custom color.
 
 ---
 
@@ -127,8 +122,9 @@ palette: {
 | `ballSpeedMultiplier` | `1` | Multiplier on the base ball speed. |
 | `gravity` | `0` | Downward acceleration (units/s²). |
 | `bounceRandomness` | `0` | Angular variance on bounces (0–1). `0.1` = slight chaos. |
-| `paddleLerpFactor` | `1` | Smoothness of paddle movement (0 = still, 1 = snap). `0.85`–`0.95` for a sliding feel. |
-| `ballSpeedIncrementPerBrick` | `0` | Speed added to the ball per brick destroyed. |
+| `paddleSpeedMultiplier` | `1` | Multiplier on the base paddle speed. |
+| `paddleLerpFactor` | `0.88` | Smoothness of paddle movement (0 = still, 1 = snap). `0.85`–`0.95` for a sliding feel. |
+| `ballSpeedIncrementPerBrick` | `0` | Speed bonus added to the ball for each brick destroyed. |
 
 ---
 
