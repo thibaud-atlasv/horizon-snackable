@@ -8,6 +8,10 @@
             "version": "*"
         },
         {
+            "name": "meta/assistant",
+            "version": "*"
+        },
+        {
             "name": "meta/editor_starter_kit",
             "version": "1.13.2"
         }
