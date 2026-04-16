@@ -348,6 +348,84 @@
     font-size: 15px;
   }
 
+  /* ── PUFFY PREVIEW ── */
+  #puffy-screen {
+    background: var(--bg);
+    gap: 16px;
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding-top: 32px;
+  }
+  .puffy-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    text-align: center;
+  }
+  .puffy-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .puffy-compare {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .compare-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 10px 14px;
+  }
+  .compare-label {
+    font-size: 12px;
+    color: var(--muted);
+    width: 72px;
+    flex-shrink: 0;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+  .compare-shapes {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+  .compare-shapes canvas {
+    border-radius: 8px;
+    background: #1a1a2e;
+  }
+  .compare-toggle {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: var(--card);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .toggle-btn.active {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(124,58,237,0.15);
+  }
+
   /* Streak badge */
   #streak-badge {
     position: absolute;
@@ -416,6 +494,20 @@
       </div>
     </div>
     <button class="btn-primary" onclick="startGame()">JOUER</button>
+    <button class="btn-primary" style="background:var(--card);color:var(--muted);border:1.5px solid rgba(255,255,255,0.08);margin-top:-8px" onclick="showScreen('puffy-screen')">Formes Puffy (preview)</button>
+  </div>
+
+  <!-- PUFFY PREVIEW -->
+  <div id="puffy-screen" class="screen">
+    <div class="puffy-title">Formes Puffy 3D</div>
+    <div class="puffy-subtitle">Comparaison Original vs Chibi</div>
+    <div class="compare-toggle">
+      <button class="toggle-btn active" id="toggle-orig" onclick="setPuffyMode('original')">Original</button>
+      <button class="toggle-btn active" id="toggle-puffy" onclick="setPuffyMode('puffy')">Puffy</button>
+      <button class="toggle-btn" id="toggle-side" onclick="setPuffyMode('side')">Côte à côte</button>
+    </div>
+    <div class="puffy-compare" id="puffy-compare"></div>
+    <button class="btn-primary" style="background:var(--card);color:var(--muted);border:1.5px solid rgba(255,255,255,0.08)" onclick="showScreen('start-screen')">← Retour</button>
   </div>
 
   <!-- GAME -->
@@ -595,6 +687,34 @@ function drawShape(ctx, type, x, y, size, color, rotation = 0) {
       ctx.lineTo(-size * 0.25, size);
       ctx.lineTo(-size * 0.25, 0);
       ctx.lineTo(-size * 0.6, 0);
+      ctx.closePath();
+      break;
+    case 'semicircle':
+      ctx.arc(0, 0, size, Math.PI, 0);
+      ctx.closePath();
+      break;
+    case 'teardrop':
+      ctx.moveTo(0, -size);
+      ctx.bezierCurveTo( size * 0.4, -size * 0.5,  size * 0.9,  size * 0.1,  size * 0.7,  size * 0.6);
+      ctx.bezierCurveTo( size * 0.5,  size,        -size * 0.5,  size,       -size * 0.7,  size * 0.6);
+      ctx.bezierCurveTo(-size * 0.9,  size * 0.1, -size * 0.4, -size * 0.5,  0,           -size);
+      ctx.closePath();
+      break;
+    case 'pentagon':
+      for (let i = 0; i < 5; i++) {
+        const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+        i === 0 ? ctx.moveTo(Math.cos(a)*size, Math.sin(a)*size)
+                : ctx.lineTo(Math.cos(a)*size, Math.sin(a)*size);
+      }
+      ctx.closePath();
+      break;
+    case 'star4':
+      for (let i = 0; i < 8; i++) {
+        const r = i % 2 === 0 ? size : size * 0.22;
+        const a = (Math.PI / 4) * i - Math.PI / 2;
+        i === 0 ? ctx.moveTo(Math.cos(a)*r, Math.sin(a)*r)
+                : ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r);
+      }
       ctx.closePath();
       break;
   }
@@ -1058,9 +1178,284 @@ function renderLeaderboard() {
 }
 
 // ============================================================
+// PUFFY SHAPES — Bézier rounded versions
+// ============================================================
+
+// Rounded polygon helper: draws an n-sided polygon with rounded corners.
+// pts: array of {x, y}, radius: corner rounding amount (world units)
+function roundedPolygon(ctx, pts, radius) {
+  const n = pts.length;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const prev = pts[(i - 1 + n) % n];
+    const curr = pts[i];
+    const next = pts[(i + 1) % n];
+
+    // Vectors toward prev and next from current corner
+    const toPrev = { x: prev.x - curr.x, y: prev.y - curr.y };
+    const toNext = { x: next.x - curr.x, y: next.y - curr.y };
+    const lenPrev = Math.hypot(toPrev.x, toPrev.y);
+    const lenNext = Math.hypot(toNext.x, toNext.y);
+
+    const r = Math.min(radius, lenPrev * 0.45, lenNext * 0.45);
+
+    const p1 = { x: curr.x + toPrev.x / lenPrev * r, y: curr.y + toPrev.y / lenPrev * r };
+    const p2 = { x: curr.x + toNext.x / lenNext * r, y: curr.y + toNext.y / lenNext * r };
+
+    if (i === 0) ctx.moveTo(p1.x, p1.y);
+    else ctx.lineTo(p1.x, p1.y);
+    ctx.quadraticCurveTo(curr.x, curr.y, p2.x, p2.y);
+  }
+  ctx.closePath();
+}
+
+function drawShapePuffy(ctx, type, x, y, size, color, rotation = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  ctx.fillStyle = color;
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 1.2;
+
+  const s = size;
+  const r = s * 0.32; // corner radius — tunable
+
+  switch (type) {
+    case 'circle':
+      // Circle stays as-is — already perfectly round
+      ctx.beginPath();
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+      break;
+
+    case 'square': {
+      // Rounded rectangle (no rotation so it's axis-aligned, puffy cube feel)
+      const half = s * 0.82;
+      ctx.beginPath();
+      ctx.roundRect(-half, -half, half * 2, half * 2, s * 0.28);
+      break;
+    }
+
+    case 'triangle': {
+      // Equilateral triangle with very round corners — classic chibi feel
+      const pts = [
+        { x: 0,              y: -s },
+        { x:  s * 0.866,     y:  s * 0.5 },
+        { x: -s * 0.866,     y:  s * 0.5 },
+      ];
+      roundedPolygon(ctx, pts, s * 0.38);
+      break;
+    }
+
+    case 'diamond': {
+      const pts = [
+        { x:  0,       y: -s },
+        { x:  s * 0.7, y:  0 },
+        { x:  0,       y:  s },
+        { x: -s * 0.7, y:  0 },
+      ];
+      roundedPolygon(ctx, pts, s * 0.22);
+      break;
+    }
+
+    case 'hexagon': {
+      const pts = [];
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i;
+        pts.push({ x: Math.cos(a) * s, y: Math.sin(a) * s });
+      }
+      roundedPolygon(ctx, pts, s * 0.2);
+      break;
+    }
+
+    case 'pentagon': {
+      const pts = [];
+      for (let i = 0; i < 5; i++) {
+        const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+        pts.push({ x: Math.cos(a) * s, y: Math.sin(a) * s });
+      }
+      roundedPolygon(ctx, pts, s * 0.22);
+      break;
+    }
+
+    case 'star': {
+      // 5-pointed star with rounded tips and inner concave curves
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const outerR = i % 2 === 0 ? s       : s * 0.42;
+        const a      = (Math.PI / 5) * i - Math.PI / 2;
+        const px = Math.cos(a) * outerR;
+        const py = Math.sin(a) * outerR;
+        if (i === 0) ctx.moveTo(px, py);
+        else         ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      break;
+    }
+
+    case 'star4': {
+      // 4-pointed star — puffy blob version with cubic Bézier bulge
+      ctx.beginPath();
+      const tips = [
+        { x: 0,  y: -s },
+        { x: s,  y:  0 },
+        { x: 0,  y:  s },
+        { x: -s, y:  0 },
+      ];
+      const inner = s * 0.22;
+      const cp    = s * 0.18; // control point bulge
+      for (let i = 0; i < 4; i++) {
+        const tip  = tips[i];
+        const inA  = tips[(i + 3) % 4];
+        const inB  = tips[(i + 1) % 4];
+        const midA = { x: inA.x * inner / s, y: inA.y * inner / s };
+        const midB = { x: inB.x * inner / s, y: inB.y * inner / s };
+
+        if (i === 0) ctx.moveTo(midA.x, midA.y);
+        else ctx.lineTo(midA.x, midA.y);
+
+        ctx.bezierCurveTo(
+          midA.x + (tip.x - midA.x) * 0.3 + cp * (midA.y < 0 ? -1 : 1),
+          midA.y + (tip.y - midA.y) * 0.3,
+          tip.x, tip.y,
+          midB.x + (tip.x - midB.x) * 0.3,
+          midB.y + (tip.y - midB.y) * 0.3
+        );
+      }
+      ctx.closePath();
+      break;
+    }
+
+    case 'cross': {
+      const arm  = s * 0.38;
+      const half = s * 0.95;
+      const pts = [
+        { x: -arm,  y: -half }, { x:  arm,  y: -half },
+        { x:  arm,  y: -arm  }, { x:  half, y: -arm  },
+        { x:  half, y:  arm  }, { x:  arm,  y:  arm  },
+        { x:  arm,  y:  half }, { x: -arm,  y:  half },
+        { x: -arm,  y:  arm  }, { x: -half, y:  arm  },
+        { x: -half, y: -arm  }, { x: -arm,  y: -arm  },
+      ];
+      roundedPolygon(ctx, pts, s * 0.22);
+      break;
+    }
+
+    case 'arrow': {
+      const pts = [
+        { x:  0,        y: -s      },
+        { x:  s * 0.62, y:  s * 0.08 },
+        { x:  s * 0.28, y:  s * 0.08 },
+        { x:  s * 0.28, y:  s      },
+        { x: -s * 0.28, y:  s      },
+        { x: -s * 0.28, y:  s * 0.08 },
+        { x: -s * 0.62, y:  s * 0.08 },
+      ];
+      roundedPolygon(ctx, pts, s * 0.22);
+      break;
+    }
+
+    case 'semicircle': {
+      // Half-disc with rounded flat edge corners
+      ctx.beginPath();
+      ctx.arc(0, 0, s, Math.PI, 0);
+      ctx.quadraticCurveTo(s * 0.1, s * 0.28, 0, s * 0.18);
+      ctx.quadraticCurveTo(-s * 0.1, s * 0.28, -s, 0);
+      ctx.closePath();
+      break;
+    }
+
+    case 'teardrop': {
+      // Teardrop already has curves — give it a fatter, more chibi belly
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo( s * 0.5, -s * 0.4,  s * 1.0, s * 0.2,  s * 0.75, s * 0.62);
+      ctx.bezierCurveTo( s * 0.5,  s * 1.05, -s * 0.5, s * 1.05, -s * 0.75, s * 0.62);
+      ctx.bezierCurveTo(-s * 1.0,  s * 0.2, -s * 0.5, -s * 0.4,  0, -s);
+      ctx.closePath();
+      break;
+    }
+
+    default:
+      ctx.beginPath();
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+  }
+
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ============================================================
+// PUFFY PREVIEW SCREEN
+// ============================================================
+const PUFFY_SHAPES = ['circle', 'triangle', 'square', 'diamond', 'hexagon', 'star', 'cross', 'arrow', 'semicircle', 'teardrop', 'star4', 'pentagon'];
+const PUFFY_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899'];
+const PUFFY_NAMES  = { circle:'Cercle', triangle:'Triangle', square:'Carré', diamond:'Losange', hexagon:'Hexagone', star:'Étoile 5', cross:'Croix', arrow:'Flèche', semicircle:'Demi-cercle', teardrop:'Goutte', star4:'Étoile 4', pentagon:'Pentagone' };
+
+let _puffyMode = 'side'; // 'original' | 'puffy' | 'side'
+
+function setPuffyMode(mode) {
+  _puffyMode = mode;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('toggle-' + (mode === 'side' ? 'side' : mode === 'puffy' ? 'puffy' : 'orig')).classList.add('active');
+  if (mode === 'side') {
+    document.getElementById('toggle-orig').classList.add('active');
+    document.getElementById('toggle-puffy').classList.add('active');
+  }
+  renderPuffyPreview();
+}
+
+function makeShapeCanvas(drawFn, type, color, sz = 52) {
+  const cvs = document.createElement('canvas');
+  cvs.width  = sz;
+  cvs.height = sz;
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, sz, sz);
+  drawFn(ctx, type, sz / 2, sz / 2, sz * 0.36, color, 0);
+  return cvs;
+}
+
+function renderPuffyPreview() {
+  const container = document.getElementById('puffy-compare');
+  container.innerHTML = '';
+
+  for (const shape of PUFFY_SHAPES) {
+    const row = document.createElement('div');
+    row.className = 'compare-row';
+
+    const label = document.createElement('div');
+    label.className = 'compare-label';
+    label.textContent = PUFFY_NAMES[shape] || shape;
+    row.appendChild(label);
+
+    const shapesDiv = document.createElement('div');
+    shapesDiv.className = 'compare-shapes';
+
+    for (const color of PUFFY_COLORS) {
+      if (_puffyMode === 'original' || _puffyMode === 'side') {
+        const cvs = makeShapeCanvas(drawShape, shape, color);
+        if (_puffyMode === 'side') cvs.title = 'Original';
+        shapesDiv.appendChild(cvs);
+      }
+      if (_puffyMode === 'puffy' || _puffyMode === 'side') {
+        const cvs = makeShapeCanvas(drawShapePuffy, shape, color);
+        cvs.style.outline = _puffyMode === 'side' ? '1.5px solid rgba(124,58,237,0.4)' : 'none';
+        if (_puffyMode === 'side') cvs.title = 'Puffy';
+        shapesDiv.appendChild(cvs);
+      }
+    }
+
+    row.appendChild(shapesDiv);
+    container.appendChild(row);
+  }
+}
+
+// ============================================================
 // INIT
 // ============================================================
 renderPreview();
+renderPuffyPreview();
 </script>
 </body>
 </html>

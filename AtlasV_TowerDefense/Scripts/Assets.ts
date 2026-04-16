@@ -32,16 +32,22 @@ export namespace Assets {
 }
 
 
+export namespace NewTiles {
+  export const Grass = new TemplateAsset('@Templates/Env/Tile.hstf');;
+  export const LeftToRight = new TemplateAsset('@Templates/Env/Path.hstf');
+  export const DownToRight = new TemplateAsset('@Templates/Env/Angle.hstf');
+}
+
 export namespace Tiles {
-  export const Grass = new TemplateAsset('@Models/FBX format/tile.fbx:template');
   export const Hill = new TemplateAsset('@Models/FBX format/tile-hill.fbx:template');
   export const Rock = new TemplateAsset('@Models/FBX format/tile-rock.fbx:template');
   export const Tree = new TemplateAsset('@Models/FBX format/tile-tree.fbx:template');
   export const TreeDouble = new TemplateAsset('@Models/FBX format/tile-tree-double.fbx:template');
   export const TreeQuad = new TemplateAsset('@Models/FBX format/tile-tree-quad.fbx:template');
   export const Crystal = new TemplateAsset('@Models/FBX format/tile-crystal.fbx:template');
+  export const RightToLeftEnd = new TemplateAsset('@Models/FBX format/tile-spawn-end.fbx:template')
   
-  export const RightToLeftEnd = new TemplateAsset('@Models/FBX format/tile-spawn-end.fbx:template');
+  export const Grass = new TemplateAsset('@Models/FBX format/tile.fbx:template');;
   export const TopToRight = new TemplateAsset('@Models/FBX format/tile-corner-round.fbx:template');
   export const LeftToRight = new TemplateAsset('@Models/FBX format/tile-straight.fbx:template');
 }

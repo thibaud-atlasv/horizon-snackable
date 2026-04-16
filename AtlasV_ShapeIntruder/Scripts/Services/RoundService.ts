@@ -12,6 +12,7 @@ import {
   SHAPES_Y_MAX,
   SHAPE_SIZE_MIN,
   SHAPE_SIZE_MAX,
+  SHAPE_ROTATION_MAX_DEG,
   SHAPE_JITTER,
   DEBUG_COLOR_FILTER,
   DEBUG_EDGE_TEST,
@@ -113,14 +114,15 @@ function buildShapes(count: number, presentPairs: IOption[]): IShapeInstance[] {
     const col  = cell % cols;
     const row  = Math.floor(cell / cols);
     const size = cellW * (SHAPE_SIZE_MIN + Math.random() * (SHAPE_SIZE_MAX - SHAPE_SIZE_MIN));
+    // rawX/rawY are the desired center of the shape
     const rawX = SHAPES_X_MIN + cellW * (col + 0.5 + (Math.random() - 0.5) * SHAPE_JITTER);
     const rawY = SHAPES_Y_MIN + cellH * (row + 0.5 + (Math.random() - 0.5) * SHAPE_JITTER);
     shapes.push({
       typeKey:  base.typeKey  as ShapeKey,
       colorKey: base.colorKey as ColorKey,
-      rotation: Math.random() * Math.PI * 2,
-      x: Math.max(SHAPES_X_MIN + size, Math.min(SHAPES_X_MAX - size, rawX)),
-      y: Math.max(SHAPES_Y_MIN + size, Math.min(SHAPES_Y_MAX - size, rawY)),
+      rotation: (Math.random() * 2 - 1) * SHAPE_ROTATION_MAX_DEG * (Math.PI / 180),
+      x: Math.max(SHAPES_X_MIN + size / 2, Math.min(SHAPES_X_MAX - size / 2, rawX)),
+      y: Math.max(SHAPES_Y_MIN + size / 2, Math.min(SHAPES_Y_MAX - size / 2, rawY)),
       size,
     });
   }
@@ -128,12 +130,13 @@ function buildShapes(count: number, presentPairs: IOption[]): IShapeInstance[] {
 }
 
 function buildEdgeTestShapes(presentPairs: IOption[]): IShapeInstance[] {
-  const size = 0.06;
-  const xMin = SHAPES_X_MIN + size;
-  const xMax = SHAPES_X_MAX - size;
+  // size as fraction of canvas [0..1]; x/y are centers
+  const size = 0.15;
+  const xMin = SHAPES_X_MIN + size / 2;
+  const xMax = SHAPES_X_MAX - size / 2;
   const xMid = (SHAPES_X_MIN + SHAPES_X_MAX) / 2;
-  const yMin = SHAPES_Y_MIN + size;
-  const yMax = SHAPES_Y_MAX - size;
+  const yMin = SHAPES_Y_MIN + size / 2;
+  const yMax = SHAPES_Y_MAX - size / 2;
   const yMid = (SHAPES_Y_MIN + SHAPES_Y_MAX) / 2;
 
   const positions = [

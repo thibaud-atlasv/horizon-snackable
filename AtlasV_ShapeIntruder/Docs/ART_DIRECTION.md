@@ -2,22 +2,65 @@
 
 ## Purpose of this document
 
-This document defines the rules an AI must follow when creating or replacing the color palette and shape library for a Shape Intruder variant. The constraints are not aesthetic preferences — they are functional requirements. A bad palette or a poorly designed shape will break the game's readability and fairness.
+This document defines the rules an AI must follow when creating or replacing the color palette, shape library, and visual assets for a Shape Intruder variant. The constraints are not aesthetic preferences — they are functional requirements. A bad palette or a poorly designed shape will break the game's readability and fairness.
+
+---
+
+## Visual Style
+
+**Style: Puffy Cartoon / Mobile Casual**
+
+All shapes and UI elements use a **sprite-based rendering approach** — no SVG paths or canvas-drawn geometry. Each shape is a pre-rendered PNG sprite with:
+- **Puffy, inflated 3D volume** — shapes look like soft balloons or marshmallows
+- Exaggerated highlights (large white specular on top-left) and soft shadows (bottom-right)
+- **Rounded, bouncy silhouettes** — even angular shapes have softened edges
+- A "squishy toy" or "gummy candy" material feel
+
+Reference: *Candy Crush*, *Homescapes*, *Gardenscapes*, *Fishdom* — bright, child-friendly mobile casual games with maximum visual appeal.
+
+The overall feel is **bright, cheerful, playful, and tactile** — colors pop, shapes feel touchable, everything looks fun and inviting.
 
 ---
 
 ## Background & Surface Colors
 
-Extracted from the HTML prototype — these are the reference values for the default theme.
-
-| Role | Hex | Usage |
+| Role | Color | Usage |
 |---|---|---|
-| App background | `#0a0a0f` | Full screen background |
-| Shape canvas background | `#1a1a2e` | Background fill behind the shapes grid |
-| Option button resting | `#1e1e2e` | Default fill for the 4 answer buttons |
-| Option button border | `rgba(255,255,255,0.06)` | Subtle border on resting buttons |
-| Option button — correct | bg `rgba(34,197,94,0.1)` · border `#22c55e` | Feedback when player picks the right answer |
-| Option button — wrong | bg `rgba(239,68,68,0.1)` · border `#ef4444` | Feedback when player picks the wrong answer |
+| App background | `#7dd3fc` (sky blue) | Full screen background — bright and cheerful |
+| Shape canvas panel | `#fef9c3` (soft yellow) | Rounded-corner card holding the shape grid |
+| Canvas panel border | `#fbbf24` (golden yellow) | 4–5px puffy border around the shape canvas card |
+| Option button resting | `#e0f2fe` (light sky) | Default fill for the 4 answer choice cards |
+| Option button border | `#38bdf8` (bright blue) | Playful border on resting button cards |
+| Option button — correct | bg `#bbf7d0` · border `#22c55e` · checkmark icon | Feedback when player picks the right answer |
+| Option button — wrong | bg `#fecaca` · border `#ef4444` · X icon | Feedback when player picks the wrong answer |
+| HUD banner | `#fef9c3` (soft yellow) | Top bar holding score, level, timer |
+| HUD banner border | `#fbbf24` (golden yellow) | Border around the HUD card |
+
+---
+
+## Sprite Asset Requirements
+
+### Shape sprites
+
+Each shape is a **grayscale PNG sprite** with:
+- Transparent background
+- Dimensions: **128×128 px** (or 256×256 for high-DPI export)
+- **Puffy 3D rendering**: large bright highlight blob in top-left quadrant, soft gradient shadow in bottom-right
+- Exaggerated volume — shapes should look inflated/pillowy
+- Soft inner glow effect for extra depth
+- No hard outline stroke — the 3D shading and soft edges define the silhouette
+
+Sprites are rendered in **grayscale** and tinted at runtime via XAML `Color` / multiply. This allows a single sprite per shape to work with any color.
+
+### UI card sprites
+
+- **Shape canvas card**: rounded rectangle with extra-rounded corners (puffy look), soft yellow background, golden border, pronounced drop shadow
+- **Answer button card (resting)**: rounded rectangle, light sky fill, bright blue border, soft drop shadow
+- **Answer button card (correct)**: same shape with green tint overlay + bouncy green checkmark badge
+- **Answer button card (wrong)**: same shape with red tint overlay + wobbly red X badge
+- **HUD card**: same puffy rounded-rectangle style as canvas card
+
+All cards use generous corner radius (≈ 28–32px on a 480px-wide layout) for that soft, friendly feel.
 
 ---
 
@@ -34,17 +77,13 @@ The player has under 10 seconds to scan the canvas. There is no time to compare 
 **No two colors may share the same hue family.**
 Forbidden combinations: two blues, two greens, two reds, two purples, etc. Each color must own its hue category unambiguously.
 
-**Minimum contrast between any two palette colors: high.**
-Test by squinting. If two colors blend or could be confused when shapes overlap, remove one.
+**Colors must work on a light soft-yellow background (`#fef9c3`).**
+All sprite colors are rendered on a light canvas. Avoid very light, washed-out, or near-white colors — they will disappear against the yellow background. Prefer saturated mid-tone and deep colors.
 
-**No desaturated or neutral colors** — no grey, no beige, no off-white, no black, no brown.
-These read poorly on a dark canvas background and lose their identity when shapes overlap.
+**No near-white, near-cream, or near-yellow colors** — they blend with the canvas background.
 
-**All colors must work on a dark background (near-black, #0a0a0f to #1a1a2e range).**
-The canvas background is always dark. Pastel or very light colors are acceptable only if they remain vivid. Dark colors (navy, dark green, maroon) are forbidden — they vanish against the background.
-
-**Saturation floor: 70% (HSL).**
-Muted or earthy tones are out. Colors should feel electric or vivid, not natural or organic.
+**Saturation floor: 65% (HSL) with brightness between 45–75%.**
+Colors should feel vivid, candy-like, and fun. The palette should feel like a bag of colorful gummy bears — bright but not harsh.
 
 ### Recommended hue slots (one color per slot)
 
@@ -54,12 +93,11 @@ Use these as a guide — one pick per slot, no doubling up:
 |---|---|---|
 | Red | 0–10° | `#ef4444` |
 | Orange | 20–35° | `#f97316` |
-| Yellow | 45–60° | `#eab308` |
-| Green | 130–160° | `#22c55e` |
-| Cyan | 180–195° | `#06b6d4` |
+| Green | 120–150° | `#22c55e` |
+| Teal | 170–190° | `#14b8a6` |
 | Blue | 210–230° | `#3b82f6` |
-| Purple/Violet | 260–280° | `#8b5cf6` |
-| Pink/Magenta | 320–345° | `#ec4899` |
+| Purple/Violet | 260–280° | `#a855f7` |
+| Pink | 320–345° | `#ec4899` |
 
 ### Each color needs a name
 
@@ -91,34 +129,31 @@ Common failure: square vs diamond (same shape, 45° rotation). In this game they
 **Shapes must be filled, not outlined.**
 All shapes are drawn filled (solid color). Outline-only or wireframe shapes are not supported by the renderer.
 
-**Shapes must be definable as a closed 2D path (canvas `ctx.beginPath()` compatible).**
-The renderer uses canvas 2D API. Any shape expressible as a series of lines, arcs, or bezier curves on a unit circle is valid.
-
 ### Silhouette clarity test
 
 For each shape, ask: if this shape were a black silhouette on a white background at 40×40px, would a stranger immediately name it correctly? If not, the shape is too ambiguous.
 
 ### Current default shape set (reference)
 
-| ID | Name | Notes |
+| ID | Name | Sprite style notes |
 |---|---|---|
-| `circle` | Cercle | Perfect rotational symmetry — always readable |
-| `triangle` | Triangle | Equilateral — clear at all sizes |
-| `square` | Carré | Axis-aligned rectangle — distinct from diamond |
-| `diamond` | Losange | Square rotated 45° — must coexist with square carefully |
-| `hexagon` | Hexagone | 6-sided, rotationally robust |
-| `star` | Étoile | 5-pointed, iconic silhouette |
-| `cross` | Croix | Plus sign — unique silhouette |
-| `arrow` | Flèche | Directional — readable even rotated |
+| `circle` | Cercle | Perfect puffy sphere — like a bouncy ball |
+| `triangle` | Triangle | Equilateral with rounded corners, inflated sides |
+| `square` | Carré | Axis-aligned, very rounded corners, pillow-like |
+| `diamond` | Losange | Square rotated 45° — puffy rhombus |
+| `hexagon` | Hexagone | 6-sided, gem-like with soft edges |
+| `star` | Étoile | 5-pointed, chunky puffy arms |
+| `cross` | Croix | Plus sign with rounded ends, soft volume |
+| `heart` | Cœur | Iconic puffy heart — extra cute |
 
 ### Shapes to avoid
 
-- **Ellipse / oval** — too similar to circle
-- **Rectangle (non-square)** — loses aspect ratio identity when rotated
-- **Pentagon** — too similar to hexagon at small sizes
-- **Crescent / moon** — complex silhouette, loses clarity when small
-- **Heart** — loses shape when rotated past 90°
-- **Letter / number shapes** — too culturally specific, rotation breaks readability
+- **Ellipse / oval** — too similar to circle sprite
+- **Rectangle (non-square)** — loses aspect identity when placed at angles
+- **Pentagon** — too similar to hexagon at small sprite sizes
+- **Crescent / moon** — complex silhouette, poor 3D readability
+- **Arrow** — asymmetric, difficult to render as a friendly toy shape
+- **Letter / number shapes** — too culturally specific
 
 ---
 
@@ -137,12 +172,55 @@ If reducing either dimension (fewer colors or fewer shapes), compensate by incre
 
 ---
 
+## XAML Layout Guidelines
+
+When generating the UI (`shape_display.xaml` or equivalent), follow these structural rules consistent with the sprite-based art direction:
+
+### Layout structure (480×800 portrait)
+
+```
+┌─────────────────────────────┐
+│   HUD card (score / level)  │  ~80px tall, soft yellow card, golden border
+├─────────────────────────────┤
+│                             │
+│  Shape canvas card          │  ~380px tall, soft yellow bg, grid of sprite shapes
+│  (grid of shape sprites)    │
+│                             │
+├─────────────────────────────┤
+│  2×2 answer button grid     │  ~320px, 4 cards with shape sprites centered
+│  [ shape ] [ shape ]        │
+│  [ shape ] [ shape ]        │
+└─────────────────────────────┘
+```
+
+### Card styling
+
+- Corner radius: `28–32` on all cards (extra puffy)
+- Drop shadow: `BlurRadius=16, ShadowDepth=6, Opacity=0.20, Color=#000000`
+- Card margin/padding: `10` between cards, `16` internal padding
+
+### Shape sprites in UI
+
+Shapes inside the canvas and answer buttons are displayed via `<Rectangle>` with `OpacityMask` bound to the grayscale sprite, filled with the tint color. Do **not** use `<Ellipse>`, `<Path>`, or direct `<Image>` elements to draw shapes — all geometry comes from masked rectangles for proper color tinting.
+
+Answer buttons each show:
+- One centered shape sprite (≈ 80×80px inside a ~140×130px card)
+- No label text — the shape sprite is the sole identifier
+- A green checkmark badge (top-right corner) on correct answer, red X badge on wrong answer
+
+### Color / tint
+
+Sprites are grayscale PNGs. Apply tint via `<Rectangle Fill="{Binding fillColor}">` with `OpacityMask` set to an `ImageBrush` bound to `spriteSource`.
+
+---
+
 ## Theming a variant
 
-When creating a themed variant (e.g. "neon arcade", "pastel kawaii", "dark sci-fi"), the rules above still apply in full. The theme affects:
+When creating a themed variant (e.g. "jungle", "space", "underwater"), the rules above still apply in full. The theme affects:
 
+- Background and card colors (while keeping light/warm contrast logic)
 - Which specific hues are chosen within each slot
-- The overall vibe of the palette (cool vs warm dominant, soft vs harsh)
-- Shape selection (a kawaii theme might exclude cross and arrow; a sci-fi theme might add custom geometric shapes)
+- Shape selection (a nature theme might include leaf or cloud; a space theme might include rocket silhouettes if they pass the silhouette clarity test)
+- Sprite surface texture (glossy candy, matte rubber, metallic) — the puffy 3D volume model stays the same
 
-The rules do **not** bend for a theme. A pastel theme must still meet the saturation floor and dark-background contrast requirements — pastel colors are acceptable only when they remain vivid enough on a near-black background.
+The rules do **not** bend for a theme. All sprite colors must remain readable against the light canvas background, and every shape sprite must pass the 40×40px silhouette clarity test.

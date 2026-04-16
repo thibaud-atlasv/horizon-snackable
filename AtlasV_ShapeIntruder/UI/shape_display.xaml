@@ -1,6 +1,9 @@
 <Grid Background="Black"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
 
   <!-- REQUIRED: BooleanToVisibilityConverter for visibility bindings -->
   <Grid.Resources>
@@ -11,13 +14,19 @@
     <Grid Width="480" Height="800">
       <!-- Background -->
       <Rectangle Fill="Black" Width="480" Height="800"/>
-
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Grid.Background>
+          <RadialGradientBrush>
+            <GradientStop Offset="0" Color="#FFFD16FF"/>
+            <GradientStop Offset="1" Color="#FF9E18EC"/>
+          </RadialGradientBrush>
+        </Grid.Background>
+        <Border ClipToBounds="True" BorderThickness="10,10,10,10" CornerRadius="20,20,20,20" Grid.RowSpan="3" Margin="0,20,0,6" Background="#FFC410FF" Opacity="0.444"/>
 
         <!-- Row 0: HUD Banner — score + timer bar -->
         <Grid Grid.Row="0" Margin="16,12,16,4">
@@ -35,20 +44,27 @@
           <!-- Timer bar -->
           <Border Grid.Row="1" Background="#2a2a3e" CornerRadius="4" Height="10"
                   HorizontalAlignment="Stretch" ClipToBounds="True">
-            <Rectangle Fill="#7c3aed" RadiusX="4" RadiusY="4"
+            <Rectangle RadiusX="4" RadiusY="4"
                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                       RenderTransformOrigin="0,0.5">
+                       RenderTransformOrigin="0,0.5" Fill="#FF61ED3A">
               <Rectangle.RenderTransform>
                 <ScaleTransform ScaleX="{Binding timerProgress}" ScaleY="1"/>
               </Rectangle.RenderTransform>
             </Rectangle>
           </Border>
         </Grid>
+        <Border Grid.Row="1" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FF000000" BorderThickness="10,10,10,10" CornerRadius="20,20,20,20" Height="475" Width="475" Opacity="0.237" Margin="3,2,0,0"/>
 
         <!-- Row 1: Intruder Zone — shapes + scoped overlay -->
         <Border Grid.Row="1"
-                Background="#1e1e2e" CornerRadius="16"
-                ClipToBounds="True" Margin="16,16,16,16" Width="450" Height="450">
+                CornerRadius="16"
+                ClipToBounds="True" Width="450" Height="450" BorderBrush="#FFFFEAD6" BorderThickness="3,3,3,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Border.Background>
+            <RadialGradientBrush>
+              <GradientStop Offset="0" Color="#FFDFD0C1"/>
+              <GradientStop Offset="1" Color="#FFFFD699"/>
+            </RadialGradientBrush>
+          </Border.Background>
           <Grid Width="450" Height="450">
             <!-- Shapes rendered via ItemsControl with Canvas panel -->
             <ItemsControl ItemsSource="{Binding shapes}">
@@ -59,24 +75,29 @@
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <Grid RenderTransformOrigin="0, 0" Opacity="{Binding opacity}">
-                    <Path.RenderTransform>
+                  <Grid RenderTransformOrigin="0.5, 0.5" Opacity="{Binding opacity}">
+                    <Grid.RenderTransform>
                       <TransformGroup>
                         <ScaleTransform ScaleX="{Binding scale}" ScaleY="{Binding scale}"/>
                         <RotateTransform Angle="{Binding rotation}"/>
                         <TranslateTransform X="{Binding x}" Y="{Binding y}"/>
                       </TransformGroup>
-                    </Path.RenderTransform>
-                    <Path Data="{Binding pathData}"
-                          Fill="{Binding fillColor}"
-                          Visibility="{Binding pathVisible, Converter={StaticResource BoolToVis}}"
-                          Stretch="None">
-                    <Path.RenderTransform>
-                      <TransformGroup>
-                        <RotateTransform Angle="{Binding rotation}"/>
-                      </TransformGroup>
-                    </Path.RenderTransform>
-                    </Path>
+                    </Grid.RenderTransform>
+                    <!-- Layer 1 (color fill): solid color masked by sprite -->
+                    <Rectangle Width="2" Height="2" IsHitTestVisible="False">
+                      <Rectangle.OpacityMask>
+                        <ImageBrush ImageSource="{Binding spriteTexture}" Stretch="Uniform"/>
+                      </Rectangle.OpacityMask>
+                      <Rectangle.Fill>
+                        <SolidColorBrush Color="{Binding fillColor}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <!-- Layer 2 (multiply blend): sprite image for texture detail -->
+                    <Image Width="2" Height="2" Stretch="Uniform" IsHitTestVisible="False" BlendingMode="Multiply">
+                      <Image.Source>
+                        <Binding Path="spriteTexture"/>
+                      </Image.Source>
+                    </Image>
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
@@ -101,109 +122,205 @@
             <ColumnDefinition Width="*"/>
           </Grid.ColumnDefinitions>
 
-          <!-- Option 0 (top-left) -->
-          <Button Grid.Row="0" Grid.Column="0" Margin="6"
-                  Command="{Binding events.onAnswerOptionPressed}"
-                  CommandParameter="0"
-                  Background="{Binding option0BgColor}" BorderBrush="{Binding option0BorderColor}" BorderThickness="2">
-            <Button.Template>
-              <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="12">
-                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-              </ControlTemplate>
-            </Button.Template>
-            <Viewbox Stretch="Uniform" Margin="16">
-              <Grid Width="40" Height="40">
-                <Path Data="{Binding option0.pathData}"
-                      Fill="{Binding option0.fillColor}"
-                      Stretch="Uniform" Width="30" Height="30"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                      Visibility="{Binding option0.pathVisible, Converter={StaticResource BoolToVis}}"/>
-              </Grid>
-            </Viewbox>
-          </Button>
+          <!-- Option 0 (top-left) — 3-layer: shadow + color fill + multiply blend -->
+          <Grid Grid.Row="0" Grid.Column="0" Margin="6">
+            <Button Command="{Binding events.onAnswerOptionPressed}"
+                    CommandParameter="0"
+                    BorderBrush="{Binding option0BorderColor}" BorderThickness="5,5,5,5" Background="{Binding Path=option0BgColor}">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border CornerRadius="12"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}">
+                    <Grid>
+                      <Border CornerRadius="7">
+                        <Border.Background>
+                          <RadialGradientBrush>
+                            <GradientStop Color="#55ffffff" Offset="0"/>
+                            <GradientStop Color="{Binding option0FillColor}" Offset="1"/>
+                          </RadialGradientBrush>
+                        </Border.Background>
+                      </Border>
+                      <Border CornerRadius="7" Background="{TemplateBinding Background}"/>
+                    </Grid>
+                  </Border>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+            <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Rectangle IsHitTestVisible="False" Opacity="0.502">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option0SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="#FF000000"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Rectangle IsHitTestVisible="False" Panel.ZIndex="1">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option0SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="{Binding option0FillColor}"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Image Stretch="Uniform" IsHitTestVisible="False" BlendingMode="Multiply" Panel.ZIndex="2">
+                <Image.Source>
+                  <Binding Path="option0SpriteTexture"/>
+                </Image.Source>
+              </Image>
+            </Grid>
+          </Grid>
 
-          <!-- Option 1 (top-right) -->
-          <Button Grid.Row="0" Grid.Column="1" Margin="6"
-                  Command="{Binding events.onAnswerOptionPressed}"
-                  CommandParameter="1"
-                  Background="{Binding option1BgColor}" BorderBrush="{Binding option1BorderColor}" BorderThickness="2">
-            <Button.Template>
-              <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="12">
-                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-              </ControlTemplate>
-            </Button.Template>
-            <Viewbox Stretch="Uniform" Margin="16">
-              <Grid Width="40" Height="40">
-                <Path Data="{Binding option1.pathData}"
-                      Fill="{Binding option1.fillColor}"
-                      Stretch="Uniform" Width="30" Height="30"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                      Visibility="{Binding option1.pathVisible, Converter={StaticResource BoolToVis}}"/>
-              </Grid>
-            </Viewbox>
-          </Button>
+          <!-- Option 1 (top-right) — 3-layer: shadow + color fill + multiply blend -->
+          <Grid Grid.Row="0" Grid.Column="1" Margin="6">
+            <Button Command="{Binding events.onAnswerOptionPressed}"
+                    CommandParameter="1"
+                    BorderBrush="{Binding option1BorderColor}" BorderThickness="5,5,5,5" Background="{Binding Path=option0BgColor}">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border CornerRadius="12"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}">
+                    <Grid>
+                      <Border CornerRadius="7">
+                        <Border.Background>
+                          <RadialGradientBrush>
+                            <GradientStop Color="#55ffffff" Offset="0"/>
+                            <GradientStop Color="{Binding option1FillColor}" Offset="1"/>
+                          </RadialGradientBrush>
+                        </Border.Background>
+                      </Border>
+                      <Border CornerRadius="7" Background="{TemplateBinding Background}"/>
+                    </Grid>
+                  </Border>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+            <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Rectangle IsHitTestVisible="False" Opacity="0.502">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option1SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="#FF000000"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Rectangle IsHitTestVisible="False" Panel.ZIndex="1">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option1SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="{Binding option1FillColor}"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Image Stretch="Uniform" IsHitTestVisible="False" BlendingMode="Multiply" Panel.ZIndex="2">
+                <Image.Source>
+                  <Binding Path="option1SpriteTexture"/>
+                </Image.Source>
+              </Image>
+            </Grid>
+          </Grid>
 
-          <!-- Option 2 (bottom-left) -->
-          <Button Grid.Row="1" Grid.Column="0" Margin="6"
-                  Command="{Binding events.onAnswerOptionPressed}"
-                  CommandParameter="2"
-                  Background="{Binding option2BgColor}" BorderBrush="{Binding option2BorderColor}" BorderThickness="2">
-            <Button.Template>
-              <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="12">
-                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-              </ControlTemplate>
-            </Button.Template>
-            <Viewbox Stretch="Uniform" Margin="16">
-              <Grid Width="40" Height="40">
-                <Path Data="{Binding option2.pathData}"
-                      Fill="{Binding option2.fillColor}"
-                      Stretch="Uniform" Width="30" Height="30"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                      Visibility="{Binding option2.pathVisible, Converter={StaticResource BoolToVis}}"/>
-              </Grid>
-            </Viewbox>
-          </Button>
+          <!-- Option 2 (bottom-left) — 3-layer: shadow + color fill + multiply blend -->
+          <Grid Grid.Row="1" Grid.Column="0" Margin="6">
+            <Button Command="{Binding events.onAnswerOptionPressed}"
+                    CommandParameter="2"
+                    BorderBrush="{Binding option2BorderColor}" BorderThickness="5,5,5,5" Background="{Binding Path=option0BgColor}">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border CornerRadius="12"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}">
+                    <Grid>
+                      <Border CornerRadius="7">
+                        <Border.Background>
+                          <RadialGradientBrush>
+                            <GradientStop Color="#55ffffff" Offset="0"/>
+                            <GradientStop Color="{Binding option2FillColor}" Offset="1"/>
+                          </RadialGradientBrush>
+                        </Border.Background>
+                      </Border>
+                      <Border CornerRadius="7" Background="{TemplateBinding Background}"/>
+                    </Grid>
+                  </Border>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+            <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Rectangle IsHitTestVisible="False" Opacity="0.502">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option2SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="#FF000000"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Rectangle IsHitTestVisible="False" Panel.ZIndex="1">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option2SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="{Binding option2FillColor}"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Image Stretch="Uniform" IsHitTestVisible="False" BlendingMode="Multiply" Panel.ZIndex="2">
+                <Image.Source>
+                  <Binding Path="option2SpriteTexture"/>
+                </Image.Source>
+              </Image>
+            </Grid>
+          </Grid>
 
-          <!-- Option 3 (bottom-right) -->
-          <Button Grid.Row="1" Grid.Column="1" Margin="6"
-                  Command="{Binding events.onAnswerOptionPressed}"
-                  CommandParameter="3"
-                  Background="{Binding option3BgColor}" BorderBrush="{Binding option3BorderColor}" BorderThickness="2">
-            <Button.Template>
-              <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="12">
-                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-              </ControlTemplate>
-            </Button.Template>
-            <Viewbox Stretch="Uniform" Margin="16">
-              <Grid Width="40" Height="40">
-                <Path Data="{Binding option3.pathData}"
-                      Fill="{Binding option3.fillColor}"
-                      Stretch="Uniform" Width="30" Height="30"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                      Visibility="{Binding option3.pathVisible, Converter={StaticResource BoolToVis}}"/>
-              </Grid>
-            </Viewbox>
-          </Button>
+          <!-- Option 3 (bottom-right) — 3-layer: shadow + color fill + multiply blend -->
+          <Grid Grid.Row="1" Grid.Column="1" Margin="6">
+            <Button Command="{Binding events.onAnswerOptionPressed}"
+                    CommandParameter="3"
+                    BorderBrush="{Binding option3BorderColor}" BorderThickness="5,5,5,5" Background="{Binding Path=option0BgColor}">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border CornerRadius="12"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}">
+                    <Grid>
+                      <Border CornerRadius="7">
+                        <Border.Background>
+                          <RadialGradientBrush>
+                            <GradientStop Color="#55ffffff" Offset="0"/>
+                            <GradientStop Color="{Binding option3FillColor}" Offset="1"/>
+                          </RadialGradientBrush>
+                        </Border.Background>
+                      </Border>
+                      <Border CornerRadius="7" Background="{TemplateBinding Background}"/>
+                    </Grid>
+                  </Border>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+            <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Rectangle IsHitTestVisible="False" Opacity="0.502">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option3SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="#FF000000"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Rectangle IsHitTestVisible="False" Panel.ZIndex="1">
+                <Rectangle.OpacityMask>
+                  <ImageBrush ImageSource="{Binding option3SpriteTexture}" Stretch="Uniform"/>
+                </Rectangle.OpacityMask>
+                <Rectangle.Fill>
+                  <SolidColorBrush Color="{Binding option3FillColor}"/>
+                </Rectangle.Fill>
+              </Rectangle>
+              <Image Stretch="Uniform" IsHitTestVisible="False" BlendingMode="Multiply" Panel.ZIndex="2">
+                <Image.Source>
+                  <Binding Path="option3SpriteTexture"/>
+                </Image.Source>
+              </Image>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Grid>

@@ -1,0 +1,19 @@
+
+BEGIN_PROPERTIES
+  baseColorTex("Color", 2D) = "white"
+  occlusionRoughnessMetalnessTex("ORM texture", 2D) = "orm"
+END_PROPERTIES
+
+BEGIN_SURFACE
+
+// ----------------------------------------------------------------------------
+void surfaceFunction(inout Surface s, inout SurfaceData d)
+{
+  s.baseColor = texture(sampler2D(baseColorTex, linearWrapSampler), d.texcoord0).rgb * d.vertexColor0.rgb;
+  vec3 orm = texture(sampler2D(occlusionRoughnessMetalnessTex, linearWrapSampler), d.texcoord0).rgb;
+  s.occlusion = orm.r;
+  s.roughness = orm.g;
+  s.metallic = orm.b;
+}
+
+END_SURFACE

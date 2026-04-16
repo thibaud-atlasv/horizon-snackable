@@ -105,10 +105,59 @@ tasks:
     files:
       - Scripts/LeaderboardScoreUpdaterExample.ts
 
+  - name: UI Style Migration - SVG to Sprites
+    status: done
+    subtasks:
+      - name: Update ShapeIntruderDisplayViewModel for sprites
+        status: done
+        summary: Ajout spriteSource dans ShapeItemViewModel + mapping dans ShapeDefs
+        files:
+          - Scripts/Defs/ShapeDefs.ts
+          - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+          - Scripts/UI/ShapeIntruderDisplayComponent.ts
+      - name: Update XAML to use Image elements
+        status: done
+        summary: Remplacement des Path SVG par Rectangle + OpacityMask pour teinte sprites
+        files:
+          - UI/shape_display.xaml
+      - name: Update art direction for puffy cartoon style
+        status: done
+        summary: Nouveau style Puffy Cartoon / Mobile Casual avec couleurs vives
+        files:
+          - Docs/ART_DIRECTION.md
+
+  - name: Fix Answer Buttons Sprites
+    status: done
+    summary: Migration vers TextureAsset avec structure 3 layers (shadow + color + multiply)
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+
+  - name: Zone Shapes Migration to TextureAsset
+    status: done
+    summary: Conversion des shapes du tableau dynamique vers TextureAsset (2 layers sans shadow)
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+
+  - name: Radial Gradient Answer Buttons
+    status: done
+    summary: Gradient radial sur les boutons - blanc au centre, couleur ViewModel à l'extérieur
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []
-  failed_attempts: []
+  failed_attempts:
+    - "Nested ViewModel bindings (option0.fillColor) - Noesis doesn't propagate change notifications"
+    - "Direct bindings inside Button content - DataContext not propagated through ContentPresenter"
+    - "RelativeSource AncestorType=Button - doesn't resolve in Noesis"
+    - "Direct ImageSource binding on ImageBrush - doesn't work in Noesis"
+    - "StaticResource/DynamicResource with string binding - not supported"
 
 notes:
   - Composant technique pour Shape Intruder

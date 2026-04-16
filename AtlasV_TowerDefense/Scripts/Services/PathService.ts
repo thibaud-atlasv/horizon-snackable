@@ -10,20 +10,18 @@
  * Note: col → Z axis, row → X axis (row 0 = top of screen).
  *
  * Tile conventions (Y-up right-hand, col=Z, row=X):
- *   LeftToRight    — straight tile, default open along Z axis (col direction).
- *                    Rotate Y=90° to open along X axis (row direction).
- *   TopToRight     — curve tile, default: entry from -X (top), exit to +Z (right).
- *                    Rotations (Y, degrees): 0°=top→right, 90°=right→bottom, 180°=bottom→left, 270°=left→top.
- *   RightToLeftEnd — end cap, default: open to +Z (right), closed to -Z (left).
- *                    Spawn entry (row=0): open toward +X (down) → rotY=90°.
- *                    Spawn exit  (row=GRID_ROWS-1): open toward -X (up) → rotY=270°.
- *   Grass/variants — filler tiles for non-path cells, weighted random distribution.
+ *   LeftToRight — straight tile, default open along Z axis (col direction).
+ *                 Rotate Y=90° to open along X axis (row direction).
+ *   DownToRight — curve tile, default: entry from down (+X), exit to right (+Z).
+ *                 Rotations (Y, degrees): TBD once new tiles are tested in-game.
+ *   End cap     — uses LeftToRight as placeholder.
+ *   Grass       — filler tile for all non-path cells.
  */
 import { Service, Vec3, WorldService, NetworkMode, Quaternion, NetworkingService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
 import { CELL_SIZE, GRID_COLS, GRID_ROWS, GRID_ORIGIN_X, GRID_ORIGIN_Z, GROUND_Y } from '../Constants';
-import { Tiles } from '../Assets';
+import { NewTiles } from '../Assets';
 import { LEVEL_DEFS } from '../Defs/LevelDefs';
 
 interface IPathSegment {
@@ -128,7 +126,7 @@ export class PathService extends Service {
       if (key === entryKey) {
         spawns.push(
           this._worldService.spawnTemplate({
-            templateAsset: Tiles.RightToLeftEnd,
+            templateAsset: NewTiles.LeftToRight,
             position: new Vec3(pos.x, GROUND_Y, pos.z),
             rotation: Quaternion.fromEuler(new Vec3(0, -90, 0)),
             scale: Vec3.one.mul(CELL_SIZE),
@@ -140,7 +138,7 @@ export class PathService extends Service {
       if (key === exitKey) {
         spawns.push(
           this._worldService.spawnTemplate({
-            templateAsset: Tiles.RightToLeftEnd,
+            templateAsset: NewTiles.LeftToRight,
             position: new Vec3(pos.x, GROUND_Y, pos.z),
             rotation: Quaternion.fromEuler(new Vec3(0, 90, 0)),
             scale: Vec3.one.mul(CELL_SIZE),
@@ -153,7 +151,7 @@ export class PathService extends Service {
       const isCurve = inDir !== outDir && (inDir + 2) % 4 !== outDir;
       const { template, rotY } = isCurve
         ? this._curveRotation(inDir, outDir)
-        : { template: Tiles.LeftToRight, rotY: (inDir === 0 || inDir === 2) ? 90 : 0 };
+        : { template: NewTiles.LeftToRight, rotY: (inDir === 0 || inDir === 2) ? 90 : 0 };
 
       spawns.push(
         this._worldService.spawnTemplate({
@@ -169,39 +167,28 @@ export class PathService extends Service {
     await Promise.all(spawns);
   }
 
-  // Returns the LeftToRight or TopToRight template + Y rotation for a curve cell.
+  // Returns the DownToRight template + Y rotation for a curve cell.
   // Directions: 0=down(+row), 1=right(+col), 2=up(-row), 3=left(-col)
-  // TopToRight default: entry from up (2), exit to right (1) → rotY=0
-  private _curveRotation(inDir: number, outDir: number): { template: typeof Tiles.TopToRight; rotY: number } {
-    // Normalize to canonical (inDir, outDir) pairs → rotY
+  // DownToRight default: entry from down (0), exit to right (1) → rotY=0
+  private _curveRotation(inDir: number, outDir: number): { template: typeof NewTiles.DownToRight; rotY: number } {
     const key = `${inDir},${outDir}`;
     const rotMap: Record<string, number> = {
-      '2,1': 0,   //ok
-
-      '3,0': 180, 
-      '0,3': 90,
-      '1,2': -90,
-      // Reversed traversal (path goes the other way)
-      '1,0': -90,
-
-      '2,3': 90,
-      '3,2': 90, //ok
-      '0,1': -90,
+      '2,1': 90,   // top→right    ✅
+      '2,3': 180,  // top→left     ✅
+      '1,0': 0,    // right→bottom ✅
+      '3,0': 270,  // left→bottom  (corrected)
+      // Reversed traversal
+      '1,2': 270,
+      '3,2': 180,  // left→top     (swapped with 0,1)
+      '0,1': 0,    // bottom→right (swapped with 3,2)
+      '0,3': 270,
     };
-    return { template: Tiles.TopToRight, rotY: rotMap[key] ?? 0 };
+    return { template: NewTiles.DownToRight, rotY: rotMap[key] ?? 0 };
   }
 
-  // Weighted random decoration tile for non-path cells.
-  // Grass 60% · Tree 12% · Rock 10% · Hill 8% · TreeDouble 5% · Crystal 3% · TreeQuad 2%
-  private _pickDecoTile(): typeof Tiles.Grass {
-    const r = Math.random();
-    if (r < 0.85) return Tiles.Grass;
-    if (r < 0.90) return Tiles.Tree;
-    if (r < 0.92) return Tiles.Rock;
-    if (r < 0.94) return Tiles.Hill;
-    if (r < 0.96) return Tiles.TreeDouble;
-    if (r < 0.98) return Tiles.Crystal;
-    return Tiles.TreeQuad;
+  // Decoration tile for non-path cells — all grass with new tiles.
+  private _pickDecoTile(): typeof NewTiles.Grass {
+    return NewTiles.Grass;
   }
 
   get totalLength(): number { return this._totalLength; }

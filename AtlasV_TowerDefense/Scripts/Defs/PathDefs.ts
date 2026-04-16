@@ -13,9 +13,9 @@
 //   row 17: ▼
 
 export const PATH_WAYPOINTS_LEVEL_0: ReadonlyArray<readonly [number, number]> = [
-  [ 2,  0],
-  [ 2,  6],
-  [ 5,  6],
+  [ 4,  0],
+  [ 4,  21],
+/*  [ 5,  6],
   [ 5,  4],
   [10,  4],
   [10,  8],
@@ -24,5 +24,5 @@ export const PATH_WAYPOINTS_LEVEL_0: ReadonlyArray<readonly [number, number]> = 
   [12, 12],
   [12, 16],
   [ 4, 16],
-  [ 4, 21],
+  [ 4, 21],*/
 ] as const;

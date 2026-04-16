@@ -8,8 +8,8 @@
 
 // ─── Grid ─────────────────────────────────────────────────────────────────────
 
-export const GRID_COLS = 14;
-export const GRID_ROWS = 22;
+export const GRID_COLS = 9;
+export const GRID_ROWS = 10;
 export const CELL_SIZE = 0.5; // world units per cell
 
 // col → Z axis (horizontal, left/right on screen)

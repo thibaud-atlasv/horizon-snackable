@@ -238,13 +238,7 @@
                     "data": {
                         "class": "horizon::platform_api::TransformPlatformComponent",
                         "version": 3,
-                        "data": {
-                            "localPosition": {
-                                "x": 5.596508979797363,
-                                "y": 1.5374030226666947e-7,
-                                "z": -3.998673439025879
-                            }
-                        }
+                        "data": {}
                     },
                     "dataType": "horizon::DataDefinitionAsset"
                 }
@@ -516,12 +510,12 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": -2.0,
-                                "y": 13.5,
+                                "x": 0.0,
+                                "y": 7.0,
                                 "z": 0.0
                             },
                             "localRotation": {
-                                "x": -1.4835355281829835,
+                                "x": -1.5707963705062867,
                                 "y": -1.5708011388778687,
                                 "z": -0.0000020517941266007257
                             },
@@ -575,6 +569,11 @@
                             "localPosition": {
                                 "x": 0.0,
                                 "y": -0.009999999776482582,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
                                 "z": 0.0
                             },
                             "localScale": {

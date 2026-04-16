@@ -20,7 +20,6 @@ import {
   HeatEvents,
   HighScoreHUDEvents,
 } from '../Types';
-import { Audio } from '../Assets';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sound IDs — utiliser ces constantes dans l'éditeur (champ soundId de AudioSource)

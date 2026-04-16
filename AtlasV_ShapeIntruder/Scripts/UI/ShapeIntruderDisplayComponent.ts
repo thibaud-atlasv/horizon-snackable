@@ -5,20 +5,22 @@ import {
   OnEntityCreateEvent,
   OnWorldUpdateEvent, ExecuteOn,
   EventService,
+  TextureAsset,
 } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload } from 'meta/worlds';
 import {
   ShapeItemViewModel,
   onAnswerOptionPressed,
-  DEFAULT_BTN_BG,
-  DEFAULT_BTN_BORDER,
+  BTN_BG_COLORS,
+  BTN_BORDER_COLORS,
   ShapeIntruderDisplayViewModel,
 } from './ShapeIntruderDisplayViewModel';
 import type { ShapeAnswerOptionPayload } from './ShapeIntruderDisplayViewModel';
 import { Events } from '../Types';
 import type { IShapeInstance, IOption } from '../Types';
-import { COLOR_DEFS, SHAPE_DEFS } from '../Defs/ShapeDefs';
-import type { ColorKey, ShapeKey } from '../Defs/ShapeDefs';
+import { COLOR_DEFS } from '../Defs/ShapeDefs';
+import type { ColorKey } from '../Defs/ShapeDefs';
+
 import {
   ZONE_SIZE,
   CORRECT_BTN_BG, CORRECT_BTN_BORDER, CORRECT_OVERLAY,
@@ -26,7 +28,9 @@ import {
   OVERLAY_TARGET_OPACITY, OVERLAY_DURATION_SEC,
   WRONG_FADE_DURATION_SEC, WRONG_FADE_TARGET,
   WRONG_PULSE_DURATION_SEC, WRONG_PULSE_PEAK,
+  DEBUG_GRID_TEST,
 } from '../Constants';
+import { SHAPE_TEXTURE_MAP } from '../Assets';
 
 @component()
 export class ShapeIntruderDisplayComponent extends Component {
@@ -47,20 +51,17 @@ export class ShapeIntruderDisplayComponent extends Component {
   @subscribe(OnEntityCreateEvent)
   onCreate(): void {
     const customUi = this.entity.getComponent(CustomUiComponent);
-    if (customUi != null) customUi.dataContext = this._shapeIntruderDisplayVM;
+    if (customUi != null) {
+      customUi.dataContext = this._shapeIntruderDisplayVM;
+      console.log('[ShapeIntruderDisplay] dataContext set');
+    }
   }
 
-  private _timer = 0;
   @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
   onUpdate(payload: OnWorldUpdateEventPayload): void {
     const dt = payload.deltaTime;
     this._tickOverlay(dt);
     this._tickShapeAnim(dt);
-    this._timer += dt;
-/*
-    for (let i = 0; i < this._shapeIntruderDisplayVM.shapes.length; i++) {
-      this._shapeIntruderDisplayVM.shapes[i].scale = Math.sin(this._timer) * 150/2;
-    }*/
   }
 
   // ─── Events ───────────────────────────────────────────────────────────────
@@ -194,14 +195,14 @@ export class ShapeIntruderDisplayComponent extends Component {
     this._shapeAnimElapsed = -1;
 
     const vm = this._shapeIntruderDisplayVM;
-    vm.option0BgColor     = DEFAULT_BTN_BG;
-    vm.option1BgColor     = DEFAULT_BTN_BG;
-    vm.option2BgColor     = DEFAULT_BTN_BG;
-    vm.option3BgColor     = DEFAULT_BTN_BG;
-    vm.option0BorderColor = DEFAULT_BTN_BORDER;
-    vm.option1BorderColor = DEFAULT_BTN_BORDER;
-    vm.option2BorderColor = DEFAULT_BTN_BORDER;
-    vm.option3BorderColor = DEFAULT_BTN_BORDER;
+    vm.option0BgColor     = BTN_BG_COLORS[0];
+    vm.option1BgColor     = BTN_BG_COLORS[1];
+    vm.option2BgColor     = BTN_BG_COLORS[2];
+    vm.option3BgColor     = BTN_BG_COLORS[3];
+    vm.option0BorderColor = BTN_BORDER_COLORS[0];
+    vm.option1BorderColor = BTN_BORDER_COLORS[1];
+    vm.option2BorderColor = BTN_BORDER_COLORS[2];
+    vm.option3BorderColor = BTN_BORDER_COLORS[3];
     vm.overlayOpacity     = 0;
     vm.timerProgress      = 1;
 
@@ -215,6 +216,11 @@ export class ShapeIntruderDisplayComponent extends Component {
   }
 
   private _updateShapesViewModel(): void {
+    if (DEBUG_GRID_TEST) {
+      this._shapeIntruderDisplayVM.shapes = this._buildDebugGrid();
+      this._shapeIntruderDisplayVM.shapeCount = this._shapeIntruderDisplayVM.shapes.length;
+      return;
+    }
     this._shapeIntruderDisplayVM.shapes = this._shapes.map(s => {
       const item      = new ShapeItemViewModel();
       item.x          = s.x * ZONE_SIZE;
@@ -222,25 +228,54 @@ export class ShapeIntruderDisplayComponent extends Component {
       item.scale      = s.size *ZONE_SIZE/2;
       item.rotation   = s.rotation * (180 / Math.PI);
       item.fillColor  = COLOR_DEFS[s.colorKey as ColorKey]?.hex ?? '#FFFFFF';
-      item.pathData   = SHAPE_DEFS[s.typeKey as ShapeKey]?.path ?? '';
+      item.spriteTexture = SHAPE_TEXTURE_MAP[s.typeKey as string] ?? null;
       return item;
     });
     this._shapeIntruderDisplayVM.shapeCount = this._shapes.length;
   }
 
-  private _updateOptionsViewModel(payload: Events.RoundStartedPayload): void {
-    const vms = [
-      this._shapeIntruderDisplayVM.option0,
-      this._shapeIntruderDisplayVM.option1,
-      this._shapeIntruderDisplayVM.option2,
-      this._shapeIntruderDisplayVM.option3,
-    ];
-    for (let i = 0; i < payload.options.length && i < 4; i++) {
-      const opt    = payload.options[i];
-      vms[i].fillColor = COLOR_DEFS[opt.colorKey as ColorKey]?.hex ?? '#FFFFFF';
-      vms[i].rotation  = 0;
-      vms[i].pathData  = SHAPE_DEFS[opt.typeKey as ShapeKey]?.path ?? '';
+  private _buildDebugGrid(): ShapeItemViewModel[] {
+    const COLS       = 5;
+    const ROWS       = 5;
+    const cellSize   = ZONE_SIZE / COLS;  // 90px per cell
+    const shapeKeys  = Object.keys(SHAPE_TEXTURE_MAP);
+    const colorKeys  = Object.keys(COLOR_DEFS) as ColorKey[];
+    const items: ShapeItemViewModel[] = [];
+
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const item = new ShapeItemViewModel();
+        // Center of each cell
+        item.x          = col * cellSize;
+        item.y          = row * cellSize;
+        // scale = half cell size so the 2×2 unit sprite fills the cell exactly
+        item.scale      = cellSize / 2;
+        item.rotation   = 0;
+        item.fillColor  = COLOR_DEFS[colorKeys[(row * COLS + col) % colorKeys.length]].hex;
+        item.spriteTexture = SHAPE_TEXTURE_MAP[shapeKeys[(col) % shapeKeys.length]] ?? null;
+        item.opacity    = 1;
+        items.push(item);
+      }
     }
+    return items;
+  }
+
+  private _updateOptionsViewModel(payload: Events.RoundStartedPayload): void {
+    const vm = this._shapeIntruderDisplayVM;
+    for (let i = 0; i < payload.options.length && i < 4; i++) {
+      const opt       = payload.options[i];
+      const fillColor = COLOR_DEFS[opt.colorKey as ColorKey]?.hex ?? '#FFFFFF';
+      const texture   = SHAPE_TEXTURE_MAP[opt.typeKey as string] ?? null;
+
+      switch (i) {
+        case 0: vm.option0FillColor = fillColor; vm.option0SpriteTexture = texture; break;
+        case 1: vm.option1FillColor = fillColor; vm.option1SpriteTexture = texture; break;
+        case 2: vm.option2FillColor = fillColor; vm.option2SpriteTexture = texture; break;
+        case 3: vm.option3FillColor = fillColor; vm.option3SpriteTexture = texture; break;
+      }
+    }
+
+
   }
 
   private _setButtonColors(index: number, bg: string, border: string): void {

@@ -40,6 +40,10 @@ export const DEBUG_COLOR_FILTER: string[] = [];
 // Place 8 shapes exactly at clamp boundaries (corners + edge midpoints) to verify UI doesn't cut them.
 export const DEBUG_EDGE_TEST = false;
 
+// Fill the zone with a uniform grid at scale=1 (100% cell size) to calibrate sprite sizing.
+// Grid is 5×5, one shape type per column, cycling through SHAPE_TEXTURE_MAP keys.
+export const DEBUG_GRID_TEST = false;
+
 // ─── Shape Layout ─────────────────────────────────────────────────────────────
 
 // Normalized [0..1] bounds of the shape placement area within the zone canvas.
@@ -49,12 +53,15 @@ export const SHAPES_X_MAX = 1;
 export const SHAPES_Y_MIN = 0;
 export const SHAPES_Y_MAX = 1;
 
-// Size range as a fraction of cell width
-export const SHAPE_SIZE_MIN = 0.25;
-export const SHAPE_SIZE_MAX = 0.65;
+// Size range as a fraction of cell width (0.75 = 75% of cell, 1.0 = 100%)
+export const SHAPE_SIZE_MIN = 0.75;
+export const SHAPE_SIZE_MAX = 1.15;
+
+// Rotation range in degrees (shapes rotate between -MAX and +MAX)
+export const SHAPE_ROTATION_MAX_DEG = 45;
 
 // How far a shape can spill outside its cell (in cell-width units, 0 = strict grid)
-export const SHAPE_JITTER = 0.65;
+export const SHAPE_JITTER = 0.15;
 
 // ─── Canvas / UI ──────────────────────────────────────────────────────────────
 
