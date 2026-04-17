@@ -1,96 +1,98 @@
 ---
 name: adding-content
-summary: How to add or remove colors and shapes in Shape Intruder via ShapeDefs.ts
+summary: How to add or remove shapes and colors in Shape Intruder via Assets.ts
 include: always
 ---
 
-# Adding Content (Colors & Shapes)
+# Adding Content (Shapes & Colors)
 
-**Single source of truth:** `Scripts/Defs/ShapeDefs.ts`.  
-`ColorKey`, `ShapeKey`, `COLOR_KEYS`, `SHAPE_KEYS` are derived automatically. No other file changes required.
+**Single source of truth:** `Scripts/Assets.ts`.  
+`ShapeKey` and `SHAPE_KEYS` are derived automatically from `SHAPE_TEXTURE_MAP`. No other file changes required.
 
-**Minimum pool:** (colors × shapes) ≥ 30 distinct pairs — otherwise the round generator cannot pick 3 valid distractors.
-
----
-
-## Colors
-
-Append one entry to `COLOR_DEFS`:
-
-```typescript
-export const COLOR_DEFS = {
-  // existing entries…
-  cyan: { hex: '#06b6d4' },   // ← new entry
-} as const satisfies Record<string, IColorDef>;
-```
-
-### Design Rules
-
-- No two colors share the same hue family
-- High contrast on dark background (`#1e1e2e`)
-- Saturation floor 70% HSL — no pastels or muddy mixes
-- Recommended hues not yet used: cyan, rose, gold
-
-### Current Palette (9 colors)
-
-| Key     | Hex       |
-|---------|-----------|
-| white   | #fef3c7   |
-| red     | #ef4444   |
-| orange  | #fb923c   |
-| yellow  | #eab308   |
-| lime    | #84cc16   |
-| teal    | #14b8a6   |
-| blue    | #3b82f6   |
-| purple  | #8b5cf6   |
-| pink    | #ec4899   |
+**Minimum pool:** At least 30 distinct shape-color sprite keys must be active (uncommented) to ensure the round generator can always find 3 valid distractors.
 
 ---
 
-## Shapes
+## How the system works
 
-Append one entry to `SHAPE_DEFS`:
+Each entry in `SHAPE_TEXTURE_MAP` is one shape+color sprite — for example `heartBlue` maps to `@shape/heartBlue.png`. The key is the sprite's identifier used throughout the game.
+
+There is no separate color or shape table. A "color" is just a naming convention in the key (e.g. `…Blue`, `…Red`). A "shape" is a visual category of sprites (e.g. all `heart…` entries).
+
+---
+
+## Adding a new sprite
+
+1. Place the PNG file in the `shape/` folder (e.g. `shape/circleGold.png`)
+2. Set `premultiplyAlpha: true` in its `.assetmeta` file
+3. Add one line to `SHAPE_TEXTURE_MAP` in `Scripts/Assets.ts`:
 
 ```typescript
-export const SHAPE_DEFS = {
+export const SHAPE_TEXTURE_MAP: Record<string, TextureAsset> = {
   // existing entries…
-  diamond: { path: 'M 0 -1 L 0.6 0 L 0 1 L -0.6 0 Z' },   // ← new entry
-} as const satisfies Record<string, IShapeDef>;
+  circleGold: new TextureAsset('@shape/circleGold.png'),  // ← new entry
+};
 ```
 
-### SVG Path Convention
+`ShapeKey` and `SHAPE_KEYS` update automatically — no other file changes needed.
 
-Paths must be **unit-radius, centered at origin** — the renderer handles scaling and translation.
+---
 
-```
-M x y              — move to (start, no draw)
-L x y              — line to
-C cx1 cy1 cx2 cy2 x y  — cubic bezier
-Z                  — close path
-```
+## Removing a sprite
 
-Bounding box roughly fits inside `[-1, 1]` on both axes. Always close with `Z`.
+Comment out or delete the entry in `SHAPE_TEXTURE_MAP`. Ensure the remaining active entries still total ≥ 30.
 
-### Design Rules
+---
 
-- Recognizable at 20–30 px radius — silhouette must be immediately nameable
-- Readable when rotated at any angle
-- No two shapes confusable (e.g. square vs. diamond must be visually distinct)
-- Filled only — shapes are solid fills, no outlines
-- Avoid: ellipse, non-square rectangle, crescent, heart, letter/number shapes
+## Sprite requirements
 
-### Current Shapes (11 shapes)
+| Property | Requirement |
+|----------|-------------|
+| Format | PNG with transparent background |
+| Dimensions | 128×128 px (or 256×256 for high-DPI) |
+| Style | Puffy cartoon 3D — see `Docs/ART_DIRECTION.md` |
+| Alpha | `premultiplyAlpha: true` in `.assetmeta` — mandatory |
+| Naming | `{shapeName}{ColorName}.png` (PascalCase color suffix) |
 
-| Key        | Description                  |
-|------------|------------------------------|
-| circle     | Full circle                  |
-| semicircle | Half circle (flat at bottom) |
-| triangle   | Equilateral, point up        |
-| square     | Axis-aligned square          |
-| pentagon   | 5 sides                      |
-| hexagon    | 6 sides                      |
-| star4      | 4-point star                 |
-| star       | 5-point star                 |
-| teardrop   | Rounded drop, point up       |
-| cross      | Plus / health cross          |
-| arrow      | Up-pointing arrow            |
+---
+
+## Current palette (active color suffixes)
+
+| Suffix | Approximate hue |
+|--------|----------------|
+| Blue   | Mid blue        |
+| Blue2  | Alternate blue  |
+| Cyan   | Teal/cyan       |
+| Green  | Mid green       |
+| Orange | Warm orange     |
+| Pink   | Hot pink        |
+| Purple | Violet/purple   |
+| Red    | Bright red      |
+
+Yellow variants exist as files but are commented out — the yellow hue is too close to the canvas background (`#fef9c3`) and fails the contrast requirement.
+
+---
+
+## Current shape categories (active)
+
+| Category key prefix | Variants |
+|---------------------|----------|
+| `circle`            | 1 (green only — round, no rotation confusion) |
+| `triangle`          | 8 colors × filled + 8 colors × empty outline |
+| `square`            | 8 colors × axis-aligned + 8 colors × tilted 45° |
+| `pentagon`          | 8 colors |
+| `hexagon`           | 8 colors |
+| `starEmpty`         | 8 colors (outline star) |
+| `starFill`          | 8 colors (solid star) |
+| `heart`             | 8 colors × filled + 8 colors × empty outline |
+
+---
+
+## Design rules
+
+- Every sprite must be recognizable at 20–30 px radius
+- Sprites must stay recognizable when rotated at any angle
+- No two shape categories may be confusable with each other (e.g. square vs. tilted square are treated as distinct — they look different enough)
+- Avoid shapes that lose identity under rotation (rectangles, asymmetric forms)
+- No near-white or near-yellow colors — they disappear against the canvas background
+- See `Docs/ART_DIRECTION.md` for full style and palette rules

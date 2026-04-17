@@ -23,6 +23,8 @@ export class LeaderboardHUDViewModelData extends UiViewModel {
   yourScore:    number  = 0;
   yourRank:     number  = 0;
   yourRankDisplay: string = '';
+  playerName:   string  = '';
+  bestScore:    number  = 0;
   entries:      readonly LeaderboardRowData[] = [];
   isLoading:    boolean = false;
   errorMessage: string  = '';

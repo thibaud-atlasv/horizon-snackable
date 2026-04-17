@@ -428,6 +428,50 @@
                 }
             ],
             "attributes": []
+        },
+        {
+            "id": "3ced2fcb-1146-4258-acb6-8e032df93f66",
+            "name": "Confettis",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26069794316053886",
+                                "ingestionId": "7179485402325287948",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": false,
+                            "renderOrderOffset": 4
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "ConfettiExplosionUIComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26069794316053886",
+                            "ingestionId": "5015053168727077012",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
         }
     ],
     "relationships": [
@@ -469,6 +513,11 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "b48b940b-9624-4325-97d7-4d99965b0f1b",
+            "destination": "f20f3bdd-8c09-47a0-8e3e-02a808867363"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "3ced2fcb-1146-4258-acb6-8e032df93f66",
             "destination": "f20f3bdd-8c09-47a0-8e3e-02a808867363"
         }
     ]

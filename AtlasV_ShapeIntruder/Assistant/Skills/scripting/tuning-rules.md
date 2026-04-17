@@ -63,15 +63,13 @@ Formula: `score += BASE_POINTS × timePct × (1 + round × ROUND_SCORE_MULT)`
 | `SHAPE_SIZE_MIN`| 0.25    | Smallest shape as fraction of grid cell width |
 | `SHAPE_SIZE_MAX`| 0.65    | Largest shape as fraction of grid cell width |
 | `SHAPE_JITTER`  | 0.65    | Max random offset per shape (in cell-width units) |
-| `ZONE_SIZE`     | 450     | Canvas pixel dimension — must match XAML zone size |
+| `ZONE_SIZE`     | 438     | Canvas pixel dimension — must match XAML zone size |
 
 ## Debug Flags
 
-These must both be in their default state before publishing:
+These must both be `false` before publishing:
 
 ```typescript
-export const DEBUG_COLOR_FILTER: string[] = [];   // [] = all colors active
-export const DEBUG_EDGE_TEST = false;              // true = corner/edge placement test
+export const DEBUG_EDGE_TEST  = false;  // places 8 shapes at corners/edges to test clipping
+export const DEBUG_GRID_TEST  = false;  // fills zone with a 5×5 uniform grid for sprite calibration
 ```
-
-`DEBUG_COLOR_FILTER` accepts a subset of `ColorKey` values to restrict generated rounds for quick visual testing (e.g., `['red', 'blue']`).

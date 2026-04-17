@@ -34,9 +34,6 @@ export const LEADERBOARD_API_NAME = 'totalscore';
 
 // ─── Debug ────────────────────────────────────────────────────────────────────
 
-// Restrict generated rounds to a subset of colors. Empty array = all colors.
-export const DEBUG_COLOR_FILTER: string[] = [];
-
 // Place 8 shapes exactly at clamp boundaries (corners + edge midpoints) to verify UI doesn't cut them.
 export const DEBUG_EDGE_TEST = false;
 
@@ -66,7 +63,7 @@ export const SHAPE_JITTER = 0.15;
 // ─── Canvas / UI ──────────────────────────────────────────────────────────────
 
 // Intruder zone canvas dimensions -- must match XAML zone canvas size
-export const ZONE_SIZE = 450;
+export const ZONE_SIZE = 438;
 
 // Answer button feedback colors
 export const CORRECT_BTN_BG     = '#1A22c55e';

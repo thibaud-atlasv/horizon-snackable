@@ -7,11 +7,13 @@ import {
   FocusedInteractionService,
   OnFocusedInteractionInputStartedEvent,
   type OnFocusedInteractionInputEventPayload,
+  type TextureAsset,
 } from 'meta/worlds';
 import { GameStateService } from '../Services/GameStateService';
 import { RoundService } from '../Services/RoundService';
 import { TimerService } from '../Services/TimerService';
 import { Events } from '../Types';
+import { SHAPE_TEXTURE_MAP } from '../Assets';
 
 /**
  * Entry point placed on the root entity in the scene.

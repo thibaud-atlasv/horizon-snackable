@@ -149,6 +149,146 @@ tasks:
       - UI/shape_display.xaml
       - Scripts/UI/ShapeIntruderDisplayViewModel.ts
 
+  - name: Remove Button Gradient - Solid Color
+    status: done
+    summary: Retour aux couleurs unies sur les boutons de réponse (SolidColorBrush au lieu de RadialGradientBrush)
+    files:
+      - UI/shape_display.xaml
+
+  - name: Home Screen Visual Redesign
+    status: done
+    summary: Écran d'accueil redesigné avec gradient magenta/violet, bordure violette, texte blanc/doré, shapes plus visibles
+    files:
+      - UI/home_screen.xaml
+
+  - name: Home Screen Color & Sprite Redesign
+    status: done
+    summary: Nouvelle palette pastel bleu/violet + migration shapes vers sprites OpacityMask
+    files:
+      - UI/home_screen.xaml
+    subtasks:
+      - name: Update colors (gradient, title, button, accents)
+        status: done
+      - name: Replace geometric shapes with sprite technique
+        status: done
+
+  - name: Home Screen Polish - Contrast & Play Button
+    status: done
+    summary: Fond violet foncé, bouton PLAY 3D doré, shapes déco supprimées
+    files:
+      - UI/home_screen.xaml
+
+  - name: Answer Buttons 3D Effect
+    status: done
+    summary: Shadow, effet enfoncé au clic, icônes checkmark/croix SVG
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+    subtasks:
+      - name: Add shadow around buttons
+        status: done
+      - name: Press offset effect on selection
+        status: done
+      - name: SVG checkmark (green) and X (red) icons
+        status: done
+
+  - name: Preload Shape Textures
+    status: done
+    summary: Préchargement des 11 textures via shapes invisibles (opacity=0) au onCreate
+    files:
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+
+  - name: Home Screen Polish - Shadow & Animated Shapes
+    status: done
+    summary: Ombre 3D sur bouton PLAY + 10 shapes animées en arrière-plan (float, rotation, pulse)
+    files:
+      - UI/home_screen.xaml
+    subtasks:
+      - name: Add 3D shadow to PLAY button
+        status: done
+      - name: Add animated decorative shapes from shape folder
+        status: done
+
+  - name: Replace SVG Icons with PNG Images
+    status: done
+    summary: Remplacement des 8 icônes SVG (4 checkmarks + 4 croix) par des images PNG (Valid.png et Invalid.png)
+    files:
+      - UI/shape_display.xaml
+
+  - name: Central Feedback Icon Animation
+    status: done
+    summary: Grande icône 180×180 au centre avec animation pop (0→1.2→1.0) et auto-hide après 800ms
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+
+  - name: Fix Feedback Icon Binding
+    status: done
+    summary: Deux images statiques (Valid.png + Invalid.png) avec visibilité bool au lieu de binding source
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+
+  - name: Score Card & Casino Animation
+    status: done
+    summary: Cadre puffy jaune/doré + animation casino (roll 500ms ease-out)
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+
+  - name: Floating Score Text Animation
+    status: done
+    summary: Texte flottant "+XXX" doré avec animation vers le haut (50px) et fade out (800ms)
+    files:
+      - UI/shape_display.xaml
+      - Scripts/UI/ShapeIntruderDisplayViewModel.ts
+      - Scripts/UI/ShapeIntruderDisplayComponent.ts
+
+  - name: Score Card Redesign
+    status: done
+    summary: Cartouche puffy cartoon centré avec nom joueur, rank coloré, score final en gros, best score
+    files:
+      - Scripts/UI/LeaderboardHUDViewModel.ts
+      - Scripts/UI/LeaderboardHUDComponent.ts
+      - UI/LeaderboardHUD.xaml
+
+  - name: Button Press Visual Feedback
+    status: done
+    summary: État enfoncé XAML (shift 4px + darkening) sur bouton PLAY et 4 boutons réponse via IsPressed triggers
+    files:
+      - UI/home_screen.xaml
+      - UI/shape_display.xaml
+
+  - name: Button Press Effect Tuning
+    status: done
+    summary: Offset augmenté à 8px + overlay changé de noir vers blanc (highlight effect)
+    files:
+      - UI/home_screen.xaml
+      - UI/shape_display.xaml
+
+  - name: Fix Press Offset Timing
+    status: done
+    summary: Remplacé TranslateTransform par Margin setter pour décalage immédiat au press (Noesis quirk)
+    files:
+      - UI/home_screen.xaml
+      - UI/shape_display.xaml
+
+  - name: Reduce Press Offset
+    status: done
+    summary: Offset réduit de 8px à 3px pour un effet plus subtil
+    files:
+      - UI/home_screen.xaml
+      - UI/shape_display.xaml
+
+  - name: Home Screen Background Shapes x2
+    status: done
+    summary: Doublé la taille des 10 shapes décoratives en arrière-plan
+    files:
+      - UI/home_screen.xaml
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []
