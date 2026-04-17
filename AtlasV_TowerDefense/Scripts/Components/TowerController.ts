@@ -17,7 +17,6 @@ import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload } from 'meta/worlds';
 import { NetworkingService } from 'meta/worlds';
 import { Events, type ITowerStats } from '../Types';
-import { CELL_SIZE } from '../Constants';
 import { TargetingService } from '../Services/TargetingService';
 import { EnemyService } from '../Services/EnemyService';
 import { TowerService } from '../Services/TowerService';
@@ -39,6 +38,8 @@ export class TowerController extends Component {
   private _bounceElapsed: number = 0;
 
   @property() barrel: Maybe<Entity> = null;
+  // Set to 90 if the barrel mesh forward is +X instead of -Z, -90 for -X, etc.
+  @property() barrelForwardOffsetDeg: number = 0;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
@@ -77,11 +78,11 @@ export class TowerController extends Component {
       const s = t < 0.5
         ? BOUNCE_OVERSHOOT * (t / 0.5)               // 0 → overshoot
         : BOUNCE_OVERSHOOT + (1 - BOUNCE_OVERSHOOT) * ((t - 0.5) / 0.5); // overshoot → 1
-      const scale = s * CELL_SIZE;
+      const scale = s;
       this._transform.localScale = new Vec3(scale, scale, scale);
       if (t >= 1) {
         this._bouncing = false;
-        this._transform.localScale = new Vec3(CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        this._transform.localScale = new Vec3(scale, scale, scale);
       }
     }
 
@@ -96,7 +97,12 @@ export class TowerController extends Component {
       if (target) {
         const barrelT = this.barrel.getComponent(TransformComponent);
         if (barrelT) {
-          barrelT.lookAt(new Vec3(target.worldX, barrelT.worldPosition.y, target.worldZ), Vec3.up);
+          const bPos = barrelT.worldPosition;
+          const dx = target.worldX - bPos.x;
+          const dz = target.worldZ - bPos.z;
+          // atan2 in RUB: forward is -Z, so yaw = atan2(dx, -dz) converted to degrees
+          const yawDeg = Math.atan2(dx, -dz) * (180 / Math.PI) + this.barrelForwardOffsetDeg;
+          barrelT.localRotation = Quaternion.fromEuler(new Vec3(0, yawDeg, 0));
         }
       }
     }

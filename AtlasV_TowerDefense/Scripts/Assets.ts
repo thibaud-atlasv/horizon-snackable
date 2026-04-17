@@ -31,7 +31,6 @@ export namespace Assets {
   export const FloatingText    = new TemplateAsset('@Templates/UI/FloatingText.hstf');
 }
 
-
 export namespace NewTiles {
   export const Grass = new TemplateAsset('@Templates/Env/Tile.hstf');;
   export const LeftToRight = new TemplateAsset('@Templates/Env/Path.hstf');

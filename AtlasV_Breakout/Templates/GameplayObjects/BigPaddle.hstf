@@ -33,7 +33,7 @@
                     "data": {
                         "class": "PowerUp",
                         "definitionAsset": {
-                            "packageOrRemoteId": "26904326832536512",
+                            "packageOrRemoteId": "18093430051423157088",
                             "ingestionId": "8590015734785280002",
                             "targetId": "4237980480"
                         },
@@ -88,7 +88,7 @@
                         "version": 11,
                         "data": {
                             "mesh": {
-                                "packageOrRemoteId": "26904326832536512",
+                                "packageOrRemoteId": "18093430051423157088",
                                 "ingestionId": "911551957056267093",
                                 "targetId": "3500183637"
                             }
@@ -103,7 +103,7 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "26904326832536512",
+                                    "packageOrRemoteId": "18093430051423157088",
                                     "ingestionId": "13569516844376947636",
                                     "targetId": "157013062"
                                 }

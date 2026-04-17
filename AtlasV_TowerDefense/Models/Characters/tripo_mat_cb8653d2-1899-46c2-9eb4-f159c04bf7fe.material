@@ -1,0 +1,31 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "tripo_mat_cb8653d2-1899-46c2-9eb4-f159c04bf7fe",
+    "attributes": [
+        {
+            "name": "layer0ColorAndAlpha",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "26631398616455768",
+                    "ingestionId": "8502043836649943373",
+                    "targetId": "1850524962"
+                }
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "33451255657851516",
+        "ingestionId": "12536732106106040758",
+        "targetId": "2708897769"
+    },
+    "baseMaterialAssetId": {
+        "packageOrRemoteId": "26631398616455768",
+        "ingestionId": "8028018322691318703",
+        "targetId": "1567951163"
+    }
+}

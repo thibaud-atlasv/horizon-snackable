@@ -17,7 +17,7 @@ import type { OnFocusedInteractionInputEventPayload, Entity } from 'meta/worlds'
 import { ExecuteOn } from 'meta/worlds';
 import { Events } from '../Types';
 import { Assets } from '../Assets';
-import { GRID_ORIGIN_X, GRID_ORIGIN_Z, CELL_SIZE, GRID_COLS, GRID_ROWS, GROUND_Y, PROJECTILE_POOL_Y } from '../Constants';
+import { GRID_ORIGIN_X, GRID_ORIGIN_Z, CELL_WIDTH, CELL_HEIGHT, GRID_COLS, GRID_ROWS, GROUND_Y, PROJECTILE_POOL_Y } from '../Constants';
 import { TowerService } from './TowerService';
 import { PathService } from './PathService';
 import { ResourceService } from './ResourceService';
@@ -50,7 +50,7 @@ export class PlacementService extends Service {
     const range = await WorldService.get().spawnTemplate({
       templateAsset: Assets.RangeIndicator,
       position: RANGE_PARK,
-      rotation: Quaternion.identity,
+      //rotation: Quaternion.identity,
       scale: Vec3.one,
       networkMode: NetworkMode.LocalOnly,
     }).catch((e: unknown) => { console.error(e); return null; });
@@ -196,8 +196,8 @@ export class PlacementService extends Service {
     const preview = await WorldService.get().spawnTemplate({
       templateAsset: def.template,
       position: pos,
-      rotation: Quaternion.identity,
-      scale: new Vec3(CELL_SIZE, CELL_SIZE, CELL_SIZE),
+      //rotation: Quaternion.identity,
+      scale: new Vec3(CELL_WIDTH, CELL_WIDTH, CELL_WIDTH),
       networkMode: NetworkMode.LocalOnly,
     }).catch((e: unknown) => { console.error(e); return null; });
 
@@ -281,8 +281,8 @@ export class PlacementService extends Service {
 
   private _worldToCell(worldX: number, worldZ: number): { col: number; row: number } {
     return {
-      col: Math.round((worldZ - GRID_ORIGIN_Z) / CELL_SIZE),
-      row: GRID_ROWS - 1 - Math.round((worldX - GRID_ORIGIN_X) / CELL_SIZE),
+      col: Math.round((worldZ - GRID_ORIGIN_Z) / CELL_HEIGHT),
+      row: GRID_ROWS - 1 - Math.round((worldX - GRID_ORIGIN_X) / CELL_WIDTH),
     };
   }
 

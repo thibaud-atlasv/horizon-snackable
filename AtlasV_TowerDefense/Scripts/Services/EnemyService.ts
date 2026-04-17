@@ -16,7 +16,7 @@ import { OnServiceReadyEvent } from 'meta/worlds';
 import type { IEnemyDef } from '../Types';
 import { Events } from '../Types';
 import { ENEMY_DEFS } from '../Defs/EnemyDefs';
-import { CELL_SIZE } from '../Constants';
+import {  } from '../Constants';
 
 // ── Record ────────────────────────────────────────────────────────────────────
 
@@ -100,7 +100,7 @@ export class EnemyService extends Service {
       templateAsset: def.template,
       position: new Vec3(0, -100, 0),
       rotation: Quaternion.identity,
-      scale: new Vec3(CELL_SIZE, CELL_SIZE, CELL_SIZE).mul(def.size * 2),
+      scale: Vec3.one.mul(def.size * 2),
       networkMode: NetworkMode.LocalOnly,
     }).catch((e: unknown) => { console.error(e); return null; });
 

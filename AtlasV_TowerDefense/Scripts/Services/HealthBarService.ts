@@ -75,7 +75,7 @@ export class HealthBarService extends Service {
       if (!rec) continue;
       const p = new Events.UpdateHealthBarPayload();
       p.worldX = rec.worldX + HEALTHBAR_OFFSET_X;
-      p.worldY = GROUND_Y + 0.5 + 0.02;
+      p.worldY = GROUND_Y + 1.5 + 0.02;
       p.worldZ = rec.worldZ;
       p.hp     = rec.hp;
       p.maxHp  = rec.maxHp;

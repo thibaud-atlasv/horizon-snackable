@@ -1,0 +1,31 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "RobotTroll",
+    "attributes": [
+        {
+            "name": "layer0ColorAndAlpha",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "26631398616455768",
+                    "ingestionId": "3433629015217244159",
+                    "targetId": "1850524962"
+                }
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "33451255657851516",
+        "ingestionId": "12536732106106040758",
+        "targetId": "2708897769"
+    },
+    "baseMaterialAssetId": {
+        "packageOrRemoteId": "26631398616455768",
+        "ingestionId": "3534051439838015619",
+        "targetId": "3482823323"
+    }
+}

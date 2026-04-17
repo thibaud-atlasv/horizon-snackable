@@ -16,7 +16,7 @@ import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
 import type { ITowerDef, ITowerStats, IUpgradeNode } from '../Types';
 import { Events } from '../Types';
-import { CELL_SIZE, GRID_COLS, GRID_ROWS, SELL_RATIO } from '../Constants';
+import { GRID_COLS, GRID_ROWS, SELL_RATIO } from '../Constants';
 import { TOWER_DEFS } from '../Defs/TowerDefs';
 import { PathService } from './PathService';
 import { ResourceService } from './ResourceService';
@@ -194,8 +194,8 @@ export class TowerService extends Service {
     const entity = await WorldService.get().spawnTemplate({
       templateAsset: def.template,
       position: pos,
-      rotation: Quaternion.identity,
-      scale: new Vec3(CELL_SIZE, CELL_SIZE, CELL_SIZE),
+      //rotation: Quaternion.identity,
+      scale: Vec3.one,
       networkMode: NetworkMode.LocalOnly,
     }).catch((e: unknown) => { console.error(e); return null; });
 
