@@ -7,25 +7,20 @@
     "name": "Troll",
     "attributes": [
         {
-            "name": "layer0ColorAndAlpha",
+            "name": "baseColorTex",
             "value": {
                 "type": "assetId",
                 "assetIdValue": {
                     "packageOrRemoteId": "26631398616455768",
-                    "ingestionId": "8502043836649943373",
+                    "ingestionId": "1454291623939446786",
                     "targetId": "1850524962"
                 }
             }
         }
     ],
     "shaderAssetId": {
-        "packageOrRemoteId": "33451255657851516",
-        "ingestionId": "12536732106106040758",
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "8676292661488983804",
         "targetId": "2708897769"
-    },
-    "baseMaterialAssetId": {
-        "packageOrRemoteId": "26631398616455768",
-        "ingestionId": "8028018322691318703",
-        "targetId": "4207237613"
     }
 }

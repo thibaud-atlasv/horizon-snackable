@@ -22,8 +22,11 @@ import { TowerService } from './TowerService';
 import { PathService } from './PathService';
 import { ResourceService } from './ResourceService';
 
-const TINT_VALID   = new Color(0.4, 1.0, 0.4, 1.0);
-const TINT_INVALID = new Color(1.0, 0.3, 0.3, 1.0);
+const TINT_VALID        = new Color(0.4, 1.0, 0.4, 1.0);
+const TINT_INVALID      = new Color(1.0, 0.3, 0.3, 1.0);
+const RANGE_COLOR_VALID   = new Color(0.3, 1.0, 0.3, 0.7);
+const RANGE_COLOR_INVALID = new Color(1.0, 0.25, 0.25, 0.7);
+const RANGE_COLOR_SELECT  = new Color(1.0, 0.85, 0.2, 0.6);
 const RANGE_PARK    = new Vec3(0, PROJECTILE_POOL_Y, 0);
 
 @service()
@@ -169,6 +172,8 @@ export class PlacementService extends Service {
       t.worldPosition = new Vec3(pos.x, GROUND_Y + 0.05, pos.z);
       t.localScale    = new Vec3(diameter, 1, diameter);
     }
+    const c = this._rangeEntity.getComponent(ColorComponent);
+    if (c) c.color = RANGE_COLOR_SELECT;
   }
 
   private _parkRange(): void {
@@ -250,6 +255,8 @@ export class PlacementService extends Service {
     if (this._rangeEntity) {
       const t = this._rangeEntity.getComponent(TransformComponent);
       if (t) t.worldPosition = new Vec3(snapPos.x, GROUND_Y + 0.02, snapPos.z);
+      const c = this._rangeEntity.getComponent(ColorComponent);
+      if (c) c.color = this._valid ? RANGE_COLOR_VALID : RANGE_COLOR_INVALID;
     }
   }
 

@@ -64,11 +64,20 @@
                     "targetId": "1850524962"
                 }
             }
+        },
+        {
+            "name": "ringWidth",
+            "value": {
+                "type": "Floats",
+                "floatValues": [
+                    0.029999999329447748
+                ]
+            }
         }
     ],
     "shaderAssetId": {
-        "packageOrRemoteId": "30952996677677480",
-        "ingestionId": "18157220368666114631",
+        "packageOrRemoteId": "26631398616455768",
+        "ingestionId": "6718687354046990873",
         "targetId": "2708897769"
     }
 }

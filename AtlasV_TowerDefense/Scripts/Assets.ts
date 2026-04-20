@@ -6,7 +6,7 @@
  *   2. Add an entry here — this is the ONLY file to edit when a path changes.
  *   3. Reference the export from Defs files or services — never use new TemplateAsset() elsewhere.
  */
-import { TemplateAsset } from 'meta/worlds';
+import { TemplateAsset, TextureAsset } from 'meta/worlds';
 
 export namespace Assets {
 
@@ -18,9 +18,9 @@ export namespace Assets {
 
   // ── Enemies ───────────────────────────────────────────────────────────────
   export const EnemyBasic = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
-  export const EnemyFast  = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
-  export const EnemyTank  = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
-  export const EnemyBoss  = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
+  export const EnemyFast  = new TemplateAsset('@Templates/Enemies/EnemyFast.hstf');
+  export const EnemyTank  = new TemplateAsset('@Templates/Enemies/EnemyTank.hstf');
+  export const EnemyBoss  = new TemplateAsset('@Templates/Enemies/EnemyBoss.hstf');
 
   // ── Shared ────────────────────────────────────────────────────────────────
   export const Particles       = new TemplateAsset('@Templates/Cube.hstf');
@@ -29,24 +29,15 @@ export namespace Assets {
   export const HealthBar       = new TemplateAsset('@Templates/HealthBar.hstf');
   export const PathCell        = new TemplateAsset('@Templates/PathCell.hstf');
   export const FloatingText    = new TemplateAsset('@Templates/UI/FloatingText.hstf');
+  export const Coin            = new TemplateAsset('@Templates/Coin.hstf'); // placeholder
 }
 
 export namespace NewTiles {
-  export const Grass = new TemplateAsset('@Templates/Env/Tile.hstf');;
-  export const LeftToRight = new TemplateAsset('@Templates/Env/Path.hstf');
-  export const DownToRight = new TemplateAsset('@Templates/Env/Angle.hstf');
+  export const Grass = new TemplateAsset('@Templates/Cube.hstf');;
+  export const LeftToRight = new TemplateAsset('@Templates/Cube.hstf');
+  export const DownToRight = new TemplateAsset('@Templates/Cube.hstf');
 }
 
-export namespace Tiles {
-  export const Hill = new TemplateAsset('@Models/FBX format/tile-hill.fbx:template');
-  export const Rock = new TemplateAsset('@Models/FBX format/tile-rock.fbx:template');
-  export const Tree = new TemplateAsset('@Models/FBX format/tile-tree.fbx:template');
-  export const TreeDouble = new TemplateAsset('@Models/FBX format/tile-tree-double.fbx:template');
-  export const TreeQuad = new TemplateAsset('@Models/FBX format/tile-tree-quad.fbx:template');
-  export const Crystal = new TemplateAsset('@Models/FBX format/tile-crystal.fbx:template');
-  export const RightToLeftEnd = new TemplateAsset('@Models/FBX format/tile-spawn-end.fbx:template')
-  
-  export const Grass = new TemplateAsset('@Models/FBX format/tile.fbx:template');;
-  export const TopToRight = new TemplateAsset('@Models/FBX format/tile-corner-round.fbx:template');
-  export const LeftToRight = new TemplateAsset('@Models/FBX format/tile-straight.fbx:template');
+export namespace TowerIcons {
+  export const CanonTower = new TextureAsset("@Textures/canon_tower.png")
 }

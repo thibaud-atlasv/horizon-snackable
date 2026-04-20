@@ -12,7 +12,7 @@
                 "type": "assetId",
                 "assetIdValue": {
                     "packageOrRemoteId": "26631398616455768",
-                    "ingestionId": "5732975921964270207",
+                    "ingestionId": "13793707403356921486",
                     "targetId": "1850524962"
                 }
             }
@@ -20,7 +20,7 @@
     ],
     "shaderAssetId": {
         "packageOrRemoteId": "30952996677677480",
-        "ingestionId": "9623295632868937486",
+        "ingestionId": "8676292661488983804",
         "targetId": "2708897769"
     }
 }

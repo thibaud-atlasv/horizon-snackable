@@ -25,20 +25,18 @@ import { ResourceService } from '../Services/ResourceService';
 
 @component()
 export class EnemyController extends Component {
-  // Drag the body pivot entity here — it will be tilted toward the camera at tiltAngle degrees.
   @property() bodyPivot: Entity | null = null;
-  // Drag the left/right arm pivot entities here for walk cycle animation.
   @property() leftArm: Entity | null = null;
   @property() rightArm: Entity | null = null;
-  // Drag the left/right leg pivot entities here for walk cycle animation.
   @property() leftLeg: Entity | null = null;
   @property() rightLeg: Entity | null = null;
-  // Body tilt toward the camera in degrees (positive = lean forward/toward cam).
+  @property() shadow: Entity | null = null;
   @property() tiltAngle: number = 45;
-  // Walk animation swing amplitude in degrees.
   @property() limbSwingDeg: number = 30;
-  // Walk animation speed multiplier.
   @property() limbSwingSpeed: number = 6;
+  @property() walkByTranslation: boolean = false;
+  // Y translation amplitude when walkByTranslation is true
+  @property() walkTranslateY: number = 0.15;
 
   private _transform!: TransformComponent;
   private _enemyId: number = -1;
@@ -52,33 +50,47 @@ export class EnemyController extends Component {
   private _deathTimer: number = 0;
   private _baseScale: number = 1;
 
-  private static readonly DEATH_DURATION = 0.35; // seconds
+  private _colorComponents: ColorComponent[] = [];
+  private _baseColor: Color = new Color(1, 1, 1, 1);
+  private _persistentTint: Color | null = null; // e.g. slow tint, survives hit flash
+  private _hitFlashTimer: number = 0;
+  private static readonly HIT_FLASH_DURATION = 0.12;
+  private static readonly HIT_COLOR = new Color(1.0, 0.1, 0.1, 1.0);
 
-  // Waypoint-segment tracking — enemies re-read the path at each waypoint boundary.
-  private _wpIndex: number = 0; // current sub-path index (0 = wp[0]→wp[1], …)
-  private _subT: number = 0;    // distance traveled within the current sub-path
+  private _squashTimer: number = 0;
+  private static readonly SQUASH_DURATION = 0.12;
+  private static readonly SQUASH_XZ = 1.12;
+  private static readonly SQUASH_Y  = 0.88;
 
-  // Accumulated time used for the walk cycle sine wave.
+  private static readonly DEATH_DURATION = 0.35;
+
+  private _wpIndex: number = 0;
+  private _subT: number = 0;
   private _animTime: number = 0;
 
-  // Rest poses captured from the template — animation is applied additively on top.
   private _restLeftLeg:  Quaternion = Quaternion.identity;
   private _restRightLeg: Quaternion = Quaternion.identity;
   private _restLeftArm:  Quaternion = Quaternion.identity;
   private _restRightArm: Quaternion = Quaternion.identity;
+  private _restLeftLegPos:  Vec3 = Vec3.zero;
+  private _restRightLegPos: Vec3 = Vec3.zero;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
     this._transform = this.entity.getComponent(TransformComponent)!;
 
-    const restOf = (e: Entity | null) =>
+    const restRot = (e: Entity | null) =>
       e?.getComponent(TransformComponent)?.localRotation ?? Quaternion.identity;
+    const restPos = (e: Entity | null) =>
+      e?.getComponent(TransformComponent)?.localPosition ?? Vec3.zero;
 
-    this._restLeftLeg  = restOf(this.leftLeg);
-    this._restRightLeg = restOf(this.rightLeg);
-    this._restLeftArm  = restOf(this.leftArm);
-    this._restRightArm = restOf(this.rightArm);
+    this._restLeftLeg  = restRot(this.leftLeg);
+    this._restRightLeg = restRot(this.rightLeg);
+    this._restLeftArm  = restRot(this.leftArm);
+    this._restRightArm = restRot(this.rightArm);
+    this._restLeftLegPos  = restPos(this.leftLeg);
+    this._restRightLegPos = restPos(this.rightLeg);
   }
 
   @subscribe(Events.InitEnemy)
@@ -101,30 +113,47 @@ export class EnemyController extends Component {
     this._transform.worldPosition = startPos;
     this._enemyId = EnemyService.get().register(this.entity, this._defId, this._hp, startPos.x, startPos.z);
 
-    const col = def.color;
-    const color = new Color(col.r, col.g, col.b, 1);
-    const child = this.entity.getChildrenWithComponent(ColorComponent);
-    if (child.length > 0) {
-        //for (const child of this.entity.getChildrenWithComponent(ColorComponent)) {
-      const c = child[0].getComponent(ColorComponent);
-      if (c) c.color = color;
-    }
+    this._colorComponents = [];
+    this._collectColorComponents(this.entity);
+    this._baseColor = this._colorComponents[0]?.color ?? new Color(1, 1, 1, 1);
+    this.resetTint();
   }
 
   @subscribe(Events.TakeDamage)
   onTakeDamage(p: Events.TakeDamagePayload): void {
     if (!this._alive || p.enemyId !== this._enemyId) return;
 
+    this._hitFlashTimer = EnemyController.HIT_FLASH_DURATION;
+    this._squashTimer = EnemyController.SQUASH_DURATION;
+    this._applyColor(EnemyController.HIT_COLOR);
+
     this._hp -= p.damage;
     const pos = this._transform.worldPosition;
     EnemyService.get().update(this._enemyId, pos.x, pos.z, PathService.get().getGlobalT(this._wpIndex, this._subT), this._hp);
-
 
     if (this._hp <= 0) this._die();
   }
 
   @subscribe(OnWorldUpdateEvent)
   onUpdate(p: OnWorldUpdateEventPayload): void {
+    if (this._hitFlashTimer > 0) {
+      this._hitFlashTimer -= p.deltaTime;
+      if (this._hitFlashTimer <= 0) this._applyColor(this._persistentTint ?? this._baseColor);
+    }
+
+    if (this._squashTimer > 0) {
+      this._squashTimer -= p.deltaTime;
+      if (this._squashTimer <= 0) {
+        this._transform.localScale = new Vec3(this._baseScale, this._baseScale, this._baseScale);
+      } else {
+        const t = this._squashTimer / EnemyController.SQUASH_DURATION;
+        const s = t * t * (3 - 2 * t);
+        const xz = this._baseScale * (1 + (EnemyController.SQUASH_XZ - 1) * s);
+        const y  = this._baseScale * (1 + (EnemyController.SQUASH_Y  - 1) * s);
+        this._transform.localScale = new Vec3(xz, y, xz);
+      }
+    }
+
     if (this._dying) {
       this._deathTimer += p.deltaTime;
       const t = Math.min(this._deathTimer / EnemyController.DEATH_DURATION, 1.0);
@@ -138,7 +167,6 @@ export class EnemyController extends Component {
     const pathService = PathService.get();
     this._subT += this._speed * (EnemyService.get().get(this._enemyId)?.speedFactor ?? 1) * dt;
 
-    // Advance through completed sub-paths — this is where the enemy reads the updated path.
     const waypointCount = pathService.getWaypointCount();
     while (this._wpIndex < waypointCount - 1) {
       const subLen = pathService.getSubPathLength(this._wpIndex);
@@ -158,11 +186,36 @@ export class EnemyController extends Component {
     this._transform.lookAt(ahead, Vec3.up);
     EnemyService.get().update(this._enemyId, pos.x, pos.z, pathService.getGlobalT(this._wpIndex, this._subT), this._hp);
 
-    // dx/dz give the travel direction; used to compute parent yaw for pivot compensation.
     const dx = ahead.x - pos.x;
     const dz = ahead.z - pos.z;
     this._updateBodyPivot(dx, dz);
-    this._animateLimbs(dt);
+    const speedFactor = EnemyService.get().get(this._enemyId)?.speedFactor ?? 1;
+    this._animateLimbs(dt, this._speed * speedFactor);
+  }
+
+  public applyTint(color: Color): void {
+    this._persistentTint = color;
+    if (this._hitFlashTimer <= 0) this._applyColor(color);
+  }
+
+  public resetTint(): void {
+    this._persistentTint = null;
+    if (this._hitFlashTimer <= 0) this._applyColor(this._baseColor);
+  }
+
+  private _collectColorComponents(entity: Entity): void {
+    if (entity === this.shadow) return;
+    const cc = entity.getComponent(ColorComponent);
+    if (cc) this._colorComponents.push(cc);
+    for (const child of entity.getChildren()) {
+      this._collectColorComponents(child);
+    }
+  }
+
+  private _applyColor(color: Color): void {
+    for (const cc of this._colorComponents) {
+      cc.color = color;
+    }
   }
 
   private _die(): void {
@@ -170,7 +223,6 @@ export class EnemyController extends Component {
     this._dying = true;
     this._deathTimer = 0;
     EnemyService.get().unregister(this._enemyId);
-    ResourceService.get().earn(this._reward);
 
     const pos = this._transform.worldPosition;
     const p = new Events.EnemyDiedPayload();
@@ -186,53 +238,51 @@ export class EnemyController extends Component {
     this.entity.destroy();
   }
 
-  // Keeps bodyPivot tilted toward the camera regardless of travel direction.
-  // Strategy: set worldRotation directly = pure X-world tilt, which stays
-  // camera-facing no matter how the parent yaws with lookAt.
-  // Tilts bodyPivot toward the camera (world +X axis) regardless of parent yaw.
-  // After lookAt, parent yaw θ satisfies: forward_world = (-sinθ, 0, -cosθ).
-  // lookAt points -Z toward target, so yaw = atan2(-dx, -dz).
-  // World X axis expressed in parent local space = (cosθ, 0, -sinθ).
-  // We rotate the pivot around that local axis by tiltAngle.
   private _updateBodyPivot(dx: number, dz: number): void {
     if (!this.bodyPivot) return;
     const pivot = this.bodyPivot.getComponent(TransformComponent);
     if (!pivot) return;
 
-    const yaw = Math.atan2(-dx, -dz); // parent yaw after lookAt
-    const cosY = Math.cos(yaw);
-    const sinY = Math.sin(yaw);
-    const tiltRad = (this.tiltAngle * Math.PI) / 180;
-    // Local axis corresponding to world X, then rotate pivot around it.
-    
-    let Angle = new Vec3(0,0,0);
-    if (dx > 0)
-      Angle = new Vec3(-30,0,0);
-    else if (dx < 0)
-      Angle = new Vec3(30,0,0);
-    else if (dz > 0)
-      Angle = new Vec3(0,0,45);
-    else if (dz < 0)
-      Angle = new Vec3(0,0,-45);
+    let Angle = new Vec3(0, 0, 0);
+    if (dx > 0)       Angle = new Vec3(-30, 0, 0);
+    else if (dx < 0)  Angle = new Vec3(30, 0, 0);
+    else if (dz > 0)  Angle = new Vec3(0, 0, 45);
+    else if (dz < 0)  Angle = new Vec3(0, 0, -45);
     pivot.localRotation = Quaternion.fromEuler(Angle);
-    //Quaternion.fromAxisAngle(new Vec3(cosY, 0, -sinY), tiltRad);
   }
 
-  private _animateLimbs(dt: number): void {
-    this._animTime += dt * this.limbSwingSpeed;
+  private _animateLimbs(dt: number, currentSpeed: number): void {
+    this._animTime += currentSpeed * dt * this.limbSwingSpeed;
     const swing = Math.sin(this._animTime) * this.limbSwingDeg;
 
-    const apply = (entity: Entity | null, rest: Quaternion, angleDeg: number) => {
+    if (this.walkByTranslation) {
+      // Y translation mode: legs bob up/down in opposition, arms still rotate
+      const applyLegTranslate = (entity: Entity | null, restPos: Vec3, phase: number) => {
+        const t = entity?.getComponent(TransformComponent);
+        if (!t) return;
+        const offsetY = Math.sin(this._animTime* 2 + phase) * this.walkTranslateY;
+        t.localPosition = new Vec3(restPos.x, restPos.y + offsetY, restPos.z);
+      };
+      applyLegTranslate(this.leftLeg,  this._restLeftLegPos,  0);
+      applyLegTranslate(this.rightLeg, this._restRightLegPos, Math.PI);
+    } else {
+      const applyRot = (entity: Entity | null, rest: Quaternion, angleDeg: number) => {
+        const t = entity?.getComponent(TransformComponent);
+        if (!t) return;
+        t.localRotation = Quaternion.mul(rest, Quaternion.fromEuler(new Vec3(0, 0, angleDeg)));
+      };
+      applyRot(this.leftLeg,  this._restLeftLeg,   swing);
+      applyRot(this.rightLeg, this._restRightLeg,  -swing);
+    }
+
+    // Arms always rotate
+    const applyArm = (entity: Entity | null, rest: Quaternion, angleDeg: number) => {
       const t = entity?.getComponent(TransformComponent);
       if (!t) return;
-      const delta = Quaternion.fromEuler(new Vec3(0, 0, angleDeg));
-      t.localRotation = Quaternion.mul(rest, delta);
+      t.localRotation = Quaternion.mul(rest, Quaternion.fromEuler(new Vec3(0, 0, angleDeg)));
     };
-
-    apply(this.leftLeg,   this._restLeftLeg,   swing);
-    apply(this.rightLeg,  this._restRightLeg,  -swing);
-    apply(this.leftArm,   this._restLeftArm,   -swing);
-    apply(this.rightArm,  this._restRightArm,   swing);
+    applyArm(this.leftArm,  this._restLeftArm,  -swing);
+    applyArm(this.rightArm, this._restRightArm,  swing);
   }
 
   private _reachEnd(): void {

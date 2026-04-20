@@ -17,7 +17,7 @@ import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
 import type { OnWorldUpdateEventPayload } from 'meta/worlds';
 import { NetworkingService } from 'meta/worlds';
 import { Events } from '../Types';
-import { PROJECTILE_HIT_RADIUS, PROJECTILE_PARTICLE_INTERVAL } from '../Constants';
+import { PROJECTILE_HIT_RADIUS, PROJECTILE_PARTICLE_INTERVAL, PROJECTILE_SCALE } from '../Constants';
 import { EnemyService } from '../Services/EnemyService';
 import { HitService } from '../Services/HitService';
 import { ProjectilePool, POOL_PARK_POSITION } from '../Services/ProjectilePool';
@@ -34,7 +34,11 @@ export class ProjectileController extends Component {
   private _destX: number = 0;
   private _destZ: number = 0;
   private _originX: number = 0;
+  private _originY: number = 0;
   private _originZ: number = 0;
+  private _arcHeight: number = 0;
+  private _travelDist: number = 0; // total XZ distance origin→target at fire time
+  private _traveled: number = 0;   // XZ distance covered so far
   private _col: Color = Color.white;
 
   @subscribe(OnEntityStartEvent)
@@ -50,16 +54,24 @@ export class ProjectileController extends Component {
     this._speed = p.speed;
     this._props = p.props;
     this._originX = p.originX;
+    this._originY = this._transform.worldPosition.y;
     this._originZ = p.originZ;
+    this._arcHeight = (p.props['arcHeight'] as number | undefined) ?? 0;
+    this._traveled = 0;
     this._active = true;
     const rec = EnemyService.get().get(p.targetEnemyId);
-    if (rec) { this._destX = rec.worldX; this._destZ = rec.worldZ; }
-
-    const scale = p.props['projectileScale'] as number | undefined;
-    if (scale !== undefined) {
-      const st = this.entity.getComponent(TransformComponent);
-      if (st) st.localScale = new Vec3(scale, scale, scale);
+    if (rec) {
+      this._destX = rec.worldX;
+      this._destZ = rec.worldZ;
+      const dx = this._destX - this._originX;
+      const dz = this._destZ - this._originZ;
+      this._travelDist = Math.sqrt(dx * dx + dz * dz) || 1;
     }
+
+    const scaleMult = (p.props['projectileScale'] as number | undefined) ?? 1;
+    const s = scaleMult * PROJECTILE_SCALE;
+    const st = this.entity.getComponent(TransformComponent);
+    if (st) st.localScale = new Vec3(s, s, s);
 
     const col = p.props['projectileColor'] as { r: number; g: number; b: number } | undefined;
     if (col) {
@@ -111,7 +123,14 @@ export class ProjectileController extends Component {
 
     const step = this._speed * p.deltaTime;
     const norm = step / dist;
-    this._transform.worldPosition = new Vec3(pos.x + dx * norm, pos.y, pos.z + dz * norm);
+    const newX = pos.x + dx * norm;
+    const newZ = pos.z + dz * norm;
+
+    this._traveled += step;
+    const t = Math.min(this._traveled / this._travelDist, 1);
+    const arcY = this._arcHeight > 0 ? this._arcHeight * 4 * t * (1 - t) : 0;
+
+    this._transform.worldPosition = new Vec3(newX, this._originY + arcY, newZ);
   }
 
   private _detonate(worldX: number, worldZ: number): void {
@@ -135,6 +154,7 @@ export class ProjectileController extends Component {
   private _return(): void {
     this._active = false;
     this._transform.worldPosition = POOL_PARK_POSITION;
+    this._transform.localScale = new Vec3(PROJECTILE_SCALE, PROJECTILE_SCALE, PROJECTILE_SCALE);
     ProjectilePool.get().release(this.entity);
   }
 }

@@ -22,8 +22,8 @@ export interface ILevelDef {
 // early waves reward fast kills (gold rush), mid waves demand AoE control,
 // late waves require layered defenses.
 const WAVES_LEVEL_0: IWaveDef[] = [
-  // 1 — tutorial: pure basics
-  { groups: [{ enemyId: 'basic', count: 8 }] },
+  // 1 — test: 2 of each type
+  { groups: [{ enemyId: 'basic', count: 8 } ]},
   // 2 — first fast enemies
   { groups: [{ enemyId: 'basic', count: 9 }, { enemyId: 'fast', count: 3 }] },
   // 3 — tanks introduced, rewards Cannon investment

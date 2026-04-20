@@ -1,0 +1,17 @@
+{
+    "version": 6,
+    "entities": [
+        {
+            "id": "b568d258-4773-4744-bcd1-b1788f701013",
+            "name": "ArrowTower",
+            "type": {
+                "packageOrRemoteId": "26631398616455768",
+                "ingestionId": "1637784053927604813",
+                "targetId": "2719744159"
+            },
+            "deltas": [],
+            "attributes": []
+        }
+    ],
+    "relationships": []
+}

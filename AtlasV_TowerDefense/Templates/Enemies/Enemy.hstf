@@ -42,7 +42,8 @@
                             "leftArm": "8a530e85-45c0-4856-915e-944e8f26b751/ac6cedb4-029e-3604-a93c-5b329e3213e6",
                             "rightArm": "8a530e85-45c0-4856-915e-944e8f26b751/da9d0770-2a8a-e3fa-0f70-f84a437fc0e1",
                             "leftLeg": "8a530e85-45c0-4856-915e-944e8f26b751/4250de6e-630c-f9e0-1582-6e5b1145cc12",
-                            "rightLeg": "8a530e85-45c0-4856-915e-944e8f26b751/653e4542-5255-d6a3-ecb3-2e40028f4528"
+                            "rightLeg": "8a530e85-45c0-4856-915e-944e8f26b751/653e4542-5255-d6a3-ecb3-2e40028f4528",
+                            "shadow": "caeea8b8-0710-4ce2-8f07-bd09eb5b1a7d"
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -105,9 +106,9 @@
                                         "z": 0.0
                                     },
                                     "localScale": {
-                                        "x": 2.0,
-                                        "y": 2.0,
-                                        "z": 2.0
+                                        "x": 1.5,
+                                        "y": 1.5,
+                                        "z": 1.5
                                     }
                                 }
                             }
@@ -131,6 +132,111 @@
                                     }
                                 }
                             }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                                "version": 8,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColliderMeshPlatformComponent",
+                                "version": 2,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 1.0,
+                                        "g": 1.0,
+                                        "b": 1.0,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "da9d0770-2a8a-e3fa-0f70-f84a437fc0e1",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                                "version": 8,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColliderMeshPlatformComponent",
+                                "version": 2,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 1.0,
+                                        "g": 1.0,
+                                        "b": 1.0,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "b4f13cbe-9f44-1741-7d36-e58f00133460",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                                "version": 8,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColliderMeshPlatformComponent",
+                                "version": 2,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 1.0,
+                                        "g": 1.0,
+                                        "b": 1.0,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
                         }
                     ],
                     "attributes": []
@@ -148,6 +254,37 @@
                                         "x": -0.2058687061071396,
                                         "y": -2.8318777367530858e-7,
                                         "z": -7.64360450489221e-8
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                                "version": 8,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColliderMeshPlatformComponent",
+                                "version": 2,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 1.0,
+                                        "g": 1.0,
+                                        "b": 1.0,
+                                        "a": 1.0
                                     }
                                 }
                             }
@@ -171,9 +308,112 @@
                                     }
                                 }
                             }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::PhysicsBodyPlatformComponent",
+                                "version": 8,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColliderMeshPlatformComponent",
+                                "version": 2,
+                                "data": null
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::ColorPlatformComponent",
+                                "version": 2,
+                                "data": {
+                                    "color": {
+                                        "r": 1.0,
+                                        "g": 1.0,
+                                        "b": 1.0,
+                                        "a": 1.0
+                                    }
+                                }
+                            }
                         }
                     ],
                     "attributes": []
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "caeea8b8-0710-4ce2-8f07-bd09eb5b1a7d",
+            "name": "shadow",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localScale": {
+                                "x": 0.800000011920929,
+                                "y": 0.5,
+                                "z": 0.699999988079071
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "24407058055595655",
+                                "ingestionId": "4786304079839798385",
+                                "targetId": "2514290551"
+                            },
+                            "lightingParams": {
+                                "class": "horizon::platform_api::LightingParams",
+                                "data": {
+                                    "contributeToGI": false
+                                }
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColorPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "color": {
+                                "r": 0.0,
+                                "g": 0.0,
+                                "b": 0.0,
+                                "a": 0.30000001192092898
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "26631398616455768",
+                                    "ingestionId": "11414668843075302347",
+                                    "targetId": "157013062"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
                 }
             ],
             "attributes": []
@@ -189,6 +429,11 @@
             "relationshipType": "RelationChildOf",
             "source": "8a530e85-45c0-4856-915e-944e8f26b751",
             "destination": "c0454eea-91fc-40d4-8966-dc1b9e4b2876"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "caeea8b8-0710-4ce2-8f07-bd09eb5b1a7d",
+            "destination": "c27edc0d-1b0d-4da3-938d-55567eb71cb8"
         }
     ]
 }

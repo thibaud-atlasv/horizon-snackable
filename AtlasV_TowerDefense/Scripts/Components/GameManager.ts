@@ -26,6 +26,7 @@ import { PathService } from '../Services/PathService';
 import { ProjectilePool } from '../Services/ProjectilePool';
 import { HealthBarService } from '../Services/HealthBarService';
 import { FloatingTextService } from '../Services/FloatingTextService';
+import { CoinService } from '../Services/CoinService';
 import { CritService } from '../Services/CritService';
 import { SplashSystem } from '../Services/SplashSystem';
 import { VfxService } from '../Services/VfxService';
@@ -34,12 +35,24 @@ import { CameraShakeService } from '../Services/CameraShakeService';
 
 @component()
 export class GameManager extends Component {
+  @property() enabled: boolean = false;
+
   private _running: boolean = false;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
     SlowService.get();
+    if (this.enabled) {
+      this._startGame();
+    }
+  }
+
+  @subscribe(Events.StartGame)
+  onStartGame(_p: Events.StartGamePayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    if (this._running) return;
+    console.log('[GameManager] StartGame received — launching game');
     this._startGame();
   }
 
@@ -79,12 +92,13 @@ export class GameManager extends Component {
     VfxService.get();
     CameraShakeService.get();
     void Promise.all([
-      PathService.get().prewarm(),
+      //PathService.get().prewarm(),
       ProjectilePool.get().prewarm(),
       HealthBarService.get().prewarm(),
       PlacementService.get().prewarm(),
       FloatingTextService.get().prewarm(),
       VfxService.get().prewarm(),
+      CoinService.get().prewarm(),
     ]);
     ResourceService.get().reset();
     WaveService.get().startGame();

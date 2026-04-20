@@ -10,6 +10,7 @@ import {
   Component,
   EventService,
   OnEntityStartEvent,
+  OnWorldUpdateEvent,
   NetworkingService,
   ExecuteOn,
   component,
@@ -18,7 +19,7 @@ import {
   UiViewModel,
   CustomUiComponent,
 } from 'meta/worlds';
-import type { Maybe } from 'meta/worlds';
+import type { Maybe, OnWorldUpdateEventPayload } from 'meta/worlds';
 
 import { Events, UiEvents } from '../Types';
 import { ResourceService } from '../Services/ResourceService';
@@ -35,10 +36,15 @@ export class GameHudViewModel extends UiViewModel {
   waveText: string = '';
 }
 
+const CASINO_SPEED = 120; // gold units per second during roll
+
 @component()
 export class GameHudController extends Component {
   private viewModel: Maybe<GameHudViewModel> = null;
   private uiComponent: Maybe<CustomUiComponent> = null;
+
+  private _displayedGold: number = START_GOLD;
+  private _targetGold: number = START_GOLD;
 
   @subscribe(OnEntityStartEvent, { execution: ExecuteOn.Owner })
   onStart(): void {
@@ -63,7 +69,22 @@ export class GameHudController extends Component {
     if (NetworkingService.get().isServerContext()) return;
     if (!this.viewModel) return;
     this.viewModel.lives = payload.lives;
-    this.viewModel.gold = payload.gold;
+    this._targetGold = payload.gold;
+    // Spending snaps immediately; earning rolls up
+    if (payload.gold < this._displayedGold) {
+      this._displayedGold = payload.gold;
+      this.viewModel.gold = payload.gold;
+    }
+  }
+
+  @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
+  onUpdate(p: OnWorldUpdateEventPayload): void {
+    if (!this.viewModel || this._displayedGold === this._targetGold) return;
+    const step = CASINO_SPEED * p.deltaTime;
+    if (this._displayedGold < this._targetGold) {
+      this._displayedGold = Math.min(this._displayedGold + step, this._targetGold);
+    }
+    this.viewModel.gold = Math.round(this._displayedGold);
   }
 
   @subscribe(Events.WaveStarted, { execution: ExecuteOn.Owner })

@@ -1,0 +1,30 @@
+BEGIN_OPTIONS
+  blendState alphaBlend
+  depthStencilState depthTestOnly
+  Template "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+  ringColor("Ring Color", Color) = (1, 1, 1, 1)
+  ringWidth("Ring Width", Float) = 0.04
+  edgeSoftness("Edge Softness", Float) = 0.015
+END_PROPERTIES
+
+BEGIN_SURFACE
+void surfaceFunction(inout Surface s, SurfaceData d)
+{
+  // UV centered on (0.5, 0.5) — mesh must be a quad with UVs in [0,1]
+  vec2 uv = d.texcoord0 - vec2(0.5, 0.5);
+  float dist = length(uv) * 2.0; // dist=1 at edge of unit circle
+
+  // outer edge: fade out just past radius 1
+  float outerAlpha = 1.0 - smoothstep(1.0 - matParams.edgeSoftness, 1.0 + matParams.edgeSoftness, dist);
+  // inner edge: fade out toward center, keeping a ring of width ringWidth
+  float innerAlpha = smoothstep(1.0 - matParams.ringWidth - matParams.edgeSoftness, 1.0 - matParams.ringWidth + matParams.edgeSoftness, dist);
+
+  float alpha = outerAlpha * innerAlpha;
+
+  s.baseColor = matParams.ringColor.rgb;
+  s.alpha = alpha * matParams.ringColor.a;
+}
+END_SURFACE

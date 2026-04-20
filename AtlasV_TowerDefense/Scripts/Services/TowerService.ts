@@ -20,6 +20,7 @@ import { GRID_COLS, GRID_ROWS, SELL_RATIO } from '../Constants';
 import { TOWER_DEFS } from '../Defs/TowerDefs';
 import { PathService } from './PathService';
 import { ResourceService } from './ResourceService';
+import { FloatingTextService } from './FloatingTextService';
 
 // ── Record ────────────────────────────────────────────────────────────────────
 
@@ -220,6 +221,8 @@ export class TowerService extends Service {
 
     const refund = Math.floor(rec.totalInvested * SELL_RATIO);
     ResourceService.get().earn(refund);
+    const towerPos = PathService.get().cellToWorld(rec.col, rec.row);
+    FloatingTextService.get().show(towerPos.x, towerPos.z, refund);
     rec.entity.destroy();
 
     const p = new Events.TowerSoldPayload();
