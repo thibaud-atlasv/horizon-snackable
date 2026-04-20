@@ -64,8 +64,12 @@ export class CameraShakeService extends Service {
 
   @subscribe(Events.EnemyReachedEnd)
   onEnemyReachedEnd(_p: Events.EnemyReachedEndPayload): void {
-    console.log('[CameraShakeService] Enemy reached end, triggering shake');
     this.shake(0.15, 0.3);
+  }
+
+  @subscribe(Events.EnemyDied)
+  onEnemyDied(p: Events.EnemyDiedPayload): void {
+    if (p.reward >= 50) this.shake(0.12, 0.25); // boss kill
   }
 
   @subscribe(OnWorldUpdateEvent)

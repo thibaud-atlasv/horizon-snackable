@@ -1,0 +1,20 @@
+BEGIN_PROPERTIES
+
+[BeginGroup("Waves", 2)]
+  pathTex("Path Texture", 2D) = "white"
+  [Slider(0.1, 10.0, 0.1)] tileScale("Tile Scale", float) = 1.0
+[EndGroup]
+
+END_PROPERTIES
+
+BEGIN_SURFACE
+
+void surfaceFunction(inout Surface s, inout SurfaceData d)
+{
+  vec2 worldUV = d.worldSpacePosition.zx * matParams.tileScale;
+  s.baseColor = texture(sampler2D(pathTex, linearWrapSampler), worldUV).rgb;
+  s.roughness = 1.0;
+  s.metallic = 0.0;
+}
+
+END_SURFACE

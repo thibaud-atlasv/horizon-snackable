@@ -7,13 +7,44 @@
     <Page.Resources>
         <!-- Colors -->
         <SolidColorBrush x:Key="OverlayBrush" Color="#99000000"/>
-        <SolidColorBrush x:Key="PanelBrush" Color="#1a1a2e"/>
+        <SolidColorBrush x:Key="ParchmentBrush" Color="#f4e4bc"/>
+        <SolidColorBrush x:Key="ParchmentDarkBrush" Color="#5d4e37"/>
+        <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
+        <SolidColorBrush x:Key="GoldDarkBrush" Color="#b8860b"/>
         <SolidColorBrush x:Key="VictoryBrush" Color="#2ecc71"/>
         <SolidColorBrush x:Key="DefeatBrush" Color="#e74c3c"/>
-        <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ffffff"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#a0a0c0"/>
+        <SolidColorBrush x:Key="TextDarkBrush" Color="#3d2b1f"/>
+        <SolidColorBrush x:Key="WoodDarkBrush" Color="#4a2c0a"/>
+        <SolidColorBrush x:Key="ShadowBrush" Color="#2a1a0a"/>
+        <SolidColorBrush x:Key="CreamBrush" Color="#f5e6c8"/>
         <SolidColorBrush x:Key="TransparentBrush" Color="Transparent"/>
+
+        <!-- Scale-in Animation Storyboard -->
+        <Storyboard x:Key="ScaleInAnimation">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CentralPanel"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.5"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CentralPanel"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.5"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CentralPanel"
+                                            Storyboard.TargetProperty="Opacity">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.2" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
     </Page.Resources>
 
     <!-- Main Container - Full Screen Overlay -->
@@ -26,133 +57,192 @@
             </Binding>
         </Grid.Visibility>
 
-        <!-- Full Screen Button for tap-to-restart -->
-        <Button x:Name="RestartButton"
-                Command="{Binding Path=events.restartTap}"
-                Background="{StaticResource TransparentBrush}"
-                BorderThickness="0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
+        <!-- Dark overlay background -->
+        <Grid Background="{StaticResource OverlayBrush}"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"/>
 
-            <!-- Semi-transparent black overlay -->
-            <Grid Background="{StaticResource OverlayBrush}"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch">
+        <!-- Central Parchment Panel with Scale Animation -->
+        <Grid x:Name="CentralPanel"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </TransformGroup>
+            </Grid.RenderTransform>
 
-                <!-- Centered Content Panel -->
-                <Border Background="{StaticResource PanelBrush}"
-                        CornerRadius="24"
-                        Padding="80,60"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        MinWidth="800">
+            <!-- Parchment Panel with Gold Border -->
+            <Border Background="{StaticResource ParchmentBrush}"
+                    BorderBrush="{StaticResource GoldBrush}"
+                    BorderThickness="16"
+                    CornerRadius="32"
+                    Padding="120,160,120,120"
+                    MinWidth="1400"
+                    MinHeight="1200">
 
-                    <StackPanel HorizontalAlignment="Center">
+                <Grid>
+                    <!-- Corner Ornaments -->
+                    <!-- Top-Left -->
+                    <Grid Width="44" Height="44" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-22,-22,0,0">
+                        <Ellipse Fill="{StaticResource GoldBrush}" Width="44" Height="44"/>
+                        <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <!-- Top-Right -->
+                    <Grid Width="44" Height="44" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-22,-22,0">
+                        <Ellipse Fill="{StaticResource GoldBrush}" Width="44" Height="44"/>
+                        <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <!-- Bottom-Left -->
+                    <Grid Width="44" Height="44" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-22,0,0,-22">
+                        <Ellipse Fill="{StaticResource GoldBrush}" Width="44" Height="44"/>
+                        <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <!-- Bottom-Right -->
+                    <Grid Width="44" Height="44" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-22,-22">
+                        <Ellipse Fill="{StaticResource GoldBrush}" Width="44" Height="44"/>
+                        <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
 
-                        <!-- Title Text - VICTORY or DEFEAT -->
-                        <Grid HorizontalAlignment="Center" Margin="0,0,0,60">
-                            <!-- Victory Text (shown when isVictory=true) -->
-                            <TextBlock x:Name="VictoryText"
-                                       Text="VICTORY"
-                                       Foreground="{StaticResource VictoryBrush}"
-                                       FontSize="80"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       Visibility="Collapsed"/>
+                    <!-- Main Content -->
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 
-                            <!-- Defeat Text (shown when isVictory=false) -->
-                            <TextBlock x:Name="DefeatText"
-                                       Text="DEFEAT"
-                                       Foreground="{StaticResource DefeatBrush}"
-                                       FontSize="80"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       Visibility="Visible"/>
-                        </Grid>
-
-                        <!-- Stats Section -->
-                        <StackPanel HorizontalAlignment="Center" Margin="0,0,0,60">
-
-                            <!-- Row 1: Enemies Killed -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,24">
-                                <TextBlock Text="ENEMIES KILLED"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                           FontSize="48"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,40,0"/>
-                                <TextBlock Text="{Binding Path=enemiesKilled, StringFormat=F0}"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           FontSize="60"
-                                           FontWeight="Bold"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-
-                            <!-- Row 2: Gold Earned -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,24">
-                                <TextBlock Text="GOLD EARNED"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                           FontSize="48"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,40,0"/>
-                                <Image Source="Textures/gold_icon.png"
-                                       Width="60"
-                                       Height="60"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,12,0"/>
-                                <TextBlock Text="{Binding Path=goldEarned, StringFormat=F0}"
-                                           Foreground="{StaticResource GoldBrush}"
-                                           FontSize="60"
-                                           FontWeight="Bold"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-
-                            <!-- Row 3: Waves -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="WAVES"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                           FontSize="48"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,40,0"/>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Path=wavesCompleted, StringFormat=F0}"
-                                               Foreground="{StaticResource TextPrimaryBrush}"
-                                               FontSize="60"
-                                               FontWeight="Bold"/>
-                                    <TextBlock Text="/"
-                                               Foreground="{StaticResource TextPrimaryBrush}"
-                                               FontSize="60"
-                                               FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding Path=totalWaves, StringFormat=F0}"
-                                               Foreground="{StaticResource TextPrimaryBrush}"
-                                               FontSize="60"
-                                               FontWeight="Bold"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                        </StackPanel>
-
-                        <!-- Tap to Restart Text -->
-                        <TextBlock Text="TAP TO RESTART"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="40"
+                        <!-- Title on Wood Plank Ribbon Banner -->
+                        <Grid HorizontalAlignment="Center" Margin="0,-240,0,60" Height="200">
+                            <!-- Wood Plank Background -->
+                            <Image Source="/Root;component/Textures/WoodPlank.png"
+                                   Stretch="Fill"
+                                   Width="1000"
+                                   Height="200"
                                    HorizontalAlignment="Center"/>
 
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Button>
+                            <!-- Victory Title (shown when isVictory=true) -->
+                            <Grid x:Name="VictoryTitle" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
+                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
+                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
+                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
+                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
+                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="{StaticResource VictoryBrush}"/>
+                            </Grid>
 
-        <!-- DataTriggers for Victory/Defeat state -->
+                            <!-- Defeat Title (shown when isVictory=false) -->
+                            <Grid x:Name="DefeatTitle" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
+                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
+                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
+                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
+                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
+                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="{StaticResource DefeatBrush}"/>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Subtitle: Wave Progress -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,80">
+                            <TextBlock Text="VAGUE " FontSize="80" Foreground="{StaticResource ParchmentDarkBrush}"/>
+                            <TextBlock Text="{Binding Path=wavesCompleted, StringFormat=F0}" FontSize="80" FontWeight="Bold" Foreground="{StaticResource ParchmentDarkBrush}"/>
+                            <TextBlock Text="/" FontSize="80" Foreground="{StaticResource ParchmentDarkBrush}"/>
+                            <TextBlock Text="{Binding Path=totalWaves, StringFormat=F0}" FontSize="80" FontWeight="Bold" Foreground="{StaticResource ParchmentDarkBrush}"/>
+                        </StackPanel>
+
+                        <!-- Stats Section -->
+                        <StackPanel HorizontalAlignment="Center" Margin="0,0,0,100">
+                            <!-- Enemies Killed -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,32">
+                                <TextBlock Text="Ennemis vaincus: " FontSize="72" Foreground="{StaticResource TextDarkBrush}"/>
+                                <TextBlock Text="{Binding Path=enemiesKilled, StringFormat=F0}" FontSize="72" FontWeight="Bold" Foreground="{StaticResource TextDarkBrush}"/>
+                            </StackPanel>
+
+                            <!-- Gold Earned -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="Or gagne: " FontSize="72" Foreground="{StaticResource TextDarkBrush}"/>
+                                <Image Source="/Root;component/Textures/gold_icon.png"
+                                       Width="80"
+                                       Height="80"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,16,0"/>
+                                <TextBlock Text="{Binding Path=goldEarned, StringFormat=F0}" FontSize="72" FontWeight="Bold" Foreground="{StaticResource GoldBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- REJOUER Button with 3D Medieval Style -->
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- Shadow layer for 3D depth -->
+                            <Border Background="{StaticResource ShadowBrush}"
+                                    CornerRadius="24"
+                                    Width="720"
+                                    Height="160"
+                                    Margin="12,12,0,0"/>
+
+                            <!-- Main Button -->
+                            <Button Command="{Binding Path=events.restartTap}"
+                                    Background="{StaticResource TransparentBrush}"
+                                    BorderThickness="0"
+                                    Width="720"
+                                    Height="160"
+                                    Cursor="Hand"
+                                    Padding="0">
+                                <Border Background="{StaticResource WoodDarkBrush}"
+                                        BorderBrush="{StaticResource GoldBrush}"
+                                        BorderThickness="12"
+                                        CornerRadius="24"
+                                        Width="720"
+                                        Height="160">
+                                    <Grid>
+                                        <!-- Button Corner Ornaments (smaller) -->
+                                        <!-- Top-Left -->
+                                        <Grid Width="32" Height="32" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,12,0,0">
+                                            <Ellipse Fill="{StaticResource GoldBrush}" Width="32" Height="32"/>
+                                            <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <!-- Top-Right -->
+                                        <Grid Width="32" Height="32" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0">
+                                            <Ellipse Fill="{StaticResource GoldBrush}" Width="32" Height="32"/>
+                                            <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <!-- Bottom-Left -->
+                                        <Grid Width="32" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,12">
+                                            <Ellipse Fill="{StaticResource GoldBrush}" Width="32" Height="32"/>
+                                            <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <!-- Bottom-Right -->
+                                        <Grid Width="32" Height="32" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,12">
+                                            <Ellipse Fill="{StaticResource GoldBrush}" Width="32" Height="32"/>
+                                            <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+
+                                        <!-- Outlined Text "REJOUER" -->
+                                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
+                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
+                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
+                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
+                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="{StaticResource CreamBrush}"/>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </Button>
+                        </Grid>
+
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- DataTriggers for Victory/Defeat state and Scale Animation -->
         <b:Interaction.Triggers>
             <!-- Victory state -->
             <b:DataTrigger Binding="{Binding Path=isVictory}" Value="True">
-                <b:ChangePropertyAction TargetName="VictoryText" PropertyName="Visibility" Value="Visible"/>
-                <b:ChangePropertyAction TargetName="DefeatText" PropertyName="Visibility" Value="Collapsed"/>
+                <b:ChangePropertyAction TargetName="VictoryTitle" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="DefeatTitle" PropertyName="Visibility" Value="Collapsed"/>
             </b:DataTrigger>
             <!-- Defeat state -->
             <b:DataTrigger Binding="{Binding Path=isVictory}" Value="False">
-                <b:ChangePropertyAction TargetName="VictoryText" PropertyName="Visibility" Value="Collapsed"/>
-                <b:ChangePropertyAction TargetName="DefeatText" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="VictoryTitle" PropertyName="Visibility" Value="Collapsed"/>
+                <b:ChangePropertyAction TargetName="DefeatTitle" PropertyName="Visibility" Value="Visible"/>
+            </b:DataTrigger>
+            <!-- Scale-in animation when visible becomes True -->
+            <b:DataTrigger Binding="{Binding Path=visible}" Value="True">
+                <b:ControlStoryboardAction Storyboard="{StaticResource ScaleInAnimation}"/>
             </b:DataTrigger>
         </b:Interaction.Triggers>
     </Grid>

@@ -10,7 +10,7 @@
  *   upgrades apply immediately without reinitializing the component.
  * Does NOT handle hit resolution — that is ProjectileController's responsibility.
  */
-import { Component, TransformComponent, Vec3, Quaternion, EventService } from 'meta/worlds';
+import { Component, TransformComponent, Vec3, Quaternion, EventService, ColorComponent, Color } from 'meta/worlds';
 import type { Entity, Maybe } from 'meta/worlds';
 import { component, property, subscribe } from 'meta/worlds';
 import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
@@ -26,6 +26,11 @@ import { ProjectilePool } from '../Services/ProjectilePool';
 const BOUNCE_DURATION = 0.35;  // total bounce time in seconds
 const BOUNCE_OVERSHOOT = 1.25; // peak scale multiplier
 
+// ── Recoil animation constants ───────────────────────────────────────────────
+const RECOIL_KICK_DURATION  = 0.06; // time to reach max recoil (s)
+const RECOIL_RETURN_DURATION = 0.14; // time to return to rest (s)
+const RECOIL_DISTANCE = 0.15;        // local units of kickback
+
 @component()
 export class TowerController extends Component {
   private _transform!: TransformComponent;
@@ -36,15 +41,29 @@ export class TowerController extends Component {
   private _stats: ITowerStats = { damage: 0, range: 0, fireRate: 1, projectileSpeed: 1, props: {} };
   private _bouncing: boolean = false;
   private _bounceElapsed: number = 0;
+  private _recoilElapsed: number = -1; // -1 = inactive
+  private _barrelRestWorldX: number = 0;
+  private _barrelRestWorldY: number = 0;
+  private _barrelRestWorldZ: number = 0;
+  private _recoilDirX: number = 0;
+  private _recoilDirZ: number = 0;
 
   @property() barrel: Maybe<Entity> = null;
-  // Set to 90 if the barrel mesh forward is +X instead of -Z, -90 for -X, etc.
-  @property() barrelForwardOffsetDeg: number = 0;
+  @property() spawnPoint: Maybe<Entity> = null;
+  @property() shadow: Maybe<Entity> = null;
+  private _shadowColor: Color = new Color(0, 0, 0, 0.4);
+  // Adjust if barrel mesh is not aligned: 180 = mesh forward is +Z (default for this project)
+  @property() barrelForwardOffsetDeg: number = 180;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
     this._transform = this.entity.getComponent(TransformComponent)!;
+    if (this.shadow) {
+      const cc = this.shadow.getComponent(ColorComponent);
+      if (cc) this._shadowColor = cc.color;
+    }
+    this._setShadowAlpha(0);
   }
 
   @subscribe(Events.InitTower)
@@ -56,6 +75,7 @@ export class TowerController extends Component {
     this._bouncing = true;
     this._bounceElapsed = 0;
     this._transform.localScale = Vec3.zero;
+    this._setShadowAlpha(0);
     this._refreshStats();
   }
 
@@ -80,6 +100,10 @@ export class TowerController extends Component {
         : BOUNCE_OVERSHOOT + (1 - BOUNCE_OVERSHOOT) * ((t - 0.5) / 0.5); // overshoot → 1
       const scale = s;
       this._transform.localScale = new Vec3(scale, scale, scale);
+      // Fade shadow in during second half of bounce
+      const shadowAlpha = Math.max(0, (t - 0.5) / 0.5);
+      this._setShadowAlpha(shadowAlpha);
+
       if (t >= 1) {
         this._bouncing = false;
         this._transform.localScale = new Vec3(scale, scale, scale);
@@ -87,6 +111,28 @@ export class TowerController extends Component {
     }
 
     if (this._cooldown > 0) this._cooldown -= dt;
+
+    // Recoil animation: barrel kicks back in world space opposite to aim direction
+    if (this._recoilElapsed >= 0 && this.barrel) {
+      this._recoilElapsed += dt;
+      const barrelT = this.barrel.getComponent(TransformComponent);
+      if (barrelT) {
+        const total = RECOIL_KICK_DURATION + RECOIL_RETURN_DURATION;
+        let offset = 0;
+        if (this._recoilElapsed < RECOIL_KICK_DURATION) {
+          offset = RECOIL_DISTANCE * (this._recoilElapsed / RECOIL_KICK_DURATION);
+        } else if (this._recoilElapsed < total) {
+          offset = RECOIL_DISTANCE * (1 - (this._recoilElapsed - RECOIL_KICK_DURATION) / RECOIL_RETURN_DURATION);
+        } else {
+          this._recoilElapsed = -1;
+        }
+        barrelT.worldPosition = new Vec3(
+          this._barrelRestWorldX - this._recoilDirX * offset,
+          this._barrelRestWorldY,
+          this._barrelRestWorldZ - this._recoilDirZ * offset,
+        );
+      }
+    }
 
     const pos = this._transform.worldPosition;
     const targetId = TargetingService.get().getBestTarget(pos.x, pos.z, this._stats.range);
@@ -100,9 +146,9 @@ export class TowerController extends Component {
           const bPos = barrelT.worldPosition;
           const dx = target.worldX - bPos.x;
           const dz = target.worldZ - bPos.z;
-          // atan2 in RUB: forward is -Z, so yaw = atan2(dx, -dz) converted to degrees
+          // barrel mesh forward is +Z in RUB: negate yaw from the standard -Z formula
           const yawDeg = Math.atan2(dx, -dz) * (180 / Math.PI) + this.barrelForwardOffsetDeg;
-          barrelT.localRotation = Quaternion.fromEuler(new Vec3(0, yawDeg, 0));
+          barrelT.localRotation = Quaternion.fromEuler(new Vec3(0, -yawDeg, 0));
         }
       }
     }
@@ -114,9 +160,30 @@ export class TowerController extends Component {
 
     this._cooldown = 1 / this._stats.fireRate;
 
-    const spawnPos = this.barrel
-      ? (this.barrel.getComponent(TransformComponent)?.worldPosition ?? pos)
-      : pos;
+    if (this.barrel) {
+      const barrelT = this.barrel.getComponent(TransformComponent);
+      if (barrelT) {
+        const bw = barrelT.worldPosition;
+        this._barrelRestWorldX = bw.x;
+        this._barrelRestWorldY = bw.y;
+        this._barrelRestWorldZ = bw.z;
+        const target2 = EnemyService.get().get(targetId);
+        if (target2) {
+          const dx2 = target2.worldX - bw.x;
+          const dz2 = target2.worldZ - bw.z;
+          const len = Math.sqrt(dx2 * dx2 + dz2 * dz2) || 1;
+          this._recoilDirX = dx2 / len;
+          this._recoilDirZ = dz2 / len;
+        }
+      }
+    }
+    this._recoilElapsed = 0;
+
+    const spawnPos = this.spawnPoint
+      ? (this.spawnPoint.getComponent(TransformComponent)?.worldPosition ?? pos)
+      : this.barrel
+        ? (this.barrel.getComponent(TransformComponent)?.worldPosition ?? pos)
+        : pos;
     const t = entity.getComponent(TransformComponent);
     if (t) t.worldPosition = spawnPos;
 
@@ -125,9 +192,15 @@ export class TowerController extends Component {
     initP.damage        = this._stats.damage;
     initP.speed         = this._stats.projectileSpeed;
     initP.props         = this._stats.props;
-    initP.originX       = spawnPos.x;
-    initP.originZ       = spawnPos.z;
+    initP.originX       = pos.x;
+    initP.originZ       = pos.z;
     EventService.sendLocally(Events.InitProjectile, initP, { eventTarget: entity });
+  }
+
+  private _setShadowAlpha(alpha: number): void {
+    if (!this.shadow) return;
+    const cc = this.shadow.getComponent(ColorComponent);
+    if (cc) cc.color = new Color(this._shadowColor.r, this._shadowColor.g, this._shadowColor.b, this._shadowColor.a * alpha);
   }
 
   private _refreshStats(): void {

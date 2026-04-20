@@ -28,11 +28,23 @@
                     0.0
                 ]
             }
+        },
+        {
+            "name": "tintColor",
+            "value": {
+                "type": "Floats",
+                "floatValues": [
+                    0.2235294133424759,
+                    0.239215686917305,
+                    0.9803921580314636,
+                    0.48181799054145815
+                ]
+            }
         }
     ],
     "shaderAssetId": {
-        "packageOrRemoteId": "30952996677677480",
-        "ingestionId": "8676292661488983804",
+        "packageOrRemoteId": "26631398616455768",
+        "ingestionId": "8775178995127442905",
         "targetId": "2708897769"
     }
 }

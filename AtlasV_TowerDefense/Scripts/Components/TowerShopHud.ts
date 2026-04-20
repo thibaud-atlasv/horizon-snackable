@@ -15,6 +15,7 @@ import {
   NetworkingService,
   ExecuteOn,
   EventService,
+  TextureAsset,
   component,
   subscribe,
   uiViewModel,
@@ -26,16 +27,25 @@ import type { Maybe } from 'meta/worlds';
 import { Events, UiEvents } from '../Types';
 import { TowerService } from '../Services/TowerService';
 import { ResourceService } from '../Services/ResourceService';
+import { TowerIcons } from '../Assets';
 
 const TOWER_COLORS: Record<string, string> = {
-  arrow:  '#2ecc71',
-  cannon: '#e67e22',
-  frost:  '#00bcd4',
-  laser:  '#9b59b6',
+  arrow:  '#552ecc71',
+  cannon: '#55e67e22',
+  frost:  '#5500bcd4',
+  laser:  '#559b59b6',
+};
+
+const TOWER_SECONDARY_COLORS: Record<string, string> = {
+  arrow:  '#1a7a42',
+  cannon: '#a85a18',
+  frost:  '#007a8a',
+  laser:  '#6a3a7d',
 };
 
 @uiViewModel()
 export class TowerShopItemViewModel extends UiViewModel {
+  icon: Maybe<TextureAsset> = null;
   iconPath: string = '';
   name: string = '';
   cost: number = 0;
@@ -43,6 +53,7 @@ export class TowerShopItemViewModel extends UiViewModel {
   towerId: string = '';
   selected: boolean = false;
   towerColor: string = '#3a3a5a';
+  secondaryColor: string = '#2a2a3a';
 }
 
 @uiViewModel()
@@ -71,9 +82,24 @@ export class TowerShopHud extends Component {
 
     this.viewModel = new TowerShopViewModel();
     this.uiComponent.dataContext = this.viewModel;
+    this.viewModel.visible = false;
 
     this._populateTowers();
     this._updateAffordability(ResourceService.get().gold);
+  }
+
+  @subscribe(Events.StartGame, { execution: ExecuteOn.Owner })
+  onStartGame(_payload: Events.StartGamePayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    if (!this.viewModel) return;
+    this.viewModel.visible = true;
+  }
+
+  @subscribe(Events.ShowTitleScreen, { execution: ExecuteOn.Owner })
+  onShowTitleScreen(_payload: Events.ShowTitleScreenPayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    if (!this.viewModel) return;
+    this.viewModel.visible = false;
   }
 
   @subscribe(Events.ResourceChanged, { execution: ExecuteOn.Owner })
@@ -139,6 +165,10 @@ export class TowerShopHud extends Component {
       item.state      = 'affordable';
       item.selected   = false;
       item.towerColor = TOWER_COLORS[def.id] ?? '#3a3a5a';
+      item.secondaryColor = TOWER_SECONDARY_COLORS[def.id] ?? '#2a2a3a';
+      if (def.id === 'cannon') {
+        item.icon = TowerIcons.CanonTower;
+      }
       return item;
     });
 

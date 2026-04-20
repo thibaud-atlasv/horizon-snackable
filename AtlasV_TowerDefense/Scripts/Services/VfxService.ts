@@ -71,9 +71,6 @@ export class VfxService extends Service {
     const rec = EnemyService.get().get(p.enemyId);
     if (!rec) return;
 
-    // White flash
-    this._flashEnemy(p.enemyId, rec.entity);
-
     // Impact particles (3 small particles at enemy position)
     const col = p.props['projectileColor'] as { r: number; g: number; b: number } | undefined;
     const r = col?.r ?? 1;
@@ -172,19 +169,6 @@ export class VfxService extends Service {
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
-
-  private _flashEnemy(enemyId: number, entity: Entity): void {
-    // Don't stack flashes on same enemy
-    const existing = this._flashes.find(f => f.enemyId === enemyId);
-    if (existing) {
-      existing.expiresAt = Date.now() + FLASH_DURATION * 1000;
-      return;
-    }
-
-    const originalColors = this._captureColors(entity);
-    this._applyWhite(entity);
-    this._flashes.push({ enemyId, expiresAt: Date.now() + FLASH_DURATION * 1000, originalColors });
-  }
 
   private _spawnImpactParticles(worldX: number, worldZ: number, r: number, g: number, b: number): void {
     for (let i = 0; i < 3; i++) {

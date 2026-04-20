@@ -10,8 +10,8 @@
 
 export const GRID_COLS = 7;
 export const GRID_ROWS = 14;
-export const CELL_WIDTH  = 1.13777; // world units per cell along X axis (rows)
-export const CELL_HEIGHT = 1.1815; // world units per cell along Z axis (cols)
+export const CELL_WIDTH  = 1; // world units per cell along X axis (rows)
+export const CELL_HEIGHT = 1; // world units per cell along Z axis (cols)
 
 // col → Z axis (horizontal, left/right on screen)
 // row → X axis (vertical, top/bottom on screen)
@@ -47,7 +47,7 @@ export const SELL_RATIO = 0.6; // fraction of totalInvested refunded on sell
 export const PARTICLE_POOL_SIZE    = 150;
 export const PROJECTILE_HIT_RADIUS = 0.3; // world units — distance to trigger hit detection
 export const PROJECTILE_PARTICLE_INTERVAL = 0.015;
-export const PROJECTILE_SCALE      = 5; // world units — visual size of spawned projectiles
+export const PROJECTILE_SCALE      = 2; // world units — visual size of spawned projectiles
 export const PROJECTILE_POOL_SIZE  = 30;   // pre-spawned projectile instances
 export const PROJECTILE_POOL_Y     = -100; // off-screen park position Y
 export const HEALTHBAR_POOL_SIZE   = 30;   // pre-spawned health bar instances

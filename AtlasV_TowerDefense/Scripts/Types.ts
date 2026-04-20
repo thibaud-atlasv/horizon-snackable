@@ -61,7 +61,6 @@ export interface IEnemyDef {
   hp: number;
   speed: number;    // cells per second
   reward: number;   // gold on death
-  size: number;     // world-unit radius (collision + visual scale)
   color: { r: number; g: number; b: number };
   template: TemplateAsset;
 }
@@ -113,6 +112,12 @@ export namespace Events {
 
   export class EnemyDiedPayload { enemyId: number = 0; reward: number = 0; worldX: number = 0; worldZ: number = 0; }
   export const EnemyDied = new LocalEvent<EnemyDiedPayload>('EvEnemyDied', EnemyDiedPayload);
+
+  export class ActivateCoinPayload { worldX: number = 0; worldZ: number = 0; amount: number = 0; }
+  export const ActivateCoin = new LocalEvent<ActivateCoinPayload>('EvActivateCoin', ActivateCoinPayload);
+
+  export class CoinCollectedPayload { amount: number = 0; }
+  export const CoinCollected = new LocalEvent<CoinCollectedPayload>('EvCoinCollected', CoinCollectedPayload);
 
   // Floating text
   export class ActivateFloatingTextPayload {
@@ -179,6 +184,14 @@ export namespace Events {
   // Restart game
   export class RestartGamePayload {}
   export const RestartGame = new LocalEvent<RestartGamePayload>('EvRestartGame', RestartGamePayload);
+
+  // Return to title screen after game over / victory
+  export class ShowTitleScreenPayload {}
+  export const ShowTitleScreen = new LocalEvent<ShowTitleScreenPayload>('EvShowTitleScreen', ShowTitleScreenPayload);
+
+  // Start game (fired by title screen)
+  export class StartGamePayload {}
+  export const StartGame = new LocalEvent<StartGamePayload>('EvStartGame', StartGamePayload);
 
   // Skip build phase → immediately start wave
   export class SkipBuildPayload {}

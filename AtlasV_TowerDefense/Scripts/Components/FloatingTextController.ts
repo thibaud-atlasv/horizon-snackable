@@ -14,7 +14,8 @@ import { Events } from '../Types';
 
 // Animation configuration
 const ANIM_DURATION = 1.0;  // seconds
-const RISE_AMOUNT = 2;    // world units to rise
+const RISE_AMOUNT_Y = 2;  // world units to rise on Y
+const RISE_AMOUNT_X = 0.5; // world units to drift on X
 
 // Gold color RGB values (hex #f5c518)
 const GOLD_R = 0.96;
@@ -56,7 +57,7 @@ export class FloatingTextController extends Component {
 
     // Store starting position
     this._startX = p.worldX;
-    this._startY = GROUND_Y + 0.5; // Slightly above ground
+    this._startY = GROUND_Y + 1.5; // Slightly above ground
     this._startZ = p.worldZ;
 
     // Position the text
@@ -81,9 +82,9 @@ export class FloatingTextController extends Component {
     this._elapsed += p.deltaTime;
     const t = Math.min(this._elapsed / ANIM_DURATION, 1.0);
 
-    // Lerp Y position upward
-    const currentY = this._startY + (RISE_AMOUNT * t);
-    this._transform.worldPosition = new Vec3(this._startX, currentY, this._startZ);
+    const currentY = this._startY + (RISE_AMOUNT_Y * t);
+    const currentX = this._startX + (RISE_AMOUNT_X * t);
+    this._transform.worldPosition = new Vec3(currentX, currentY, this._startZ);
 
     // Fade out via alpha (ease out)
     const alpha = 1.0 - (t * t); // Quadratic ease out for smoother fade

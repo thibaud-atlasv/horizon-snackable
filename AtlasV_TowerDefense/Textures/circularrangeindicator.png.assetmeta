@@ -7,50 +7,96 @@
         "assetBuilderSettings": [
             {
                 "class": "horizon::renderer::tool::TextureAssetBuilderSettings",
-                "version": 10002,
+                "version": 10003,
                 "data": {
                     "target": "tex",
-                    "streamable": true,
-                    "streamCount": 2,
+                    "streamable": false,
+                    "streamCount": 0,
                     "cpuReadable": false,
                     "textureSettings": {
                         "class": "horizon::renderer::tool::TextureAssetBuilderTextureSettings",
+                        "version": 4,
                         "data": {
                             "equirectangularToCube": false,
                             "enableRoughnessConvolution": false,
-                            "premultiplyAlpha": false,
-                            "pcSettings": {
-                                "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
-                                "data": {
-                                    "textureFormat": "BC7Srgb",
-                                    "generateMips": true,
-                                    "highQualityCompression": false
+                            "premultiplyAlpha": true,
+                            "preserveAlphaCoverage": false,
+                            "alphaCutoff": 0.5,
+                            "renormalizeNormals": false,
+                            "mipFilterType": "Default",
+                            "defaultFormat": "Srgb",
+                            "platformOverrides": [
+                                {
+                                    "class": "horizon::renderer::tool::TextureAssetBuilderPlatformOverride",
+                                    "data": {
+                                        "platform": "pc",
+                                        "settings": {
+                                            "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
+                                            "data": {
+                                                "textureFormat": "BC7Srgb",
+                                                "generateMips": true,
+                                                "highQualityCompression": false
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "class": "horizon::renderer::tool::TextureAssetBuilderPlatformOverride",
+                                    "data": {
+                                        "platform": "android",
+                                        "settings": {
+                                            "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
+                                            "data": {
+                                                "textureFormat": "ASTC6x6Srgb",
+                                                "generateMips": true,
+                                                "highQualityCompression": false
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "class": "horizon::renderer::tool::TextureAssetBuilderPlatformOverride",
+                                    "data": {
+                                        "platform": "linux64",
+                                        "settings": {
+                                            "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
+                                            "data": {
+                                                "textureFormat": "BC7Srgb",
+                                                "generateMips": true,
+                                                "highQualityCompression": false
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "class": "horizon::renderer::tool::TextureAssetBuilderPlatformOverride",
+                                    "data": {
+                                        "platform": "ios",
+                                        "settings": {
+                                            "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
+                                            "data": {
+                                                "textureFormat": "ASTC6x6Srgb",
+                                                "generateMips": true,
+                                                "highQualityCompression": false
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "class": "horizon::renderer::tool::TextureAssetBuilderPlatformOverride",
+                                    "data": {
+                                        "platform": "macos",
+                                        "settings": {
+                                            "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
+                                            "data": {
+                                                "textureFormat": "BC7Srgb",
+                                                "generateMips": true,
+                                                "highQualityCompression": false
+                                            }
+                                        }
+                                    }
                                 }
-                            },
-                            "androidSettings": {
-                                "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
-                                "data": {
-                                    "textureFormat": "ASTC6x6Srgb",
-                                    "generateMips": true,
-                                    "highQualityCompression": false
-                                }
-                            },
-                            "linuxSettings": {
-                                "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
-                                "data": {
-                                    "textureFormat": "BC7Srgb",
-                                    "generateMips": true,
-                                    "highQualityCompression": false
-                                }
-                            },
-                            "iosSettings": {
-                                "class": "horizon::renderer::tool::TextureAssetBuilderPlatformSettings",
-                                "data": {
-                                    "textureFormat": "ASTC6x6Srgb",
-                                    "generateMips": true,
-                                    "highQualityCompression": false
-                                }
-                            }
+                            ]
                         }
                     }
                 }

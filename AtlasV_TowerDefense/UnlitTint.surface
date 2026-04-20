@@ -1,0 +1,25 @@
+BEGIN_OPTIONS
+  Template "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+  baseColorTex("Color", 2D) = "white"
+  tintColor("Tint Color", Color) = (1, 1, 1, 0)
+  uvScaleOffset("UV Scale (xy) Offset (zw)", Vector4) = (1,1,0,0)
+END_PROPERTIES
+
+BEGIN_VERTEX
+void vertexFunction(inout Vertex v, VertexData d)
+{
+  v.texcoord0 = v.texcoord0 * matParams.uvScaleOffset.xy + matParams.uvScaleOffset.zw;
+}
+END_VERTEX
+
+BEGIN_SURFACE
+void surfaceFunction(inout Surface s, SurfaceData d)
+{
+  vec4 color = texture(sampler2D(baseColorTex, linearWrapSampler), d.texcoord0);
+  s.baseColor = mix(color.rgb, matParams.tintColor.rgb, matParams.tintColor.a);
+  s.alpha = color.a;
+}
+END_SURFACE

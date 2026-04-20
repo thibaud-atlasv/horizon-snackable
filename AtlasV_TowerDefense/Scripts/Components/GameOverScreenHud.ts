@@ -133,8 +133,8 @@ export class GameOverScreenHud extends Component {
     this._currentWave = 0;
     this._ended = false;
 
-    // Fire restart event
-    EventService.sendLocally(Events.RestartGame, new Events.RestartGamePayload());
+    // Return to title screen instead of restarting directly
+    EventService.sendLocally(Events.ShowTitleScreen, new Events.ShowTitleScreenPayload());
   }
 }
 

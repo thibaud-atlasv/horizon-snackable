@@ -47,6 +47,11 @@ export class ResourceService extends Service {
     this._notify();
   }
 
+  @subscribe(Events.CoinCollected)
+  onCoinCollected(p: Events.CoinCollectedPayload): void {
+    this.earn(p.amount);
+  }
+
   reset(): void {
     this._gold = START_GOLD;
     this._lives = START_LIVES;

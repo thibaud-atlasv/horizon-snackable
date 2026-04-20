@@ -100,7 +100,6 @@ export class EnemyService extends Service {
       templateAsset: def.template,
       position: new Vec3(0, -100, 0),
       rotation: Quaternion.identity,
-      scale: Vec3.one.mul(def.size * 2),
       networkMode: NetworkMode.LocalOnly,
     }).catch((e: unknown) => { console.error(e); return null; });
 

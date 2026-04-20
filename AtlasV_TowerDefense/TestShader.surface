@@ -1,0 +1,184 @@
+BEGIN_PROPERTIES
+
+[BeginGroup("Water", 2)]
+    waterColor("Water Color", Color) = (0.0, 0.153, 0.369, 1.0)
+    fresnelColor("Fresnel Color", Color) = (0.2, 0.702, 0.573, 1.0)
+[EndGroup]
+
+[BeginGroup("Waves", 5)]
+    waveDirection("Direction (XZ)", Vector2) = (1.0, 0.3)
+    [Slider(0.05,2,0.05)]waveHeight("Height", float) = 0.2
+    [Slider(0.5,8,0.1)]waveFrequency("Frequency", float) = 5.0
+    [Slider(0,3,0.1)]waveSpeed("Speed", float) = 0.3
+    [Slider(0,1,0.1)]waveSteepness("Steepness", float) = 0.2
+    [Slider(0,2,0.1)]windChop("Wind Chop", float) = 0.1
+[EndGroup]
+
+[BeginGroup("Surface Detail", 3)]
+    [Slider(0,2,0.1)]normalStrength("Normal Strength", float) = 0.1
+    [Slider(0,8,0.1)]fresnelIntensity("Fresnel Intensity", float) = 8.0
+    [Slider(0,2,0.1)]sparkleIntensity("Sparkle Intensity", float) = 0.1
+[EndGroup]
+
+END_PROPERTIES
+
+BEGIN_SHARED
+
+// Gerstner wave: displaces a point along a travelling wave with circular orbits
+vec3 gerstnerWave(vec2 pos, vec2 dir, float amp, float freq, float speed, float steepness, float t)
+{
+    float phase = speed;
+    float theta = freq * dot(dir, pos) + phase * t;
+    float Q = steepness / (freq * amp);
+    return vec3(
+        Q * amp * dir.x * cos(theta),
+        amp * sin(theta),
+        Q * amp * dir.y * cos(theta)
+    );
+}
+
+// Rotate a 2D direction by an angle in degrees
+vec2 rotateDirection(vec2 dir, float deg)
+{
+    float r = deg * 3.14159 / 180.0;
+    return vec2(dir.x * cos(r) - dir.y * sin(r),
+                dir.x * sin(r) + dir.y * cos(r));
+}
+
+// Hash-based gradient for Perlin noise
+vec2 perlinGradient(vec2 p)
+{
+    float angle = fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453) * 6.28318;
+    return vec2(cos(angle), sin(angle));
+}
+
+// 2D Perlin noise with quintic interpolation
+float perlinNoise(vec2 p)
+{
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+
+    float v00 = dot(perlinGradient(i), f);
+    float v10 = dot(perlinGradient(i + vec2(1, 0)), f - vec2(1, 0));
+    float v01 = dot(perlinGradient(i + vec2(0, 1)), f - vec2(0, 1));
+    float v11 = dot(perlinGradient(i + vec2(1, 1)), f - vec2(1, 1));
+
+    return mix(mix(v00, v10, u.x),
+               mix(v01, v11, u.x), u.y) * 0.5 + 0.5;
+}
+
+// Fractal Brownian Motion (FBM) - layers of rotated noise for organic detail
+float fbm(vec2 p, int octaves)
+{
+    float value = 0.0;
+    float amp = 0.5;
+    float freq = 1.0;
+    mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
+
+    for (int i = 0; i < octaves; i++)
+    {
+        value += amp * perlinNoise(p * freq);
+        p = rot * p;
+        amp *= 0.5;
+        freq *= 2.0;
+    }
+    return value;
+}
+
+END_SHARED
+
+BEGIN_VERTEX
+
+void vertexFunction(inout Vertex v, inout VertexData d)
+{
+    vec2 pos = v.localSpacePosition.xz;
+    float t = getTime();
+
+    vec2 dir = normalize(matParams.waveDirection);
+    float amp = matParams.waveHeight;
+    float freq = matParams.waveFrequency;
+    float spd = matParams.waveSpeed;
+    float steep = matParams.waveSteepness;
+
+    // Three Gerstner wave layers auto-derived from a single set of controls:
+    //   Wave 1 - primary, full amplitude
+    //   Wave 2 - rotated 55°, half amplitude, double frequency, slightly faster
+    //   Wave 3 - rotated 100°, quarter amplitude, triple frequency, faster still
+    vec3 displacement = vec3(0.0);
+    displacement += gerstnerWave(pos, dir, amp, freq, spd, steep, t);
+    displacement += gerstnerWave(pos, rotateDirection(dir, 55.0), amp * 0.5,  freq * 2.0, spd * 1.2, steep, t);
+    displacement += gerstnerWave(pos, rotateDirection(dir, 100.0), amp * 0.25, freq * 3.0, spd * 1.5, steep, t);
+
+    // Small FBM noise on top for organic variation (derived from wave height)
+    float noise = fbm(pos * 0.5 + t * 0.3, 4);
+    displacement.y += (noise - 0.5) * amp * 0.4;
+
+    // Apply wind chop to horizontal displacement, vertical always applied
+    float chop = matParams.windChop;
+    v.localSpacePosition.x += displacement.x * chop;
+    v.localSpacePosition.z += displacement.z * chop;
+    v.localSpacePosition.y += displacement.y;
+}
+
+END_VERTEX
+
+BEGIN_SURFACE
+
+void surfaceFunction(inout Surface s, inout SurfaceData d)
+{
+    float t = getTime();
+    vec2 dir = normalize(matParams.waveDirection);
+
+    // Procedural normals (two FBM layers, scales derived from wave frequency)
+    float freq = matParams.waveFrequency;
+    float eps = 0.1;
+
+    // Layer 1 - large rolling normals
+    vec2 uv1 = d.worldSpacePosition.xz * freq * 0.35;
+    uv1 += dir * t * 0.05;
+    float n1_c = fbm(uv1, 3);
+    vec3 normal1 = normalize(vec3(
+        n1_c - fbm(uv1 + vec2(eps, 0.0), 3),
+        n1_c - fbm(uv1 + vec2(0.0, eps), 3),
+        eps));
+
+    // Layer 2 - fine detail ripples (rotated 30° for variety)
+    vec2 uv2 = d.worldSpacePosition.xz * freq * 1.3;
+    uv2 += rotateDirection(dir, 30.0) * t * 0.1;
+    float n2_c = fbm(uv2, 4);
+    vec3 normal2 = normalize(vec3(
+        n2_c - fbm(uv2 + vec2(eps, 0.0), 4),
+        n2_c - fbm(uv2 + vec2(0.0, eps), 4),
+        eps));
+
+    // Blend and apply strength (increasing chop sharpens normals)
+    vec3 blended = normalize(vec3(
+        normal1.xy + normal2.xy,
+        normal1.z * normal2.z));
+    float chopNormalBoost = 1.0 + (matParams.windChop - 1.0) * 0.3;
+    blended.xy *= matParams.normalStrength * chopNormalBoost;
+    s.tangentSpaceNormal = normalize(blended);
+
+    // Fresnel (view-dependent blend between water color and edge color)
+    vec3 V = normalize(d.worldSpaceViewDir);
+    vec3 N = normalize(d.worldSpaceNormal);
+    float fresnel = pow(1.0 - max(dot(V, N), 0.0), matParams.fresnelIntensity);
+    vec3 color = mix(matParams.waterColor.rgb, matParams.fresnelColor.rgb, fresnel);
+
+    // Specular sparkle (sun glints on waves)
+    vec3 L = normalize(vec3(0.5, 1.0, 0.3)); // Hardcoded light direction
+    vec3 H = normalize(L + V);
+    vec3 Np = normalize(N + blended * 0.3);
+    float sparkle = pow(max(dot(Np, H), 0.0), 128.0);
+    sparkle *= 1.0 + 0.5 * (1.0 - max(dot(V, N), 0.0));
+    sparkle *= matParams.sparkleIntensity;
+
+    // Material
+    s.roughness = 0.05;
+    s.metallic = 0.0;
+    s.baseColor = color;
+    s.emissive = vec3(1.0) * sparkle;
+}
+
+END_SURFACE
