@@ -72,7 +72,7 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "26904326832536512",
+                                    "packageOrRemoteId": "18093430051423157088",
                                     "ingestionId": "6044079188968600105",
                                     "targetId": "157013062"
                                 }
@@ -85,7 +85,7 @@
                     "data": {
                         "class": "Brick",
                         "definitionAsset": {
-                            "packageOrRemoteId": "26904326832536512",
+                            "packageOrRemoteId": "18093430051423157088",
                             "ingestionId": "10374899672274944721",
                             "targetId": "4237980480"
                         },

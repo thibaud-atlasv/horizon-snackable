@@ -152,6 +152,13 @@ export class LeaderboardHUDComponent extends Component {
 
     this._vm.yourScore    = p.finalScore;
     this._vm.errorMessage = '';
+    this._vm.bestScore    = this._cachedScore ?? 0;
+
+    // Set player name from local player's BasePlayerComponent
+    const localPlayer = PlayerService.get().getLocalPlayer();
+    const bpc = localPlayer?.getComponent(BasePlayerComponent);
+    this._vm.playerName = bpc?.displayName ?? 'Player';
+
     this._setVisibility(true);
     this._vm.isLoading = (p.finalScore > (this._cachedScore ?? 0));
   }
@@ -176,11 +183,7 @@ export class LeaderboardHUDComponent extends Component {
       }
       return;
     }
-    console.log(`[LB][S] onSubmitScore — score=${p.score} cachedScore=${this._cachedScore ?? 'unknown'}`);
-    if (this._cachedScore !== undefined && p.score <= this._cachedScore) {
-      console.log('[LB][S] onSubmitScore — skip, not a new high score');
-      return;
-    }
+    if (this._cachedScore !== undefined && p.score <= this._cachedScore) return;
     const player    = PlayerService.get().getAllPlayers()[0];
     if (!player) return;
 
@@ -188,28 +191,21 @@ export class LeaderboardHUDComponent extends Component {
     {
       // _fetchForPlayer failed (network error / rate limit at start) — cachedScore is unknown.
       // Verify live before writing: updateEntryForPlayer overwrites unconditionally.
-      console.log('[LB][S] onSubmitScore — cachedScore unknown, fetching live entry');
       const current = await this.lbService.fetchEntryForPlayer(player, this.leaderboardApiName).catch((e) => {
-        console.error('[LB][S] onSubmitScore — live fetch error', e);
+        console.error('[LB][S] live fetch error', e);
         return null;
       });
       if (current === null) {
-        console.warn('[LB][S] onSubmitScore — live fetch failed, aborting to avoid overwrite');
+        console.warn('[LB][S] live fetch failed, aborting submit');
         return;
       }
       this._cachedScore = current?.score ?? 0;
-      console.log(`[LB][S] onSubmitScore — live score=${this._cachedScore}`);
-      if (p.score <= this._cachedScore) {
-        console.log('[LB][S] onSubmitScore — skip after live check, not a new high score');
-        return;
-      }
+      if (p.score <= this._cachedScore) return;
     }
-    console.log(`[LB][S] onSubmitScore — updating entry score=${p.score}`);
     const updated = await this.lbService.updateEntryForPlayer(player, this.leaderboardApiName, p.score, {})
-        .catch((e) => { console.error('[LB][S] onSubmitScore — update error', e); return null; });
+        .catch((e) => { console.error('[LB][S] update error', e); return null; });
     this._cachedScore = p.score;
     const newRank     = updated?.rank ?? 0;
-    console.log(`[LB][S] onSubmitScore — done newRank=${newRank} prevRank=${this._cachedRank ?? 'none'}`);
     EventService.sendGlobally(NetworkEvents.LeaderboardPlayerData, {
       yourRank:      newRank,
       yourBestScore: p.score,
@@ -245,11 +241,8 @@ export class LeaderboardHUDComponent extends Component {
     this._cachedScore = p.yourBestScore;
     this._cachedRank  = p.yourRank;
     this._vm.isLoading = false;
-    console.log(`[LB][C] onLeaderboardPlayerData — score=${p.yourBestScore} rank=${p.yourRank} prevRank=${prevRank ?? 'none'}`);
 
-    // Optimistic reorder: player entered or moved within top 10
     if (p.yourRank > 0 && p.yourRank <= MAX_ENTRIES && p.yourRank !== prevRank) {
-      console.log('[LB][C] onLeaderboardPlayerData — optimistic reorder');
       this._reorderEntriesOptimistically(p.yourBestScore, p.yourRank);
     }
 
@@ -291,6 +284,7 @@ export class LeaderboardHUDComponent extends Component {
     const alias = PlayerService.get().getLocalPlayer()?.getComponent(BasePlayerComponent)?.displayName ?? '';
     this._vm.yourRank        = this._cachedRank ?? 0;
     this._vm.yourRankDisplay = this._formatRank(this._cachedRank ?? 0);
+    this._vm.bestScore       = this._cachedScore ?? 0;
     for (const row of this._vm.entries) {
       row.isCurrentPlayer = alias !== '' && row.playerName === alias;
     }

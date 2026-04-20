@@ -10,7 +10,7 @@
                 "version": 10003,
                 "data": {
                     "target": "tex",
-                    "streamable": true,
+                    "streamable": false,
                     "streamCount": 2,
                     "cpuReadable": false,
                     "textureSettings": {

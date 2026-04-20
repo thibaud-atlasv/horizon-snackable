@@ -3,15 +3,667 @@
       xmlns:noesis="clr-namespace:NoesisGUIExtensions"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
       mc:Ignorable="d"
-      Background="#0a0a0f">
+      >
+    <Grid.Background>
+        <RadialGradientBrush>
+            <GradientStop Offset="0" Color="#FF2A1A4E"/>
+            <GradientStop Offset="1" Color="#FF120A2A"/>
+        </RadialGradientBrush>
+    </Grid.Background>
 
     <Grid.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
+        <!-- Play Button Style - extracted for editor editing -->
+        <Style x:Key="PlayButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="PlayPressGrid">
+                            <Border x:Name="PlayButtonBorder"
+                                    BorderThickness="4"
+                                    CornerRadius="20"
+                                    Padding="40,12" BorderBrush="#FFFF8800">
+                                <Border.Background>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                                        <GradientStop Color="#FFFFC500" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Rectangle x:Name="PlayDarkenOverlay" RadiusX="20" RadiusY="20" Fill="#FFFFFF" Opacity="0" IsHitTestVisible="False"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="PlayPressGrid" Property="Margin" Value="0,3,0,-3"/>
+                                <Setter TargetName="PlayDarkenOverlay" Property="Opacity" Value="0.1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground">
+                <Setter.Value>
+                    <SolidColorBrush Color="#FF000000" Opacity="0.944"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Grid.Resources>
 
     <Viewbox Stretch="Uniform">
         <Grid Width="480" Height="800">
+            <Grid.Resources>
+                <!-- Background Shape Animations -->
+                <!-- Shape 1: Heart Pink - Top Left -->
+                <Storyboard x:Key="BgShape1Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape1"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2" Value="-8">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape1"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <LinearDoubleKeyFrame KeyTime="0:0:12" Value="360"/>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape1"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.9"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3" Value="0.9">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape1"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.9"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3" Value="0.9">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 2: Star Blue - Top Right -->
+                <Storyboard x:Key="BgShape2Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape2"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.5" Value="8">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:5" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape2"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <LinearDoubleKeyFrame KeyTime="0:0:10" Value="360"/>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape2"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.8" Value="1.15">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.6" Value="1.0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape2"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.8" Value="1.15">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.6" Value="1.0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 3: Hexagon Cyan - Left Middle -->
+                <Storyboard x:Key="BgShape3Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape3"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.75" Value="-6">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.5" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape3"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="-15"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4" Value="15">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:8" Value="-15">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape3"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.95"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1.08">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4" Value="0.95">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape3"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.95"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1.08">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4" Value="0.95">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 4: Triangle Yellow - Bottom Left -->
+                <Storyboard x:Key="BgShape4Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape4"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.2" Value="7">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4.4" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape4"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <LinearDoubleKeyFrame KeyTime="0:0:15" Value="360"/>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape4"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.92"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.3" Value="1.05">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.6" Value="0.92">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape4"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.92"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.3" Value="1.05">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.6" Value="0.92">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 5: Circle Green - Bottom Right -->
+                <Storyboard x:Key="BgShape5Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape5"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.8" Value="-7">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.6" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape5"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <LinearDoubleKeyFrame KeyTime="0:0:8" Value="360"/>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape5"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.88"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.6" Value="1.12">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.2" Value="0.88">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape5"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.88"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.6" Value="1.12">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.2" Value="0.88">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 6: Square Pink - Right Middle -->
+                <Storyboard x:Key="BgShape6Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape6"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.3" Value="6">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4.6" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape6"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="10"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.5" Value="-10">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:7" Value="10">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape6"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.9"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.4" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.8" Value="0.9">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape6"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.9"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.4" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.8" Value="0.9">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 7: Pentagon Orange - Top Center -->
+                <Storyboard x:Key="BgShape7Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape7"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.9" Value="-8">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.8" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape7"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <LinearDoubleKeyFrame KeyTime="0:0:11" Value="360"/>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape7"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.93"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.7" Value="1.07">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.4" Value="0.93">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape7"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.93"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.7" Value="1.07">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3.4" Value="0.93">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 8: Star Orange - Bottom Center -->
+                <Storyboard x:Key="BgShape8Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape8"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.1" Value="8">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4.2" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape8"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <LinearDoubleKeyFrame KeyTime="0:0:9" Value="360"/>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape8"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.85"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.4" Value="0.85">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape8"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.85"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.4" Value="0.85">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 9: Heart Purple - Mid Left Lower -->
+                <Storyboard x:Key="BgShape9Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape9"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.4" Value="-6">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4.8" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape9"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="-12"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3" Value="12">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:6" Value="-12">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape9"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.9"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="1.08">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3" Value="0.9">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape9"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.9"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="1.08">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:3" Value="0.9">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+
+                <!-- Shape 10: Hexagon Purple - Mid Right Upper -->
+                <Storyboard x:Key="BgShape10Anim" RepeatBehavior="Forever">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape10"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(TranslateTransform.Y)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2.6" Value="7">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:5.2" Value="0">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape10"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(RotateTransform.Angle)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                        <LinearDoubleKeyFrame KeyTime="0:0:14" Value="360"/>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape10"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.95"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4" Value="0.95">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BgShape10"
+                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0.95"/>
+                        <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1.1">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                        <EasingDoubleKeyFrame KeyTime="0:0:4" Value="0.95">
+                            <EasingDoubleKeyFrame.EasingFunction><SineEase EasingMode="EaseInOut"/></EasingDoubleKeyFrame.EasingFunction>
+                        </EasingDoubleKeyFrame>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+            </Grid.Resources>
+
+            <!-- Semi-transparent violet border overlay (matching shape_display) -->
+            <Border ClipToBounds="True" BorderThickness="10" CornerRadius="20" Opacity="0.444" Margin="0,20,0,6" IsHitTestVisible="False">
+                <Border.Background>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#FFE738E9" Offset="0"/>
+                        <GradientStop Offset="1" Color="#FF8139EE"/>
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- Animated Background Shapes -->
+            <!-- Shape 1: Heart Pink - Top Left -->
+            <Image x:Name="BgShape1" Source="shape/heartPink.png" Width="100" Height="100" 
+                   Opacity="0.35" IsHitTestVisible="False"
+                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25,60,0,0"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="0"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape1Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 2: Star Blue - Top Right -->
+            <Image x:Name="BgShape2" Source="shape/starfillBlue.png" Width="110" Height="110" 
+                   Opacity="0.38" IsHitTestVisible="False"
+                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,30,0"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="15"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape2Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 3: Hexagon Cyan - Left Middle -->
+            <Image x:Name="BgShape3" Source="shape/hexagonCyan.png" Width="90" Height="90" 
+                   Opacity="0.32" IsHitTestVisible="False"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0,0,100"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="-10"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape3Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 4: Triangle Yellow - Bottom Left -->
+            <Image x:Name="BgShape4" Source="shape/triangleYellow.png" Width="120" Height="120" 
+                   Opacity="0.4" IsHitTestVisible="False"
+                   HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="35,0,0,70"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="20"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape4Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 5: Circle Green - Bottom Right -->
+            <Image x:Name="BgShape5" Source="shape/circleGreen.png" Width="96" Height="96" 
+                   Opacity="0.36" IsHitTestVisible="False"
+                   HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,90"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="0"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape5Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 6: Square Pink - Right Middle -->
+            <Image x:Name="BgShape6" Source="shape/squarePink.png" Width="84" Height="84" 
+                   Opacity="0.3" IsHitTestVisible="False"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,50"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="25"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape6Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 7: Pentagon Orange - Top Center -->
+            <Image x:Name="BgShape7" Source="shape/pentagonOrange.png" Width="104" Height="104" 
+                   Opacity="0.33" IsHitTestVisible="False"
+                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="80,45,0,0"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="-5"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape7Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 8: Star Orange - Bottom Center -->
+            <Image x:Name="BgShape8" Source="shape/starfillOrange.png" Width="116" Height="116" 
+                   Opacity="0.42" IsHitTestVisible="False"
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="-60,0,0,50"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="10"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape8Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 9: Heart Purple - Mid Left Lower -->
+            <Image x:Name="BgShape9" Source="shape/heartPurple.png" Width="88" Height="88" 
+                   Opacity="0.28" IsHitTestVisible="False"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" Margin="30,180,0,0"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="-8"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape9Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
+            <!-- Shape 10: Hexagon Purple - Mid Right Upper -->
+            <Image x:Name="BgShape10" Source="shape/hexagonPurple.png" Width="92" Height="92" 
+                   Opacity="0.34" IsHitTestVisible="False"
+                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,200,25,0"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <RotateTransform Angle="12"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger>
+                        <b:ControlStoryboardAction Storyboard="{StaticResource BgShape10Anim}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </Image>
+
             <!-- Home screen: tap anywhere to start -->
             <Button Command="{Binding events.onHomeScreenTapToStart}"
                     Visibility="{Binding isHomeVisible, Converter={StaticResource BoolToVis}}"
@@ -24,397 +676,39 @@
                     </ControlTemplate>
                 </Button.Template>
                 <Grid>
-                <!-- Decorative background shapes (low opacity, behind content) -->
-                <Canvas Width="480" Height="800" ClipToBounds="True">
-                    <!-- Triangle - top left, red -->
-                    <Path Data="M 0 -1 L 0.866 0.5 L -0.866 0.5 Z"
-                          Fill="#ef4444" Opacity="0.10">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="45" ScaleY="45"/>
-                                <RotateTransform Angle="15"/>
-                                <TranslateTransform x:Name="FloatTrans1" X="60" Y="90"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans1"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="90" To="78"
-                                                         Duration="0:0:4.5"
-                                                         BeginTime="0:0:0"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Circle - top right, cyan -->
-                    <Path Data="M 0 -1 C 0.5523 -1, 1 -0.5523, 1 0 C 1 0.5523, 0.5523 1, 0 1 C -0.5523 1, -1 0.5523, -1 0 C -1 -0.5523, -0.5523 -1, 0 -1 Z"
-                          Fill="#06b6d4" Opacity="0.09">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="35" ScaleY="35"/>
-                                <TranslateTransform x:Name="FloatTrans2" X="400" Y="70"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans2"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="70" To="60"
-                                                         Duration="0:0:5.2"
-                                                         BeginTime="0:0:0.8"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Hexagon - left side, purple -->
-                    <Path Data="M 1 0 L 0.5 0.866 L -0.5 0.866 L -1 0 L -0.5 -0.866 L 0.5 -0.866 Z"
-                          Fill="#8b5cf6" Opacity="0.12">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="40" ScaleY="40"/>
-                                <RotateTransform Angle="30"/>
-                                <TranslateTransform x:Name="FloatTrans3" X="30" Y="280"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans3"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="280" To="266"
-                                                         Duration="0:0:3.8"
-                                                         BeginTime="0:0:1.5"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Star - right side, yellow -->
-                    <Path Data="M 0 -1 L 0.2245 -0.309 L 0.9511 -0.309 L 0.3633 0.118 L 0.5878 0.809 L 0 0.382 L -0.5878 0.809 L -0.3633 0.118 L -0.9511 -0.309 L -0.2245 -0.309 Z"
-                          Fill="#eab308" Opacity="0.11">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="30" ScaleY="30"/>
-                                <RotateTransform Angle="-20"/>
-                                <TranslateTransform x:Name="FloatTrans4" X="430" Y="240"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans4"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="240" To="229"
-                                                         Duration="0:0:4.9"
-                                                         BeginTime="0:0:0.3"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Diamond - upper center-left, orange -->
-                    <Path Data="M 0 -1 L 1 0 L 0 1 L -1 0 Z"
-                          Fill="#f97316" Opacity="0.08">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="50" ScaleY="50"/>
-                                <RotateTransform Angle="10"/>
-                                <TranslateTransform x:Name="FloatTrans5" X="140" Y="180"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans5"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="180" To="167"
-                                                         Duration="0:0:5.5"
-                                                         BeginTime="0:0:1.2"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Cross - center right, green -->
-                    <Path Data="M -0.3 -1 L 0.3 -1 L 0.3 -0.3 L 1 -0.3 L 1 0.3 L 0.3 0.3 L 0.3 1 L -0.3 1 L -0.3 0.3 L -1 0.3 L -1 -0.3 L -0.3 -0.3 Z"
-                          Fill="#22c55e" Opacity="0.10">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="28" ScaleY="28"/>
-                                <RotateTransform Angle="45"/>
-                                <TranslateTransform x:Name="FloatTrans6" X="420" Y="440"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans6"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="440" To="431"
-                                                         Duration="0:0:4.2"
-                                                         BeginTime="0:0:0.6"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Square - lower left, blue -->
-                    <Path Data="M -0.707 -0.707 L 0.707 -0.707 L 0.707 0.707 L -0.707 0.707 Z"
-                          Fill="#3b82f6" Opacity="0.12">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="38" ScaleY="38"/>
-                                <RotateTransform Angle="22"/>
-                                <TranslateTransform x:Name="FloatTrans7" X="80" Y="520"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans7"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="520" To="505"
-                                                         Duration="0:0:3.5"
-                                                         BeginTime="0:0:1.8"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Arrow - bottom right, pink -->
-                    <Path Data="M 0 -1 L 0.7 0.1 L 0.3 0.1 L 0.3 1 L -0.3 1 L -0.3 0.1 L -0.7 0.1 Z"
-                          Fill="#ec4899" Opacity="0.09">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="32" ScaleY="32"/>
-                                <RotateTransform Angle="135"/>
-                                <TranslateTransform x:Name="FloatTrans8" X="380" Y="620"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans8"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="620" To="610"
-                                                         Duration="0:0:5.0"
-                                                         BeginTime="0:0:0.4"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Triangle - bottom center, cyan -->
-                    <Path Data="M 0 -1 L 0.866 0.5 L -0.866 0.5 Z"
-                          Fill="#06b6d4" Opacity="0.08">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="42" ScaleY="42"/>
-                                <RotateTransform Angle="180"/>
-                                <TranslateTransform x:Name="FloatTrans9" X="220" Y="720"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans9"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="720" To="708"
-                                                         Duration="0:0:4.7"
-                                                         BeginTime="0:0:1.0"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Hexagon - bottom left, yellow -->
-                    <Path Data="M 1 0 L 0.5 0.866 L -0.5 0.866 L -1 0 L -0.5 -0.866 L 0.5 -0.866 Z"
-                          Fill="#eab308" Opacity="0.10">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="25" ScaleY="25"/>
-                                <RotateTransform Angle="60"/>
-                                <TranslateTransform x:Name="FloatTrans10" X="55" Y="700"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans10"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="700" To="692"
-                                                         Duration="0:0:5.8"
-                                                         BeginTime="0:0:0.2"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Star - center left, pink -->
-                    <Path Data="M 0 -1 L 0.2245 -0.309 L 0.9511 -0.309 L 0.3633 0.118 L 0.5878 0.809 L 0 0.382 L -0.5878 0.809 L -0.3633 0.118 L -0.9511 -0.309 L -0.2245 -0.309 Z"
-                          Fill="#ec4899" Opacity="0.12">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="22" ScaleY="22"/>
-                                <RotateTransform Angle="40"/>
-                                <TranslateTransform x:Name="FloatTrans11" X="50" Y="420"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans11"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="420" To="409"
-                                                         Duration="0:0:3.9"
-                                                         BeginTime="0:0:1.4"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Diamond - mid right, purple -->
-                    <Path Data="M 0 -1 L 1 0 L 0 1 L -1 0 Z"
-                          Fill="#8b5cf6" Opacity="0.09">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="35" ScaleY="35"/>
-                                <RotateTransform Angle="-15"/>
-                                <TranslateTransform x:Name="FloatTrans12" X="450" Y="150"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans12"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="150" To="136"
-                                                         Duration="0:0:4.3"
-                                                         BeginTime="0:0:0.7"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Circle - lower center, green -->
-                    <Path Data="M 0 -1 C 0.5523 -1, 1 -0.5523, 1 0 C 1 0.5523, 0.5523 1, 0 1 C -0.5523 1, -1 0.5523, -1 0 C -1 -0.5523, -0.5523 -1, 0 -1 Z"
-                          Fill="#22c55e" Opacity="0.08">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="30" ScaleY="30"/>
-                                <TranslateTransform x:Name="FloatTrans13" X="300" Y="750"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans13"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="750" To="740"
-                                                         Duration="0:0:5.1"
-                                                         BeginTime="0:0:1.6"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-
-                    <!-- Cross - upper center, red -->
-                    <Path Data="M -0.3 -1 L 0.3 -1 L 0.3 -0.3 L 1 -0.3 L 1 0.3 L 0.3 0.3 L 0.3 1 L -0.3 1 L -0.3 0.3 L -1 0.3 L -1 -0.3 L -0.3 -0.3 Z"
-                          Fill="#ef4444" Opacity="0.08">
-                        <Path.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleX="25" ScaleY="25"/>
-                                <RotateTransform Angle="20"/>
-                                <TranslateTransform x:Name="FloatTrans14" X="340" Y="30"/>
-                            </TransformGroup>
-                        </Path.RenderTransform>
-                        <Path.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FloatTrans14"
-                                                         Storyboard.TargetProperty="Y"
-                                                         From="30" To="17"
-                                                         Duration="0:0:4.0"
-                                                         BeginTime="0:0:0.9"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Path.Triggers>
-                    </Path>
-                </Canvas>
-
                 <!-- Centered content -->
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <!-- Title: Shape -->
-                    <TextBlock Text="Shape"
-                               FontWeight="Bold"
-                               HorizontalAlignment="Center" FontFamily="Kallisto" FontSize="100" Foreground="#FF1D42D6"/>
+                    <!-- Title: Shape with layered shadow -->
+                    <Grid HorizontalAlignment="Center">
+                        <!-- Shadow layer -->
+                        <TextBlock Text="Shape"
+                                   FontWeight="Bold"
+                                   FontSize="100" FontFamily="Bangers" Foreground="#FF1C1227">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform X="2" Y="2"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                        <!-- Main text layer -->
+                        <TextBlock Text="Shape"
+                                   FontWeight="Bold"
+                                   FontSize="100" Foreground="#FFFFFFFF" FontFamily="Bangers"/>
+                    </Grid>
 
-                    <!-- Title: Intruder -->
-                    <TextBlock Text="Intruder"
-                               FontWeight="Bold"
-                               HorizontalAlignment="Center"
-                               Margin="0,-10,0,0" FontFamily="Kallisto" FontSize="100" Foreground="#FF1D42D6"/>
+                    <!-- Title: Intruder with layered shadow -->
+                    <Grid HorizontalAlignment="Center" Margin="0,-10,0,0">
+                        <!-- Shadow layer -->
+                        <TextBlock Text="Intruder"
+                                   FontWeight="Bold"
+                                   FontSize="100" FontFamily="Bangers" Foreground="#FF1C1227">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform X="2" Y="2"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                        <!-- Main text layer -->
+                        <TextBlock Text="Intruder"
+                                   FontWeight="Bold"
+                                   FontSize="100" Foreground="#FFFFFFFF" FontFamily="Bangers"/>
+                    </Grid>
 
                     <!-- Vertical spacing -->
                     <Rectangle Height="40"/>
@@ -422,7 +716,7 @@
                     <!-- Subtitle -->
                     <TextBlock Text="Spot the missing shape before time runs out."
                                FontSize="18"
-                               Foreground="#aaaaaa"
+                               Foreground="#FFF0E0"
                                HorizontalAlignment="Center"
                                TextWrapping="Wrap"
                                TextAlignment="Center"
@@ -431,38 +725,21 @@
                     <!-- Vertical spacing -->
                     <Rectangle Height="60"/>
 
-                    <!-- Tap to start text with pulse animation -->
-                    <TextBlock Text="Tap to start"
-                               FontSize="22"
-                               Foreground="#22c55e"
-                               FontFamily="Kallisto"
-                               Opacity="0.8"
-                               HorizontalAlignment="Center"
-                               RenderTransformOrigin="0.5,0.5">
-                        <TextBlock.RenderTransform>
-                            <ScaleTransform x:Name="TapToStartScale" ScaleX="1" ScaleY="1"/>
-                        </TextBlock.RenderTransform>
-                        <TextBlock.Triggers>
-                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="TapToStartScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         From="1.0" To="1.08"
-                                                         Duration="0:0:0.8"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                        <DoubleAnimation Storyboard.TargetName="TapToStartScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         From="1.0" To="1.08"
-                                                         Duration="0:0:0.8"
-                                                         AutoReverse="True"
-                                                         RepeatBehavior="Forever"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </TextBlock.Triggers>
-                    </TextBlock>
+                    <!-- Styled PLAY button with 3D shadow -->
+                    <Grid HorizontalAlignment="Center">
+                        <!-- Shadow behind -->
+                        <Border Background="#55000000" CornerRadius="20" Margin="2,6,-3,-4"/>
+                        <!-- The PLAY button -->
+                        <Button Command="{Binding events.onHomeScreenTapToStart}"
+                                Content="PLAY"
+                                FontWeight="Bold"
+                                HorizontalAlignment="Center" FontFamily="Bangers" FontSize="50"
+                                Style="{StaticResource PlayButtonStyle}">
+                            <Button.Foreground>
+                                <SolidColorBrush Opacity="0.944" Color="#FF0D0213"/>
+                            </Button.Foreground>
+                        </Button>
+                    </Grid>
                 </StackPanel>
                 </Grid>
             </Button>

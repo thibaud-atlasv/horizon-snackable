@@ -20,7 +20,7 @@
 import { Service, Vec3, WorldService, NetworkMode, Quaternion, NetworkingService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
-import { CELL_SIZE, GRID_COLS, GRID_ROWS, GRID_ORIGIN_X, GRID_ORIGIN_Z, GROUND_Y } from '../Constants';
+import { CELL_WIDTH, CELL_HEIGHT, GRID_COLS, GRID_ROWS, GRID_ORIGIN_X, GRID_ORIGIN_Z, GROUND_Y } from '../Constants';
 import { NewTiles } from '../Assets';
 import { LEVEL_DEFS } from '../Defs/LevelDefs';
 
@@ -57,23 +57,6 @@ export class PathService extends Service {
     if (NetworkingService.get().isServerContext()) return;
 
     const spawns: Array<Promise<void>> = [];
-
-    // Spawn decoration tiles for every non-path cell (weighted random)
-    for (let row = 0; row < GRID_ROWS; row++) {
-      for (let col = 0; col < GRID_COLS; col++) {
-        if (this.isPathCell(col, row)) continue;
-        const pos = this.cellToWorld(col, row);
-        spawns.push(
-          this._worldService.spawnTemplate({
-            templateAsset: this._pickDecoTile(),
-            position: new Vec3(pos.x, GROUND_Y, pos.z),
-            rotation: Quaternion.identity,
-            scale: Vec3.one.mul(CELL_SIZE),
-            networkMode: NetworkMode.LocalOnly,
-          }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
-        );
-      }
-    }
 
     // Spawn directional path tiles cell by cell
     // Build a map from cell key → [inDir, outDir] for each path cell
@@ -129,7 +112,7 @@ export class PathService extends Service {
             templateAsset: NewTiles.LeftToRight,
             position: new Vec3(pos.x, GROUND_Y, pos.z),
             rotation: Quaternion.fromEuler(new Vec3(0, -90, 0)),
-            scale: Vec3.one.mul(CELL_SIZE),
+            scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
             networkMode: NetworkMode.LocalOnly,
           }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
         );
@@ -141,7 +124,7 @@ export class PathService extends Service {
             templateAsset: NewTiles.LeftToRight,
             position: new Vec3(pos.x, GROUND_Y, pos.z),
             rotation: Quaternion.fromEuler(new Vec3(0, 90, 0)),
-            scale: Vec3.one.mul(CELL_SIZE),
+            scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
             networkMode: NetworkMode.LocalOnly,
           }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
         );
@@ -158,7 +141,7 @@ export class PathService extends Service {
           templateAsset: template,
           position: new Vec3(pos.x, GROUND_Y, pos.z),
           rotation: Quaternion.fromEuler(new Vec3(0, rotY, 0)),
-          scale: Vec3.one.mul(CELL_SIZE),
+          scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
           networkMode: NetworkMode.LocalOnly,
         }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
       );
@@ -236,15 +219,15 @@ export class PathService extends Service {
   // col → Z axis, row → X axis (row 0 = top)
   cellToWorld(col: number, row: number): Vec3 {
     return new Vec3(
-      GRID_ORIGIN_X + (GRID_ROWS - 1 - row) * CELL_SIZE,
+      GRID_ORIGIN_X + (GRID_ROWS - 1 - row) * CELL_WIDTH,
       GROUND_Y,
-      GRID_ORIGIN_Z + col * CELL_SIZE,
+      GRID_ORIGIN_Z + col * CELL_HEIGHT,
     );
   }
 
   worldToCell(worldX: number, worldZ: number): readonly [number, number] {
-    const col = Math.round((worldZ - GRID_ORIGIN_Z) / CELL_SIZE);
-    const row = GRID_ROWS - 1 - Math.round((worldX - GRID_ORIGIN_X) / CELL_SIZE);
+    const col = Math.round((worldZ - GRID_ORIGIN_Z) / CELL_HEIGHT);
+    const row = GRID_ROWS - 1 - Math.round((worldX - GRID_ORIGIN_X) / CELL_WIDTH);
     return [col, row] as const;
   }
 

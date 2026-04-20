@@ -34,18 +34,11 @@ import { CameraShakeService } from '../Services/CameraShakeService';
 
 @component()
 export class GameManager extends Component {
-  @property() ground: Maybe<Entity> = null; // link the ground mesh in the editor
-
   private _running: boolean = false;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
-    if (this.ground) {
-      const c = this.ground.getComponent(ColorComponent);
-      const gc = hexColor(GROUND_COLOR);
-      if (c) c.color = new Color(gc.r, gc.g, gc.b);
-    }
     SlowService.get();
     this._startGame();
   }

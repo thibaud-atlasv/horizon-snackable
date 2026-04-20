@@ -2,8 +2,8 @@ import { uiViewModel, UiViewModel, UiEvent, serializable, TextureAsset } from 'm
 import type { Maybe } from 'meta/worlds';
 
 // Fixed background colors per button position (never change between rounds)
-export const BTN_BG_COLORS     = ['#00000000', '#00000000', '#00000000', '#00000000'] as const;
-export const BTN_BORDER_COLORS = ['#a855f7', '#3b82f6', '#22c55e', '#ea580c'] as const;
+export const BTN_BG_COLORS     = ['#e8c7ff', '#55edfb', '#bbee39', '#ffdb3f'] as const;
+export const BTN_BORDER_COLORS = ['#ce8cf9', '#1aa3f1', '#74d702', '#ff9b3d'] as const;
 
 // Feedback colors
 export const BTN_CORRECT_BG     = '#bbf7d0';
@@ -13,12 +13,11 @@ export const BTN_WRONG_BORDER   = '#ef4444';
 
 @uiViewModel()
 export class ShapeItemViewModel extends UiViewModel {
-  public x:         number = 0;
-  public y:         number = 0;
-  public scale:     number = 1;
-  public rotation:  number = 0;
-  public fillColor: string = '#FFFFFF';
-  public opacity:   number = 1;
+  public x:        number = 0;
+  public y:        number = 0;
+  public scale:    number = 1;
+  public rotation: number = 0;
+  public opacity:  number = 1;
   public spriteTexture: Maybe<TextureAsset> = null;
 }
 
@@ -56,17 +55,28 @@ export class ShapeIntruderDisplayViewModel extends UiViewModel {
   public option2BorderColor: string = BTN_BORDER_COLORS[2];
   public option3BorderColor: string = BTN_BORDER_COLORS[3];
 
-  // Flat option fill color for XAML (avoids nested ViewModel path bindings)
-  public option0FillColor:    string = '#ef4444';
-  public option1FillColor:    string = '#3b82f6';
-  public option2FillColor:    string = '#22c55e';
-  public option3FillColor:    string = '#a855f7';
-
-  // TextureAsset bindings for dynamic 3-layer shape display in XAML
+  // TextureAsset bindings for dynamic shape display in XAML
   public option0SpriteTexture: Maybe<TextureAsset> = null;
   public option1SpriteTexture: Maybe<TextureAsset> = null;
   public option2SpriteTexture: Maybe<TextureAsset> = null;
   public option3SpriteTexture: Maybe<TextureAsset> = null;
+
+  // Per-button Y offset for pressed effect (0 = normal, 3 = pressed down)
+  public option0OffsetY: number = 0;
+  public option1OffsetY: number = 0;
+  public option2OffsetY: number = 0;
+  public option3OffsetY: number = 0;
+
+  // Per-button validation icon visibility
+  public option0CheckVisible: boolean = false;
+  public option1CheckVisible: boolean = false;
+  public option2CheckVisible: boolean = false;
+  public option3CheckVisible: boolean = false;
+
+  public option0CrossVisible: boolean = false;
+  public option1CrossVisible: boolean = false;
+  public option2CrossVisible: boolean = false;
+  public option3CrossVisible: boolean = false;
 
   // HUD: score counter and timer bar
   public scoreText:      string = '0';
@@ -75,6 +85,17 @@ export class ShapeIntruderDisplayViewModel extends UiViewModel {
   // Full-canvas overlay for correct/incorrect flash
   public overlayColor:   string = '#22c55e';
   public overlayOpacity: number = 0;
+
+  // Centered feedback icon (correct/wrong) with pop animation
+  public feedbackValidVisible:   boolean = false;
+  public feedbackInvalidVisible: boolean = false;
+  public feedbackIconScale:      number  = 0;
+
+  // Score popup (floating "+XXX" after scoring)
+  public scorePopupText:     string  = '';
+  public scorePopupOpacity:  number  = 0;
+  public scorePopupOffsetY:  number  = 0;
+  public scorePopupVisible:  boolean = false;
 
   override readonly events = { onAnswerOptionPressed };
 }

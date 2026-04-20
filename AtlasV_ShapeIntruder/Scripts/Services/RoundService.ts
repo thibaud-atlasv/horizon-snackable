@@ -14,21 +14,20 @@ import {
   SHAPE_SIZE_MAX,
   SHAPE_ROTATION_MAX_DEG,
   SHAPE_JITTER,
-  DEBUG_COLOR_FILTER,
   DEBUG_EDGE_TEST,
 } from '../Constants';
-import { COLOR_KEYS, SHAPE_KEYS } from '../Defs/ShapeDefs';
-import type { ColorKey, ShapeKey } from '../Defs/ShapeDefs';
+import { SHAPE_KEYS } from '../Defs/ShapeDefs';
+import type { ShapeKey } from '../Defs/ShapeDefs';
 
 /**
  * Generates round data: shape instances placed on the canvas and the 4 answer options.
  *
  * Algorithm:
- *   1. Build all ShapeKey × ColorKey pairs, shuffle them
- *   2. The first pair is the ABSENT one (= correct answer)
- *   3. Fill the canvas with the remaining pairs (cycled)
- *   4. Collect 3 pairs confirmed present in the canvas as distractors
- *   5. Shuffle [absentPair, ...distractors] → options[]
+ *   1. Shuffle all ShapeKeys
+ *   2. The first key is the ABSENT one (= correct answer)
+ *   3. Fill the canvas with the remaining keys (cycled)
+ *   4. Collect 3 keys confirmed present in the canvas as distractors
+ *   5. Shuffle [absentKey, ...distractors] → options[]
  */
 @service()
 export class RoundService extends Service {
@@ -54,33 +53,22 @@ export class RoundService extends Service {
       SHAPE_COUNT_MAX,
     );
 
-    const activeColors = DEBUG_COLOR_FILTER.length > 0
-      ? COLOR_KEYS.filter(c => DEBUG_COLOR_FILTER.includes(c))
-      : COLOR_KEYS;
+    const keys = [...SHAPE_KEYS];
+    shuffle(keys);
 
-    const allPairs: IOption[] = [];
-    for (const typeKey of SHAPE_KEYS) {
-      for (const colorKey of activeColors) {
-        allPairs.push({ typeKey, colorKey });
-      }
-    }
-    shuffle(allPairs);
+    const absentKey   = keys[0];
+    const presentKeys = keys.slice(1);
 
-    const absentPair   = allPairs[0];
-    const presentPairs = allPairs.slice(1);
+    const shapes = buildShapes(shapeCount, presentKeys);
 
-    const shapes = buildShapes(shapeCount, presentPairs);
-
-    const uniquePresent = uniquePairsInShapes(shapes);
+    const uniquePresent = uniqueKeysInShapes(shapes);
     shuffle(uniquePresent);
     const distractors = uniquePresent.slice(0, OPTION_COUNT - 1);
 
-    const options: IOption[] = [absentPair, ...distractors];
+    const options: IOption[] = [{ typeKey: absentKey }, ...distractors.map(k => ({ typeKey: k }))];
     shuffle(options);
 
-    const correctIndex = options.findIndex(
-      o => o.typeKey === absentPair.typeKey && o.colorKey === absentPair.colorKey,
-    );
+    const correctIndex = options.findIndex(o => o.typeKey === absentKey);
 
     EventService.sendLocally(Events.RoundStarted, {
       round: this._round,
@@ -93,8 +81,8 @@ export class RoundService extends Service {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildShapes(count: number, presentPairs: IOption[]): IShapeInstance[] {
-  if (DEBUG_EDGE_TEST) return buildEdgeTestShapes(presentPairs);
+function buildShapes(count: number, presentKeys: ShapeKey[]): IShapeInstance[] {
+  if (DEBUG_EDGE_TEST) return buildEdgeTestShapes(presentKeys);
 
   const areaW = SHAPES_X_MAX - SHAPES_X_MIN;
   const areaH = SHAPES_Y_MAX - SHAPES_Y_MIN;
@@ -103,23 +91,20 @@ function buildShapes(count: number, presentPairs: IOption[]): IShapeInstance[] {
   const cellW = areaW / cols;
   const cellH = areaH / rows;
 
-  // Shuffle cell indices to break the visual row/column pattern
   const cellIndices = Array.from({ length: cols * rows }, (_, i) => i);
   shuffle(cellIndices);
 
   const shapes: IShapeInstance[] = [];
   for (let i = 0; i < count; i++) {
-    const base = presentPairs[i % presentPairs.length];
-    const cell = cellIndices[i];
-    const col  = cell % cols;
-    const row  = Math.floor(cell / cols);
-    const size = cellW * (SHAPE_SIZE_MIN + Math.random() * (SHAPE_SIZE_MAX - SHAPE_SIZE_MIN));
-    // rawX/rawY are the desired center of the shape
-    const rawX = SHAPES_X_MIN + cellW * (col + 0.5 + (Math.random() - 0.5) * SHAPE_JITTER);
-    const rawY = SHAPES_Y_MIN + cellH * (row + 0.5 + (Math.random() - 0.5) * SHAPE_JITTER);
+    const typeKey = presentKeys[i % presentKeys.length];
+    const cell    = cellIndices[i];
+    const col     = cell % cols;
+    const row     = Math.floor(cell / cols);
+    const size    = cellW * (SHAPE_SIZE_MIN + Math.random() * (SHAPE_SIZE_MAX - SHAPE_SIZE_MIN));
+    const rawX    = SHAPES_X_MIN + cellW * (col + 0.5 + (Math.random() - 0.5) * SHAPE_JITTER);
+    const rawY    = SHAPES_Y_MIN + cellH * (row + 0.5 + (Math.random() - 0.5) * SHAPE_JITTER);
     shapes.push({
-      typeKey:  base.typeKey  as ShapeKey,
-      colorKey: base.colorKey as ColorKey,
+      typeKey,
       rotation: (Math.random() * 2 - 1) * SHAPE_ROTATION_MAX_DEG * (Math.PI / 180),
       x: Math.max(SHAPES_X_MIN + size / 2, Math.min(SHAPES_X_MAX - size / 2, rawX)),
       y: Math.max(SHAPES_Y_MIN + size / 2, Math.min(SHAPES_Y_MAX - size / 2, rawY)),
@@ -129,8 +114,7 @@ function buildShapes(count: number, presentPairs: IOption[]): IShapeInstance[] {
   return shapes;
 }
 
-function buildEdgeTestShapes(presentPairs: IOption[]): IShapeInstance[] {
-  // size as fraction of canvas [0..1]; x/y are centers
+function buildEdgeTestShapes(presentKeys: ShapeKey[]): IShapeInstance[] {
   const size = 0.15;
   const xMin = SHAPES_X_MIN + size / 2;
   const xMax = SHAPES_X_MAX - size / 2;
@@ -140,19 +124,18 @@ function buildEdgeTestShapes(presentPairs: IOption[]): IShapeInstance[] {
   const yMid = (SHAPES_Y_MIN + SHAPES_Y_MAX) / 2;
 
   const positions = [
-    { x: xMin, y: yMin },  // top-left
-    { x: xMid, y: yMin },  // top-center
-    { x: xMax, y: yMin },  // top-right
-    { x: xMin, y: yMid },  // middle-left
-    { x: xMax, y: yMid },  // middle-right
-    { x: xMin, y: yMax },  // bottom-left
-    { x: xMid, y: yMax },  // bottom-center
-    { x: xMax, y: yMax },  // bottom-right
+    { x: xMin, y: yMin },
+    { x: xMid, y: yMin },
+    { x: xMax, y: yMin },
+    { x: xMin, y: yMid },
+    { x: xMax, y: yMid },
+    { x: xMin, y: yMax },
+    { x: xMid, y: yMax },
+    { x: xMax, y: yMax },
   ];
 
   return positions.map((pos, i) => ({
-    typeKey:  presentPairs[0].typeKey  as ShapeKey,
-    colorKey: presentPairs[i % presentPairs.length].colorKey as ColorKey,
+    typeKey:  presentKeys[i % presentKeys.length],
     rotation: 0,
     x:        pos.x,
     y:        pos.y,
@@ -160,14 +143,13 @@ function buildEdgeTestShapes(presentPairs: IOption[]): IShapeInstance[] {
   }));
 }
 
-function uniquePairsInShapes(shapes: IShapeInstance[]): IOption[] {
-  const seen   = new Set<string>();
-  const unique: IOption[] = [];
+function uniqueKeysInShapes(shapes: IShapeInstance[]): ShapeKey[] {
+  const seen  = new Set<string>();
+  const unique: ShapeKey[] = [];
   for (const s of shapes) {
-    const key = `${s.typeKey}|${s.colorKey}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push({ typeKey: s.typeKey, colorKey: s.colorKey });
+    if (!seen.has(s.typeKey)) {
+      seen.add(s.typeKey);
+      unique.push(s.typeKey as ShapeKey);
     }
   }
   return unique;

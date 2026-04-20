@@ -166,7 +166,7 @@
             "name": "mixamo.com",
             "source": "remap",
             "default": {
-                "packageOrRemoteId": "26835398609386284",
+                "packageOrRemoteId": "26435503376059174",
                 "ingestionId": "15956422089844585316",
                 "targetId": "3596134716"
             }
@@ -176,19 +176,19 @@
             "name": "mixamo.com_1",
             "source": "remap",
             "default": {
-                "packageOrRemoteId": "26835398609386284",
+                "packageOrRemoteId": "26435503376059174",
                 "ingestionId": "188875039317157330",
                 "targetId": "3596134716"
             }
         }
     ],
     "hierarchy": {
-        "packageOrRemoteId": "26835398609386284",
+        "packageOrRemoteId": "26435503376059174",
         "ingestionId": "15956422089844585316",
         "targetId": "2745964793"
     },
     "mesh": {
-        "packageOrRemoteId": "26835398609386284",
+        "packageOrRemoteId": "26435503376059174",
         "ingestionId": "15956422089844585316",
         "targetId": "2764924730"
     }

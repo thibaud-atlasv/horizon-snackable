@@ -2,12 +2,11 @@ import { LocalEvent, NetworkEvent, serializable } from 'meta/worlds';
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
-// typeKey / colorKey are keys of SHAPE_DEFS / COLOR_DEFS (see Defs/ShapeDefs.ts).
-// Typed as string here so Types.ts stays import-free; services use ColorKey / ShapeKey.
+// typeKey is a key of SHAPE_TEXTURE_MAP (see Assets.ts / Defs/ShapeDefs.ts).
+// Typed as string here so Types.ts stays import-free.
 
 export interface IShapeInstance {
   typeKey:  string;
-  colorKey: string;
   rotation: number;  // radians
   x:        number;  // canvas-space px
   y:        number;  // canvas-space px
@@ -15,8 +14,7 @@ export interface IShapeInstance {
 }
 
 export interface IOption {
-  typeKey:  string;
-  colorKey: string;
+  typeKey: string;
 }
 
 // ─── Events ───────────────────────────────────────────────────────────────────

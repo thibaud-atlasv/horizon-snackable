@@ -3,6 +3,8 @@
       xmlns:b="http://schemas.microsoft.com/xaml/behaviors">
 
     <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
         <!-- Title Pop-In Animation -->
         <Storyboard x:Key="TitlePopAnim">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TitleBlock"
@@ -55,116 +57,6 @@
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-
-        <!-- Leaderboard Entry Item Template -->
-        <DataTemplate x:Key="LeaderboardEntryTemplate">
-            <Grid Height="60" Margin="0,4,0,4">
-                <!-- Current Player Highlight Background -->
-                <Border x:Name="PlayerHighlightBorder" CornerRadius="8" Background="#40FFD700">
-                    <Border.Visibility>
-                        <Binding Path="isCurrentPlayer">
-                            <Binding.Converter>
-                                <BooleanToVisibilityConverter/>
-                            </Binding.Converter>
-                        </Binding>
-                    </Border.Visibility>
-                </Border>
-                
-                <!-- Normal Row Background -->
-                <Border CornerRadius="8" Background="#30000000">
-                    <Border.Visibility>
-                        <Binding Path="isCurrentPlayer">
-                            <Binding.Converter>
-                                <BooleanToVisibilityConverter Visibility="Hidden"/>
-                            </Binding.Converter>
-                        </Binding>
-                    </Border.Visibility>
-                </Border>
-
-                <Grid Margin="16,0,16,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Rank Display -->
-                    <Grid Grid.Column="0" VerticalAlignment="Center">
-                        <!-- Shadow -->
-                        <TextBlock Text="{Binding Path=rankDisplay}"
-                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000"
-                                   HorizontalAlignment="Left" VerticalAlignment="Center"
-                                   Margin="2,2,0,0" TextAlignment="Center" FontSize="40"/>
-                        <!-- Outline -->
-                        <TextBlock Text="{Binding Path=rankDisplay}"
-                                   FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="3"
-                                   Foreground="Transparent"
-                                   HorizontalAlignment="Left" VerticalAlignment="Center" TextAlignment="Center" FontSize="40"/>
-                        <!-- Main Text - Color based on rank -->
-                        <TextBlock Text="{Binding Path=rankDisplay}"
-                                   FontFamily="Roboto" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" TextAlignment="Center" FontSize="40">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=rank}" Value="1">
-                                            <Setter Property="Foreground" Value="#FFFFD700"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=rank}" Value="2">
-                                            <Setter Property="Foreground" Value="#FFC0C0C0"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=rank}" Value="3">
-                                            <Setter Property="Foreground" Value="#FFCD7F32"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
-
-                    <!-- Player Name -->
-                    <Grid Grid.Column="1" VerticalAlignment="Center">
-                        <!-- Shadow -->
-                        <TextBlock Text="{Binding Path=playerName}"
-                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000"
-                                   VerticalAlignment="Center"
-                                   FontSize="40" TextAlignment="Center" Margin="0,2,0,0"/>
-                        <!-- Outline -->
-                        <TextBlock Text="{Binding Path=playerName}"
-                                   FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="2"
-                                   Foreground="Transparent"
-                                   VerticalAlignment="Center" FontSize="40" TextAlignment="Center" Margin="0,2,0,0"/>
-                        <!-- Main Text -->
-                        <TextBlock Text="{Binding Path=playerName}"
-                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFFFFF"
-                                   VerticalAlignment="Center" FontSize="40" TextAlignment="Center" Margin="0,2,0,0"/>
-                    </Grid>
-
-                    <!-- Score -->
-                    <Grid Grid.Column="2" VerticalAlignment="Center">
-                        <!-- Shadow -->
-                        <TextBlock Text="{Binding Path=score, StringFormat=F0}"
-                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   Margin="2,2,0,0" FontSize="40"/>
-                        <!-- Outline -->
-                        <TextBlock Text="{Binding Path=score, StringFormat=F0}"
-                                   FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="2"
-                                   Foreground="Transparent"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="40"/>
-                        <!-- Main Text -->
-                        <TextBlock Text="{Binding Path=score, StringFormat=F0}"
-                                   FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFFF"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="40"/>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </DataTemplate>
-
-        <!-- Vertical Panel Template for ItemsControl -->
-        <ItemsPanelTemplate x:Key="VerticalPanel">
-            <StackPanel Orientation="Vertical"/>
-        </ItemsPanelTemplate>
     </Page.Resources>
 
     <!-- Main Container - Visibility bound to isVisible -->
@@ -185,92 +77,282 @@
             </b:DataTrigger>
         </b:Interaction.Triggers>
 
-        <!-- Full-screen dark overlay -->
-        <Border/>
-        <Border HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="40,40,40,40" Background="#E6000000" Padding="75,75,75,75">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Grid x:Name="TitleBlock" RenderTransformOrigin="0.5,0.5" Margin="0,0,0,30">
-                    <Grid.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </Grid.RenderTransform>
-                    <TextBlock Text="{Binding Path=title}" FontFamily="Roboto" FontWeight="Bold" Foreground="{Binding Path=titleColor}" HorizontalAlignment="Center" VerticalAlignment="Center" CharacterSpacing="-30" TextAlignment="Center" FontSize="120"/>
-                </Grid>
-                <Grid x:Name="ContentContainer" RenderTransformOrigin="0.5,0.5">
-                    <Grid.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </Grid.RenderTransform>
-                    <StackPanel>
-                        <Border CornerRadius="12" Padding="30,20,30,20" Margin="0,0,0,20">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Grid HorizontalAlignment="Center">
-                                    <TextBlock Text="YOUR SCORE" FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0" FontSize="40"/>
-                                    <TextBlock Text="YOUR SCORE" FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="2" Foreground="Transparent" HorizontalAlignment="Center" FontSize="40"/>
-                                    <TextBlock Text="YOUR SCORE" FontFamily="Roboto" FontWeight="Bold" Foreground="#AAFFFFFF" HorizontalAlignment="Center" FontSize="40"/>
-                                </Grid>
-                                <Grid HorizontalAlignment="Center" Margin="0,5,0,5">
-                                    <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000" HorizontalAlignment="Center" Margin="3,3,0,0" FontSize="80"/>
-                                    <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="4" Foreground="Transparent" HorizontalAlignment="Center" FontSize="80"/>
-                                    <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}" FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFFFFF" HorizontalAlignment="Center" CharacterSpacing="-20" FontSize="80"/>
-                                </Grid>
-                                <Grid HorizontalAlignment="Center">
-                                    <TextBlock Text="{Binding Path=yourRankDisplay}" FontFamily="Roboto" FontWeight="Bold" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0" FontSize="50"/>
-                                    <TextBlock Text="{Binding Path=yourRankDisplay}" FontFamily="Roboto" FontWeight="Bold" Stroke="#FF1A1A2E" StrokeThickness="3" Foreground="Transparent" HorizontalAlignment="Center" FontSize="50"/>
-                                    <TextBlock Text="{Binding Path=yourRankDisplay}" FontFamily="Roboto" FontWeight="Bold" Foreground="#FFFFD700" HorizontalAlignment="Center" FontSize="50"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                        <Grid Margin="0,10,0,10">
-                            <Grid.Visibility>
-                                <Binding Path="isLoading">
-                                    <Binding.Converter>
-                                        <BooleanToVisibilityConverter/>
-                                    </Binding.Converter>
-                                </Binding>
-                            </Grid.Visibility>
-                            <TextBlock Text="Loading..." FontFamily="Roboto" FontWeight="Bold" FontSize="32" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0"/>
-                            <TextBlock Text="Loading..." FontFamily="Roboto" FontWeight="Bold" FontSize="32" Stroke="#FF1A1A2E" StrokeThickness="2" Foreground="Transparent" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Loading..." FontFamily="Roboto" FontWeight="Bold" FontSize="32" Foreground="#AAFFFFFF" HorizontalAlignment="Center"/>
-                        </Grid>
-                        <Grid Margin="0,10,0,10">
-                            <Grid.Style>
-                                <Style TargetType="Grid">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=errorMessage}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Grid.Style>
-                            <TextBlock Text="{Binding Path=errorMessage}" FontFamily="Roboto" FontWeight="Bold" FontSize="24" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0"/>
-                            <TextBlock Text="{Binding Path=errorMessage}" FontFamily="Roboto" FontWeight="Bold" FontSize="24" Stroke="#FF1A1A2E" StrokeThickness="2" Foreground="Transparent" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=errorMessage}" FontFamily="Roboto" FontWeight="Bold" FontSize="24" Foreground="#FFFF6666" HorizontalAlignment="Center"/>
-                        </Grid>
-                        <Grid Margin="0,10,0,10">
-                            <TextBlock Text="TOP 10" FontFamily="Roboto" FontWeight="Bold" FontSize="36" Foreground="#40000000" HorizontalAlignment="Center" Margin="2,2,0,0"/>
-                            <TextBlock Text="TOP 10" FontFamily="Roboto" FontWeight="Bold" FontSize="36" Stroke="#FF1A1A2E" StrokeThickness="3" Foreground="Transparent" HorizontalAlignment="Center"/>
-                            <TextBlock Text="TOP 10" FontFamily="Roboto" FontWeight="Bold" FontSize="36" Foreground="#FFFFFFFF" HorizontalAlignment="Center"/>
-                        </Grid>
-                        <Border Background="#20000000" CornerRadius="12" Padding="10" MaxHeight="850" MinWidth="950">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                <ItemsControl ItemsSource="{Binding Path=entries}" ItemTemplate="{StaticResource LeaderboardEntryTemplate}" ItemsPanel="{StaticResource VerticalPanel}"/>
-                            </ScrollViewer>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-        </Border>
+        <!-- Radial gradient background matching app style -->
 
-        <!-- Semi-transparent background overlay for content panel -->
+        <Viewbox Stretch="Uniform">
+            <Grid Width="480" Height="800">
+                <!-- Full-screen semi-transparent dark overlay -->
+                <Border>
+                    <Border.Background>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#FF2A1A4E" Offset="0"/>
+                            <GradientStop Color="#FF120A2A" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <!-- Decorative floating shapes scattered around the card -->
+                <!-- Star Orange - Top Left -->
+                <Image Source="shape/starfillOrange.png" Width="55" Height="55"
+                       Opacity="0.5" IsHitTestVisible="False"
+                       HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Margin="25,140,0,0" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="-15"/>
+                    </Image.RenderTransform>
+                </Image>
+
+                <!-- Heart Pink - Top Right -->
+                <Image Source="shape/heartPink.png" Width="48" Height="48"
+                       Opacity="0.55" IsHitTestVisible="False"
+                       HorizontalAlignment="Right" VerticalAlignment="Top"
+                       Margin="0,160,30,0" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="20"/>
+                    </Image.RenderTransform>
+                </Image>
+
+                <!-- Hexagon Cyan - Left Middle -->
+                <Image Source="shape/hexagonCyan.png" Width="50" Height="50"
+                       Opacity="0.45" IsHitTestVisible="False"
+                       HorizontalAlignment="Left" VerticalAlignment="Center"
+                       Margin="15,-50,0,0" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="30"/>
+                    </Image.RenderTransform>
+                </Image>
+
+                <!-- Triangle Purple - Bottom Left -->
+                <Image Source="shape/trianglePurple.png" Width="52" Height="52"
+                       Opacity="0.5" IsHitTestVisible="False"
+                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                       Margin="35,0,0,150" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="-25"/>
+                    </Image.RenderTransform>
+                </Image>
+
+                <!-- Pentagon Yellow - Bottom Right -->
+                <Image Source="shape/pentagonYellow.png" Width="58" Height="58"
+                       Opacity="0.6" IsHitTestVisible="False"
+                       HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                       Margin="0,0,25,170" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="12"/>
+                    </Image.RenderTransform>
+                </Image>
+
+                <!-- Star Orange - Right Middle -->
+                <Image Source="shape/starfillOrange.png" Width="42" Height="42"
+                       Opacity="0.4" IsHitTestVisible="False"
+                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                       Margin="0,80,20,0" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="45"/>
+                    </Image.RenderTransform>
+                </Image>
+
+                <!-- Heart Pink - Bottom Center -->
+                <Image Source="shape/heartPink.png" Width="40" Height="40"
+                       Opacity="0.45" IsHitTestVisible="False"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                       Margin="-100,0,0,120" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="-10"/>
+                    </Image.RenderTransform>
+                </Image>
+
+                <!-- Centered Cartouche Card -->
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- Shadow border behind card (offset down-right) -->
+                    <Border Background="#55000000" CornerRadius="28"
+                            Width="360" Margin="6,8,0,0"/>
+
+                    <!-- Main card with golden border -->
+                    <Border Background="#fef9c3" BorderBrush="#fbbf24" BorderThickness="4"
+                            CornerRadius="28" Width="360" Padding="24,20,24,24">
+                        <StackPanel>
+                            <!-- Title Block with animation transforms -->
+                            <Grid x:Name="TitleBlock" RenderTransformOrigin="0.5,0.5" Margin="0,0,0,8">
+                                <Grid.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                        <SkewTransform/>
+                                        <RotateTransform/>
+                                        <TranslateTransform/>
+                                    </TransformGroup>
+                                </Grid.RenderTransform>
+                                <!-- Title with text shadow (layered TextBlock pattern) -->
+                                <Grid HorizontalAlignment="Center">
+                                    <!-- Shadow text layer -->
+                                    <TextBlock Text="{Binding Path=title}"
+                                               FontFamily="Roboto" FontWeight="Bold" FontSize="48"
+                                               Foreground="#44000000" HorizontalAlignment="Center">
+                                        <TextBlock.RenderTransform>
+                                            <TranslateTransform X="2" Y="2"/>
+                                        </TextBlock.RenderTransform>
+                                    </TextBlock>
+                                    <!-- Main title text with bound color -->
+                                    <TextBlock Text="{Binding Path=title}"
+                                               FontFamily="Roboto" FontWeight="Bold" FontSize="48"
+                                               Foreground="{Binding Path=titleColor}"
+                                               HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+
+                            <!-- Content Container with animation transforms -->
+                            <Grid x:Name="ContentContainer" RenderTransformOrigin="0.5,0.5">
+                                <Grid.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                        <SkewTransform/>
+                                        <RotateTransform/>
+                                        <TranslateTransform/>
+                                    </TransformGroup>
+                                </Grid.RenderTransform>
+
+                                <StackPanel>
+                                    <!-- Player Name -->
+                                    <Grid HorizontalAlignment="Center" Margin="0,4,0,16">
+                                        <!-- Shadow -->
+                                        <TextBlock Text="{Binding Path=playerName}"
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="22"
+                                                   Foreground="#33000000" HorizontalAlignment="Center">
+                                            <TextBlock.RenderTransform>
+                                                <TranslateTransform X="1" Y="1"/>
+                                            </TextBlock.RenderTransform>
+                                        </TextBlock>
+                                        <!-- Main text -->
+                                        <TextBlock Text="{Binding Path=playerName}"
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="22"
+                                                   Foreground="#92400e" HorizontalAlignment="Center"/>
+                                    </Grid>
+
+                                    <!-- Divider line -->
+                                    <Border Background="#fbbf24" Height="2" Margin="20,0,20,16" CornerRadius="1"/>
+
+                                    <!-- FINAL SCORE label -->
+                                    <TextBlock Text="FINAL SCORE"
+                                               FontFamily="Roboto" FontWeight="Bold" FontSize="14"
+                                               Foreground="#a16207" HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+
+                                    <!-- Score value - BIG -->
+                                    <Grid HorizontalAlignment="Center" Margin="0,0,0,12">
+                                        <!-- Shadow -->
+                                        <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}"
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="56"
+                                                   Foreground="#33000000" HorizontalAlignment="Center">
+                                            <TextBlock.RenderTransform>
+                                                <TranslateTransform X="2" Y="2"/>
+                                            </TextBlock.RenderTransform>
+                                        </TextBlock>
+                                        <!-- Main score text -->
+                                        <TextBlock Text="{Binding Path=yourScore, StringFormat=F0}"
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="56"
+                                                   Foreground="#92400e" HorizontalAlignment="Center"/>
+                                    </Grid>
+
+                                    <!-- Rank display with DataTrigger coloring -->
+                                    <Grid HorizontalAlignment="Center" Margin="0,0,0,16">
+                                        <!-- Shadow -->
+                                        <TextBlock Text="{Binding Path=yourRankDisplay}"
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="32"
+                                                   Foreground="#33000000" HorizontalAlignment="Center">
+                                            <TextBlock.RenderTransform>
+                                                <TranslateTransform X="1" Y="1"/>
+                                            </TextBlock.RenderTransform>
+                                        </TextBlock>
+                                        <!-- Main rank text with DataTrigger coloring -->
+                                        <TextBlock Text="{Binding Path=yourRankDisplay}"
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="32"
+                                                   HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#78350f"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=yourRank}" Value="1">
+                                                            <Setter Property="Foreground" Value="#FFD700"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=yourRank}" Value="2">
+                                                            <Setter Property="Foreground" Value="#C0C0C0"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=yourRank}" Value="3">
+                                                            <Setter Property="Foreground" Value="#CD7F32"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <!-- Divider line -->
+                                    <Border Background="#fcd34d" Height="1" Margin="40,0,40,12" CornerRadius="1"/>
+
+                                    <!-- BEST SCORE label + value -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+                                        <TextBlock Text="BEST SCORE: "
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="16"
+                                                   Foreground="#a16207" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Path=bestScore, StringFormat=F0}"
+                                                   FontFamily="Roboto" FontWeight="Bold" FontSize="20"
+                                                   Foreground="#78350f" VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Loading text - visible when isLoading is true -->
+                                    <Grid Margin="0,8,0,8"
+                                          Visibility="{Binding Path=isLoading, Converter={StaticResource BoolToVis}}">
+                                        <Grid HorizontalAlignment="Center">
+                                            <!-- Shadow -->
+                                            <TextBlock Text="Submitting..."
+                                                       FontFamily="Roboto" FontWeight="Bold" FontSize="18"
+                                                       Foreground="#33000000" HorizontalAlignment="Center">
+                                                <TextBlock.RenderTransform>
+                                                    <TranslateTransform X="1" Y="1"/>
+                                                </TextBlock.RenderTransform>
+                                            </TextBlock>
+                                            <!-- Main text -->
+                                            <TextBlock Text="Submitting..."
+                                                       FontFamily="Roboto" FontWeight="Bold" FontSize="18"
+                                                       Foreground="#a16207" HorizontalAlignment="Center"/>
+                                        </Grid>
+                                    </Grid>
+
+                                    <!-- Error text - visible when errorMessage is non-empty -->
+                                    <Grid Margin="0,8,0,8">
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=errorMessage}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Grid HorizontalAlignment="Center">
+                                            <!-- Shadow -->
+                                            <TextBlock Text="{Binding Path=errorMessage}"
+                                                       FontFamily="Roboto" FontWeight="Bold" FontSize="14"
+                                                       Foreground="#33000000" HorizontalAlignment="Center"
+                                                       TextWrapping="Wrap" MaxWidth="280" TextAlignment="Center">
+                                                <TextBlock.RenderTransform>
+                                                    <TranslateTransform X="1" Y="1"/>
+                                                </TextBlock.RenderTransform>
+                                            </TextBlock>
+                                            <!-- Main error text - reddish -->
+                                            <TextBlock Text="{Binding Path=errorMessage}"
+                                                       FontFamily="Roboto" FontWeight="Bold" FontSize="14"
+                                                       Foreground="#dc2626" HorizontalAlignment="Center"
+                                                       TextWrapping="Wrap" MaxWidth="280" TextAlignment="Center"/>
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Viewbox>
     </Grid>
 </Page>

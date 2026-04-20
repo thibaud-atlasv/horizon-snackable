@@ -42,15 +42,16 @@ The overall feel is **bright, cheerful, playful, and tactile** — colors pop, s
 
 ### Shape sprites
 
-Each shape is a **grayscale PNG sprite** with:
+Each shape+color combination is one **pre-colored PNG sprite**:
 - Transparent background
 - Dimensions: **128×128 px** (or 256×256 for high-DPI export)
 - **Puffy 3D rendering**: large bright highlight blob in top-left quadrant, soft gradient shadow in bottom-right
 - Exaggerated volume — shapes should look inflated/pillowy
 - Soft inner glow effect for extra depth
 - No hard outline stroke — the 3D shading and soft edges define the silhouette
+- Color baked in — one PNG per shape+color pair (e.g. `heartBlue.png`, `squareRed.png`)
 
-Sprites are rendered in **grayscale** and tinted at runtime via XAML `Color` / multiply. This allows a single sprite per shape to work with any color.
+Sprites are displayed via XAML `<Image>` elements. Color tinting at runtime is not used — the color is part of the asset.
 
 ### UI card sprites
 
@@ -77,10 +78,10 @@ The player has under 10 seconds to scan the canvas. There is no time to compare 
 **No two colors may share the same hue family.**
 Forbidden combinations: two blues, two greens, two reds, two purples, etc. Each color must own its hue category unambiguously.
 
-**Colors must work on a light soft-yellow background (`#fef9c3`).**
-All sprite colors are rendered on a light canvas. Avoid very light, washed-out, or near-white colors — they will disappear against the yellow background. Prefer saturated mid-tone and deep colors.
+**Colors must work on a light soft-yellow canvas background (`#fef9c3`).**
+Sprites are placed on a light canvas. Avoid very light, washed-out, or near-white colors — they will disappear against the yellow background. Prefer saturated mid-tone and deep colors.
 
-**No near-white, near-cream, or near-yellow colors** — they blend with the canvas background.
+**No near-white, near-cream, or near-yellow colors** — they blend with the canvas background. This is why the Yellow color variants are commented out in `Assets.ts`.
 
 **Saturation floor: 65% (HSL) with brightness between 45–75%.**
 Colors should feel vivid, candy-like, and fun. The palette should feel like a bag of colorful gummy bears — bright but not harsh.
@@ -133,24 +134,26 @@ All shapes are drawn filled (solid color). Outline-only or wireframe shapes are 
 
 For each shape, ask: if this shape were a black silhouette on a white background at 40×40px, would a stranger immediately name it correctly? If not, the shape is too ambiguous.
 
-### Current default shape set (reference)
+### Current shape categories (active in Assets.ts)
 
-| ID | Name | Sprite style notes |
+| Key prefix | Description | Notes |
 |---|---|---|
-| `circle` | Cercle | Perfect puffy sphere — like a bouncy ball |
-| `triangle` | Triangle | Equilateral with rounded corners, inflated sides |
-| `square` | Carré | Axis-aligned, very rounded corners, pillow-like |
-| `diamond` | Losange | Square rotated 45° — puffy rhombus |
-| `hexagon` | Hexagone | 6-sided, gem-like with soft edges |
-| `star` | Étoile | 5-pointed, chunky puffy arms |
-| `cross` | Croix | Plus sign with rounded ends, soft volume |
-| `heart` | Cœur | Iconic puffy heart — extra cute |
+| `circle` | Perfect puffy sphere | Only green variant active (round, rotation-agnostic) |
+| `triangle` | Equilateral with rounded corners | Filled + empty outline variants |
+| `square` | Axis-aligned, pillow-like | Filled variants |
+| `squareTilted` | Square rotated 45° | Visually distinct from `square` |
+| `pentagon` | 5-sided, gem-like | 8 color variants |
+| `hexagon` | 6-sided, gem-like with soft edges | 8 color variants |
+| `starEmpty` | 5-pointed outline star | 8 color variants |
+| `starFill` | 5-pointed solid star | 8 color variants |
+| `heart` | Iconic puffy heart | Filled + empty outline variants |
+| `triangleEmpty` | Outlined triangle | See triangle |
+| `heartEmpty` | Outlined heart | See heart |
 
 ### Shapes to avoid
 
-- **Ellipse / oval** — too similar to circle sprite
+- **Ellipse / oval** — too similar to circle
 - **Rectangle (non-square)** — loses aspect identity when placed at angles
-- **Pentagon** — too similar to hexagon at small sprite sizes
 - **Crescent / moon** — complex silhouette, poor 3D readability
 - **Arrow** — asymmetric, difficult to render as a friendly toy shape
 - **Letter / number shapes** — too culturally specific
@@ -201,16 +204,12 @@ When generating the UI (`shape_display.xaml` or equivalent), follow these struct
 
 ### Shape sprites in UI
 
-Shapes inside the canvas and answer buttons are displayed via `<Rectangle>` with `OpacityMask` bound to the grayscale sprite, filled with the tint color. Do **not** use `<Ellipse>`, `<Path>`, or direct `<Image>` elements to draw shapes — all geometry comes from masked rectangles for proper color tinting.
+Shapes inside the canvas and answer buttons are displayed via `<Image Source="{Binding spriteTexture}">` with a `TransformGroup` for position, rotation, and scale. Colors are baked into the sprite — no runtime tinting is applied.
 
 Answer buttons each show:
-- One centered shape sprite (≈ 80×80px inside a ~140×130px card)
+- One centered shape Image (≈ 80×80px inside a ~140×130px card)
 - No label text — the shape sprite is the sole identifier
 - A green checkmark badge (top-right corner) on correct answer, red X badge on wrong answer
-
-### Color / tint
-
-Sprites are grayscale PNGs. Apply tint via `<Rectangle Fill="{Binding fillColor}">` with `OpacityMask` set to an `ImageBrush` bound to `spriteSource`.
 
 ---
 

@@ -8,14 +8,15 @@
 
 // ─── Grid ─────────────────────────────────────────────────────────────────────
 
-export const GRID_COLS = 9;
-export const GRID_ROWS = 10;
-export const CELL_SIZE = 0.5; // world units per cell
+export const GRID_COLS = 7;
+export const GRID_ROWS = 14;
+export const CELL_WIDTH  = 1.13777; // world units per cell along X axis (rows)
+export const CELL_HEIGHT = 1.1815; // world units per cell along Z axis (cols)
 
 // col → Z axis (horizontal, left/right on screen)
 // row → X axis (vertical, top/bottom on screen)
-export const GRID_ORIGIN_X = -((GRID_ROWS - 1) / 2) * CELL_SIZE; // -5.75 — top row X
-export const GRID_ORIGIN_Z = -((GRID_COLS - 1) / 2) * CELL_SIZE; // -3.75 — left col Z
+export const GRID_ORIGIN_X = -((GRID_ROWS - 1) / 2) * CELL_WIDTH;  // top row X
+export const GRID_ORIGIN_Z = -((GRID_COLS - 1) / 2) * CELL_HEIGHT; // left col Z
 
 // Y position for ground-level entities (towers, enemies, tiles)
 export const GROUND_Y = 0;
@@ -24,7 +25,7 @@ export const GROUND_Y = 0;
 
 export const WAVE_BUILD_DURATION   = 5;    // seconds of build phase before wave starts
 export const WAVE_CLEAR_DURATION   = 0.5;  // seconds between last kill and next build phase
-export const ENEMY_SPAWN_INTERVAL  = 0.35; // seconds between enemy spawns within a wave
+export const ENEMY_SPAWN_INTERVAL  = 0.75; // seconds between enemy spawns within a wave
 
 // ─── Economy ──────────────────────────────────────────────────────────────────
 
@@ -46,11 +47,11 @@ export const SELL_RATIO = 0.6; // fraction of totalInvested refunded on sell
 export const PARTICLE_POOL_SIZE    = 150;
 export const PROJECTILE_HIT_RADIUS = 0.3; // world units — distance to trigger hit detection
 export const PROJECTILE_PARTICLE_INTERVAL = 0.015;
-export const PROJECTILE_SCALE      = 0.25; // world units — visual size of spawned projectiles
+export const PROJECTILE_SCALE      = 5; // world units — visual size of spawned projectiles
 export const PROJECTILE_POOL_SIZE  = 30;   // pre-spawned projectile instances
 export const PROJECTILE_POOL_Y     = -100; // off-screen park position Y
 export const HEALTHBAR_POOL_SIZE   = 30;   // pre-spawned health bar instances
-export const HEALTHBAR_OFFSET_X    = 0.35; // world units ahead of enemy (X axis)
+export const HEALTHBAR_OFFSET_X    = 0.75; // world units ahead of enemy (X axis)
 export const HEALTHBAR_WIDTH       = 0.4;  // world units (matches cell size)
 export const HEALTHBAR_HEIGHT      = 0.06; // world units (thin bar)
 export const HEALTHBAR_DEPTH       = 0.02; // world units (flat)
