@@ -1,0 +1,201 @@
+{
+    "version": 6,
+    "entities": [
+        {
+            "id": "63d9a8d8-549d-4ddc-bff7-45b5fb5cebcf",
+            "name": "LaserTower",
+            "type": {
+                "packageOrRemoteId": "26631398616455768",
+                "ingestionId": "1637784053927604813",
+                "targetId": "2719744159"
+            },
+            "deltas": [
+                {
+                    "sourceId": "2e7f0eb8-c407-4566-b3ea-73d31d752c49",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "TowerController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "26631398616455768",
+                                    "ingestionId": "15027774208938648437",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "modelTier1a": "",
+                                    "modelTier1b": "",
+                                    "modelTier2a": "",
+                                    "modelTier2b": "",
+                                    "modelTier3a": "",
+                                    "modelTier3b": ""
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "12bbca2f-0024-4445-b56a-5816516957a1",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::MeshPlatformComponent",
+                                "version": 11,
+                                "data": {
+                                    "mesh": {
+                                        "packageOrRemoteId": "26631398616455768",
+                                        "ingestionId": "10063084137982485923",
+                                        "targetId": "3445545749"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::MaterialPlatformComponent",
+                                "version": 1,
+                                "data": {
+                                    "materials": [
+                                        {
+                                            "packageOrRemoteId": "26631398616455768",
+                                            "ingestionId": "15999550875517858814",
+                                            "targetId": "157013062"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "2589505b-2fe6-4b73-86e1-4bb15530afef",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "horizon::platform_api::TransformPlatformComponent",
+                                "version": 3,
+                                "data": {
+                                    "localPosition": {
+                                        "x": 0.37245944142341616,
+                                        "y": 0.34269845485687258,
+                                        "z": -0.002758890390396118
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "26ae9f1e-ae7f-461f-8067-48ff9fa7e989",
+                    "components": null
+                },
+                {
+                    "sourceId": "7acccf83-e1b7-4b22-a0aa-05b1244a330b",
+                    "components": null
+                },
+                {
+                    "sourceId": "4a7920d7-25ea-46c5-b9dc-b95f586b3b33",
+                    "components": null
+                },
+                {
+                    "sourceId": "76920af5-510d-4d30-9d63-a6e81595743a",
+                    "components": null
+                },
+                {
+                    "sourceId": "e22efaf1-65e5-42cc-8116-bed728b4d9de",
+                    "components": null
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "28bc90de-bdd1-462a-91fa-dc42330bb9bd",
+            "name": "LaserCanon",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": -0.05022113025188446,
+                                "y": 0.12648089230060578,
+                                "z": 0.10289549082517624
+                            },
+                            "localRotation": {
+                                "x": -0.7853986620903015,
+                                "y": -1.570797324180603,
+                                "z": 2.950280872937583e-7
+                            },
+                            "localScale": {
+                                "x": 1.5000004768371583,
+                                "y": 1.5000001192092896,
+                                "z": 1.5000004768371583
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "26631398616455768",
+                                "ingestionId": "10063084137982485923",
+                                "targetId": "3734060263"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "26631398616455768",
+                                    "ingestionId": "15999550875517858814",
+                                    "targetId": "157013062"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColorPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "color": {
+                                "r": 1.0,
+                                "g": 1.0,
+                                "b": 1.0,
+                                "a": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "28bc90de-bdd1-462a-91fa-dc42330bb9bd",
+            "destination": "63d9a8d8-549d-4ddc-bff7-45b5fb5cebcf/2e7f0eb8-c407-4566-b3ea-73d31d752c49"
+        }
+    ]
+}

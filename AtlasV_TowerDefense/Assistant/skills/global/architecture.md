@@ -75,6 +75,8 @@ TowerController fires
 `TowerDefs`, `EnemyDefs`, `LevelDefs` export const arrays — no side effects, no service calls.
 Catalog services read them in `onReady()`. Adding a new tower/enemy = adding an entry to the array.
 
+`LevelDefs` owns path waypoints via `ILevelDef.pathWaypoints` — there is no separate `PathDefs` import needed. `PathService` reads `LEVEL_DEFS[0].pathWaypoints` in `onReady()`.
+
 ## Assets
 
 `Assets.ts` is the **only** file with `new TemplateAsset(...)`.

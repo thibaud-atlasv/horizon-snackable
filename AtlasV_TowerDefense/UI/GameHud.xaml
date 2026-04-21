@@ -9,7 +9,41 @@
         <SolidColorBrush x:Key="WoodBrush" Color="#2a1a0e"/>
         <SolidColorBrush x:Key="RedBrush" Color="#e74c3c"/>
         <SolidColorBrush x:Key="CreamBrush" Color="#f5e6c8"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Page.Resources>
+    <Page.Visibility>
+        <Binding Path="visible">
+            <Binding.Converter>
+                <BooleanToVisibilityConverter/>
+            </Binding.Converter>
+        </Binding>
+    </Page.Visibility>
+
+    <Grid>
+    <!-- Countdown overlay - centered on screen, shown only before wave 1 -->
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Center"
+          Visibility="{Binding showCountdown, Converter={StaticResource BoolToVisConverter}}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!-- Label -->
+        <Grid Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,20">
+            <TextBlock Text="WAVE INCOMING!" FontFamily="Anton" FontSize="90" FontWeight="Bold" Foreground="Black" Margin="-4,0,0,0"/>
+            <TextBlock Text="WAVE INCOMING!" FontFamily="Anton" FontSize="90" FontWeight="Bold" Foreground="Black" Margin="4,0,0,0"/>
+            <TextBlock Text="WAVE INCOMING!" FontFamily="Anton" FontSize="90" FontWeight="Bold" Foreground="Black" Margin="0,-4,0,0"/>
+            <TextBlock Text="WAVE INCOMING!" FontFamily="Anton" FontSize="90" FontWeight="Bold" Foreground="Black" Margin="0,4,0,0"/>
+            <TextBlock Text="WAVE INCOMING!" FontFamily="Anton" FontSize="90" FontWeight="Bold" Foreground="{StaticResource CreamBrush}"/>
+        </Grid>
+        <!-- Big countdown number -->
+        <Grid Grid.Row="1" HorizontalAlignment="Center">
+            <TextBlock Text="{Binding countdown, StringFormat=F0}" FontFamily="Anton" FontSize="400" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
+            <TextBlock Text="{Binding countdown, StringFormat=F0}" FontFamily="Anton" FontSize="400" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
+            <TextBlock Text="{Binding countdown, StringFormat=F0}" FontFamily="Anton" FontSize="400" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
+            <TextBlock Text="{Binding countdown, StringFormat=F0}" FontFamily="Anton" FontSize="400" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
+            <TextBlock Text="{Binding countdown, StringFormat=F0}" FontFamily="Anton" FontSize="400" FontWeight="Bold" Foreground="{StaticResource GoldBrush}"/>
+        </Grid>
+    </Grid>
 
     <!-- Top HUD Bar - Lives (left), Wave (center), and Gold (right) -->
     <Grid VerticalAlignment="Top" Height="280">
@@ -116,7 +150,7 @@
             </Border>
 
             <!-- CENTER SECTION: Wave with outlined text -->
-            <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,100,0,0">
                 <TextBlock Text="{Binding Path=waveText}" 
                            FontSize="80" FontWeight="Bold" Foreground="Black" Margin="-4,0,0,0"/>
                 <TextBlock Text="{Binding Path=waveText}" 
@@ -201,5 +235,6 @@
                 </Grid>
             </Border>
         </Grid>
+    </Grid>
     </Grid>
 </Page>

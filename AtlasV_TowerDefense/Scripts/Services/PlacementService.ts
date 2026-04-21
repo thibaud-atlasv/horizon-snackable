@@ -10,7 +10,7 @@
  * Valid cell = not a path cell, not already occupied, affordable.
  * Deactivated when TowerDeselected or tower is placed.
  */
-import { Service, WorldService, NetworkMode, Vec3, Quaternion, EventService, TransformComponent, ColorComponent, Color } from 'meta/worlds';
+import { Service, WorldService, NetworkMode, Vec3, EventService, TransformComponent, ColorComponent, Color } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnFocusedInteractionInputStartedEvent, OnFocusedInteractionInputMovedEvent, OnFocusedInteractionInputEndedEvent } from 'meta/worlds';
 import type { OnFocusedInteractionInputEventPayload, Entity } from 'meta/worlds';
@@ -53,10 +53,9 @@ export class PlacementService extends Service {
     const range = await WorldService.get().spawnTemplate({
       templateAsset: Assets.RangeIndicator,
       position: RANGE_PARK,
-      //rotation: Quaternion.identity,
       scale: Vec3.one,
       networkMode: NetworkMode.LocalOnly,
-    }).catch((e: unknown) => { console.error(e); return null; });
+    }).catch(() => null);
 
     this._rangeEntity = range;
   }
@@ -201,10 +200,9 @@ export class PlacementService extends Service {
     const preview = await WorldService.get().spawnTemplate({
       templateAsset: def.template,
       position: pos,
-      //rotation: Quaternion.identity,
       scale: new Vec3(CELL_WIDTH, CELL_WIDTH, CELL_WIDTH),
       networkMode: NetworkMode.LocalOnly,
-    }).catch((e: unknown) => { console.error(e); return null; });
+    }).catch(() => null);
 
     if (!preview) { this._placementActive = false; return; }
     if (!this._placementActive) { preview.destroy(); return; }

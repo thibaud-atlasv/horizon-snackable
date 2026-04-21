@@ -114,7 +114,7 @@ export class PathService extends Service {
             rotation: Quaternion.fromEuler(new Vec3(0, -90, 0)),
             scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
             networkMode: NetworkMode.LocalOnly,
-          }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
+          }).catch(() => undefined) as Promise<void>,
         );
         continue;
       }
@@ -126,7 +126,7 @@ export class PathService extends Service {
             rotation: Quaternion.fromEuler(new Vec3(0, 90, 0)),
             scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
             networkMode: NetworkMode.LocalOnly,
-          }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
+          }).catch(() => undefined) as Promise<void>,
         );
         continue;
       }

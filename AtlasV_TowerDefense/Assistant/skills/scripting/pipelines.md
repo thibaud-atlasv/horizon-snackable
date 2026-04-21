@@ -87,3 +87,15 @@ Props flow from `ITowerStats.props` → `IHitContext.props` → `TakeDamagePaylo
 ## Adding a Damage-Value Pipeline (if needed)
 
 If armor, resistance, or damage-value transforms are needed in the future, add a new `DamageService` following the same pattern as `HitService` — a `reduce` over registered `(ctx) → ctx` modifiers. Register it in `GameManager._startGame()` and declare its context interface in `Types.ts`.
+
+## Visual Feedback on Hit
+
+After `TakeDamage` resolves, several services react to produce visuals — none require pipeline changes:
+
+| Service | Trigger | Effect |
+|---------|---------|--------|
+| `VfxService` | `TakeDamage` | Hit flash + impact particle at enemy position |
+| `SlowService` | `TakeDamage` (if `props.slowFactor`) | Cyan tint via `EnemyController.applyTint()` |
+| `FloatingTextService` | `TakeDamage` (if `props.isCrit`) | Red "×N" text above enemy |
+| `CameraShakeService` | `EnemyReachedEnd` / `EnemyDied` (reward ≥ 50) | Camera shake |
+| `CoinService` | `EnemyDied` | 3–8 physics coins spawned at death position |

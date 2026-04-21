@@ -243,12 +243,12 @@ export class EnemyController extends Component {
     const pivot = this.bodyPivot.getComponent(TransformComponent);
     if (!pivot) return;
 
-    let Angle = new Vec3(0, 0, 0);
-    if (dx > 0)       Angle = new Vec3(-30, 0, 0);
-    else if (dx < 0)  Angle = new Vec3(30, 0, 0);
-    else if (dz > 0)  Angle = new Vec3(0, 0, 45);
-    else if (dz < 0)  Angle = new Vec3(0, 0, -45);
-    pivot.localRotation = Quaternion.fromEuler(Angle);
+    let angle = new Vec3(0, 0, 0);
+    if (dx > 0)       angle = new Vec3(-30, 0, 0);
+    else if (dx < 0)  angle = new Vec3(30, 0, 0);
+    else if (dz > 0)  angle = new Vec3(0, 0, 45);
+    else if (dz < 0)  angle = new Vec3(0, 0, -45);
+    pivot.localRotation = Quaternion.fromEuler(angle);
   }
 
   private _animateLimbs(dt: number, currentSpeed: number): void {

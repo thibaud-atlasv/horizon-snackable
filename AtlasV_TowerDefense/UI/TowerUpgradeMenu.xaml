@@ -2,25 +2,30 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d">
 
     <Page.Resources>
         <!-- Colors (matching TowerShop) -->
-        <SolidColorBrush x:Key="BackgroundBrush" Color="#1a1a2e"/>
-        <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#2a2a4a"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#3a3a5a"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ffffff"/>
-        <SolidColorBrush x:Key="TextDisabledBrush" Color="#555577"/>
-        <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
-        <SolidColorBrush x:Key="SellButtonBrush" Color="#8B0000"/>
-        <SolidColorBrush x:Key="UpgradeHistoryBrush" Color="#a0a0c0"/>
+        <SolidColorBrush x:Key="ParchmentLightBrush" Color="#FFf4e4bc"/>
+        <SolidColorBrush x:Key="ParchmentDarkBrush" Color="#FFd4c4a0"/>
+        <SolidColorBrush x:Key="TextWhiteBrush" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="GoldBrush" Color="#FFf5c518"/>
+        <SolidColorBrush x:Key="RedBrush" Color="#FFe74c3c"/>
+        <SolidColorBrush x:Key="GoldDarkBrush" Color="#FFc9a000"/>
+        <SolidColorBrush x:Key="WoodBrush" Color="#FF2a1a0e"/>
+        <SolidColorBrush x:Key="SellButtonBrush" Color="#FF8B0000"/>
+        <SolidColorBrush x:Key="SellButtonDarkBrush" Color="#FF5C0000"/>
+        <SolidColorBrush x:Key="UpgradeHistoryBrush" Color="#FFd4c4a0"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFFFF"/>
 
-        <!-- BooleanToVisibilityConverter for showUpgrades / showHistory bindings -->
+        <!-- BooleanToVisibilityConverter -->
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+
     </Page.Resources>
 
-    <!-- Main Layout - Full width bar at bottom, visibility bound to ViewModel -->
-    <Grid VerticalAlignment="Bottom">
+    <!-- Main Layout - Full width bar at bottom with overflow for cards -->
+    <Grid ClipToBounds="False" VerticalAlignment="Bottom" Height="800">
         <Grid.Visibility>
             <Binding Path="visible">
                 <Binding.Converter>
@@ -29,291 +34,634 @@
             </Binding>
         </Grid.Visibility>
 
-        <!-- Background Bar -->
-        <Border Background="{StaticResource BackgroundBrush}"
-                Height="600"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="0,2,0,0">
+        <!-- Medieval wood/leather background bar -->
+        <Border VerticalAlignment="Bottom"
+                CornerRadius="38,38,0,0" Height="400" d:IsLocked="True">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                    <GradientStop Color="#F02a1a0e" Offset="0"/>
+                    <GradientStop Color="#F81a0a00" Offset="0.3"/>
+                    <GradientStop Color="#FF0a0500" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
 
-            <!-- 4-Column Layout: [Info] [Upgrade1?] [Upgrade2?] [Sell] -->
-            <Grid HorizontalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Column 0 - Info Panel (always visible) -->
-                <Border Grid.Column="0"
-                        Background="Transparent"
-                        BorderBrush="{Binding towerBorderColor}"
-                        BorderThickness="2"
-                        Width="360"
-                        Height="360"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Margin="36,0,36,0" Padding="36,36,36,36">
-                    <StackPanel VerticalAlignment="Center">
-                        <!-- Tower Name -->
-                        <TextBlock Text="{Binding towerName}"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   FontSize="54"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"
-                                   Margin="0,0,0,24"/>
-
-                        <!-- Upgrade History Line 1 -->
-                        <TextBlock x:Name="UpgradeHistory1Text"
-                                   Text="{Binding upgradeHistory1, StringFormat='+ {0}'}"
-                                   Foreground="{StaticResource UpgradeHistoryBrush}"
-                                   FontSize="42"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,0,6"
-                                   Visibility="{Binding showHistory1, Converter={StaticResource BoolToVisConverter}}"/>
-
-                        <!-- Upgrade History Line 2 -->
-                        <TextBlock x:Name="UpgradeHistory2Text"
-                                   Text="{Binding upgradeHistory2, StringFormat='+ {0}'}"
-                                   Foreground="{StaticResource UpgradeHistoryBrush}"
-                                   FontSize="42"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,0,6"
-                                   Visibility="{Binding showHistory2, Converter={StaticResource BoolToVisConverter}}"/>
-
-                        <!-- Upgrade History Line 3 -->
-                        <TextBlock x:Name="UpgradeHistory3Text"
-                                   Text="{Binding upgradeHistory3, StringFormat='+ {0}'}"
-                                   Foreground="{StaticResource UpgradeHistoryBrush}"
-                                   FontSize="42"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,0,6"
-                                   Visibility="{Binding showHistory3, Converter={StaticResource BoolToVisConverter}}"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Column 1 - Upgrade 1 (hidden when maxed) -->
-                <Border Grid.Column="1"
-                        Visibility="{Binding showUpgrades, Converter={StaticResource BoolToVisConverter}}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Margin="36,0,36,0">
-                    <Button x:Name="Upgrade1Button"
-                            Command="{Binding Path=events.upgradeTowerTap}"
-                            CommandParameter="0"
-                            MinWidth="360"
-                            MinHeight="360"
-                            Background="{StaticResource ButtonBackgroundBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="2"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center" Padding="0,0,0,0">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Upgrade 1 Name -->
-                            <TextBlock x:Name="Upgrade1Name"
-                                       Grid.Row="0"
-                                       Text="{Binding upgrade1Name}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                       FontSize="54"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       TextAlignment="Center"
-                                       Margin="0,0,0,18"/>
-
-                            <!-- Upgrade 1 Cost with Gold Icon (hidden when maxed) -->
-                            <StackPanel x:Name="Upgrade1CostPanel"
-                                        Grid.Row="1"
-                                        Orientation="Horizontal"
-                                        HorizontalAlignment="Center">
-                                <Image Source="Textures/gold_icon.png"
-                                       Width="72"
-                                       Height="72"
-                                       Margin="0,0,18,0"
-                                       VerticalAlignment="Center"/>
-                                <TextBlock x:Name="Upgrade1CostText"
-                                           Text="{Binding upgrade1Cost, StringFormat=F0}"
-                                           Foreground="{StaticResource GoldBrush}"
-                                           FontSize="48"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-
-                            <!-- MAX label (shown when maxed) -->
-                            <TextBlock x:Name="Upgrade1MaxLabel"
-                                       Grid.Row="1"
-                                       Text="MAX"
-                                       Foreground="{StaticResource TextDisabledBrush}"
-                                       FontSize="48"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       Visibility="Collapsed"/>
-                        </Grid>
-                    </Button>
-                </Border>
-
-                <!-- Column 2 - Upgrade 2 (hidden when maxed) -->
-                <Border Grid.Column="2"
-                        Visibility="{Binding showUpgrades, Converter={StaticResource BoolToVisConverter}}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Margin="36,0,36,0">
-                    <Button x:Name="Upgrade2Button"
-                            Command="{Binding Path=events.upgradeTowerTap}"
-                            CommandParameter="1"
-                            MinWidth="360"
-                            MinHeight="360"
-                            Background="{StaticResource ButtonBackgroundBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="2"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center" Padding="0,0,0,0">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Upgrade 2 Name -->
-                            <TextBlock x:Name="Upgrade2Name"
-                                       Grid.Row="0"
-                                       Text="{Binding upgrade2Name}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                       FontSize="54"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       TextAlignment="Center"
-                                       Margin="0,0,0,18"/>
-
-                            <!-- Upgrade 2 Cost with Gold Icon (hidden when maxed) -->
-                            <StackPanel x:Name="Upgrade2CostPanel"
-                                        Grid.Row="1"
-                                        Orientation="Horizontal"
-                                        HorizontalAlignment="Center">
-                                <Image Source="Textures/gold_icon.png"
-                                       Width="72"
-                                       Height="72"
-                                       Margin="0,0,18,0"
-                                       VerticalAlignment="Center"/>
-                                <TextBlock x:Name="Upgrade2CostText"
-                                           Text="{Binding upgrade2Cost, StringFormat=F0}"
-                                           Foreground="{StaticResource GoldBrush}"
-                                           FontSize="48"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-
-                            <!-- MAX label (shown when maxed) -->
-                            <TextBlock x:Name="Upgrade2MaxLabel"
-                                       Grid.Row="1"
-                                       Text="MAX"
-                                       Foreground="{StaticResource TextDisabledBrush}"
-                                       FontSize="48"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       Visibility="Collapsed"/>
-                        </Grid>
-                    </Button>
-                </Border>
-
-                <!-- Column 3 - Sell Button (always visible, far right) -->
-                <Button x:Name="SellButton"
-                        Grid.Column="3"
-                        Command="{Binding Path=events.sellTowerTap}"
-                        MinWidth="360"
-                        MinHeight="360"
-                        Background="{StaticResource SellButtonBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="2"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Padding="0,0,0,0" Margin="36,0,36,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Sell Label -->
-                        <TextBlock Grid.Row="0"
-                                   Text="SELL"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   FontSize="54"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"
-                                   Margin="0,0,0,18"/>
-
-                        <!-- Sell Value with Gold Icon -->
-                        <StackPanel Grid.Row="1"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
-                            <Image Source="Textures/gold_icon.png"
-                                   Width="72"
-                                   Height="72"
-                                   Margin="0,0,18,0"
-                                   VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding sellValue, StringFormat=F0}"
-                                       Foreground="{StaticResource GoldBrush}"
-                                       FontSize="48"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Grid>
-                </Button>
-            </Grid>
+            <!-- Decorative gold top border line -->
+            <Border BorderThickness="6,6,6,0" BorderBrush="#FF553B14"/>
         </Border>
 
-        <!-- DataTriggers for Upgrade 1 state -->
+        <!-- Content Layout: [Info Panel] [Card 1] [Card 2] ——— [SELL] -->
+        <StackPanel Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Bottom"
+                    ClipToBounds="False" Margin="0,0,0,15">
+
+            <!-- Info Panel (always visible) -->
+            <Grid Width="350" Height="350" Margin="30,0,30,0" VerticalAlignment="Bottom">
+                <!-- Outer gold frame -->
+                <Border BorderThickness="6" CornerRadius="20">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{Binding towerBorderColor, FallbackValue=#FFf5c518}"/>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#E62a1a0e" Offset="0"/>
+                            <GradientStop Color="#F81a0a00" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Grid>
+                        <!-- Existing text content on top -->
+                        <StackPanel VerticalAlignment="Center" Margin="20">
+                            <!-- Tower Name with outlined text -->
+                            <Grid HorizontalAlignment="Center" Margin="0,0,0,20">
+                                <TextBlock Text="{Binding towerName}" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="48" Margin="-2,0,0,0"/>
+                                <TextBlock Text="{Binding towerName}" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="48" Margin="2,0,0,0"/>
+                                <TextBlock Text="{Binding towerName}" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="48" Margin="0,-2,0,0"/>
+                                <TextBlock Text="{Binding towerName}" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="48" Margin="0,2,0,0"/>
+                                <TextBlock Text="{Binding towerName}" FontWeight="Bold" FontFamily="Anton" FontSize="48" Foreground="#FFF5E6C8"/>
+                            </Grid>
+
+                            <!-- Upgrade History Lines -->
+                            <TextBlock Text="{Binding upgradeHistory1, StringFormat='+ {0}'}"
+                                       Foreground="{StaticResource UpgradeHistoryBrush}"
+                                       FontSize="36"
+                                       FontFamily="Anton"
+                                       HorizontalAlignment="Left"
+                                       Margin="10,0,0,4"
+                                       Visibility="{Binding showHistory1, Converter={StaticResource BoolToVisConverter}}"/>
+
+                            <TextBlock Text="{Binding upgradeHistory2, StringFormat='+ {0}'}"
+                                       Foreground="{StaticResource UpgradeHistoryBrush}"
+                                       FontSize="36"
+                                       FontFamily="Anton"
+                                       HorizontalAlignment="Left"
+                                       Margin="10,0,0,4"
+                                       Visibility="{Binding showHistory2, Converter={StaticResource BoolToVisConverter}}"/>
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Upgrade Cards Container (hidden when maxed) -->
+            <Grid ClipToBounds="False"
+                  Visibility="{Binding showUpgrades, Converter={StaticResource BoolToVisConverter}}">
+                <StackPanel x:Name="CardsPanel" 
+                            Orientation="Horizontal" 
+                            ClipToBounds="False"
+                            RenderTransformOrigin="0.5,1.0" Margin="0,0,0,-150">
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+
+                    <!-- ========== UPGRADE CARD 1 ========== -->
+                <Grid x:Name="Card1Container" ClipToBounds="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="20,0,20,0"
+                      RenderTransformOrigin="0.5,1.0">
+                    <Grid.Resources>
+                        <!-- Pop-in: scale 0→1.15→1.0 + rise from Y=80, overshoot feel -->
+                        <Storyboard x:Key="Card1SlideOut">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1SlideTranslate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="80"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.32" Value="-12">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.45" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1PopScale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.12">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.45" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1PopScale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.12">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.45" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                        <!-- Slide-out: shrink + drop back down -->
+                        <Storyboard x:Key="Card1SlideIn">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1SlideTranslate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="80">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1PopScale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1PopScale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                        <!-- Select: punch up + scale, fast and snappy -->
+                        <Storyboard x:Key="Card1SelectAnimation">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1Translate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="-55">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1Scale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.18">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1Scale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.18">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                        <!-- Deselect: snap back to neutral -->
+                        <Storyboard x:Key="Card1DeselectAnimation">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1Translate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1Scale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card1Scale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </Grid.Resources>
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="Card1PopScale" ScaleX="1.0" ScaleY="1.0"/>
+                            <ScaleTransform x:Name="Card1Scale" ScaleX="1.0" ScaleY="1.0"/>
+                            <TranslateTransform x:Name="Card1Translate" X="0" Y="0"/>
+                            <TranslateTransform x:Name="Card1SlideTranslate" X="0" Y="80"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseLeftButtonUp">
+                            <b:InvokeCommandAction Command="{Binding events.upgradeTowerTap}" CommandParameter="0"/>
+                        </b:EventTrigger>
+                        <b:DataTrigger Binding="{Binding upgrade1Selected}" Value="True">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card1SelectAnimation}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                        <b:DataTrigger Binding="{Binding upgrade1Selected}" Value="False">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card1DeselectAnimation}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                        <b:DataTrigger Binding="{Binding card1Visible}" Value="True">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card1SlideOut}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                        <b:DataTrigger Binding="{Binding card1Visible}" Value="False">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card1SlideIn}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                    </b:Interaction.Triggers>
+
+                    <!-- Main Card - 400x620 -->
+                    <Grid x:Name="Card1Grid" Width="400" Height="620" ClipToBounds="False">
+                        <!-- Drop Shadow Layer -->
+                        <Border Margin="5,5,5,5" CornerRadius="50" Background="#FF554318"/>
+
+                        <!-- Outer Gold Frame Border -->
+                        <Border x:Name="Card1Border"
+                                BorderBrush="{StaticResource GoldBrush}"
+                                ClipToBounds="False" BorderThickness="8" CornerRadius="50" d:IsHidden="True">
+                            <!-- Inner Upgrade Color Border -->
+                            <Border ClipToBounds="False" BorderThickness="10" CornerRadius="40">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{Binding upgrade1Color, FallbackValue=#FF0000}"/>
+                                </Border.BorderBrush>
+
+                                <!-- Radial Gradient Background Layer -->
+                                <Border ClipToBounds="False" CornerRadius="34">
+                                    <Border.Background>
+                                        <RadialGradientBrush>
+                                            <GradientStop Color="#00000000" Offset="0"/>
+                                            <GradientStop Offset="1" Color="{Binding upgrade1SecondaryColor, FallbackValue=#880000}"/>
+                                        </RadialGradientBrush>
+                                    </Border.Background>
+
+                                    <!-- Tower Image as Full Card Background -->
+                                    <Border ClipToBounds="False" CornerRadius="50,50,50,50">
+                                        <Border.Background>
+                                            <ImageBrush Viewbox="0,0.2,1,0" ImageSource="{Binding Path=towerImage}" Stretch="Uniform"/>
+                                        </Border.Background>
+
+                                        <!-- Semi-transparent overlay for text readability -->
+                                        <Border ClipToBounds="False" CornerRadius="50,50,50,50">
+                                            <Grid Margin="20" d:IsHidden="True">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Corner Ornaments -->
+                                                <!-- Top Left -->
+                                                <Ellipse Grid.RowSpan="2" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                         Margin="6,6,0,0"/>
+                                                <Ellipse Grid.RowSpan="2" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                         Margin="10,10,0,0"/>
+
+                                                <!-- Top Right -->
+                                                <Ellipse Grid.RowSpan="2" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                         Margin="0,6,6,0"/>
+                                                <Ellipse Grid.RowSpan="2" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                         Margin="0,10,10,0"/>
+
+                                                <!-- Bottom Left -->
+                                                <Ellipse Grid.Row="1" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                                         Margin="6,0,0,6"/>
+                                                <Ellipse Grid.Row="1" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                                         Margin="10,0,0,10"/>
+
+                                                <!-- Bottom Right -->
+                                                <Ellipse Grid.Row="1" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                         Margin="0,0,6,6"/>
+                                                <Ellipse Grid.Row="1" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                         Margin="0,0,10,10"/>
+                                            </Grid>
+                                        </Border>
+                                    </Border>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </Grid>
+
+                    <!-- Disabled Overlay -->
+                    <Border x:Name="Card1Disabled" CornerRadius="50" BorderThickness="10" Background="#AF000000" Visibility="Collapsed" IsEnabled="False"/>
+
+                    <!-- Ribbon Banner - OUTSIDE the border chain -->
+                    <Grid VerticalAlignment="Top" 
+                          IsHitTestVisible="False"
+                          ClipToBounds="False" Width="400" IsEnabled="False" Margin="0,130,0,0" Height="165">
+                        <Image Source="/Root;component/Textures/WoodPlank.png" HorizontalAlignment="Center" Stretch="Fill" VerticalAlignment="Center"/>
+                        <!-- Upgrade Name with outlined text -->
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" Margin="-3,0,0,0" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade1Name, FallbackValue=Upgrade}"/>
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade1Name, FallbackValue=Upgrade}" Margin="3,0,0,0"/>
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade1Name, FallbackValue=Upgrade}" Margin="0,-3,0,0"/>
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" Margin="0,3,0,0" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade1Name, FallbackValue=Upgrade}"/>
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" Text="{Binding upgrade1Name, FallbackValue=Upgrade}" FontSize="50" Foreground="#FFF5E6C8"/>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Cost Display - OUTSIDE the card frame -->
+                    <Border CornerRadius="12,12,0,0" VerticalAlignment="Top" IsEnabled="False" Margin="0,40,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Image Source="/Root;component/Textures/gold_icon.png" Width="62" Height="62" Margin="10"/>
+                            <Grid VerticalAlignment="Center">
+                                <TextBlock Text="{Binding upgrade1Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="-3,0,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock Text="{Binding upgrade1Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="3,0,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock Text="{Binding upgrade1Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="0,-3,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock Text="{Binding upgrade1Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="0,3,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock x:Name="Card1CostText" Text="{Binding upgrade1Cost, StringFormat=F0}" Foreground="{StaticResource GoldBrush}" FontWeight="Bold" FontSize="75"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ========== UPGRADE CARD 2 ========== -->
+                <Grid x:Name="Card2Container" ClipToBounds="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="20,0,20,0"
+                      RenderTransformOrigin="0.5,1.0">
+                    <Grid.Resources>
+                        <Storyboard x:Key="Card2SlideOut">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2SlideTranslate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="80"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.32" Value="-12">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.45" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2PopScale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.12">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.45" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2PopScale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.12">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.45" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                        <Storyboard x:Key="Card2SlideIn">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2SlideTranslate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="80">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2PopScale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2PopScale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseIn"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                        <Storyboard x:Key="Card2SelectAnimation">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2Translate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="-55">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2Scale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.18">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2Scale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.18">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                        <Storyboard x:Key="Card2DeselectAnimation">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2Translate" Storyboard.TargetProperty="Y">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2Scale" Storyboard.TargetProperty="ScaleX">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Card2Scale" Storyboard.TargetProperty="ScaleY">
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.0">
+                                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
+                                </EasingDoubleKeyFrame>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </Grid.Resources>
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="Card2PopScale" ScaleX="1.0" ScaleY="1.0"/>
+                            <ScaleTransform x:Name="Card2Scale" ScaleX="1.0" ScaleY="1.0"/>
+                            <TranslateTransform x:Name="Card2Translate" X="0" Y="0"/>
+                            <TranslateTransform x:Name="Card2SlideTranslate" X="0" Y="80"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseLeftButtonUp">
+                            <b:InvokeCommandAction Command="{Binding events.upgradeTowerTap}" CommandParameter="1"/>
+                        </b:EventTrigger>
+                        <b:DataTrigger Binding="{Binding upgrade2Selected}" Value="True">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card2SelectAnimation}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                        <b:DataTrigger Binding="{Binding upgrade2Selected}" Value="False">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card2DeselectAnimation}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                        <b:DataTrigger Binding="{Binding card2Visible}" Value="True">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card2SlideOut}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                        <b:DataTrigger Binding="{Binding card2Visible}" Value="False">
+                            <b:ControlStoryboardAction Storyboard="{StaticResource Card2SlideIn}" ControlStoryboardOption="Play"/>
+                        </b:DataTrigger>
+                    </b:Interaction.Triggers>
+
+                    <!-- Main Card - 400x620 -->
+                    <Grid x:Name="Card2Grid" Width="400" Height="620" ClipToBounds="False">
+                        <!-- Drop Shadow Layer -->
+                        <Border Margin="5,5,5,5" CornerRadius="50" Background="#FF554318"/>
+
+                        <!-- Outer Gold Frame Border -->
+                        <Border x:Name="Card2Border"
+                                BorderBrush="{StaticResource GoldBrush}"
+                                ClipToBounds="False" BorderThickness="8" CornerRadius="50">
+                            <!-- Inner Upgrade Color Border -->
+                            <Border ClipToBounds="False" BorderThickness="10" CornerRadius="40">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{Binding upgrade2Color, FallbackValue=#0000FF}"/>
+                                </Border.BorderBrush>
+
+                                <!-- Radial Gradient Background Layer -->
+                                <Border ClipToBounds="False" CornerRadius="34">
+                                    <Border.Background>
+                                        <RadialGradientBrush>
+                                            <GradientStop Color="#00000000" Offset="0"/>
+                                            <GradientStop Offset="1" Color="{Binding upgrade2SecondaryColor, FallbackValue=#000088}"/>
+                                        </RadialGradientBrush>
+                                    </Border.Background>
+
+                                    <!-- Tower Image as Full Card Background -->
+                                    <Border ClipToBounds="False" CornerRadius="50,50,50,50">
+                                        <Border.Background>
+                                            <ImageBrush Viewbox="0,0.2,1,0" ImageSource="{Binding Path=towerImage}" Stretch="Uniform"/>
+                                        </Border.Background>
+
+                                        <!-- Semi-transparent overlay for text readability -->
+                                        <Border ClipToBounds="False" CornerRadius="50,50,50,50">
+                                            <Grid Margin="20">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Corner Ornaments -->
+                                                <!-- Top Left -->
+                                                <Ellipse Grid.RowSpan="2" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                         Margin="6,6,0,0"/>
+                                                <Ellipse Grid.RowSpan="2" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                         Margin="10,10,0,0"/>
+
+                                                <!-- Top Right -->
+                                                <Ellipse Grid.RowSpan="2" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                         Margin="0,6,6,0"/>
+                                                <Ellipse Grid.RowSpan="2" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                         Margin="0,10,10,0"/>
+
+                                                <!-- Bottom Left -->
+                                                <Ellipse Grid.Row="1" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                                         Margin="6,0,0,6"/>
+                                                <Ellipse Grid.Row="1" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                                         Margin="10,0,0,10"/>
+
+                                                <!-- Bottom Right -->
+                                                <Ellipse Grid.Row="1" Width="22" Height="22" 
+                                                         Fill="{StaticResource GoldBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                         Margin="0,0,6,6"/>
+                                                <Ellipse Grid.Row="1" Width="14" Height="14" 
+                                                         Fill="{StaticResource GoldDarkBrush}"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                         Margin="0,0,10,10"/>
+                                            </Grid>
+                                        </Border>
+                                    </Border>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </Grid>
+
+                    <!-- Disabled Overlay -->
+                    <Border x:Name="Card2Disabled" CornerRadius="50" BorderThickness="10" Background="#AF000000" Visibility="Collapsed" IsEnabled="False"/>
+
+                    <!-- Ribbon Banner - OUTSIDE the border chain -->
+                    <Grid VerticalAlignment="Top" 
+                          IsHitTestVisible="False"
+                          ClipToBounds="False" Width="400" IsEnabled="False" Margin="0,130,0,0" Height="165">
+                        <Image Source="/Root;component/Textures/WoodPlank.png" HorizontalAlignment="Center" Stretch="Fill" VerticalAlignment="Center"/>
+                        <!-- Upgrade Name with outlined text -->
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" Margin="-3,0,0,0" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade2Name, FallbackValue=Upgrade}"/>
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade2Name, FallbackValue=Upgrade}" Margin="3,0,0,0"/>
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade2Name, FallbackValue=Upgrade}" Margin="0,-3,0,0"/>
+                            <TextBlock Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" Margin="0,3,0,0" IsHitTestVisible="False" FontSize="50" Text="{Binding upgrade2Name, FallbackValue=Upgrade}"/>
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Anton" Text="{Binding upgrade2Name, FallbackValue=Upgrade}" FontSize="50" Foreground="#FFF5E6C8"/>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Cost Display - OUTSIDE the card frame -->
+                    <Border CornerRadius="12,12,0,0" VerticalAlignment="Top" IsEnabled="False" Margin="0,40,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Image Source="/Root;component/Textures/gold_icon.png" Width="62" Height="62" Margin="10"/>
+                            <Grid VerticalAlignment="Center">
+                                <TextBlock Text="{Binding upgrade2Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="-3,0,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock Text="{Binding upgrade2Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="3,0,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock Text="{Binding upgrade2Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="0,-3,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock Text="{Binding upgrade2Cost, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="0,3,0,0" IsHitTestVisible="False" FontSize="75"/>
+                                <TextBlock x:Name="Card2CostText" Text="{Binding upgrade2Cost, StringFormat=F0}" Foreground="{StaticResource GoldBrush}" FontWeight="Bold" FontSize="75"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                </StackPanel>
+            </Grid>
+
+            <!-- ========== SELL BUTTON ========== -->
+            <Grid Width="280" Height="350" Margin="60,0,30,0" VerticalAlignment="Bottom">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="MouseLeftButtonUp">
+                        <b:InvokeCommandAction Command="{Binding events.sellTowerTap}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+
+                <!-- Dark red danger background -->
+                <Border CornerRadius="20">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#FF8B0000" Offset="0"/>
+                            <GradientStop Color="#FF5C0000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border BorderThickness="4" BorderBrush="#FF3C0000" CornerRadius="20"/>
+                </Border>
+
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <!-- SELL Label with outlined text -->
+                    <Grid HorizontalAlignment="Center" Margin="0,0,0,20">
+                        <TextBlock Text="SELL" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="56" Margin="-2,0,0,0"/>
+                        <TextBlock Text="SELL" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="56" Margin="2,0,0,0"/>
+                        <TextBlock Text="SELL" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="56" Margin="0,-2,0,0"/>
+                        <TextBlock Text="SELL" Foreground="Black" FontWeight="Bold" FontFamily="Anton" FontSize="56" Margin="0,2,0,0"/>
+                        <TextBlock Text="SELL" FontWeight="Bold" FontFamily="Anton" FontSize="56" Foreground="#FFFFFFFF"/>
+                    </Grid>
+
+                    <!-- Sell Value with Gold Icon -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Image Source="/Root;component/Textures/gold_icon.png" Width="52" Height="52" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Grid VerticalAlignment="Center">
+                            <TextBlock Text="{Binding sellValue, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="-2,0,0,0" FontSize="52"/>
+                            <TextBlock Text="{Binding sellValue, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="2,0,0,0" FontSize="52"/>
+                            <TextBlock Text="{Binding sellValue, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="0,-2,0,0" FontSize="52"/>
+                            <TextBlock Text="{Binding sellValue, StringFormat=F0}" Foreground="Black" FontWeight="Bold" Margin="0,2,0,0" FontSize="52"/>
+                            <TextBlock Text="{Binding sellValue, StringFormat=F0}" Foreground="{StaticResource GoldBrush}" FontWeight="Bold" FontSize="52"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- DataTriggers for state-based styling -->
         <b:Interaction.Triggers>
             <!-- Upgrade 1: affordable -->
             <b:DataTrigger Binding="{Binding upgrade1State}" Value="affordable">
-                <b:ChangePropertyAction TargetName="Upgrade1Button" PropertyName="Opacity" Value="1.0"/>
-                <b:ChangePropertyAction TargetName="Upgrade1Name" PropertyName="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade1CostText" PropertyName="Foreground" Value="{StaticResource GoldBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade1CostPanel" PropertyName="Visibility" Value="Visible"/>
-                <b:ChangePropertyAction TargetName="Upgrade1MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
+                <b:ChangePropertyAction TargetName="Card1Container" PropertyName="Opacity" Value="1.0"/>
+                <b:ChangePropertyAction TargetName="Card1CostText" PropertyName="Foreground" Value="{StaticResource GoldBrush}"/>
+                <b:ChangePropertyAction TargetName="Card1Disabled" PropertyName="Visibility" Value="Collapsed"/>
             </b:DataTrigger>
 
             <!-- Upgrade 1: too_expensive -->
             <b:DataTrigger Binding="{Binding upgrade1State}" Value="too_expensive">
-                <b:ChangePropertyAction TargetName="Upgrade1Button" PropertyName="Opacity" Value="0.5"/>
-                <b:ChangePropertyAction TargetName="Upgrade1Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade1CostText" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade1CostPanel" PropertyName="Visibility" Value="Visible"/>
-                <b:ChangePropertyAction TargetName="Upgrade1MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
-            </b:DataTrigger>
-
-            <!-- Upgrade 1: maxed -->
-            <b:DataTrigger Binding="{Binding upgrade1State}" Value="maxed">
-                <b:ChangePropertyAction TargetName="Upgrade1Button" PropertyName="Opacity" Value="0.5"/>
-                <b:ChangePropertyAction TargetName="Upgrade1Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade1CostPanel" PropertyName="Visibility" Value="Collapsed"/>
-                <b:ChangePropertyAction TargetName="Upgrade1MaxLabel" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="Card1CostText" PropertyName="Foreground" Value="{StaticResource RedBrush}"/>
+                <b:ChangePropertyAction TargetName="Card1Disabled" PropertyName="Visibility" Value="Visible"/>
             </b:DataTrigger>
 
             <!-- Upgrade 2: affordable -->
             <b:DataTrigger Binding="{Binding upgrade2State}" Value="affordable">
-                <b:ChangePropertyAction TargetName="Upgrade2Button" PropertyName="Opacity" Value="1.0"/>
-                <b:ChangePropertyAction TargetName="Upgrade2Name" PropertyName="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade2CostText" PropertyName="Foreground" Value="{StaticResource GoldBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade2CostPanel" PropertyName="Visibility" Value="Visible"/>
-                <b:ChangePropertyAction TargetName="Upgrade2MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
+                <b:ChangePropertyAction TargetName="Card2Container" PropertyName="Opacity" Value="1.0"/>
+                <b:ChangePropertyAction TargetName="Card2CostText" PropertyName="Foreground" Value="{StaticResource GoldBrush}"/>
+                <b:ChangePropertyAction TargetName="Card2Disabled" PropertyName="Visibility" Value="Collapsed"/>
             </b:DataTrigger>
 
             <!-- Upgrade 2: too_expensive -->
             <b:DataTrigger Binding="{Binding upgrade2State}" Value="too_expensive">
-                <b:ChangePropertyAction TargetName="Upgrade2Button" PropertyName="Opacity" Value="0.5"/>
-                <b:ChangePropertyAction TargetName="Upgrade2Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade2CostText" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade2CostPanel" PropertyName="Visibility" Value="Visible"/>
-                <b:ChangePropertyAction TargetName="Upgrade2MaxLabel" PropertyName="Visibility" Value="Collapsed"/>
-            </b:DataTrigger>
-
-            <!-- Upgrade 2: maxed -->
-            <b:DataTrigger Binding="{Binding upgrade2State}" Value="maxed">
-                <b:ChangePropertyAction TargetName="Upgrade2Button" PropertyName="Opacity" Value="0.5"/>
-                <b:ChangePropertyAction TargetName="Upgrade2Name" PropertyName="Foreground" Value="{StaticResource TextDisabledBrush}"/>
-                <b:ChangePropertyAction TargetName="Upgrade2CostPanel" PropertyName="Visibility" Value="Collapsed"/>
-                <b:ChangePropertyAction TargetName="Upgrade2MaxLabel" PropertyName="Visibility" Value="Visible"/>
+                <b:ChangePropertyAction TargetName="Card2CostText" PropertyName="Foreground" Value="{StaticResource RedBrush}"/>
+                <b:ChangePropertyAction TargetName="Card2Disabled" PropertyName="Visibility" Value="Visible"/>
             </b:DataTrigger>
         </b:Interaction.Triggers>
     </Grid>

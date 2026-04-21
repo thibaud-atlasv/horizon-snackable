@@ -36,7 +36,7 @@ export class CoinService extends Service {
           rotation: Quaternion.identity,
           scale: new Vec3(0.1, 0.1, 0.1),
           networkMode: NetworkMode.LocalOnly,
-        }).catch((e: unknown) => { console.error(e); return null; }),
+        }).catch(() => null),
       ),
     );
     for (const e of entities) { if (e) this._pool.push(e); }

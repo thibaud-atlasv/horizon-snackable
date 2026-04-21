@@ -9,9 +9,163 @@
                 "ingestionId": "1637784053927604813",
                 "targetId": "2719744159"
             },
-            "deltas": [],
+            "deltas": [
+                {
+                    "sourceId": "2e7f0eb8-c407-4566-b3ea-73d31d752c49",
+                    "components": [
+                        {
+                            "dataType": "horizon::DataDefinitionAsset",
+                            "data": {
+                                "class": "TowerController",
+                                "definitionAsset": {
+                                    "packageOrRemoteId": "26631398616455768",
+                                    "ingestionId": "15027774208938648437",
+                                    "targetId": "4237980480"
+                                },
+                                "data": {
+                                    "spawnPoint": "e27e8752-d4b5-4a6c-80a2-320a7cd2be8f",
+                                    "modelTier1b": "",
+                                    "modelTier2b": "",
+                                    "modelTier3b": ""
+                                }
+                            }
+                        }
+                    ],
+                    "attributes": []
+                },
+                {
+                    "sourceId": "12bbca2f-0024-4445-b56a-5816516957a1",
+                    "components": null
+                },
+                {
+                    "sourceId": "26ae9f1e-ae7f-461f-8067-48ff9fa7e989",
+                    "components": null
+                },
+                {
+                    "sourceId": "7acccf83-e1b7-4b22-a0aa-05b1244a330b",
+                    "components": null
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "dbb1a4f4-2df5-4142-9b9f-c1f52d98eabb",
+            "name": "Canon.001",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 4.656612873077393e-10,
+                                "y": -2.9802322387695315e-8,
+                                "z": 1.4901161193847657e-8
+                            },
+                            "localRotation": {
+                                "x": 1.7800998008965508e-8,
+                                "y": 1.3792408580797118e-14,
+                                "z": 2.1397509144312905e-14
+                            },
+                            "localScale": {
+                                "x": 0.9999998807907105,
+                                "y": 0.9999999403953552,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "26631398616455768",
+                                "ingestionId": "1352963612826534726",
+                                "targetId": "3278978704"
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 1,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "26631398616455768",
+                                    "ingestionId": "6844415365801362055",
+                                    "targetId": "157013062"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColorPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "color": {
+                                "r": 1.0,
+                                "g": 1.0,
+                                "b": 1.0,
+                                "a": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "e27e8752-d4b5-4a6c-80a2-320a7cd2be8f",
+            "name": "ProjectileSpawn",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.1843932867050171,
+                                "y": 0.21812643110752107,
+                                "z": -0.02208433672785759
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
             "attributes": []
         }
     ],
-    "relationships": []
+    "relationships": [
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "dbb1a4f4-2df5-4142-9b9f-c1f52d98eabb",
+            "destination": "b568d258-4773-4744-bcd1-b1788f701013/b379ac17-7f96-4340-99a4-c543efdf63e4"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "e27e8752-d4b5-4a6c-80a2-320a7cd2be8f",
+            "destination": "dbb1a4f4-2df5-4142-9b9f-c1f52d98eabb"
+        }
+    ]
 }

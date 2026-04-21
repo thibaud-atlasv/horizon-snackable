@@ -233,7 +233,15 @@ Right-Handed Y-Up (RUB):
 | Y | up | down |
 | Z | backward | forward |
 
-Grid cell → world: `new Vec3(GRID_ORIGIN_X + col * CELL_SIZE, GROUND_Y, GRID_ORIGIN_Z + row * CELL_SIZE)`
+Grid cell → world (from `PathService.cellToWorld`):
+```typescript
+new Vec3(
+  GRID_ORIGIN_X + (GRID_ROWS - 1 - row) * CELL_WIDTH,
+  GROUND_Y,
+  GRID_ORIGIN_Z + col * CELL_HEIGHT,
+)
+```
+Note: `col → Z axis`, `row → X axis`, row 0 = top of screen.
 
 ---
 

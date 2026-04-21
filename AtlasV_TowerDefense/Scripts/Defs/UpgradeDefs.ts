@@ -1,8 +1,8 @@
 /**
  * UpgradeDefs.ts — Upgrade atom catalog and binary tree builder.
  *
- * tree(t1, t2, t3): builds a readonly [IUpgradeNode, IUpgradeNode] from flat arrays.
- *   t1: 2 root atoms, t2: 2 pairs (one per root), t3: 4 pairs (one per t2 node).
+ * tree(t1, t2): builds a readonly [IUpgradeNode, IUpgradeNode] from flat arrays.
+ *   t1: 2 root atoms, t2: 2 pairs (one per root) — leaf nodes with no further next.
  *   Each node's apply() is a pure function (ITowerStats) → ITowerStats.
  * Upg: named atom constructors — each takes a cost and returns an Atom.
  *   rate: fireRate × 2 | damage: damage × 2 | range: +2.0 world units
@@ -22,28 +22,19 @@ type AtomFn = (cost: number) => Atom;
 export function tree(
   t1: readonly [Atom, Atom],
   t2: readonly [readonly [Atom, Atom], readonly [Atom, Atom]],
-  t3: readonly [
-    readonly [Atom, Atom], readonly [Atom, Atom],
-    readonly [Atom, Atom], readonly [Atom, Atom],
-  ],
 ): readonly [IUpgradeNode, IUpgradeNode] {
   const leaf = (a: Atom): IUpgradeNode => ({ ...a });
   const branch = (
     root: Atom,
     t2pair: readonly [Atom, Atom],
-    t3left: readonly [Atom, Atom],
-    t3right: readonly [Atom, Atom],
   ): IUpgradeNode => ({
     ...root,
-    next: [
-      { ...t2pair[0], next: [leaf(t3left[0]),  leaf(t3left[1])]  },
-      { ...t2pair[1], next: [leaf(t3right[0]), leaf(t3right[1])] },
-    ],
+    next: [leaf(t2pair[0]), leaf(t2pair[1])],
   });
 
   return [
-    branch(t1[0], t2[0], t3[0], t3[1]),
-    branch(t1[1], t2[1], t3[2], t3[3]),
+    branch(t1[0], t2[0]),
+    branch(t1[1], t2[1]),
   ];
 }
 
@@ -58,7 +49,7 @@ export const Upg = {
   range:        u('Range',    s => ({ ...s, range: s.range + 1.0 })),
   splash:       u('Splash',   s => {
     const cur = (s.props['splashRadius'] as number | undefined) ?? 0;
-    return { ...s, props: { ...s.props, splashRadius: cur + 0.4 } };
+    return { ...s, props: { ...s.props, splashRadius: cur + 0.5 } };
   }),
   slowFactor:   u('Slow',    s => {
     const cur = (s.props['slowFactor'] as number | undefined) ?? 0.5;

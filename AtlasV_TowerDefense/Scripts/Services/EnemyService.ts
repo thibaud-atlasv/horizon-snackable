@@ -101,7 +101,7 @@ export class EnemyService extends Service {
       position: new Vec3(0, -100, 0),
       rotation: Quaternion.identity,
       networkMode: NetworkMode.LocalOnly,
-    }).catch((e: unknown) => { console.error(e); return null; });
+    }).catch(() => null);
 
     if (!entity) return;
 

@@ -2,18 +2,20 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      mc:Ignorable="d">
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d"
+      d:DesignWidth="1920" d:DesignHeight="1920">
 
     <Page.Resources>
         <!-- Colors -->
         <SolidColorBrush x:Key="OverlayBrush" Color="#99000000"/>
-        <SolidColorBrush x:Key="ParchmentBrush" Color="#f4e4bc"/>
-        <SolidColorBrush x:Key="ParchmentDarkBrush" Color="#5d4e37"/>
+        <SolidColorBrush x:Key="ParchmentBrush" Color="#1a1a2e"/>
+        <SolidColorBrush x:Key="ParchmentDarkBrush" Color="#c0c0d0"/>
         <SolidColorBrush x:Key="GoldBrush" Color="#f5c518"/>
         <SolidColorBrush x:Key="GoldDarkBrush" Color="#b8860b"/>
         <SolidColorBrush x:Key="VictoryBrush" Color="#2ecc71"/>
         <SolidColorBrush x:Key="DefeatBrush" Color="#e74c3c"/>
-        <SolidColorBrush x:Key="TextDarkBrush" Color="#3d2b1f"/>
+        <SolidColorBrush x:Key="TextDarkBrush" Color="#e0e0e0"/>
         <SolidColorBrush x:Key="WoodDarkBrush" Color="#4a2c0a"/>
         <SolidColorBrush x:Key="ShadowBrush" Color="#2a1a0a"/>
         <SolidColorBrush x:Key="CreamBrush" Color="#f5e6c8"/>
@@ -74,13 +76,17 @@
             </Grid.RenderTransform>
 
             <!-- Parchment Panel with Gold Border -->
-            <Border Background="{StaticResource ParchmentBrush}"
-                    BorderBrush="{StaticResource GoldBrush}"
+            <Border BorderBrush="{StaticResource GoldBrush}"
                     BorderThickness="16"
                     CornerRadius="32"
-                    Padding="120,160,120,120"
                     MinWidth="1400"
-                    MinHeight="1200">
+                    MinHeight="1200" Padding="50,50,50,50">
+                <Border.Background>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#FF000000" Offset="0"/>
+                        <GradientStop Offset="1" Color="#FF1A1A2E"/>
+                    </RadialGradientBrush>
+                </Border.Background>
 
                 <Grid>
                     <!-- Corner Ornaments -->
@@ -106,10 +112,10 @@
                     </Grid>
 
                     <!-- Main Content -->
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel>
 
                         <!-- Title on Wood Plank Ribbon Banner -->
-                        <Grid HorizontalAlignment="Center" Margin="0,-240,0,60" Height="200">
+                        <Grid HorizontalAlignment="Center" Height="200" Margin="0,40,0,60">
                             <!-- Wood Plank Background -->
                             <Image Source="/Root;component/Textures/WoodPlank.png"
                                    Stretch="Fill"
@@ -119,26 +125,26 @@
 
                             <!-- Victory Title (shown when isVictory=true) -->
                             <Grid x:Name="VictoryTitle" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
-                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
-                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
-                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
-                                <TextBlock Text="VICTOIRE" FontSize="144" FontWeight="Bold" Foreground="{StaticResource VictoryBrush}"/>
+                                <TextBlock Text="VICTORY" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
+                                <TextBlock Text="VICTORY" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
+                                <TextBlock Text="VICTORY" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
+                                <TextBlock Text="VICTORY" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
+                                <TextBlock Text="VICTORY" FontSize="144" FontWeight="Bold" Foreground="{StaticResource VictoryBrush}"/>
                             </Grid>
 
                             <!-- Defeat Title (shown when isVictory=false) -->
                             <Grid x:Name="DefeatTitle" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
-                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
-                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
-                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
-                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
-                                <TextBlock Text="DEFAITE" FontSize="144" FontWeight="Bold" Foreground="{StaticResource DefeatBrush}"/>
+                                <TextBlock Text="DEFEAT" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
+                                <TextBlock Text="DEFEAT" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
+                                <TextBlock Text="DEFEAT" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
+                                <TextBlock Text="DEFEAT" FontSize="144" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
+                                <TextBlock Text="DEFEAT" FontSize="144" FontWeight="Bold" Foreground="#FFDB5446"/>
                             </Grid>
                         </Grid>
 
                         <!-- Subtitle: Wave Progress -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,80">
-                            <TextBlock Text="VAGUE " FontSize="80" Foreground="{StaticResource ParchmentDarkBrush}"/>
+                            <TextBlock Text="WAVE " FontSize="80" Foreground="{StaticResource ParchmentDarkBrush}"/>
                             <TextBlock Text="{Binding Path=wavesCompleted, StringFormat=F0}" FontSize="80" FontWeight="Bold" Foreground="{StaticResource ParchmentDarkBrush}"/>
                             <TextBlock Text="/" FontSize="80" Foreground="{StaticResource ParchmentDarkBrush}"/>
                             <TextBlock Text="{Binding Path=totalWaves, StringFormat=F0}" FontSize="80" FontWeight="Bold" Foreground="{StaticResource ParchmentDarkBrush}"/>
@@ -148,13 +154,13 @@
                         <StackPanel HorizontalAlignment="Center" Margin="0,0,0,100">
                             <!-- Enemies Killed -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,32">
-                                <TextBlock Text="Ennemis vaincus: " FontSize="72" Foreground="{StaticResource TextDarkBrush}"/>
+                                <TextBlock Text="Enemies defeated: " FontSize="72" Foreground="{StaticResource TextDarkBrush}"/>
                                 <TextBlock Text="{Binding Path=enemiesKilled, StringFormat=F0}" FontSize="72" FontWeight="Bold" Foreground="{StaticResource TextDarkBrush}"/>
                             </StackPanel>
 
                             <!-- Gold Earned -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="Or gagne: " FontSize="72" Foreground="{StaticResource TextDarkBrush}"/>
+                                <TextBlock Text="Gold earned: " FontSize="72" Foreground="{StaticResource TextDarkBrush}"/>
                                 <Image Source="/Root;component/Textures/gold_icon.png"
                                        Width="80"
                                        Height="80"
@@ -164,29 +170,24 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- REJOUER Button with 3D Medieval Style -->
+                        <!-- PLAY AGAIN Button with 3D Medieval Style -->
                         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                             <!-- Shadow layer for 3D depth -->
-                            <Border Background="{StaticResource ShadowBrush}"
-                                    CornerRadius="24"
+                            <Border CornerRadius="24"
                                     Width="720"
-                                    Height="160"
-                                    Margin="12,12,0,0"/>
+                                    Margin="12,12,0,0" Height="250"/>
 
                             <!-- Main Button -->
                             <Button Command="{Binding Path=events.restartTap}"
                                     Background="{StaticResource TransparentBrush}"
                                     BorderThickness="0"
-                                    Width="720"
-                                    Height="160"
                                     Cursor="Hand"
-                                    Padding="0">
+                                    Padding="0" Height="200" Width="750">
                                 <Border Background="{StaticResource WoodDarkBrush}"
                                         BorderBrush="{StaticResource GoldBrush}"
                                         BorderThickness="12"
                                         CornerRadius="24"
-                                        Width="720"
-                                        Height="160">
+                                        Height="200" Width="750">
                                     <Grid>
                                         <!-- Button Corner Ornaments (smaller) -->
                                         <!-- Top-Left -->
@@ -210,13 +211,13 @@
                                             <Ellipse Fill="{StaticResource GoldDarkBrush}" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Grid>
 
-                                        <!-- Outlined Text "REJOUER" -->
+                                        <!-- Outlined Text "PLAY AGAIN" -->
                                         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
-                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
-                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
-                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
-                                            <TextBlock Text="REJOUER" FontSize="96" FontWeight="Bold" Foreground="{StaticResource CreamBrush}"/>
+                                            <TextBlock Text="PLAY AGAIN" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="6,0,0,0"/>
+                                            <TextBlock Text="PLAY AGAIN" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="-6,0,0,0"/>
+                                            <TextBlock Text="PLAY AGAIN" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="0,6,0,0"/>
+                                            <TextBlock Text="PLAY AGAIN" FontSize="96" FontWeight="Bold" Foreground="Black" Margin="0,-6,0,0"/>
+                                            <TextBlock Text="PLAY AGAIN" FontSize="96" FontWeight="Bold" Foreground="{StaticResource CreamBrush}"/>
                                         </Grid>
                                     </Grid>
                                 </Border>

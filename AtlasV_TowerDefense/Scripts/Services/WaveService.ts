@@ -15,7 +15,7 @@ import { Service, EventService } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
 import { Events, GamePhase } from '../Types';
-import { WAVE_CLEAR_DURATION, WAVE_BONUS_GOLD, ENEMY_SPAWN_INTERVAL, INCOME_RATE } from '../Constants';
+import { WAVE_CLEAR_DURATION, WAVE_BONUS_GOLD, WAVE_BUILD_DURATION, ENEMY_SPAWN_INTERVAL, INCOME_RATE } from '../Constants';
 import { LEVEL_DEFS } from '../Defs/LevelDefs';
 import { EnemyService } from './EnemyService';
 import { ResourceService } from './ResourceService';
@@ -59,7 +59,18 @@ export class WaveService extends Service {
   }
 
   tick(dt: number): void {
-    this._timer -= dt;
+    if (this._phase === GamePhase.Build && this._waveIndex === 0) {
+      const prevSeconds = Math.ceil(this._timer);
+      this._timer -= dt;
+      const newSeconds = Math.ceil(this._timer);
+      if (newSeconds !== prevSeconds && newSeconds >= 0) {
+        const p = new Events.CountdownTickPayload();
+        p.secondsLeft = newSeconds;
+        EventService.sendLocally(Events.CountdownTick, p);
+      }
+    } else {
+      this._timer -= dt;
+    }
 
     if (this._phase === GamePhase.Build && this._timer <= 0) {
       this._enterWave();
@@ -123,7 +134,7 @@ export class WaveService extends Service {
 
   private _enterBuild(): void {
     this._phase = GamePhase.Build;
-    this._timer = 0; // no build delay — wave starts immediately
+    this._timer = this._waveIndex === 0 ? WAVE_BUILD_DURATION : 0;
     this._sendPhase(GamePhase.Build);
   }
 

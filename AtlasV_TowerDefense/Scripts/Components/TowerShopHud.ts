@@ -166,8 +166,14 @@ export class TowerShopHud extends Component {
       item.selected   = false;
       item.towerColor = TOWER_COLORS[def.id] ?? '#3a3a5a';
       item.secondaryColor = TOWER_SECONDARY_COLORS[def.id] ?? '#2a2a3a';
-      if (def.id === 'cannon') {
-        item.icon = TowerIcons.CanonTower;
+      const TOWER_ICON_MAP: Record<string, TextureAsset> = {
+        arrow: TowerIcons.BallistaTower,
+        cannon: TowerIcons.CanonTower,
+        frost: TowerIcons.FrostTower,
+        laser: TowerIcons.LaserTower,
+      };
+      if (TOWER_ICON_MAP[def.id]) {
+        item.icon = TOWER_ICON_MAP[def.id];
       }
       return item;
     });

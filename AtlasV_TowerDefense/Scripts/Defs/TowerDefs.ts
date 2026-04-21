@@ -3,7 +3,7 @@
  *
  * Pure data — no side effects, no service calls.
  * To add a new tower: add an entry to TOWER_DEFS, declare its template in Assets.ts.
- * Upgrade trees are built with tree() from UpgradeDefs. Cost rule: T1≤base, T2≤1.5×, T3≤3×.
+ * Upgrade trees are built with tree() from UpgradeDefs. Cost rule: T1≤base, T2≤1.5×.
  * Design constraints: no splash on arrow, no slow on non-frost, crit on arrow (×2/path max)
  *   and cannon (×1/path), range on laser max once per path.
  * Read by TowerService.onReady() into its internal catalog.
@@ -19,14 +19,12 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Crit path  → gambler spikes, then bigger hits or faster procs
   {
     id: 'arrow', name: 'Arrow', cost: 50,
-    stats: { damage: 12, range: 2.25, fireRate: 1.5, projectileSpeed: 7,
-      props: { projectileColor: { r: 1.00, g: 0.90, b: 0.20 }, projectileScale: 0.10, critMultiplier:2, critChance: 0.2, arcHeight: 1.5 } },
+    stats: { damage: 12, range: 2.70, fireRate: 1.5, projectileSpeed: 7,
+      props: { projectileColor: { r: 0.55, g: 0.35, b: 0.18 }, projectileScale: 0.10, critMultiplier:2, critChance: 0.2, arcHeight: 0 } },
     template: Assets.Arrow,
     upgrades: tree(
       [Upg.range(50),    Upg.crit(50)],
       [[Upg.rate(75),    Upg.damage(75)],    [Upg.damage(75),   Upg.rate(75)]],
-      [[Upg.damage(150), Upg.range(150)],    [Upg.rate(150),    Upg.damage(150)],
-       [Upg.crit(150),   Upg.damage(150)],   [Upg.rate(150),    Upg.crit(150)]],
     ),
   },
   // ── Cannon ─────────────────────────────────────────────────────────────────
@@ -35,14 +33,12 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Splash path → massive zone or rapid AoE
   {
     id: 'cannon', name: 'Cannon', cost: 100,
-    stats: { damage: 40, range: 1.75, fireRate: 0.6, projectileSpeed: 4.5,
-      props: { splashRadius: 0.6, projectileColor: { r: 1.00, g: 0.50, b: 0.10 }, arcHeight: 1.2 } },
+    stats: { damage: 40, range: 2.10, fireRate: 0.6, projectileSpeed: 4.5,
+      props: { splashRadius: 0.75, projectileScale: 0.15, projectileColor: { r: 0.15, g: 0.18, b: 0.12 }, arcHeight: 1.5 } },
     template: Assets.Cannon,
     upgrades: tree(
       [Upg.damage(100),  Upg.splash(100)],
       [[Upg.rate(150),   Upg.range(150)],    [Upg.damage(150),  Upg.rate(150)]],
-      [[Upg.crit(300),   Upg.damage(300)],   [Upg.splash(300),  Upg.rate(300)],
-       [Upg.splash(300), Upg.damage(300)],   [Upg.rate(300),    Upg.damage(300)]],
     ),
   },
   // ── Frost ──────────────────────────────────────────────────────────────────
@@ -51,15 +47,13 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Duration path → longer freeze, then more intense or wider
   {
     id: 'frost', name: 'Frost', cost: 80,
-    stats: { damage: 5, range: 1.90, fireRate: 1.0, projectileSpeed: 5.5,
-      props: { slowFactor: 0.5, slowDuration: 1.5, splashRadius: 0.4,
-               projectileColor: { r: 0.40, g: 0.91, b: 0.97 }, projectileScale: 0.12, arcHeight: 0.5 } },
+    stats: { damage: 5, range: 2.28, fireRate: 1.0, projectileSpeed: 5.5,
+      props: { slowFactor: 0.5, slowDuration: 1.5,
+               projectileColor: { r: 0.40, g: 0.91, b: 0.97 }, projectileScale: 0.12, arcHeight: 1.5 } },
     template: Assets.Frost,
     upgrades: tree(
       [Upg.splash(80),        Upg.slowDuration(80)],
       [[Upg.slowFactor(120),  Upg.range(120)],        [Upg.rate(120),         Upg.splash(120)]],
-      [[Upg.splash(240),      Upg.slowDuration(240)],  [Upg.range(240),        Upg.slowFactor(240)],
-       [Upg.slowFactor(240),  Upg.splash(240)],        [Upg.slowDuration(240), Upg.range(240)]],
     ),
   },
   // ── Laser ──────────────────────────────────────────────────────────────────
@@ -68,14 +62,12 @@ export const TOWER_DEFS: ITowerDef[] = [
   // Damage path → focused beam, then speed burst or longer reach (max 1× Range)
   {
     id: 'laser', name: 'Laser', cost: 200,
-    stats: { damage: 8, range: 3.0, fireRate: 5.0, projectileSpeed: 12.5,
+    stats: { damage: 8, range: 3.60, fireRate: 5.0, projectileSpeed: 12.5,
       props: { projectileColor: { r: 0.75, g: 0.52, b: 0.98 }, projectileScale: 0.1, arcHeight: 0.3 } },
     template: Assets.Laser,
     upgrades: tree(
       [Upg.rate(175),    Upg.damage(175)],
       [[Upg.damage(250), Upg.range(250)],    [Upg.rate(250),    Upg.range(250)]],
-      [[Upg.rate(400),   Upg.damage(400)],   [Upg.damage(400),  Upg.rate(400)],
-       [Upg.damage(400), Upg.rate(400)],     [Upg.rate(400),    Upg.damage(400)]],
     ),
   },
 ];

@@ -126,7 +126,29 @@ tasks:
     files: [UI/GameHud.xaml]
 
   - name: GameOverScreen English + Dark Background
-    status: in_progress
+    status: done
+    summary: Textes FR→EN (VICTORY/DEFEAT/PLAY AGAIN), fond parchemin→sombre #1a1a2e, cadre doré conservé
+    files: [UI/GameOverScreen.xaml]
+
+  - name: Tower Upgrade Menu Card Style Redesign
+    status: done
+    summary: 2 cartes style TowerShop avec couleur par type d'upgrade, bouton SELL séparé rouge/danger, fond bois médiéval
+    files: [UI/TowerUpgradeMenu.xaml, TowerUpgradeMenuHud.ts]
+
+  - name: Hook Tower Textures in Shop and Upgrade UI
+    status: done
+    summary: Textures balista/canon/frost/laser connectées dans TowerShop (fond de carte) et TowerUpgradeMenu (panel info)
+    files: [Assets.ts, TowerShopHud.ts, TowerShop.xaml, TowerUpgradeMenuHud.ts, TowerUpgradeMenu.xaml]
+
+  - name: Tower Upgrade Menu - Move Icon Behind Upgrade Cards
+    status: done
+    summary: Design identique au TowerShop - ImageBrush avec Viewbox et Stretch dans les 2 cartes d'upgrade
+    files: [UI/TowerUpgradeMenu.xaml]
+
+  - name: Tower Upgrade Menu - Card Animations
+    status: done
+    summary: 4 storyboards par carte (Card1/2SlideIn/Out), TranslateTransforms nommés, logique card1Visible/card2Visible
+    files: [UI/TowerUpgradeMenu.xaml, TowerUpgradeMenuHud.ts]
 
 chopping_block:
   disabled_systems: []

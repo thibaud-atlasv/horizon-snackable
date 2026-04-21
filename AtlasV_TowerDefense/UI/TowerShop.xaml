@@ -140,7 +140,7 @@
                                 <!-- Tower Image as Full Card Background -->
                                 <Border ClipToBounds="False" CornerRadius="50,50,50,50">
                                     <Border.Background>
-                                        <ImageBrush Viewbox="0,0.2,1,0" ImageSource="/Root;component/Textures/canon_tower.png" Stretch="Uniform"/>
+                                        <ImageBrush Viewbox="0,0.2,1,0" ImageSource="{Binding Path=icon}" Stretch="Uniform"/>
                                     </Border.Background>
 
                                     <!-- Semi-transparent overlay for text readability -->

@@ -11,10 +11,10 @@ import { TemplateAsset, TextureAsset } from 'meta/worlds';
 export namespace Assets {
 
   // ── Towers ────────────────────────────────────────────────────────────────
-  export const Arrow  = new TemplateAsset('@Templates/Towers/VoxelArrowTower.hstf');
-  export const Cannon = new TemplateAsset('@Templates/Towers/VoxelCannonTower.hstf');
-  export const Frost  = new TemplateAsset('@Templates/Towers/VoxelFrostTower.hstf');
-  export const Laser  = new TemplateAsset('@Templates/Towers/VoxelLaserTower.hstf');
+  export const Arrow  = new TemplateAsset('@Templates/Towers/ArrowTower.hstf');
+  export const Cannon = new TemplateAsset('@Templates/Towers/CanonTower.hstf');
+  export const Frost  = new TemplateAsset('@Templates/Towers/FrostTower.hstf');
+  export const Laser  = new TemplateAsset('@Templates/Towers/LaserTower.hstf');
 
   // ── Enemies ───────────────────────────────────────────────────────────────
   export const EnemyBasic = new TemplateAsset('@Templates/Enemies/Enemy.hstf');
@@ -39,5 +39,8 @@ export namespace NewTiles {
 }
 
 export namespace TowerIcons {
-  export const CanonTower = new TextureAsset("@Textures/canon_tower.png")
+  export const BallistaTower = new TextureAsset("@Textures/balista_tower.png");
+  export const CanonTower = new TextureAsset("@Textures/canon_tower.png");
+  export const FrostTower = new TextureAsset("@Textures/frost_tower.png");
+  export const LaserTower = new TextureAsset("@Textures/laser_tower.png");
 }

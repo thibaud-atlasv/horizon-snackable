@@ -10,7 +10,7 @@
  *   upgrades apply immediately without reinitializing the component.
  * Does NOT handle hit resolution — that is ProjectileController's responsibility.
  */
-import { Component, TransformComponent, Vec3, Quaternion, EventService, ColorComponent, Color } from 'meta/worlds';
+import { Component, TransformComponent, Vec3, Quaternion, EventService, ColorComponent, Color, MeshComponent } from 'meta/worlds';
 import type { Entity, Maybe } from 'meta/worlds';
 import { component, property, subscribe } from 'meta/worlds';
 import { OnEntityStartEvent, OnWorldUpdateEvent } from 'meta/worlds';
@@ -42,16 +42,24 @@ export class TowerController extends Component {
   private _bouncing: boolean = false;
   private _bounceElapsed: number = 0;
   private _recoilElapsed: number = -1; // -1 = inactive
-  private _barrelRestWorldX: number = 0;
-  private _barrelRestWorldY: number = 0;
-  private _barrelRestWorldZ: number = 0;
+  private _barrelRestLocalX: number = 0;
+  private _barrelRestLocalY: number = 0;
+  private _barrelRestLocalZ: number = 0;
+  private _barrelRestCaptured: boolean = false;
   private _recoilDirX: number = 0;
   private _recoilDirZ: number = 0;
 
   @property() barrel: Maybe<Entity> = null;
   @property() spawnPoint: Maybe<Entity> = null;
   @property() shadow: Maybe<Entity> = null;
+  @property() modelTier1a: Maybe<Entity> = null;
+  @property() modelTier1b: Maybe<Entity> = null;
+  @property() modelTier2a: Maybe<Entity> = null;
+  @property() modelTier2b: Maybe<Entity> = null;
+  @property() modelTier3a: Maybe<Entity> = null;
+  @property() modelTier3b: Maybe<Entity> = null;
   private _shadowColor: Color = new Color(0, 0, 0, 0.4);
+  private _currentTier: number = 0;
   // Adjust if barrel mesh is not aligned: 180 = mesh forward is +Z (default for this project)
   @property() barrelForwardOffsetDeg: number = 180;
 
@@ -74,14 +82,20 @@ export class TowerController extends Component {
     this._ready    = true;
     this._bouncing = true;
     this._bounceElapsed = 0;
+    this._barrelRestCaptured = false;
+    this._currentTier = 0;
     this._transform.localScale = Vec3.zero;
     this._setShadowAlpha(0);
     this._refreshStats();
+    this._applyTierModel();
   }
 
   @subscribe(Events.TowerUpgraded)
   onTowerUpgraded(p: Events.TowerUpgradedPayload): void {
-    if (p.col === this._col && p.row === this._row) this._refreshStats();
+    if (p.col !== this._col || p.row !== this._row) return;
+    this._currentTier = p.tier;
+    this._refreshStats();
+    this._applyTierModel();
   }
 
   @subscribe(OnWorldUpdateEvent)
@@ -125,12 +139,18 @@ export class TowerController extends Component {
           offset = RECOIL_DISTANCE * (1 - (this._recoilElapsed - RECOIL_KICK_DURATION) / RECOIL_RETURN_DURATION);
         } else {
           this._recoilElapsed = -1;
+          barrelT.localPosition = new Vec3(this._barrelRestLocalX, this._barrelRestLocalY, this._barrelRestLocalZ);
         }
-        barrelT.worldPosition = new Vec3(
-          this._barrelRestWorldX - this._recoilDirX * offset,
-          this._barrelRestWorldY,
-          this._barrelRestWorldZ - this._recoilDirZ * offset,
-        );
+        if (this._recoilElapsed >= 0) {
+          // Reset to rest local first, then apply world-space offset
+          barrelT.localPosition = new Vec3(this._barrelRestLocalX, this._barrelRestLocalY, this._barrelRestLocalZ);
+          const restWorld = barrelT.worldPosition;
+          barrelT.worldPosition = new Vec3(
+            restWorld.x - this._recoilDirX * offset,
+            restWorld.y,
+            restWorld.z - this._recoilDirZ * offset,
+          );
+        }
       }
     }
 
@@ -163,12 +183,16 @@ export class TowerController extends Component {
     if (this.barrel) {
       const barrelT = this.barrel.getComponent(TransformComponent);
       if (barrelT) {
-        const bw = barrelT.worldPosition;
-        this._barrelRestWorldX = bw.x;
-        this._barrelRestWorldY = bw.y;
-        this._barrelRestWorldZ = bw.z;
+        if (!this._barrelRestCaptured) {
+          const bl = barrelT.localPosition;
+          this._barrelRestLocalX = bl.x;
+          this._barrelRestLocalY = bl.y;
+          this._barrelRestLocalZ = bl.z;
+          this._barrelRestCaptured = true;
+        }
         const target2 = EnemyService.get().get(targetId);
         if (target2) {
+          const bw = barrelT.worldPosition;
           const dx2 = target2.worldX - bw.x;
           const dz2 = target2.worldZ - bw.z;
           const len = Math.sqrt(dx2 * dx2 + dz2 * dz2) || 1;
@@ -195,6 +219,25 @@ export class TowerController extends Component {
     initP.originX       = pos.x;
     initP.originZ       = pos.z;
     EventService.sendLocally(Events.InitProjectile, initP, { eventTarget: entity });
+  }
+
+  private _setVisible(entity: Maybe<Entity>, visible: boolean): void {
+    if (!entity) return;
+    const mesh = entity.getComponent(MeshComponent);
+    if (mesh) mesh.isVisibleSelf = visible;
+  }
+
+  private _applyTierModel(): void {
+    const tiers: Array<[Maybe<Entity>, Maybe<Entity>]> = [
+      [this.modelTier1a, this.modelTier1b],
+      [this.modelTier2a, this.modelTier2b],
+      [this.modelTier3a, this.modelTier3b],
+    ];
+    for (let i = 0; i < tiers.length; i++) {
+      const visible = i === this._currentTier;
+      this._setVisible(tiers[i][0], visible);
+      this._setVisible(tiers[i][1], visible);
+    }
   }
 
   private _setShadowAlpha(alpha: number): void {

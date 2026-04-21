@@ -15,7 +15,7 @@ Core tension: strategic placement (choke points, range overlap) vs. economy mana
 | Platform | Meta Horizon Studio (MHS) |
 | Language | TypeScript ES2022 |
 | Target | Mobile portrait, local single-player |
-| Grid | 18×24 cells × 0.5 world units = **9×12 world units**, centered on origin |
+| Grid | 7 cols × 14 rows × 1 cell = **7×14 world units**, centered on origin |
 | Play area | Grid ~70% screen height; HUD top ~10%, Shop bottom ~20% |
 | Ground | Tiled cartoon grass texture (Unlit material, UV scale 6×4) on 11×8 plane; dark border plane behind |
 
@@ -52,8 +52,8 @@ Scripts/
   Defs/
     TowerDefs.ts    — TOWER_DEFS: ITowerDef[] (4 towers + upgrade trees)
     EnemyDefs.ts    — ENEMY_DEFS: IEnemyDef[] (4 enemy types)
-    LevelDefs.ts    — LEVEL_DEFS: ILevelDef[] (10 waves, 1 level)
-    PathDefs.ts     — PATH_WAYPOINTS_LEVEL_0 (snake path top→bottom)
+    LevelDefs.ts    — LEVEL_DEFS: ILevelDef[] (20 waves, 1 level, includes path waypoints)
+    PathDefs.ts     — (waypoints now embedded in LevelDefs per ILevelDef)
     UpgradeDefs.ts  — Upg atoms catalog + tree() builder
 
   Services/
@@ -72,6 +72,8 @@ Scripts/
     HealthBarService    — pre-spawned health bar pool (30 entities)
     FloatingTextService — pools floating text entities; shows gold on death, crit multiplier on hit
     CameraShakeService  — shakes camera when an enemy reaches the end (life lost feedback)
+    VfxService          — hit flash, impact/death particles, pooled particle physics
+    CoinService         — pre-spawned coin pool (75 entities), physics loot coins on kill
 
   Components/
     GameManager         — onStart prewarm, onUpdate tick, game start/end/restart
@@ -86,7 +88,8 @@ Scripts/
     TowerShopHud         — ViewModel for tower purchase bar
     TowerUpgradeMenuHud  — ViewModel for upgrade/sell panel
     GameOverScreenHud    — ViewModel for end screen + stats
-    TitleScreenHud       — ViewModel for pre-game title screen + "Jouer" button
+    TitleScreenHud       — ViewModel for pre-game title screen + Play button
+    CoinController       — physics-simulated coin loot with bounce, gravity, and collect animation
     WaveBannerHud        — ViewModel for wave announcement banner (WAVE X, animated)
 ```
 
@@ -149,7 +152,7 @@ HP scales +15% per wave: `hp × (1 + waveIndex × 0.15)`.
 
 | Parameter | Value |
 |-----------|-------|
-| Start gold | 150g |
+| Start gold | 350g |
 | Start lives | 20 |
 | Wave bonus | +25g at end of each wave |
 | Sell refund | 60% of total invested (tower + upgrades) |

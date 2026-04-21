@@ -30,9 +30,9 @@ export const ENEMY_SPAWN_INTERVAL  = 0.75; // seconds between enemy spawns withi
 // ─── Economy ──────────────────────────────────────────────────────────────────
 
 export const START_GOLD  = 150;
-export const START_LIVES = 20;
-export const WAVE_BONUS_GOLD = 25; // flat gold awarded at end of each wave
-export const INCOME_RATE = 0.10;   // 10% of gold on hand → bonus at wave end
+export const START_LIVES = 10;
+export const WAVE_BONUS_GOLD = 15; // flat gold awarded at end of each wave
+export const INCOME_RATE = 0.15;   // 10% of gold on hand → bonus at wave end
 
 // ─── Enemy scaling ────────────────────────────────────────────────────────────
 
@@ -44,7 +44,7 @@ export const SELL_RATIO = 0.6; // fraction of totalInvested refunded on sell
 
 // ─── Projectile ───────────────────────────────────────────────────────────────
 
-export const PARTICLE_POOL_SIZE    = 150;
+export const PARTICLE_POOL_SIZE    = 100;
 export const PROJECTILE_HIT_RADIUS = 0.3; // world units — distance to trigger hit detection
 export const PROJECTILE_PARTICLE_INTERVAL = 0.015;
 export const PROJECTILE_SCALE      = 2; // world units — visual size of spawned projectiles

@@ -44,13 +44,6 @@ export interface ITowerDef {
   cost: number;
   stats: ITowerStats;
 
-  /*damage: number;
-  range: number;           // cells
-  fireRate: number;        // shots per second
-  projectileSpeed: number; // cells per second
-  props?: Record<string, unknown>; // feature-specific base data (splashRadius, debuff, …)*/
-
-
   template: TemplateAsset;
   upgrades: readonly [IUpgradeNode, IUpgradeNode];
 }
@@ -99,6 +92,9 @@ export namespace Events {
 
   export class WaveCompletedPayload { waveIndex: number = 0; }
   export const WaveCompleted = new LocalEvent<WaveCompletedPayload>('EvWaveCompleted', WaveCompletedPayload);
+
+  export class CountdownTickPayload { secondsLeft: number = 0; }
+  export const CountdownTick = new LocalEvent<CountdownTickPayload>('EvCountdownTick', CountdownTickPayload);
 
   // Enemy lifecycle
   export class InitEnemyPayload { defId: string = ''; waveIndex: number = 0; }

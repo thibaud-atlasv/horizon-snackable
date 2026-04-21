@@ -13,6 +13,8 @@ include: as_needed
 - [ ] 3. Create `.hstf` template in `Templates/Towers/` with `TowerController` component
 - [ ] 4. Add shop entry (automatic — `TowerShopHud` reads `TOWER_DEFS`)
 
+> **Shop limit**: `TowerShopHud` has 4 fixed button slots. Adding a 5th tower requires updating the XAML panel and the ViewModel.
+
 ## Step 1 — Assets.ts
 
 ```typescript
@@ -69,15 +71,17 @@ Projectile visuals are driven by `props.projectileColor` and `props.projectileSc
 
 ## Mechanic Props Reference
 
-Add to `stats.props` to opt into existing systems:
+`stats.props` flows through the hit pipeline into `IHitContext.props` and `TakeDamagePayload.props`.
 
-| Prop | Type | Effect |
-|------|------|--------|
-| `splashRadius` | `number` | AoE on hit (handled by `SplashSystem`) |
-| `slowFactor` | `number (0–1)` | Slow multiplier on hit (handled by `SlowService`) |
-| `slowDuration` | `number` | Slow duration in seconds |
-| `critChance` | `number (0–1)` | Crit probability (handled by `CritService`) |
-| `critMultiplier` | `number` | Crit damage multiplier |
+| Prop | Type | Required | Effect |
+|------|------|----------|--------|
+| `projectileColor` | `{r,g,b}` | **yes** | Sets projectile mesh color in `ProjectileController.onInit` |
+| `projectileScale` | `number` | **yes** | Sets projectile mesh scale |
+| `splashRadius` | `number` | no | AoE on hit (handled by `SplashSystem`) |
+| `slowFactor` | `number (0–1)` | no | Slow multiplier on hit (handled by `SlowService`) |
+| `slowDuration` | `number` | no | Slow duration in seconds |
+| `critChance` | `number (0–1)` | no | Crit probability (handled by `CritService`) |
+| `critMultiplier` | `number` | no | Crit damage multiplier (default `CRIT_MULTIPLIER` from `Constants.ts`) |
 
 ## Cost Balancing Rule (for upgrade tree)
 

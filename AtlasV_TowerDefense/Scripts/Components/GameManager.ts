@@ -52,7 +52,6 @@ export class GameManager extends Component {
   onStartGame(_p: Events.StartGamePayload): void {
     if (NetworkingService.get().isServerContext()) return;
     if (this._running) return;
-    console.log('[GameManager] StartGame received — launching game');
     this._startGame();
   }
 
@@ -92,7 +91,6 @@ export class GameManager extends Component {
     VfxService.get();
     CameraShakeService.get();
     void Promise.all([
-      //PathService.get().prewarm(),
       ProjectilePool.get().prewarm(),
       HealthBarService.get().prewarm(),
       PlacementService.get().prewarm(),

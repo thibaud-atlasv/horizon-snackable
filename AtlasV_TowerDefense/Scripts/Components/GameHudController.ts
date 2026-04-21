@@ -28,12 +28,14 @@ import { LEVEL_DEFS } from '../Defs/LevelDefs';
 
 @uiViewModel()
 export class GameHudViewModel extends UiViewModel {
-  visible: boolean = true;
+  visible: boolean = false;
   lives: number = START_LIVES;
   gold: number = START_GOLD;
   waveNumber: number = 1;
   totalWaves: number = LEVEL_DEFS[0].waves.length;
   waveText: string = '';
+  countdown: number = 0;
+  showCountdown: boolean = false;
 }
 
 const CASINO_SPEED = 120; // gold units per second during roll
@@ -55,13 +57,27 @@ export class GameHudController extends Component {
 
     this.viewModel = new GameHudViewModel();
     this.uiComponent.dataContext = this.viewModel;
+    this.viewModel.visible = false;
 
     const resourceSvc = ResourceService.get();
     this.viewModel.lives = resourceSvc.lives;
     this.viewModel.gold = resourceSvc.gold;
     this.viewModel.waveNumber = 1;
     this.viewModel.totalWaves = LEVEL_DEFS[0].waves.length;
-    //this._updateWaveText();
+  }
+
+  @subscribe(Events.StartGame, { execution: ExecuteOn.Owner })
+  onStartGame(_p: Events.StartGamePayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    if (!this.viewModel) return;
+    this.viewModel.visible = true;
+  }
+
+  @subscribe(Events.ShowTitleScreen, { execution: ExecuteOn.Owner })
+  onShowTitleScreen(_p: Events.ShowTitleScreenPayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    if (!this.viewModel) return;
+    this.viewModel.visible = false;
   }
 
   @subscribe(Events.ResourceChanged, { execution: ExecuteOn.Owner })
@@ -93,17 +109,28 @@ export class GameHudController extends Component {
     if (!this.viewModel) return;
     this.viewModel.waveNumber = payload.waveIndex + 1; // 1-based display
     this.viewModel.totalWaves = payload.totalWaves;
+    this.viewModel.showCountdown = false;
+    this.viewModel.countdown = 0;
     this._updateWaveText();
+  }
+
+  @subscribe(Events.CountdownTick, { execution: ExecuteOn.Owner })
+  onCountdownTick(payload: Events.CountdownTickPayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    if (!this.viewModel) return;
+    this.viewModel.countdown = payload.secondsLeft;
+    this.viewModel.showCountdown = payload.secondsLeft > 0;
   }
 
   @subscribe(Events.RestartGame, { execution: ExecuteOn.Owner })
   onRestart(_p: Events.RestartGamePayload): void {
     if (!this.viewModel) return;
-    this.viewModel.visible = true;
+    this.viewModel.visible = false;
     this.viewModel.waveNumber = 1;
     this.viewModel.totalWaves = LEVEL_DEFS[0].waves.length;
     this.viewModel.waveText = "";
-    //this._updateWaveText();
+    this.viewModel.countdown = 0;
+    this.viewModel.showCountdown = false;
   }
 
 

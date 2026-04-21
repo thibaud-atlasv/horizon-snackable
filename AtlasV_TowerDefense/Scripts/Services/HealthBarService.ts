@@ -34,7 +34,7 @@ export class HealthBarService extends Service {
           rotation: Quaternion.identity,
           scale: new Vec3(HEALTHBAR_HEIGHT, HEALTHBAR_DEPTH, HEALTHBAR_WIDTH),
           networkMode: NetworkMode.LocalOnly,
-        }).catch((e) => { console.error(e); return null; }),
+        }).catch(() => null),
       ),
     );
     for (const entity of entities) { if (entity) this._free.push(entity); }

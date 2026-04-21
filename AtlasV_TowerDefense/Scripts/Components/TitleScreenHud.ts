@@ -5,7 +5,7 @@
  * Component Networking: Local (client-only UI)
  * Component Ownership: Server-owned scene entity, but UI logic runs on client via ExecuteOn.Owner
  *
- * Shows a full-screen overlay with the game logo and a "Jouer" (Play) button.
+ * Shows a full-screen overlay with the game logo and a Play button.
  * When the player taps the button, the overlay hides and fires Events.StartGame
  * to kick off the game via GameManager.
  */

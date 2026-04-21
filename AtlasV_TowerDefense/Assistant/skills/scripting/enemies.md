@@ -32,7 +32,7 @@ No other files need changing — `EnemyService` reads `ENEMY_DEFS` in `onReady()
 | `hp` | `number` | Base HP (scales per wave, see below) |
 | `speed` | `number` | World units per second along path |
 | `reward` | `number` | Gold awarded on death |
-| `size` | `number` | World-unit radius — affects visual scale and collision |
+| `size` | _(not in current IEnemyDef — visual scale set on the .hstf template directly)_ | |
 | `color` | `{r,g,b}` | Applied to all `ColorComponent` children of the entity |
 | `template` | `TemplateAsset` | Ref from `Assets.ts` |
 

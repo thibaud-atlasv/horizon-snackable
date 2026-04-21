@@ -32,7 +32,7 @@ export class FloatingTextService extends Service {
           position: PARK_POS,
           scale: Vec3.one,
           networkMode: NetworkMode.LocalOnly,
-        }).catch((e: unknown) => { console.error(e); return null; }),
+        }).catch(() => null),
       ),
     );
     for (const entity of entities) { if (entity) this._pool.push(entity); }

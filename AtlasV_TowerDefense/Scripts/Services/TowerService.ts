@@ -10,7 +10,7 @@
  * computeStats(defId, choices): walks the upgrade tree to get live ITowerStats.
  * Resets registry on RestartGame.
  */
-import { Service, EventService, WorldService, NetworkMode, Vec3, Quaternion } from 'meta/worlds';
+import { Service, EventService, WorldService, NetworkMode, Vec3 } from 'meta/worlds';
 import type { Entity } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
@@ -195,10 +195,9 @@ export class TowerService extends Service {
     const entity = await WorldService.get().spawnTemplate({
       templateAsset: def.template,
       position: pos,
-      //rotation: Quaternion.identity,
       scale: Vec3.one,
       networkMode: NetworkMode.LocalOnly,
-    }).catch((e: unknown) => { console.error(e); return null; });
+    }).catch(() => null);
 
     if (!entity) return;
 
