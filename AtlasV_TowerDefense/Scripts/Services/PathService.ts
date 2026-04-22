@@ -1,27 +1,18 @@
 /**
- * PathService — Waypoint path management, world coordinate conversion, and path tile spawning.
+ * PathService — Waypoint path management and world coordinate conversion.
  *
  * Reads PATH_WAYPOINTS_LEVEL_0 from LevelDefs in onReady(). Builds ISubPath segments.
- * prewarm(): spawns one tile per path cell using directional tile templates (straight/curve/grass).
+ * prewarm(): no-op — path is baked into the scene as a texture/decor.
  * getWorldPositionInSubPath(wpIndex, subT): interpolates world position along a segment.
  * getGlobalT(wpIndex, subT): converts segment position to global path progress (used for targeting).
  * isPathCell(col, row): checks if a grid cell is occupied by the path (blocks tower placement).
  * cellToWorld(col, row) / worldToCell(x, z): converts between grid coords and world coords.
  * Note: col → Z axis, row → X axis (row 0 = top of screen).
- *
- * Tile conventions (Y-up right-hand, col=Z, row=X):
- *   LeftToRight — straight tile, default open along Z axis (col direction).
- *                 Rotate Y=90° to open along X axis (row direction).
- *   DownToRight — curve tile, default: entry from down (+X), exit to right (+Z).
- *                 Rotations (Y, degrees): TBD once new tiles are tested in-game.
- *   End cap     — uses LeftToRight as placeholder.
- *   Grass       — filler tile for all non-path cells.
  */
-import { Service, Vec3, WorldService, NetworkMode, Quaternion, NetworkingService } from 'meta/worlds';
+import { Service, Vec3 } from 'meta/worlds';
 import { service, subscribe } from 'meta/worlds';
 import { OnServiceReadyEvent } from 'meta/worlds';
 import { CELL_WIDTH, CELL_HEIGHT, GRID_COLS, GRID_ROWS, GRID_ORIGIN_X, GRID_ORIGIN_Z, GROUND_Y } from '../Constants';
-import { NewTiles } from '../Assets';
 import { LEVEL_DEFS } from '../Defs/LevelDefs';
 
 interface IPathSegment {
@@ -45,7 +36,6 @@ export class PathService extends Service {
   private _segments:   IPathSegment[] = [];
   private _totalLength: number = 0;
   private _pathCells:  Set<number> = new Set();
-  private _worldService: WorldService = Service.inject(WorldService);
 
   @subscribe(OnServiceReadyEvent)
   onReady(): void {
@@ -54,124 +44,7 @@ export class PathService extends Service {
   }
 
   async prewarm(): Promise<void> {
-    if (NetworkingService.get().isServerContext()) return;
-
-    const spawns: Array<Promise<void>> = [];
-
-    // Spawn directional path tiles cell by cell
-    // Build a map from cell key → [inDir, outDir] for each path cell
-    // Directions: 0=+row(down-screen), 1=+col(right), 2=-row(up-screen), 3=-col(left)
-    const cellDirs = new Map<number, [number, number]>();
-    for (let i = 0; i < this._waypoints.length - 1; i++) {
-      const [c0, r0] = this._waypoints[i];
-      const [c1, r1] = this._waypoints[i + 1];
-      const dc = Math.sign(c1 - c0);
-      const dr = Math.sign(r1 - r0);
-      // outDir for this segment: dr>0 → 0 (down), dc>0 → 1 (right), dr<0 → 2 (up), dc<0 → 3 (left)
-      const outDir = dr > 0 ? 0 : dc > 0 ? 1 : dr < 0 ? 2 : 3;
-      const inDir  = (outDir + 2) % 4; // opposite
-
-      const steps = Math.max(Math.abs(c1 - c0), Math.abs(r1 - r0));
-      for (let step = 0; step <= steps; step++) {
-        const col = Math.round(c0 + (c1 - c0) * (step / steps));
-        const row = Math.round(r0 + (r1 - r0) * (step / steps));
-        const key = col * 100 + row;
-        const existing = cellDirs.get(key);
-        if (!existing) {
-          // First time seeing this cell — store incoming/outgoing from this segment
-          // For intermediate cells both in and out are the same direction pair
-          cellDirs.set(key, [inDir, outDir]);
-        } else {
-          // Corner cell: it was the endpoint of the previous segment (outDir recorded)
-          // and now it's the start of this segment — update outDir
-          cellDirs.set(key, [existing[0], outDir]);
-        }
-      }
-    }
-
-    // Identify entry/exit cells: first and last in-bounds cells of the path
-    const firstWp = this._waypoints[0];
-    const lastWp  = this._waypoints[this._waypoints.length - 1];
-    const entryKey = firstWp[0] * 100 + Math.max(0, firstWp[1]);
-    const exitKey  = lastWp[0]  * 100 + Math.min(GRID_ROWS - 1, lastWp[1]);
-
-    for (const [key, [inDir, outDir]] of cellDirs) {
-      const col = Math.floor(key / 100);
-      const row = key % 100;
-      // Skip out-of-bounds cells (entry/exit waypoints outside grid)
-      if (row < 0 || row >= GRID_ROWS || col < 0 || col >= GRID_COLS) continue;
-      const pos = this.cellToWorld(col, row);
-
-      // End-cap tiles: open toward the path, closed away from grid
-      // RightToLeftEnd default: open +Z (right), closed -Z (left)
-      // Entry row=0: path exits downward (+row = +X), cap closes upward → rotY=90
-      // Exit row=GRID_ROWS-1: path enters from above (-row = -X), cap closes downward → rotY=270
-      if (key === entryKey) {
-        spawns.push(
-          this._worldService.spawnTemplate({
-            templateAsset: NewTiles.LeftToRight,
-            position: new Vec3(pos.x, GROUND_Y, pos.z),
-            rotation: Quaternion.fromEuler(new Vec3(0, -90, 0)),
-            scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
-            networkMode: NetworkMode.LocalOnly,
-          }).catch(() => undefined) as Promise<void>,
-        );
-        continue;
-      }
-      if (key === exitKey) {
-        spawns.push(
-          this._worldService.spawnTemplate({
-            templateAsset: NewTiles.LeftToRight,
-            position: new Vec3(pos.x, GROUND_Y, pos.z),
-            rotation: Quaternion.fromEuler(new Vec3(0, 90, 0)),
-            scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
-            networkMode: NetworkMode.LocalOnly,
-          }).catch(() => undefined) as Promise<void>,
-        );
-        continue;
-      }
-
-      const isCurve = inDir !== outDir && (inDir + 2) % 4 !== outDir;
-      const { template, rotY } = isCurve
-        ? this._curveRotation(inDir, outDir)
-        : { template: NewTiles.LeftToRight, rotY: (inDir === 0 || inDir === 2) ? 90 : 0 };
-
-      spawns.push(
-        this._worldService.spawnTemplate({
-          templateAsset: template,
-          position: new Vec3(pos.x, GROUND_Y, pos.z),
-          rotation: Quaternion.fromEuler(new Vec3(0, rotY, 0)),
-          scale: new Vec3(CELL_WIDTH, 1, CELL_HEIGHT),
-          networkMode: NetworkMode.LocalOnly,
-        }).catch((e: unknown) => { console.error(e); }) as Promise<void>,
-      );
-    }
-
-    await Promise.all(spawns);
-  }
-
-  // Returns the DownToRight template + Y rotation for a curve cell.
-  // Directions: 0=down(+row), 1=right(+col), 2=up(-row), 3=left(-col)
-  // DownToRight default: entry from down (0), exit to right (1) → rotY=0
-  private _curveRotation(inDir: number, outDir: number): { template: typeof NewTiles.DownToRight; rotY: number } {
-    const key = `${inDir},${outDir}`;
-    const rotMap: Record<string, number> = {
-      '2,1': 90,   // top→right    ✅
-      '2,3': 180,  // top→left     ✅
-      '1,0': 0,    // right→bottom ✅
-      '3,0': 270,  // left→bottom  (corrected)
-      // Reversed traversal
-      '1,2': 270,
-      '3,2': 180,  // left→top     (swapped with 0,1)
-      '0,1': 0,    // bottom→right (swapped with 3,2)
-      '0,3': 270,
-    };
-    return { template: NewTiles.DownToRight, rotY: rotMap[key] ?? 0 };
-  }
-
-  // Decoration tile for non-path cells — all grass with new tiles.
-  private _pickDecoTile(): typeof NewTiles.Grass {
-    return NewTiles.Grass;
+    // Path is baked into the scene as a texture — nothing to spawn.
   }
 
   get totalLength(): number { return this._totalLength; }

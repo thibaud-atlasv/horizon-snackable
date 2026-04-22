@@ -113,7 +113,7 @@
                 </Image>
 
                 <!-- Hexagon Cyan - Left Middle -->
-                <Image Source="shape/hexagonCyan.png" Width="50" Height="50"
+                <Image Source="shape/pentagonCyan.png" Width="50" Height="50"
                        Opacity="0.45" IsHitTestVisible="False"
                        HorizontalAlignment="Left" VerticalAlignment="Center"
                        Margin="15,-50,0,0" RenderTransformOrigin="0.5,0.5">

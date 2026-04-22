@@ -1,3 +1,3 @@
 <Project>
-  <StartupDocument>UI/shape_display.xaml</StartupDocument>
+  <StartupDocument>UI/home_screen.xaml</StartupDocument>
 </Project>

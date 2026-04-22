@@ -54,6 +54,8 @@ export interface IFallingObj {
   waiting(): boolean;
   /** Minimum Y (world space, Y-up) of the object's bounding volume. */
   getLowestY(): number;
+  /** Center X (world space) of the object. */
+  getWorldX(): number;
 }
 
 export type WaveObjDef = {
@@ -72,6 +74,20 @@ export type RoundConfig = {
   objects: WaveObjDef[];
 };
 
+
+// ─── Render State ───────────────────────────────────────────────────────────────
+
+export type FallingObjRenderState = {
+  readonly objId:    number;
+  readonly type:     FallingObjType;
+  readonly cx:       number;   // world X
+  readonly cy:       number;   // world Y
+  readonly angle:    number;   // radians, CCW
+  readonly scaleX:   number;   // logical width  (logW or ballRadius*2)
+  readonly scaleY:   number;   // logical height (LOG_H or ballRadius*2)
+  readonly alpha:    number;   // [0..1]
+  readonly launched: boolean;
+};
 
 // ─── Events ─────────────────────────────────────────────────────────────────────
 // All payload fields MUST have default values.
@@ -98,10 +114,12 @@ export namespace Events {
   // SpawnManager sends positioning and structural config only.
   // Each FallingObj component randomizes its own physics in onInitFallingObj.
   export class InitFallingObjPayload {
-    readonly objId:      number         = 0;
+    readonly objId:      number              = 0;
+    /** Horizontal spawn position (world X). */
+    readonly cx:         number              = 0;
     /** Round index — each object uses this to derive speed and difficulty scaling. */
-    readonly roundIndex: number         = 0;
-    readonly config : {[key: string]: any} = {};
+    readonly roundIndex: number              = 0;
+    readonly config:     {[key: string]: unknown} = {};
   }
   export const InitFallingObj = new LocalEvent<InitFallingObjPayload>('EvInitFallingObj', InitFallingObjPayload);
 
@@ -112,8 +130,13 @@ export namespace Events {
   export const FallingObjActivate = new LocalEvent<FallingObjActivatePayload>('EvFallingObjActivate', FallingObjActivatePayload);
 
   // ── Object events (FallingObj → world) ────────────────────────────────────────
-  export class FallingObjHitFloorPayload {}
+  export class FallingObjHitFloorPayload {
+    readonly objId: number = 0;
+  }
   export const FallingObjHitFloor = new LocalEvent<FallingObjHitFloorPayload>('EvFallingObjHitFloor', FallingObjHitFloorPayload);
+
+  export class GameOverShakePayload {}
+  export const GameOverShake = new LocalEvent<GameOverShakePayload>('EvGameOverShake', GameOverShakePayload);
 
   export class FallingObjFreezePayload {
     readonly objId: number = 0;
@@ -143,6 +166,19 @@ export namespace Events {
   // ── Player tap (ClientSetup → world) ──────────────────────────────────────────
   export class PlayerTapPayload {}
   export const PlayerTap = new LocalEvent<PlayerTapPayload>('EvPlayerTap', PlayerTapPayload);
+
+  // ── Render (FallingObjService → renderers) ────────────────────────────────────
+  export class RenderFallingObjsPayload {
+    readonly states: FallingObjRenderState[] = [];
+  }
+  export const RenderFallingObjs = new LocalEvent<RenderFallingObjsPayload>('EvRenderFallingObjs', RenderFallingObjsPayload);
+
+  // ── Bamboo slice visual feedback ──────────────────────────────────────
+  export class BambooSlicePayload {
+    readonly worldX: number = 0;
+    readonly worldY: number = 0;
+  }
+  export const BambooSlice = new LocalEvent<BambooSlicePayload>('EvBambooSlice', BambooSlicePayload);
 }
 // ─── Server Events (Network) ────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-import { TemplateAsset } from 'meta/worlds';
+import { TemplateAsset, TextureAsset } from 'meta/worlds';
 import { FallingObjType } from './Types';
 
 /**
@@ -15,15 +15,13 @@ import { FallingObjType } from './Types';
 
 
 export namespace Assets {
-  export const FallingObjTemplates: Record<FallingObjType, TemplateAsset> = {
-    [FallingObjType.Log]:  new TemplateAsset('../Templates/GameplayObjects/Log.hstf'),
-    [FallingObjType.Ball]: new TemplateAsset('../Templates/GameplayObjects/Ball.hstf'),
-  };
+  export const BambooCenter = new TextureAsset("@Textures/bambooCenter.png");
+  export const BambooLeft   = new TextureAsset("@Textures/bambooLeft.png");
+  export const BambooRight  = new TextureAsset("@Textures/bambooRight.png");
 
-  export const FloatingText : TemplateAsset = new TemplateAsset('../Templates/GameplayObjects/FloatingText.hstf');
-  export const HorizontalLine : TemplateAsset = new TemplateAsset('../Templates/GameplayObjects/HorizontalLine.hstf');
+  export const SlicedFX    = new TextureAsset("@Textures/BambooSlicedFX.png");
+  export const SlicedLeft  = new TextureAsset("@Textures/BambooSlicedLeft.png");
+  export const SlicedRight = new TextureAsset("@Textures/BambooSlicedRight.png");
 
-  export const Primitives = {
-      Cube : new TemplateAsset('../Templates/Primitives/Cube.hstf'),
-  }
+  export const Debug = new TextureAsset("@Textures/debug.png");
 }

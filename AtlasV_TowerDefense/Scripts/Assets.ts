@@ -29,13 +29,7 @@ export namespace Assets {
   export const HealthBar       = new TemplateAsset('@Templates/HealthBar.hstf');
   export const PathCell        = new TemplateAsset('@Templates/PathCell.hstf');
   export const FloatingText    = new TemplateAsset('@Templates/UI/FloatingText.hstf');
-  export const Coin            = new TemplateAsset('@Templates/Coin.hstf'); // placeholder
-}
-
-export namespace NewTiles {
-  export const Grass = new TemplateAsset('@Templates/Cube.hstf');;
-  export const LeftToRight = new TemplateAsset('@Templates/Cube.hstf');
-  export const DownToRight = new TemplateAsset('@Templates/Cube.hstf');
+  export const Coin            = new TemplateAsset('@Templates/Coin.hstf');
 }
 
 export namespace TowerIcons {

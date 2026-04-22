@@ -23,9 +23,9 @@ export const PX_TO_WORLD = HEIGHT / 700;  // ≈ 0.02286  (1 HTML px → world u
 // ─── Gameplay Zones (world space, Y-up) ──────────────────────────────────────
 
 /** Y below which a log corner triggers game-over. */
-export const FLOOR_Y  = -8.5;  // ≈ -6.47
+export const FLOOR_Y  = -6.13;  // ligne rouge à 425px du bas (canvas 3640px)
 /** Y where ghost-preview logs are shown. */
-export const START_Y  = 6.5;  // ≈  6.68
+export const START_Y  = 6.13;   // symétrique — apparaît juste sous la zone score
 /** Top of the scoring zone (logs above this score 0). */
 export const PLAY_TOP = 3;  // ≈  5.49
 
@@ -33,7 +33,7 @@ export const PLAY_TOP = 3;  // ≈  5.49
 
 export const LOG_W_MAX = 170 * PX_TO_WORLD;  // ≈ 3.89 wu
 export const LOG_W_MIN = 90  * PX_TO_WORLD;  // ≈ 2.06 wu
-export const LOG_H     = 20  * PX_TO_WORLD;  // ≈ 0.46 wu
+export const LOG_H     = 32  * PX_TO_WORLD;  // ratio-correct: SPRITE_H/SPRITE_END_W (159/450) * LOG_W_MIN
 
 // ─── Physics ─────────────────────────────────────────────────────────────────
 
@@ -69,8 +69,6 @@ export const MAX_PIVOT      = 0.50; // max pivot offset (fraction of half-width)
 
 export const SPAWN_DELAY_MS  = 1100;  // delay between successive log spawns
 export const RESUME_DELAY_MS = 280;   // pause after freeze before resuming falling
-export const FREEZE_HOLD_MS  = 240;   // how long frozen log stays at full opacity
-export const FREEZE_FADE_MS  = 460;   // duration of frozen log fade-out
 
 // ─── Scoring Thresholds ───────────────────────────────────────────────────────
 // d = 1 - precision (distance from perfect). 0 = touching floor, 1 = at PLAY_TOP.

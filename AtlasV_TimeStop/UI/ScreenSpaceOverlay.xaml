@@ -1,0 +1,70 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent"
+      IsHitTestVisible="False" d:DesignWidth="1920" d:DesignHeight="3640">
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Page.Resources>
+    <Grid RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform/>
+                <SkewTransform/>
+                <RotateTransform/>
+                <TranslateTransform X="{Binding Path=shakeX}"/>
+            </TransformGroup>
+        </Grid.RenderTransform>
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="2637" Height="4067">
+            <Image Source="/Root;component/Textures/BG.png" Stretch="Fill"/>
+            <Rectangle x:Name="LosingLine" StrokeThickness="0" VerticalAlignment="Bottom" Height="35" Margin="0,0,0,632">
+                <Rectangle.Fill>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Offset="0" Color="#FFFF0000"/>
+                        <GradientStop Offset="1" Color="#32FF0000"/>
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+        </Grid>
+
+        <!-- Falling objects — shakeX applied on whole canvas -->
+        <ItemsControl ItemsSource="{Binding items}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="{Binding itemWidth}" Height="{Binding itemHeight}" Opacity="{Binding alpha}" Visibility="{Binding isVisible, Converter={StaticResource BoolToVis}}">
+                        <Border.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="{Binding scaleX}" ScaleY="{Binding scaleY}"/>
+                                <RotateTransform Angle="{Binding rotation}"/>
+                                <TranslateTransform X="{Binding translateX}" Y="{Binding translateY}"/>
+                            </TransformGroup>
+                        </Border.RenderTransform>
+                        <Border.Background>
+                            <ImageBrush ImageSource="{Binding texture}" Stretch="Fill"/>
+                        </Border.Background>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Game over red radial overlay -->
+        <Rectangle IsHitTestVisible="False" Opacity="{Binding Path=overlayAlpha, FallbackValue=0}">
+            <Rectangle.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Offset="0"   Color="#00FF0000"/>
+                    <GradientStop Offset="0.6" Color="#66FF0000"/>
+                    <GradientStop Offset="1"   Color="#CCFF0000"/>
+                </RadialGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Grid>
+
+</Page>

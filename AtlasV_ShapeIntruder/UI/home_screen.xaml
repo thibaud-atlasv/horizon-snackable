@@ -513,7 +513,7 @@
             </Image>
 
             <!-- Shape 3: Hexagon Cyan - Left Middle -->
-            <Image x:Name="BgShape3" Source="shape/hexagonCyan.png" Width="90" Height="90" 
+            <Image x:Name="BgShape3" Source="shape/pentagonCyan.png" Width="90" Height="90" 
                    Opacity="0.32" IsHitTestVisible="False"
                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0,0,100"
                    RenderTransformOrigin="0.5,0.5">
@@ -646,7 +646,7 @@
             </Image>
 
             <!-- Shape 10: Hexagon Purple - Mid Right Upper -->
-            <Image x:Name="BgShape10" Source="shape/hexagonPurple.png" Width="92" Height="92" 
+            <Image x:Name="BgShape10" Source="shape/pentagonPurple.png" Width="92" Height="92" 
                    Opacity="0.34" IsHitTestVisible="False"
                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,200,25,0"
                    RenderTransformOrigin="0.5,0.5">
@@ -681,33 +681,29 @@
                     <!-- Title: Shape with layered shadow -->
                     <Grid HorizontalAlignment="Center">
                         <!-- Shadow layer -->
-                        <TextBlock Text="Shape"
-                                   FontWeight="Bold"
-                                   FontSize="100" FontFamily="Bangers" Foreground="#FF1C1227">
+                        <TextBlock FontWeight="Bold"
+                                   FontSize="100" FontFamily="Bangers" Foreground="#FF1C1227" Text="SPOT">
                             <TextBlock.RenderTransform>
                                 <TranslateTransform X="2" Y="2"/>
                             </TextBlock.RenderTransform>
                         </TextBlock>
                         <!-- Main text layer -->
-                        <TextBlock Text="Shape"
-                                   FontWeight="Bold"
-                                   FontSize="100" Foreground="#FFFFFFFF" FontFamily="Bangers"/>
+                        <TextBlock FontWeight="Bold"
+                                   FontSize="100" Foreground="#FFFFFFFF" FontFamily="Bangers" Text="SPOT"/>
                     </Grid>
 
                     <!-- Title: Intruder with layered shadow -->
                     <Grid HorizontalAlignment="Center" Margin="0,-10,0,0">
                         <!-- Shadow layer -->
-                        <TextBlock Text="Intruder"
-                                   FontWeight="Bold"
-                                   FontSize="100" FontFamily="Bangers" Foreground="#FF1C1227">
+                        <TextBlock FontWeight="Bold"
+                                   FontSize="100" FontFamily="Bangers" Foreground="#FF1C1227" Text="CHALLENGE">
                             <TextBlock.RenderTransform>
                                 <TranslateTransform X="2" Y="2"/>
                             </TextBlock.RenderTransform>
                         </TextBlock>
                         <!-- Main text layer -->
-                        <TextBlock Text="Intruder"
-                                   FontWeight="Bold"
-                                   FontSize="100" Foreground="#FFFFFFFF" FontFamily="Bangers"/>
+                        <TextBlock FontWeight="Bold"
+                                   FontSize="100" Foreground="#FFFFFFFF" FontFamily="Bangers" Text="CHALLENGE"/>
                     </Grid>
 
                     <!-- Vertical spacing -->

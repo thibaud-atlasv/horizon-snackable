@@ -7,7 +7,7 @@
  * Upg: named atom constructors — each takes a cost and returns an Atom.
  *   rate: fireRate × 2 | damage: damage × 2 | range: +2.0 world units
  *   splash: splashRadius + 0.8 | slowFactor: ×0.7 (min 0.15) | slowDuration: +1.0s
- *   crit: critChance + 0.20 (max 0.80) — arrow/cannon only, handled by CritService.
+ *   crit: critChance = max(cur, 0.20); critMultiplier +1 — arrow/cannon only, handled by CritService.
  * To add a new atom: add a new entry to Upg, handle its props key in a pipeline service.
  */
 import type { IUpgradeNode, ITowerStats } from '../Types';
@@ -60,9 +60,9 @@ export const Upg = {
     return { ...s, props: { ...s.props, slowDuration: cur + 1.0 } };
   }),
   crit: u('Crit', s => {
-    const cur = (s.props['critChance'] as number | undefined) ?? 0.2;
+    const cur = (s.props['critChance'] as number | undefined) ?? 0;
     const mul = (s.props['critMultiplier'] as number | undefined) ?? 1;
-
+    // Set crit chance to 20% if not already higher; always add +1 to multiplier
     return { ...s, props: { ...s.props, critChance: Math.max(cur, 0.2), critMultiplier: mul + 1 } };
   }),
 };

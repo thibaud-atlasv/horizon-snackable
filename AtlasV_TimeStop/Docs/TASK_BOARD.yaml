@@ -1,4 +1,33 @@
 tasks:
+  - name: Dynamic Item List UI System
+    status: done
+    summary: UI screen space avec liste dynamique d'items - chaque item a image + translate/rotation/scale contrôlables via ViewModel
+    files:
+      - scripts/GameHUD/ScreenSpaceItemViewModel.ts
+      - scripts/GameHUD/ScreenSpaceOverlayViewModel.ts
+      - assets/UI/ScreenSpaceOverlay.xaml
+    subtasks:
+      - name: Custom UI screen space avec liste d'items dynamique
+        status: done
+      - name: Item template avec image + transforms contrôlables
+        status: done
+  - name: Bamboo Slice Animation UI
+    status: done
+    summary: Animation world space de coupe bambou avec 3 PNG - éjection des morceaux + fade FX
+    files:
+      - scripts/Types.ts
+      - scripts/Assets.ts
+      - scripts/GameplayObjects/BambooSliceVisual.ts
+      - scripts/InputManager.ts
+      - assets/UI/BambooSliceLeft.xaml
+      - assets/UI/BambooSliceRight.xaml
+      - assets/UI/BambooSliceFX.xaml
+      - Templates/GameplayObjects/BambooSliceLeft.hstf
+      - Templates/GameplayObjects/BambooSliceRight.hstf
+      - Templates/GameplayObjects/BambooSliceFX.hstf
+    subtasks:
+      - name: Custom UI world space avec animation de coupe bambou
+        status: done
   - name: UI Feedback System
     status: done
     summary: Système complet de feedback visuel UI pour le scoring
@@ -41,6 +70,78 @@ tasks:
       - name: Create leaderboard XAML and ViewModel
         status: done
       - name: Verify implementation
+        status: done
+
+  - name: GameHUD Style Update
+    status: done
+    summary: Updated Tap to Start color to orange (#FF5D10), added ScoreUI.png background (381x123px centered) and golden text (#9A6721) for score
+    files:
+      - Scripts/GameHUD/GameHUDViewModel.ts
+      - assets/UI/GameHUD.xaml
+    subtasks:
+      - name: Tap to Start text color #FF5D10
+        status: done
+      - name: Score background with ScoreUI.png + text color #9A6721
+        status: done
+      - name: Fix score background position and size (381x123px, centered behind score)
+        status: done
+
+  - name: LeaderboardHUD Background Art
+    status: done
+    summary: GameOverBoard.png as background, content repositioned below baked title, dark brown text colors for contrast
+    files:
+      - assets/UI/LeaderboardHUD.xaml
+    subtasks:
+      - name: Intégrer GameOverBoard.png comme background (929x1104px)
+        status: done
+      - name: Repositionner le contenu dans la zone utile (bordure 100px, titre 300px haut)
+        status: done
+      - name: Couleur texte contrastée avec fond #FFE18F
+        status: done
+
+  - name: Screen Space Freeze Feedback UI
+    status: done
+    summary: UI 2D screen space réutilisable pour le feedback freeze - ligne + grade + score avec animations punchy
+    files:
+      - Scripts/GameHUD/FreezeFeedbackHUDViewModel.ts
+      - assets/UI/FreezeFeedbackHUD.xaml
+    subtasks:
+      - name: Créer XAML + ViewModel avec ligne, grade, score
+        status: done
+      - name: Animations punchy (apparition ligne, score monte)
+        status: done
+      - name: Animation fade out
+        status: done
+      - name: Réutilisation des éléments (pas de spawn)
+        status: done
+      - name: Remplacer FreezeLineVisual.ts
+        status: done
+
+  - name: FreezeFeedback Text Layout Update
+    status: done
+    summary: Grade à gauche, score à droite, au-dessus de la ligne, font Roboto, animation vers le haut + fade out
+    files:
+      - assets/UI/FreezeFeedbackHUD.xaml
+    subtasks:
+      - name: Textes au-dessus de la ligne (grade gauche, score droite)
+        status: done
+      - name: Police Roboto pour les deux textes
+        status: done
+      - name: Animation vers le haut avec fade out
+        status: done
+
+  - name: Tap to Start Animation Loop
+    status: done
+    summary: Animation pulse scale en boucle sur "Tap to Start" pendant la phase Start (1.0 → 1.1 → 1.0), s'arrête automatiquement au tap
+    files:
+      - scripts/components/ui/GameHUDViewModel.ts
+      - UI/GameHUD.xaml
+    subtasks:
+      - name: Animation pulsante en boucle sur le texte "Tap to Start"
+        status: done
+      - name: Arrêt automatique quand la partie commence
+        status: done
+      - name: Fix - Passage de opacity à scale pour éviter le clipping
         status: done
 
 chopping_block:

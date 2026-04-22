@@ -47,13 +47,13 @@
   <Viewbox Stretch="Uniform">
     <Grid Width="480" Height="800">
       <!-- Background -->
-      <Grid>
+      <Grid Margin="0,15,0,0">
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="*"/>
-          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="auto"/>
+          <RowDefinition Height="1*"/>
+          <RowDefinition Height="250"/>
         </Grid.RowDefinitions>
-        <Border ClipToBounds="True" BorderThickness="10,10,10,10" CornerRadius="20,20,20,20" Grid.RowSpan="3" Margin="0,20,0,6">
+        <Border ClipToBounds="True" CornerRadius="20,20,20,20" Grid.RowSpan="3" Margin="0,0,0,6" BorderThickness="5,5,5,5">
           <Border.Background>
             <RadialGradientBrush>
               <GradientStop Color="#FFE738E9" Offset="0"/>
@@ -63,7 +63,7 @@
         </Border>
 
         <!-- Row 0: HUD Banner — score + timer bar -->
-        <Grid Grid.Row="0" Margin="16,12,16,4">
+        <Grid Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20,20,20,20">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -74,11 +74,6 @@
             <!-- Shadow layer (offset down-right) -->
             <Border Background="#44000000" CornerRadius="22" Margin="2,3,0,0"/>
             <!-- Main score card -->
-            <Border Background="#fef9c3" BorderBrush="#fbbf24" BorderThickness="3" CornerRadius="22"
-                    Padding="24,6,24,6" Margin="0,0,2,3">
-              <TextBlock Text="{Binding scoreText}" FontSize="28" FontWeight="Bold" Foreground="#92400e"
-                         HorizontalAlignment="Center"/>
-            </Border>
 
             <!-- Floating score popup "+XXX" — floats upward and fades out -->
             <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,-10"
@@ -97,25 +92,18 @@
                          Foreground="#fbbf24" HorizontalAlignment="Center"/>
             </Grid>
           </Grid>
+          <Border Background="#fef9c3" BorderBrush="#fbbf24" BorderThickness="3" CornerRadius="22" Padding="24,6,24,6">
+            <TextBlock Text="{Binding scoreText}" FontSize="28" FontWeight="Bold" Foreground="#92400e" HorizontalAlignment="Center"/>
+          </Border>
 
           <!-- Timer bar -->
-          <Border Grid.Row="1" Background="#2a2a3e" CornerRadius="4" Height="10"
-                  HorizontalAlignment="Stretch" ClipToBounds="True">
-            <Rectangle RadiusX="4" RadiusY="4"
-                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                       RenderTransformOrigin="0,0.5" Fill="#FF61ED3A">
-              <Rectangle.RenderTransform>
-                <ScaleTransform ScaleX="{Binding timerProgress}" ScaleY="1"/>
-              </Rectangle.RenderTransform>
-            </Rectangle>
-          </Border>
         </Grid>
-        <Border Grid.Row="1" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FF000000" BorderThickness="10,10,10,10" CornerRadius="20,20,20,20" Opacity="0.237" Margin="0,10,0,0" Width="460" Height="460"/>
+        <Border Grid.Row="1" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FF000000" BorderThickness="10,10,10,10" CornerRadius="20,20,20,20" Opacity="0.237" Width="460" Height="460"/>
 
         <!-- Row 1: Intruder Zone — shapes + scoped overlay -->
         <Border Grid.Row="1"
                 CornerRadius="16"
-                ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="6,6,6,6" BorderBrush="#FFFF8800" Width="438" Height="438" Padding="1,1,1,1">
+                ClipToBounds="True" HorizontalAlignment="Center" BorderThickness="6,6,6,6" BorderBrush="#FFFF8800" Width="438" Height="438" Padding="1,1,1,1" VerticalAlignment="Top">
           <Border.Background>
             <RadialGradientBrush>
               <GradientStop Offset="0" Color="#FFFFFFFF"/>
@@ -166,9 +154,16 @@
             </Image>
           </Grid>
         </Border>
+        <Border Background="#2a2a3e" CornerRadius="4" Height="10" HorizontalAlignment="Stretch" ClipToBounds="True" Grid.Row="2" VerticalAlignment="Top" Margin="20,10,20,10">
+          <Rectangle RadiusX="4" RadiusY="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransformOrigin="0,0.5" Fill="#FF61ED3A">
+            <Rectangle.RenderTransform>
+              <ScaleTransform ScaleX="{Binding timerProgress}" ScaleY="1"/>
+            </Rectangle.RenderTransform>
+          </Rectangle>
+        </Border>
 
         <!-- Row 2: 2×2 answer button grid -->
-        <Grid Grid.Row="2" Height="200" Margin="14,8,14,20">
+        <Grid Height="200" Grid.Row="2" Margin="14,20,14,20">
           <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
@@ -179,7 +174,7 @@
           </Grid.ColumnDefinitions>
 
           <!-- Option 0 (top-left) — 3-layer: shadow + color fill + multiply blend -->
-          <Grid Grid.Row="0" Grid.Column="0" Margin="6,6,6,6">
+          <Grid Grid.Row="0" Grid.Column="0" Margin="7,6,5,6">
             <!-- Shadow behind (stays in place) -->
             <Border Background="#55000000" CornerRadius="12" Margin="2,6,-3,-4"/>
             <!-- Pressable container with Y offset for post-answer state -->
@@ -198,15 +193,15 @@
                               BorderBrush="{TemplateBinding BorderBrush}"
                               BorderThickness="{TemplateBinding BorderThickness}"
                               Background="{TemplateBinding Background}"/>
-                      <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" Height="70">
                         <Image Stretch="Uniform" IsHitTestVisible="False" Panel.ZIndex="2">
                           <Image.Source>
                             <Binding Path="option0SpriteTexture"/>
                           </Image.Source>
                         </Image>
                       </Grid>
-                      <Image Source="Textures/Valid.png" Visibility="{Binding option0CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
-                      <Image Source="Textures/Invalid.png" Visibility="{Binding option0CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
+                      <Image Source="Textures/Valid.png" Visibility="{Binding option0CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Left" Margin="20,20,20,20"/>
+                      <Image Source="Textures/Invalid.png" Visibility="{Binding option0CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Left" Margin="20,20,20,20"/>
                       <Rectangle x:Name="Opt0Darken" RadiusX="12" RadiusY="12" Fill="#FFFFFF" Opacity="0" IsHitTestVisible="False"/>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -241,15 +236,15 @@
                               BorderBrush="{TemplateBinding BorderBrush}"
                               BorderThickness="{TemplateBinding BorderThickness}"
                               Background="{TemplateBinding Background}"/>
-                      <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" Height="70">
                         <Image Stretch="Uniform" IsHitTestVisible="False" Panel.ZIndex="2">
                           <Image.Source>
                             <Binding Path="option1SpriteTexture"/>
                           </Image.Source>
                         </Image>
                       </Grid>
-                      <Image Source="Textures/Valid.png" Visibility="{Binding option1CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
-                      <Image Source="Textures/Invalid.png" Visibility="{Binding option1CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
+                      <Image Source="Textures/Valid.png" Visibility="{Binding option1CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Right" Margin="20,20,20,20"/>
+                      <Image Source="Textures/Invalid.png" Visibility="{Binding option1CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Right" Margin="20,20,20,20"/>
                       <Rectangle x:Name="Opt1Darken" RadiusX="12" RadiusY="12" Fill="#FFFFFF" Opacity="0" IsHitTestVisible="False"/>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -284,15 +279,15 @@
                               BorderBrush="{TemplateBinding BorderBrush}"
                               BorderThickness="{TemplateBinding BorderThickness}"
                               Background="{TemplateBinding Background}"/>
-                      <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" Height="70">
                         <Image Stretch="Uniform" IsHitTestVisible="False" Panel.ZIndex="2">
                           <Image.Source>
                             <Binding Path="option2SpriteTexture"/>
                           </Image.Source>
                         </Image>
                       </Grid>
-                      <Image Source="Textures/Valid.png" Visibility="{Binding option2CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
-                      <Image Source="Textures/Invalid.png" Visibility="{Binding option2CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
+                      <Image Source="Textures/Valid.png" Visibility="{Binding option2CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Left" Margin="20,20,20,20"/>
+                      <Image Source="Textures/Invalid.png" Visibility="{Binding option2CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Left" Margin="20,20,20,20"/>
                       <Rectangle x:Name="Opt2Darken" RadiusX="12" RadiusY="12" Fill="#FFFFFF" Opacity="0" IsHitTestVisible="False"/>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -327,15 +322,15 @@
                               BorderBrush="{TemplateBinding BorderBrush}"
                               BorderThickness="{TemplateBinding BorderThickness}"
                               Background="{TemplateBinding Background}"/>
-                      <Grid Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" Height="70">
                         <Image Stretch="Uniform" IsHitTestVisible="False" Panel.ZIndex="2">
                           <Image.Source>
                             <Binding Path="option3SpriteTexture"/>
                           </Image.Source>
                         </Image>
                       </Grid>
-                      <Image Source="Textures/Valid.png" Visibility="{Binding option3CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
-                      <Image Source="Textures/Invalid.png" Visibility="{Binding option3CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50"/>
+                      <Image Source="Textures/Valid.png" Visibility="{Binding option3CheckVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Right" Margin="20,20,20,20"/>
+                      <Image Source="Textures/Invalid.png" Visibility="{Binding option3CrossVisible, Converter={StaticResource BoolToVis}}" IsHitTestVisible="False" VerticalAlignment="Center" Width="50" Height="50" HorizontalAlignment="Right" Margin="20,20,20,20"/>
                       <Rectangle x:Name="Opt3Darken" RadiusX="12" RadiusY="12" Fill="#FFFFFF" Opacity="0" IsHitTestVisible="False"/>
                     </Grid>
                     <ControlTemplate.Triggers>
