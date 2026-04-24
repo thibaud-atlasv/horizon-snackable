@@ -43,6 +43,8 @@ export class EnemyController extends Component {
   private _defId: string = '';
 
   private _hp: number = 0;
+  private _maxHp: number = 0;
+  private _regenPerSec: number = 0;
   private _speed: number = 0;
   private _reward: number = 0;
   private _alive: boolean = false;
@@ -100,10 +102,12 @@ export class EnemyController extends Component {
 
     const hpMult = 1 + p.waveIndex * HP_SCALE_PER_WAVE;
 
-    this._defId   = p.defId;
-    this._hp      = Math.round(def.hp * hpMult);
-    this._speed   = def.speed;
-    this._reward  = def.reward;
+    this._defId       = p.defId;
+    this._hp          = Math.round(def.hp * hpMult);
+    this._maxHp       = this._hp;
+    this._regenPerSec = def.regenPerSec ?? 0;
+    this._speed       = def.speed;
+    this._reward      = def.reward;
     this._wpIndex = 0;
     this._subT    = 0;
     this._alive   = true;
@@ -164,6 +168,13 @@ export class EnemyController extends Component {
     if (!this._alive) return;
 
     const dt = p.deltaTime;
+
+    if (this._regenPerSec > 0 && this._hp < this._maxHp) {
+      this._hp = Math.min(this._hp + this._regenPerSec * dt, this._maxHp);
+      const pos = this._transform.worldPosition;
+      EnemyService.get().update(this._enemyId, pos.x, pos.z, PathService.get().getGlobalT(this._wpIndex, this._subT), this._hp);
+    }
+
     const pathService = PathService.get();
     this._subT += this._speed * (EnemyService.get().get(this._enemyId)?.speedFactor ?? 1) * dt;
 

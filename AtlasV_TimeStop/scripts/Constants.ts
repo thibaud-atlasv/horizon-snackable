@@ -23,7 +23,7 @@ export const PX_TO_WORLD = HEIGHT / 700;  // ≈ 0.02286  (1 HTML px → world u
 // ─── Gameplay Zones (world space, Y-up) ──────────────────────────────────────
 
 /** Y below which a log corner triggers game-over. */
-export const FLOOR_Y  = -6.13;  // ligne rouge à 425px du bas (canvas 3640px)
+export const FLOOR_Y  = -6.13;  // -35px canvas depuis -6.13
 /** Y where ghost-preview logs are shown. */
 export const START_Y  = 6.13;   // symétrique — apparaît juste sous la zone score
 /** Top of the scoring zone (logs above this score 0). */

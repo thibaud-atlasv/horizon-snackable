@@ -14,7 +14,7 @@ import {
 } from 'meta/worlds';
 import type { Maybe, OnWorldUpdateEventPayload } from 'meta/worlds';
 import { Assets } from '../../Assets';
-import { WIDTH, HEIGHT } from '../../Constants';
+import { WIDTH, HEIGHT, FLOOR_Y } from '../../Constants';
 import { Events, type FallingObjRenderState } from '../../Types';
 
 // ── Canvas / layout constants ──────────────────────────────────────────────
@@ -26,10 +26,12 @@ const PX_PER_WU_Y = CANVAS_H / HEIGHT;
 const MAX_LOGS = 10;
 
 // Native bamboo sprite dimensions (px).
-const SPRITE_H = 159;
-const SPRITE_LEFT_W = 175;
+const SPRITE_H = 128;
+
+const SPRITE_LEFT_W = 172;
+const SPRITE_RIGHT_W = 257;
 const SPRITE_CENTER_W = 192;
-const SPRITE_RIGHT_W = 275;
+
 const SPRITE_TOTAL_W = SPRITE_LEFT_W + SPRITE_CENTER_W + SPRITE_RIGHT_W;
 const LEFT_FRAC = SPRITE_LEFT_W / SPRITE_TOTAL_W;
 const CENTER_FRAC = SPRITE_CENTER_W / SPRITE_TOTAL_W;
@@ -479,5 +481,13 @@ export class FallingObjCanvas extends Component {
     dbgRight.translateX = refRightOffX * dbgCos; dbgRight.translateY = -refRightOffX * dbgSin;
     dbgRight.rotation = -45; dbgRight.itemWidth = refRightW; dbgRight.itemHeight = refH;
     dbgRight.isVisible = true; this._items.push(dbgRight);
+
+    // Game-over line at FLOOR_Y.
+    const floorPy = -(FLOOR_Y / HEIGHT) * CANVAS_H;
+    const floorLine = this._makeItem(Assets.BambooCenter);
+    floorLine.translateX = 0; floorLine.translateY = floorPy;
+    floorLine.rotation = 0; floorLine.itemWidth = CANVAS_W; floorLine.itemHeight = 50;
+    floorLine.texture = Assets.Debug;
+    floorLine.isVisible = true; this._items.push(floorLine);
   }
 }

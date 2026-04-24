@@ -33,10 +33,10 @@ export class UpgradeRegistryService extends Service {
     EventService.sendLocally(Events.UpgradeRegistryChanged, {});
   }
 
-  registerDef(entry: IUpgradeDef, level: number = 0): void {
+  registerDef(entry: IUpgradeDef, level: number = 0, labelOverride?: string): void {
     this.register({
       id: entry.id,
-      label: entry.label,
+      label: labelOverride ?? entry.label,
       description: entry.effectLabel,
       cost: entry.getCost(level),
     });

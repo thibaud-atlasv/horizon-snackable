@@ -31,6 +31,10 @@ export class SlowService extends Service {
     const duration = p.props['slowDuration'] as number | undefined;
     if (factor === undefined || duration === undefined || factor >= 1) return;
 
+    const rec = this._enemyService.get(p.enemyId);
+    const def = rec ? this._enemyService.find(rec.defId) : undefined;
+    if (def?.slowImmune) return;
+
     const expiresAt = Date.now() + duration * 1000;
     const existing  = this._slows.get(p.enemyId);
 

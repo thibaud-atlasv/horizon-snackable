@@ -193,6 +193,7 @@ FallingObjService.onUpdate (every frame) → Events.RenderFallingObjs → Fallin
 | `components/GameHUD/GameHUDViewModel.ts` | `GameHUDViewModel` | Score + countdown HUD |
 | `components/GameHUD/LeaderboardHUDViewModel.ts` | `LeaderboardHUDViewModel` | Leaderboard overlay |
 | `components/GameHUD/FreezeFeedbackHUDViewModel.ts` | `FreezeFeedbackHUDViewModel` | Screen-space grade/score/line overlay on freeze |
+| `components/ui/ScoringScaleHUDViewModel.ts` | `ScoringScaleHUDViewModel` | Screen-space scoring threshold markers (Perfect/Great/Good/Early) on left side |
 | `components/GameplayObjects/BallObj.ts` | `BallObj` | Entity-based ball (unused until Ball rounds added) |
 | `components/GameplayObjects/FloatingScoreText.ts` | `FloatingScoreText` | (Inactive — replaced by FreezeFeedbackHUDViewModel) |
 | `components/GameplayObjects/FreezeLineVisual.ts` | `FreezeLineVisual` | (Inactive — replaced by FreezeFeedbackHUDViewModel) |

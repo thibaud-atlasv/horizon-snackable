@@ -4,52 +4,164 @@
         {
             "id": "b568d258-4773-4744-bcd1-b1788f701013",
             "name": "ArrowTower",
-            "type": {
-                "packageOrRemoteId": "26631398616455768",
-                "ingestionId": "1637784053927604813",
-                "targetId": "2719744159"
-            },
-            "deltas": [
+            "components": [
                 {
-                    "sourceId": "2e7f0eb8-c407-4566-b3ea-73d31d752c49",
-                    "components": [
-                        {
-                            "dataType": "horizon::DataDefinitionAsset",
-                            "data": {
-                                "class": "TowerController",
-                                "definitionAsset": {
-                                    "packageOrRemoteId": "26631398616455768",
-                                    "ingestionId": "15027774208938648437",
-                                    "targetId": "4237980480"
-                                },
-                                "data": {
-                                    "spawnPoint": "e27e8752-d4b5-4a6c-80a2-320a7cd2be8f",
-                                    "modelTier1b": "",
-                                    "modelTier2b": "",
-                                    "modelTier3b": ""
-                                }
-                            }
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "TowerController",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26631398616455768",
+                            "ingestionId": "15027774208938648437",
+                            "targetId": "4237980480"
+                        },
+                        "data": {
+                            "barrel": "49374cf1-fca4-46f5-9bea-3018c27739f2",
+                            "spawnPoint": "6d057240-aa02-43cd-a8c8-d173520a400f",
+                            "shadow": "",
+                            "modelTier1": "a1fa733e-caed-4561-a39d-546af87cc7a9/df2c9483-57a3-4f62-9b9b-4f9f19f0958f",
+                            "modelTier2": "a1fa733e-caed-4561-a39d-546af87cc7a9/36438361-f302-4e7a-abf1-b34ce45e71a2",
+                            "modelTier3": "a1fa733e-caed-4561-a39d-546af87cc7a9/96384f29-549f-4631-84f7-59bbe1c273f7",
+                            "barrelForwardOffsetDeg": 0.0
                         }
-                    ],
-                    "attributes": []
-                },
-                {
-                    "sourceId": "12bbca2f-0024-4445-b56a-5816516957a1",
-                    "components": null
-                },
-                {
-                    "sourceId": "26ae9f1e-ae7f-461f-8067-48ff9fa7e989",
-                    "components": null
-                },
-                {
-                    "sourceId": "7acccf83-e1b7-4b22-a0aa-05b1244a330b",
-                    "components": null
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
                 }
             ],
             "attributes": []
         },
         {
-            "id": "dbb1a4f4-2df5-4142-9b9f-c1f52d98eabb",
+            "id": "a1fa733e-caed-4561-a39d-546af87cc7a9",
+            "name": "Icons",
+            "type": {
+                "packageOrRemoteId": "26631398616455768",
+                "ingestionId": "15393429881198269662",
+                "targetId": "2719744159"
+            },
+            "deltas": [],
+            "attributes": []
+        },
+        {
+            "id": "590dc15c-e554-428c-8819-ab3e7328c868",
+            "name": "Pivot",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": -0.08986267447471619,
+                                "y": 0.35226941108703616,
+                                "z": -0.007565916050225496
+                            },
+                            "localRotation": {
+                                "x": -0.785398542881012,
+                                "y": -1.5707975625991822,
+                                "z": 3.793218468217674e-7
+                            },
+                            "localScale": {
+                                "x": 1.5000004768371583,
+                                "y": 1.500000238418579,
+                                "z": 1.5000005960464478
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "71d7b908-920b-43cd-ab71-f19356e7c3ee",
+            "name": "CanonLvl1",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": -0.05000000074505806,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MeshPlatformComponent",
+                        "version": 11,
+                        "data": {
+                            "mesh": {
+                                "packageOrRemoteId": "26631398616455768",
+                                "ingestionId": "4855175550601653276",
+                                "targetId": "1158271707"
+                            },
+                            "isVisibleSelf": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::MaterialPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "materials": [
+                                {
+                                    "packageOrRemoteId": "26631398616455768",
+                                    "ingestionId": "14059280474995827378",
+                                    "targetId": "157013062"
+                                }
+                            ]
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::ColorPlatformComponent",
+                        "version": 2,
+                        "data": {
+                            "color": {
+                                "r": 1.0,
+                                "g": 1.0,
+                                "b": 1.0,
+                                "a": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "49374cf1-fca4-46f5-9bea-3018c27739f2",
+            "name": "Canon",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "43aa10be-d17a-4b28-a3ec-a43d7bb58669",
             "name": "Canon.001",
             "components": [
                 {
@@ -58,18 +170,18 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": 4.656612873077393e-10,
-                                "y": -2.9802322387695315e-8,
-                                "z": 1.4901161193847657e-8
+                                "x": -0.015289169736206532,
+                                "y": 0.31438350677490237,
+                                "z": 2.2351741790771486e-8
                             },
                             "localRotation": {
-                                "x": 1.7800998008965508e-8,
-                                "y": 1.3792408580797118e-14,
-                                "z": 2.1397509144312905e-14
+                                "x": -3.8394883716819098e-8,
+                                "y": -1.0536706440689159e-7,
+                                "z": -7.63136398518327e-8
                             },
                             "localScale": {
                                 "x": 0.9999998807907105,
-                                "y": 0.9999999403953552,
+                                "y": 0.9999998807907105,
                                 "z": 1.0
                             }
                         }
@@ -93,7 +205,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::MaterialPlatformComponent",
-                        "version": 1,
+                        "version": 2,
                         "data": {
                             "materials": [
                                 {
@@ -125,7 +237,7 @@
             "attributes": []
         },
         {
-            "id": "e27e8752-d4b5-4a6c-80a2-320a7cd2be8f",
+            "id": "6d057240-aa02-43cd-a8c8-d173520a400f",
             "name": "ProjectileSpawn",
             "components": [
                 {
@@ -134,9 +246,9 @@
                         "version": 3,
                         "data": {
                             "localPosition": {
-                                "x": 0.1843932867050171,
-                                "y": 0.21812643110752107,
-                                "z": -0.02208433672785759
+                                "x": 0.19968242943286897,
+                                "y": 0.21002227067947389,
+                                "z": -0.0220843143761158
                             },
                             "localRotation": {
                                 "x": -0.0,
@@ -159,13 +271,33 @@
     "relationships": [
         {
             "relationshipType": "RelationChildOf",
-            "source": "dbb1a4f4-2df5-4142-9b9f-c1f52d98eabb",
-            "destination": "b568d258-4773-4744-bcd1-b1788f701013/b379ac17-7f96-4340-99a4-c543efdf63e4"
+            "source": "a1fa733e-caed-4561-a39d-546af87cc7a9",
+            "destination": "b568d258-4773-4744-bcd1-b1788f701013"
         },
         {
             "relationshipType": "RelationChildOf",
-            "source": "e27e8752-d4b5-4a6c-80a2-320a7cd2be8f",
-            "destination": "dbb1a4f4-2df5-4142-9b9f-c1f52d98eabb"
+            "source": "590dc15c-e554-428c-8819-ab3e7328c868",
+            "destination": "b568d258-4773-4744-bcd1-b1788f701013"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "71d7b908-920b-43cd-ab71-f19356e7c3ee",
+            "destination": "590dc15c-e554-428c-8819-ab3e7328c868"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "49374cf1-fca4-46f5-9bea-3018c27739f2",
+            "destination": "590dc15c-e554-428c-8819-ab3e7328c868"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "43aa10be-d17a-4b28-a3ec-a43d7bb58669",
+            "destination": "49374cf1-fca4-46f5-9bea-3018c27739f2"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "6d057240-aa02-43cd-a8c8-d173520a400f",
+            "destination": "43aa10be-d17a-4b28-a3ec-a43d7bb58669"
         }
     ]
 }

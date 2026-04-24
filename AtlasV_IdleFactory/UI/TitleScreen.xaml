@@ -1,0 +1,180 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      d:DesignWidth="1920" d:DesignHeight="3640">
+
+    <Page.Resources>
+        <!-- Color Palette - Orange Theme -->
+        <SolidColorBrush x:Key="MetallicGrey" Color="#FF8A8A8A"/>
+        <SolidColorBrush x:Key="BrightOrange" Color="#FFFF8C00"/>
+        <SolidColorBrush x:Key="DarkOrangeShadow" Color="#FFD47600"/>
+        <SolidColorBrush x:Key="TaglineBackground" Color="#FF5A6A7A"/>
+        <SolidColorBrush x:Key="ButtonText" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="YellowHighlight" Color="#FFFFDD00"/>
+        <SolidColorBrush x:Key="TextShadow" Color="#80000000"/>
+
+        <!-- Transparent Button Style - No Chrome -->
+        <Style x:Key="TransparentButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter x:Name="ContentArea"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+    <Page.Background>
+        <RadialGradientBrush>
+            <GradientStop Color="#FF000000" Offset="1"/>
+            <GradientStop Offset="0" Color="#FF686868"/>
+        </RadialGradientBrush>
+    </Page.Background>
+
+    <Viewbox Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid Width="900" Height="1600">
+            <!-- Full-screen background image -->
+            <Image Stretch="UniformToFill" Opacity="0.934" Source="/Root;component/Textures/IdleFactory_TitleScreen.png"/>
+
+            <!-- Main Content Layout -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="180"/>
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Title Logo at Top -->
+                <Image Grid.Row="0" 
+                       Stretch="Uniform"
+                       MaxWidth="700" HorizontalAlignment="Center" VerticalAlignment="Top" Source="/Root;component/Textures/IdleFactory_Logo.png"/>
+
+                <!-- Row 1: Tagline Cartouche - Rounded semi-transparent shape -->
+                <Border Grid.Row="1"
+                        CornerRadius="20"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Padding="40,16" BorderThickness="2,2,2,2" Margin="0,-180,0,0">
+                    <Border.Background>
+                        <RadialGradientBrush>
+                            <GradientStop Offset="0" Color="#E6000D1B"/>
+                            <GradientStop Offset="1" Color="#E6000000"/>
+                        </RadialGradientBrush>
+                    </Border.Background>
+                    <TextBlock Text="BUILD.  AUTOMATE.  PROFIT."
+                               FontSize="28"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource ButtonText}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               CharacterSpacing="80"/>
+                </Border>
+
+                <!-- Row 2: Spacer/Flex -->
+
+                <!-- Row 3: Play Button + Teasing Text -->
+                <StackPanel Grid.Row="3" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Bottom"
+                            Margin="0,0,0,20">
+                    
+                    <!-- PLAY Button - 3D Orange Style with Press Effect -->
+                    <!-- All layers are inside the Button's ControlTemplate so IsPressed triggers work -->
+                    <Button Command="{Binding events.PlayButtonClick}"
+                            HorizontalAlignment="Center">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <!-- Outermost container with TranslateTransform for press shift -->
+                                <Border x:Name="OuterContainer" 
+                                        RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform x:Name="PressTransform" Y="0"/>
+                                    </Border.RenderTransform>
+                                    
+                                    <!-- Layer 1: Metallic Blue Outline - outermost border -->
+                                    <Border CornerRadius="24" 
+                                            BorderThickness="10,10,10,10" 
+                                            BorderBrush="#97a6cf">
+                                        
+                                        <!-- Layer 2: Dark Orange Shadow Border - thick bottom for 3D effect -->
+                                        <Border x:Name="ShadowBorder"
+                                                BorderThickness="4,2,4,12" 
+                                                CornerRadius="15" 
+                                                BorderBrush="#FFE76102">
+                                            
+                                            <!-- Layer 3: Bright Orange Background -->
+                                            <Border x:Name="BackgroundBorder"
+                                                    CornerRadius="10" 
+                                                    Background="#FFFDB91E" 
+                                                    Padding="100,5,100,5">
+                                                
+                                                <!-- Button Text with Shadow -->
+                                                <Grid>
+                                                    <!-- Text Shadow -->
+                                                    <TextBlock Text="PLAY"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="#FFDC7425" 
+                                                               FontWeight="ExtraBlack" 
+                                                               FontSize="75" 
+                                                               Margin="2,8,0,0"/>
+                                                    <!-- Main Text -->
+                                                    <TextBlock Text="PLAY"
+                                                               Foreground="#FFFFFFFF"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center" 
+                                                               FontWeight="ExtraBlack" 
+                                                               FontSize="75"/>
+                                                </Grid>
+                                            </Border>
+                                        </Border>
+                                    </Border>
+                                </Border>
+                                
+                                <!-- Press Effect Triggers -->
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <!-- Shift button down 4px -->
+                                        <Setter TargetName="PressTransform" Property="Y" Value="4"/>
+                                        <!-- Reduce shadow border thickness (removes thick bottom shadow) -->
+                                        <Setter TargetName="ShadowBorder" Property="BorderThickness" Value="4,6,4,4"/>
+                                        <!-- Slightly darken background when pressed -->
+                                        <Setter TargetName="BackgroundBorder" Property="Background" Value="#FFF0A810"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- Teasing Text Below Button -->
+                    <Grid Margin="60,30,60,0">
+                        <!-- Text Shadow Layer -->
+                        <TextBlock TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   Margin="2,2,0,0" FontSize="28" FontWeight="Bold" Foreground="#AF000000">
+                            <Run Text="Start from scratch and build your "/>
+                            <Run Text="own shipping empire!"/>
+                            <Run Text=" Upgrade machines, speed up production, and watch your factory grow while you earn!"/>
+                        </TextBlock>
+                        <!-- Main Text Layer with Yellow Highlight -->
+                        <TextBlock TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   HorizontalAlignment="Center" FontSize="28" FontWeight="Bold">
+                            <Run Text="Start from scratch and build your " Foreground="{StaticResource ButtonText}"/>
+                            <Run Text="own shipping empire!" Foreground="{StaticResource YellowHighlight}" FontWeight="Bold"/>
+                            <Run Text=" Upgrade machines, speed up production, and watch your factory grow while you earn!" Foreground="{StaticResource ButtonText}"/>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Row 4: Bottom Spacer -->
+            </Grid>
+        </Grid>
+    </Viewbox>
+</Page>

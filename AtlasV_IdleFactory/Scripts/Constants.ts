@@ -38,4 +38,4 @@ export const PRODUCTION_BASE_INTERVAL = 4.0; // seconds per product at level 0
 // Economy
 // ---------------------------------------------------------------------------
 export const MONEY_PER_PRODUCT = 15;
-export const STARTING_MONEY    = 50;
+export const STARTING_MONEY    = 1000;

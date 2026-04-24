@@ -34,16 +34,16 @@ const PROD_COSTS     = [100, 200, 400, 600, 800, 1600];    // other modules: pai
 
 export const UPGRADE_CONVEYOR: IUpgradeDef = {
     id:          'conveyor',
-    label:       'Conveyor Belt',
-    effectLabel: 'Speed (slots/s)',
+    label:       'Speed Up',
+    effectLabel: 'Faster belt',
     maxLevel:    CONVEYOR_SPEEDS.length - 1,
     getCost:     (level) => CONVEYOR_COSTS[level] ?? Infinity,
     getEffect:   (level) => CONVEYOR_SPEEDS[level] ?? CONVEYOR_SPEEDS[CONVEYOR_SPEEDS.length - 1],
   };
 export const UPGRADE_PRODUCTION0: IUpgradeDef = {
     id:          'production0',
-    label:       'Production 1',
-    effectLabel: 'Interval (s)',
+    label:       'Deploy Crane',
+    effectLabel: 'Upgrade Speed',
     maxLevel:    PROD_INTERVALS.length - 1,
     getCost:     (level) => PROD0_COSTS[level] ?? Infinity,
     getEffect:   (level) => PROD_INTERVALS[level] ?? PROD_INTERVALS[PROD_INTERVALS.length - 1],
@@ -51,8 +51,8 @@ export const UPGRADE_PRODUCTION0: IUpgradeDef = {
 
 export const UPGRADE_WAREHOUSE: IUpgradeDef = {
   id:          'warehouse',
-  label:       'Warehouse',
-  effectLabel: 'Capacity',
+  label:       'Expand Storage',
+  effectLabel: 'More capacity',
   maxLevel:    WAREHOUSE_CAPS.length - 1,
   getCost:     (level) => WAREHOUSE_COSTS[level] ?? Infinity,
   getEffect:   (level) => WAREHOUSE_CAPS[level] ?? WAREHOUSE_CAPS[WAREHOUSE_CAPS.length - 1],
@@ -60,8 +60,8 @@ export const UPGRADE_WAREHOUSE: IUpgradeDef = {
 
 export const UPGRADE_TRUCKS: IUpgradeDef = {
   id:          'trucks',
-  label:       'Trucks',
-  effectLabel: 'Truck Count',
+  label:       'Add a Truck',
+  effectLabel: 'More trucks',
   maxLevel:    TRUCK_COUNTS.length - 1,
   getCost:     (level) => TRUCK_COSTS[level] ?? Infinity,
   getEffect:   (level) => TRUCK_COUNTS[level] ?? TRUCK_COUNTS[TRUCK_COUNTS.length - 1],
@@ -69,8 +69,8 @@ export const UPGRADE_TRUCKS: IUpgradeDef = {
 
 export const UPGRADE_PRODUCTION1: IUpgradeDef = {
   id:          'production1',
-  label:       'Production 2',
-  effectLabel: 'Interval (s)',
+  label:       'Deploy Crane',
+  effectLabel: 'Upgrade Crane',
   maxLevel:    PROD_INTERVALS.length - 1,
   getCost:     (level) => PROD_COSTS[level] ?? Infinity,
   getEffect:   (level) => PROD_INTERVALS[level] ?? PROD_INTERVALS[PROD_INTERVALS.length - 1],
@@ -78,8 +78,8 @@ export const UPGRADE_PRODUCTION1: IUpgradeDef = {
 
 export const UPGRADE_PRODUCTION2: IUpgradeDef = {
   id:          'production2',
-  label:       'Production 3',
-  effectLabel: 'Interval (s)',
+  label:       'Deploy Crane',
+  effectLabel: 'Upgrade Crane',
   maxLevel:    PROD_INTERVALS.length - 1,
   getCost:     (level) => PROD_COSTS[level] ?? Infinity,
   getEffect:   (level) => PROD_INTERVALS[level] ?? PROD_INTERVALS[PROD_INTERVALS.length - 1],

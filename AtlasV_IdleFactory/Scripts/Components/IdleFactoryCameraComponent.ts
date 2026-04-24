@@ -9,6 +9,7 @@ import {
   OnPlayerCreateEvent,
   ExecuteOn,
   NetworkingService,
+  FocusedInteractionService,
 } from 'meta/worlds';
 import type { Maybe } from 'meta/worlds';
 
@@ -20,13 +21,9 @@ export class IdleFactoryCameraComponent extends Component {
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
     this._camera = this.entity.getComponent(CameraComponent);
+
+    FocusedInteractionService.get().enableFocusedInteraction({disableEmotesButton:true, disableFocusExitButton:true});
     if (!this._camera) return;
-
-    this._camera.fieldOfView = 60;
-
-    // Delay activation to ensure the scene and default camera are fully initialized.
-    // CameraService.setActiveCamera requires the rendering pipeline to be ready;
-    // calling it synchronously in onStart can silently fail on some devices.
     setTimeout(() => {
       CameraService.get().setActiveCamera({ camera: this._camera! });
     }, 1500);

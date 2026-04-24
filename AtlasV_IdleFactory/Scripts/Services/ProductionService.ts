@@ -39,7 +39,7 @@ export class ProductionService extends Service {
       // Level 0 → getEffect(0) = Infinity (locked)
       const interval = upgradeDef ? upgradeDef.getEffect(0) : Infinity;
       if (upgradeDef)
-        this._upgrade.registerDef(upgradeDef, 0);
+        this._upgrade.registerDef(upgradeDef, 0, 'Deploy Crane');
       return {
         id:              upgradeId,
         depositDistance: def.depositDistance,
@@ -65,7 +65,7 @@ export class ProductionService extends Service {
       mod.timer    = 0;
       mod.blocked  = false;
       if (p.level < upgradeDef.maxLevel) {
-        this._upgrade.registerDef(upgradeDef, p.level);
+        this._upgrade.registerDef(upgradeDef, p.level, 'Upgrade Speed');
       } else {
         this._upgrade.remove(mod.id);
       }

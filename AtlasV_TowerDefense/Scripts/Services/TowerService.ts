@@ -209,6 +209,12 @@ export class TowerService extends Service {
     initP.col   = col;
     initP.row   = row;
     EventService.sendLocally(Events.InitTower, initP, { eventTarget: entity });
+
+    const placedP = new Events.TowerPlacedPayload();
+    placedP.defId = towerId;
+    placedP.col   = col;
+    placedP.row   = row;
+    EventService.sendLocally(Events.TowerPlaced, placedP);
   }
 
   // ── Actions (called by UI) ───────────────────────────────────────────────────

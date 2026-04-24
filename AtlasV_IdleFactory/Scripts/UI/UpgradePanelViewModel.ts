@@ -41,6 +41,28 @@ export class UpgradeItemViewModel extends UiViewModel {
   public PositionX: number = 0;
   /** Y position offset for Canvas-based absolute positioning */
   public PositionY: number = 0;
+
+  // --- 3D Relief Button Colors ---
+  /** Outer outline border color (ARGB hex string) */
+  public OutlineColor: string = '#FF2E7D32';
+  /** Top-left highlight border color for 3D relief effect */
+  public HighlightBorderColor: string = '#FF4CAF50';
+  /** Bottom-right shadow border color for 3D relief effect */
+  public ShadowBorderColor: string = '#FF0D1A0D';
+  /** Button background fill color */
+  public ButtonBackgroundColor: string = '#CC1A1A1A';
+  /** Button label text color */
+  public ButtonTextColor: string = '#FFFFFFFF';
+
+  // --- Element Visibility Flags ---
+  /** Whether the outer outline border is visible */
+  public OutlineVisible: boolean = true;
+  /** Whether the top-left highlight relief border is visible */
+  public HighlightBorderVisible: boolean = true;
+  /** Whether the bottom-right shadow relief border is visible */
+  public ShadowBorderVisible: boolean = true;
+  /** Whether the button background is visible */
+  public ButtonVisible: boolean = true;
 }
 
 // ——— Main ViewModel ————————————————————————————————————————————————————————
@@ -64,6 +86,7 @@ export class UpgradePanelViewModel extends UiViewModel {
 
   /**
    * Add a new upgrade item to the panel with explicit XY positioning.
+   * Optionally accepts color/visibility overrides for 3D relief styling.
    * Reassigns the array to trigger UI binding update.
    */
   addUpgrade(
@@ -74,6 +97,17 @@ export class UpgradePanelViewModel extends UiViewModel {
     isEnabled: boolean,
     positionX: number,
     positionY: number,
+    style?: Partial<{
+      OutlineColor: string;
+      HighlightBorderColor: string;
+      ShadowBorderColor: string;
+      ButtonBackgroundColor: string;
+      ButtonTextColor: string;
+      OutlineVisible: boolean;
+      HighlightBorderVisible: boolean;
+      ShadowBorderVisible: boolean;
+      ButtonVisible: boolean;
+    }>,
   ): void {
     const item = new UpgradeItemViewModel();
     item.UpgradeId = id;
@@ -83,6 +117,19 @@ export class UpgradePanelViewModel extends UiViewModel {
     item.IsEnabled = isEnabled;
     item.PositionX = positionX;
     item.PositionY = positionY;
+
+    // Apply optional style overrides (defaults stay if not provided)
+    if (style) {
+      if (style.OutlineColor !== undefined) item.OutlineColor = style.OutlineColor;
+      if (style.HighlightBorderColor !== undefined) item.HighlightBorderColor = style.HighlightBorderColor;
+      if (style.ShadowBorderColor !== undefined) item.ShadowBorderColor = style.ShadowBorderColor;
+      if (style.ButtonBackgroundColor !== undefined) item.ButtonBackgroundColor = style.ButtonBackgroundColor;
+      if (style.ButtonTextColor !== undefined) item.ButtonTextColor = style.ButtonTextColor;
+      if (style.OutlineVisible !== undefined) item.OutlineVisible = style.OutlineVisible;
+      if (style.HighlightBorderVisible !== undefined) item.HighlightBorderVisible = style.HighlightBorderVisible;
+      if (style.ShadowBorderVisible !== undefined) item.ShadowBorderVisible = style.ShadowBorderVisible;
+      if (style.ButtonVisible !== undefined) item.ButtonVisible = style.ButtonVisible;
+    }
     
     // Create new array to trigger binding update
     this.Items = [...this.Items, item];
@@ -113,6 +160,15 @@ export class UpgradePanelViewModel extends UiViewModel {
       AnimationTrigger: number;
       PositionX: number;
       PositionY: number;
+      OutlineColor: string;
+      HighlightBorderColor: string;
+      ShadowBorderColor: string;
+      ButtonBackgroundColor: string;
+      ButtonTextColor: string;
+      OutlineVisible: boolean;
+      HighlightBorderVisible: boolean;
+      ShadowBorderVisible: boolean;
+      ButtonVisible: boolean;
     }>
   ): void {
     const item = this.Items.find(i => i.UpgradeId === id) as UpgradeItemViewModel | undefined;
@@ -128,6 +184,15 @@ export class UpgradePanelViewModel extends UiViewModel {
     if (partial.AnimationTrigger !== undefined) item.AnimationTrigger = partial.AnimationTrigger;
     if (partial.PositionX !== undefined) item.PositionX = partial.PositionX;
     if (partial.PositionY !== undefined) item.PositionY = partial.PositionY;
+    if (partial.OutlineColor !== undefined) item.OutlineColor = partial.OutlineColor;
+    if (partial.HighlightBorderColor !== undefined) item.HighlightBorderColor = partial.HighlightBorderColor;
+    if (partial.ShadowBorderColor !== undefined) item.ShadowBorderColor = partial.ShadowBorderColor;
+    if (partial.ButtonBackgroundColor !== undefined) item.ButtonBackgroundColor = partial.ButtonBackgroundColor;
+    if (partial.ButtonTextColor !== undefined) item.ButtonTextColor = partial.ButtonTextColor;
+    if (partial.OutlineVisible !== undefined) item.OutlineVisible = partial.OutlineVisible;
+    if (partial.HighlightBorderVisible !== undefined) item.HighlightBorderVisible = partial.HighlightBorderVisible;
+    if (partial.ShadowBorderVisible !== undefined) item.ShadowBorderVisible = partial.ShadowBorderVisible;
+    if (partial.ButtonVisible !== undefined) item.ButtonVisible = partial.ButtonVisible;
   }
 
   /**

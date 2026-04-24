@@ -52,10 +52,13 @@ export interface IEnemyDef {
   id: string;
   name: string;
   hp: number;
-  speed: number;    // cells per second
-  reward: number;   // gold on death
+  speed: number;      // cells per second
+  reward: number;     // gold on death
   color: { r: number; g: number; b: number };
   template: TemplateAsset;
+  dodgeChance?: number;  // 0–1 probability to ignore a projectile hit
+  regenPerSec?: number;  // HP regenerated per second while alive
+  slowImmune?: boolean;  // if true, slow debuffs have no effect
 }
 
 export interface IWaveGroup {
@@ -196,6 +199,14 @@ export namespace Events {
   // Tower spawn bounce (sent to newly placed tower entity)
   export class TowerSpawnedPayload { col: number = 0; row: number = 0; }
   export const TowerSpawned = new LocalEvent<TowerSpawnedPayload>('EvTowerSpawned', TowerSpawnedPayload);
+
+  // Fired once after a tower is successfully placed on the grid
+  export class TowerPlacedPayload { defId: string = ''; col: number = 0; row: number = 0; }
+  export const TowerPlaced = new LocalEvent<TowerPlacedPayload>('EvTowerPlaced', TowerPlacedPayload);
+
+  // Fired by WaveService to show the FTUE "place your first tower" hint
+  export class FtueHintPayload {}
+  export const FtueHint = new LocalEvent<FtueHintPayload>('EvFtueHint', FtueHintPayload);
 
 }
 

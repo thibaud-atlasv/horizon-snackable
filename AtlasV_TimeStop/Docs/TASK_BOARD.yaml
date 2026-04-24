@@ -144,6 +144,18 @@ tasks:
       - name: Fix - Passage de opacity à scale pour éviter le clipping
         status: done
 
+  - name: Scoring Scale UI
+    status: done
+    summary: UI screen space avec liste dynamique de marqueurs de scoring - ligne pointillés + texte Bangers, Y configurable, même repère que FreezeFeedbackHUD
+    files:
+      - scripts/components/ui/ScoringScaleHUDViewModel.ts
+      - UI/ScoringScaleHUD.xaml
+    subtasks:
+      - name: Custom UI screen space avec liste dynamique d'échelles de scoring
+        status: done
+      - name: Chaque élément - ligne pointillés horizontale + texte configurable
+        status: done
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []

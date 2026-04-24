@@ -1,154 +1,127 @@
+# Language rule: all content in this file must be written in English.
+
 tasks:
-  - name: Entrepôt en Primitives 3D
+  - name: Warehouse — 3D Primitives
     status: done
-    summary: Entrepôt créé avec sol, toit, murs, 8 slots de stockage, zones entrée/sortie
+    summary: Warehouse built with floor, roof, walls, 8 storage slots, entry/exit zones
     files: [space.hstf]
-    subtasks:
-      - name: Créer entrepôt avec cubes dans space.hstf
-        status: done
 
-  - name: Route 2 Voies pour Camions
+  - name: Truck Road — 2 Lanes
     status: done
-    summary: Route créée avec chaussée asphalte, ligne centrale pointillée blanche, bordures jaunes
+    summary: Road built with asphalt surface, white dashed center line, yellow edge borders
     files: [space.hstf]
-    subtasks:
-      - name: Créer route avec cubes dans space.hstf
-        status: done
 
-  - name: Produit en Primitives Assemblées
+  - name: Product Template
     status: done
-    summary: Template carton créé avec corps marron, ruban adhésif, et lignes de rabats
+    summary: Cardboard box template built with brown body, tape strip, and fold lines
     files: [Templates/GameplayObjects/Product.hstf]
-    subtasks:
-      - name: Créer template boîte/carton avec primitives
-        status: done
 
-  - name: Conveyor Belt en Primitives 3D
+  - name: Conveyor Belt — 3D Primitives
     status: done
-    summary: Conveyor belt créé avec base, 8 slots alignés aux productions, et rails latéraux
+    summary: Conveyor belt built with base, 8 slots aligned to production modules, lateral rails
     files: [space.hstf]
-    subtasks:
-      - name: Créer conveyor belt avec slots dans space.hstf
-        status: done
 
-  - name: Camion en Primitives 3D
+  - name: Truck Template
     status: done
-    summary: Template camion créé avec primitives (châssis gris, cabine rouge, 4 roues noires)
+    summary: Truck template built with primitives (gray chassis, red cab, 4 black wheels)
     files: [Templates/GameplayObjects/Truck.hstf]
-    subtasks:
-      - name: Créer modèle camion avec cubes/cylindres
-        status: done
 
-  - name: Layout 3D Mobile Portrait
+  - name: Mobile Portrait Layout
     status: done
-    reference: "Idle Factory Tycoon"
-    summary: Layout primitives 3D créé avec 6 zones colorées et caméra top-down
-    files: [space.hstf, Templates/GameplayObjects/FactoryZoneCube.hstf, Scripts/IdleFactoryCameraComponent.ts]
-    subtasks:
-      - name: Créer layout avec primitives 3D
-        status: done
+    summary: 3D primitives layout with 6 colored zones and top-down camera
+    files: [space.hstf, Scripts/Components/IdleFactoryCameraComponent.ts]
 
-  - name: UI Jauge Entrepôt
+  - name: Warehouse Gauge UI — World-Space
     status: done
-    summary: Jauge de contenance avec barre de progression verte et texte "X / Y"
-    files: [Scripts/Components/WarehouseGaugeHudComponent.ts, Scripts/UI/WarehouseGaugeHudViewModel.ts, UI/WarehouseGaugeHud.xaml, Scripts/Types.ts]
-    subtasks:
-      - name: Créer UI jauge et connecter au WarehouseService
-        status: done
-
-  - name: Rebuild Warehouse Template
-    status: done
-    summary: Entrepôt reconstruit avec sol, toit, 6 murs avec gaps, 8 slots, zones entrée/sortie
-    files: [Templates/GameplayObjects/Warehouse.hstf]
-    subtasks:
-      - name: Assembler sol, toit, murs, slots, zones dans template
-        status: done
-
-  - name: Jauge 3D World-Space Entrepôt
-    status: done
-    summary: Jauge 3D avec bordure épaisse, barre de remplissage verte, et texte "X/Y" visible en top-down
-    files: [Scripts/Components/Warehouse3DGaugeController.ts, Templates/Warehouse.hstf]
-    subtasks:
-      - name: Supprimer ancienne UI screen-space
-        status: done
-      - name: Créer jauge 3D avec bordure épaisse et chiffre
-        status: done
-      - name: Vérifier implémentation
-        status: done
-
-  - name: Custom UI World-Space Entrepôt
-    status: done
-    summary: Custom UI XAML en world-space avec bordure épaisse, barre verte, texte "X/Y" visible en top-down
+    summary: World-space custom UI XAML gauge with thick border, green progress bar, and "stock/capacity" text visible from top-down
     files: [UI/WarehouseGauge.xaml, Scripts/UI/WarehouseGaugeViewModel.ts, Templates/Warehouse.hstf]
-    subtasks:
-      - name: Remplacer jauge 3D par Custom UI world-space
-        status: done
-      - name: Vérifier implémentation
-        status: done
 
-  - name: UI Upgrades Screenspace
+  - name: Warehouse Template Rebuild
     status: done
-    summary: Custom UI 2D screenspace pour liste dynamique d'upgrades (prix, titre, description, enabled, position, event click)
-    files: [UI/UpgradePanel.xaml, Scripts/UI/UpgradePanelViewModel.ts]
-    subtasks:
-      - name: Créer XAML style jauge warehouse + ViewModel avec bindings
-        status: done
+    summary: Warehouse rebuilt with floor, roof, 6 walls with gaps, 8 slots, entry/exit zones
+    files: [Templates/Warehouse.hstf]
 
-  - name: UI Upgrades Position XY + Component
+  - name: Upgrade Panel UI — Screen-Space
     status: done
-    summary: Position XY par bouton via RenderTransform binding + UpgradePanelComponent créé
+    summary: Screen-space custom UI for dynamic upgrade list with XY-positioned buttons, price, title, description, enabled state, and click event
     files: [UI/UpgradePanel.xaml, Scripts/UI/UpgradePanelViewModel.ts, Scripts/Components/UpgradePanelComponent.ts]
-    subtasks:
-      - name: Ajouter position XY avec RenderTransform binding dans XAML
-        status: done
-      - name: Créer UpgradePanelComponent pour ajouter les boutons
-        status: done
 
-  - name: Redesign Boutons Upgrade
+  - name: Upgrade Buttons — 3D Relief Style
     status: done
-    summary: Layout vertical avec prix en gros (38px gold) pleine largeur, titre/description en petit au-dessus
-    files: [UI/UpgradePanel.xaml]
-    subtasks:
-      - name: Prix en gros pleine largeur, label/description en petit au-dessus
-        status: done
+    summary: 4-layer button structure (outline, highlight border, shadow border, background fill) with per-button configurable colors and visibility
+    files: [UI/UpgradePanel.xaml, Scripts/UI/UpgradePanelViewModel.ts]
 
-  - name: Style Boutons Upgrade v2
+  - name: Upgrade Buttons — Per-Upgrade Color Palette
     status: done
-    summary: Icône gold_icon.png, double bordure (vert ext + gris int), fond gris semi-transparent
-    files: [UI/UpgradePanel.xaml, Scripts/Components/UpgradePanelComponent.ts]
-    subtasks:
-      - name: Icône gold_icon.png au lieu de $, double bordure épaisse, fond gris semi-transparent
-        status: done
+    summary: Each upgrade button has a unique color theme; outline color reflects affordability (green = can afford, gray = too expensive), updated on every TruckDelivered event
+    files: [Scripts/Components/UpgradePanelComponent.ts]
 
-  - name: UI Bandeau Stats Joueur
+  - name: Player Stats Bar UI
     status: done
-    summary: Bandeau screenspace en haut avec temps, paquets envoyés, gold
+    summary: Screen-space banner at top of screen showing time played, packages sent, and gold balance
     files: [UI/PlayerStatsBar.xaml, Scripts/UI/PlayerStatsBarViewModel.ts, Scripts/Components/PlayerStatsBarComponent.ts]
-    subtasks:
-      - name: Créer XAML + ViewModel + Component
-        status: done
 
-  - name: Module Production en Primitives 3D
+  - name: Production Module Template
     status: done
-    summary: Template ProductionModule créé avec corps, rampe inclinée -11°, rails, machine colorable, cheminée
+    summary: ProductionModule template built with body, angled exit ramp (-11°), rails, colorable machine block, chimney
     files: [Templates/ProductionModule.hstf, Templates/Layout.hstf]
-    subtasks:
-      - name: Créer template module production avec primitives et rampe
-        status: done
 
-  - name: Grue sur Modules de Production
+  - name: Crane on Production Modules
     status: done
-    summary: Grue ajoutée avec base grise, pilier jaune, bras horizontal, et crochet au-dessus de la rampe
+    summary: Crane added with gray base, yellow pillar, horizontal arm, and hook above the ramp
     files: [Templates/ProductionModule.hstf]
+
+  - name: Title Screen
+    status: done
+    summary: Title screen with logo image, description text, and Play button that hides/shows game UI panels
+    files: [UI/TitleScreen.xaml, Scripts/UI/TitleScreenViewModel.ts, Scripts/Components/TitleScreenComponent.ts, Textures/title_logo.png, space.hstf]
+
+  - name: Title Screen — Radial Background + English Text
+    status: done
+    summary: Opaque radial gradient background (dark gray → black) and all text translated to English
+    files: [UI/TitleScreen.xaml]
     subtasks:
-      - name: Ajouter grue en primitives au template ProductionModule
+      - name: Add opaque background with radial gradient
+        status: done
+      - name: Translate all UI text to English
         status: done
 
-  - name: Sprite Titre Idle Factory
-    status: in_progress
+  - name: Title Screen — Custom Images
+    status: done
+    summary: Logo.png for title, background.png as fullscreen fill background (UniformToFill)
+    files: [UI/TitleScreen.xaml]
     subtasks:
-      - name: Générer image titre avec texte centré et background industriel
-        status: in_progress
+      - name: Use Logo.png for title image
+        status: done
+      - name: Use background.png as fullscreen fill background
+        status: done
+
+  - name: Title Screen — Visual Polish
+    status: done
+    summary: Tagline cartouche, orange 3D Play button with metal outline, teasing text with yellow highlight
+    files: [UI/TitleScreen.xaml, Scripts/UI/TitleScreenViewModel.ts, Scripts/Components/TitleScreenComponent.ts]
+    subtasks:
+      - name: Add tagline cartouche under logo (BUILD. AUTOMATE. PROFIT.)
+        status: done
+      - name: Redesign Play button (orange 3D thick effect, metal outline)
+        status: done
+      - name: Add teasing text under button with yellow highlight
+        status: done
+
+  - name: Play Button Press Effect
+    status: done
+    summary: Button shifts down 4px when pressed, shadow reduces, background darkens — pure XAML IsPressed triggers
+    files: [UI/TitleScreen.xaml]
+
+  - name: Upgrade Buttons Press Effect
+    status: done
+    summary: Buttons shift down 4px when pressed, shadow flattens, semi-transparent overlay darkens background — works with dynamic per-button colors
+    files: [UI/UpgradePanel.xaml]
+
+  - name: PlayerStatsBar — 3D Button Style Redesign
+    status: done
+    summary: 3 equal-width 3D relief frames (dark blue, black outline, 4-layer technique), 10px margins, semi-transparent green/gray background bar
+    files: [UI/PlayerStatsBar.xaml]
 
 chopping_block:
   disabled_systems: []
@@ -156,5 +129,6 @@ chopping_block:
   failed_attempts: []
 
 notes:
-  - Jeu Idle Factory Tycoon avec modules isolés et souples
-  - Ratio mobile portrait (9:16)
+  - Idle Factory Tycoon — modular and flexible architecture
+  - Mobile portrait ratio (9:16)
+  - All content must be written in English

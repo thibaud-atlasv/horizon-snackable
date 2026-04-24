@@ -39,7 +39,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::SpawnPointPlatformComponent",
-                        "version": 1,
+                        "version": 2,
                         "data": {
                             "stateEnabled": true,
                             "allowStart": true
@@ -162,14 +162,16 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
+                        "version": 15,
                         "data": {
                             "customUiType": "ScreenSpace",
                             "xaml": {
                                 "packageOrRemoteId": "25614199331587746",
                                 "ingestionId": "8167202439901711175",
                                 "targetId": "2149638574"
-                            }
+                            },
+                            "width": 0,
+                            "height": 0
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -210,7 +212,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
+                        "version": 15,
                         "data": {
                             "customUiType": "ScreenSpace",
                             "xaml": {
@@ -218,6 +220,8 @@
                                 "ingestionId": "12935197256516873139",
                                 "targetId": "2149638574"
                             },
+                            "width": 0,
+                            "height": 0,
                             "panelVisibility": false,
                             "isInteractable": false,
                             "renderOrderOffset": 10
@@ -255,14 +259,16 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
+                        "version": 15,
                         "data": {
                             "customUiType": "ScreenSpace",
                             "xaml": {
                                 "packageOrRemoteId": "25614199331587746",
                                 "ingestionId": "6516703374727273125",
                                 "targetId": "2149638574"
-                            }
+                            },
+                            "width": 0,
+                            "height": 0
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -275,7 +281,9 @@
                             "ingestionId": "17428063946443410817",
                             "targetId": "4237980480"
                         },
-                        "data": {}
+                        "data": {
+                            "debugMode": false
+                        }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
                 }
@@ -297,7 +305,7 @@
                 {
                     "data": {
                         "class": "horizon::platform_api::CustomUiPlatformComponent",
-                        "version": 14,
+                        "version": 15,
                         "data": {
                             "customUiType": "ScreenSpace",
                             "xaml": {
@@ -305,6 +313,8 @@
                                 "ingestionId": "18396341554550132073",
                                 "targetId": "2149638574"
                             },
+                            "width": 0,
+                            "height": 0,
                             "renderOrderOffset": 2
                         }
                     },

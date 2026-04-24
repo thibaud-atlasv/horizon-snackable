@@ -6,104 +6,163 @@
       Background="Transparent">
 
     <Page.Resources>
-        <!-- Color Palette - Warehouse Theme (matching existing UI) -->
-        <SolidColorBrush x:Key="PanelBorder" Color="#FF2E7D32"/>
-        <SolidColorBrush x:Key="PanelBackground" Color="#CC1A1A1A"/>
-        <SolidColorBrush x:Key="HeaderText" Color="#FF4CAF50"/>
+        <!-- Color Palette - Dark Blue 3D Relief Theme -->
+        <SolidColorBrush x:Key="FrameOutline" Color="#FF000000"/>
+        <SolidColorBrush x:Key="FrameHighlight" Color="#FF3A5A8C"/>
+        <SolidColorBrush x:Key="FrameShadow" Color="#FF0A1A30"/>
+        <SolidColorBrush x:Key="FrameBackground" Color="#FF152040"/>
+        <SolidColorBrush x:Key="BarBackground" Color="#80304030"/>
         <SolidColorBrush x:Key="TextShadow" Color="#80000000"/>
         <SolidColorBrush x:Key="StatText" Color="#FFFFFFFF"/>
         <SolidColorBrush x:Key="GoldText" Color="#FFFFD700"/>
-        <SolidColorBrush x:Key="PlaceholderIcon" Color="#FF666666"/>
     </Page.Resources>
 
     <Viewbox Stretch="Uniform" VerticalAlignment="Bottom">
         <Grid Width="900" Height="100">
-            <!-- Main Stats Bar Container -->
-            <Border BorderBrush="{StaticResource PanelBorder}"
-                    Background="{StaticResource PanelBackground}"
-                    Padding="20,10" BorderThickness="0,3,0,0">
-                
-                <!-- Three Stats in Horizontal Layout -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+            <!-- Semi-transparent green/gray background bar -->
+            <Border Background="{StaticResource BarBackground}" 
+                    CornerRadius="8"/>
+            
+            <!-- 3-column Grid with 10px outer margins -->
+            <Grid Margin="6,6,6,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- Stat 1: Time Played -->
-                    <StackPanel Grid.Column="0" 
-                                Orientation="Horizontal" 
-                                HorizontalAlignment="Center" 
-                                VerticalAlignment="Center">
-                        <Image Source="Textures/Time.png" 
-                               Width="40" Height="40" 
-                               Stretch="Uniform"
-                               VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                        <Grid VerticalAlignment="Center">
-                            <!-- Text Shadow -->
-                            <TextBlock Text="{Binding Path=TimePlayed}" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource TextShadow}"
-                                       Margin="2,2,0,0"/>
-                            <!-- Main Text -->
-                            <TextBlock Text="{Binding Path=TimePlayed}" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource StatText}"/>
-                        </Grid>
-                    </StackPanel>
+                <!-- Stat 1: Time Played - 4-Layer 3D Relief Frame -->
+                <Border Grid.Column="0" BorderBrush="{StaticResource FrameOutline}"
+                        BorderThickness="6"
+                        CornerRadius="12" Margin="0,0,3,0">
+                    <!-- Layer 2: Highlight Border (top-left light relief) -->
+                    <Border BorderBrush="{StaticResource FrameHighlight}"
+                            BorderThickness="5,5,0,0"
+                            CornerRadius="10">
+                        <!-- Layer 3: Shadow Border (bottom-right shadow relief) -->
+                        <Border BorderBrush="{StaticResource FrameShadow}"
+                                BorderThickness="0,0,5,5"
+                                CornerRadius="8">
+                            <!-- Layer 4: Background fill -->
+                            <Border Background="{StaticResource FrameBackground}"
+                                    CornerRadius="6"
+                                    Padding="10,5">
+                                <!-- Stat Content -->
+                                <StackPanel Orientation="Horizontal" 
+                                            HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center">
+                                    <Image Source="Textures/Time.png" 
+                                           Width="40" Height="40" 
+                                           Stretch="Uniform"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"/>
+                                    <Grid VerticalAlignment="Center">
+                                        <!-- Text Shadow -->
+                                        <TextBlock Text="{Binding Path=TimePlayed}" 
+                                                   FontSize="28" 
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource TextShadow}"
+                                                   Margin="2,2,0,0"/>
+                                        <!-- Main Text -->
+                                        <TextBlock Text="{Binding Path=TimePlayed}" 
+                                                   FontSize="28" 
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource StatText}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Border>
+                    </Border>
+                </Border>
 
-                    <!-- Stat 2: Packages Sent -->
-                    <StackPanel Grid.Column="1" 
-                                Orientation="Horizontal" 
-                                HorizontalAlignment="Center" 
-                                VerticalAlignment="Center">
-                        <Image Width="40" Height="40" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,10,0" Source="/Root;component/Textures/cube.png"/>
-                        <!-- Placeholder Icon (gray square) -->
-                        <Grid VerticalAlignment="Center">
-                            <!-- Text Shadow -->
-                            <TextBlock Text="{Binding Path=PackagesSent}" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource TextShadow}"
-                                       Margin="2,2,0,0"/>
-                            <!-- Main Text -->
-                            <TextBlock Text="{Binding Path=PackagesSent}" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource StatText}"/>
-                        </Grid>
-                    </StackPanel>
+                <!-- Stat 2: Packages Sent - 4-Layer 3D Relief Frame -->
+                <Border Grid.Column="1" BorderBrush="{StaticResource FrameOutline}"
+                        BorderThickness="6"
+                        CornerRadius="12" Margin="3,0,3,0">
+                    <!-- Layer 2: Highlight Border (top-left light relief) -->
+                    <Border BorderBrush="{StaticResource FrameHighlight}"
+                            BorderThickness="5,5,0,0"
+                            CornerRadius="10">
+                        <!-- Layer 3: Shadow Border (bottom-right shadow relief) -->
+                        <Border BorderBrush="{StaticResource FrameShadow}"
+                                BorderThickness="0,0,5,5"
+                                CornerRadius="8">
+                            <!-- Layer 4: Background fill -->
+                            <Border Background="{StaticResource FrameBackground}"
+                                    CornerRadius="6"
+                                    Padding="10,5">
+                                <!-- Stat Content -->
+                                <StackPanel Orientation="Horizontal" 
+                                            HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center">
+                                    <Image Source="/Root;component/Textures/cube.png" 
+                                           Width="40" Height="40" 
+                                           Stretch="Uniform"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"/>
+                                    <Grid VerticalAlignment="Center">
+                                        <!-- Text Shadow -->
+                                        <TextBlock Text="{Binding Path=PackagesSent}" 
+                                                   FontSize="28" 
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource TextShadow}"
+                                                   Margin="2,2,0,0"/>
+                                        <!-- Main Text -->
+                                        <TextBlock Text="{Binding Path=PackagesSent}" 
+                                                   FontSize="28" 
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource StatText}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Border>
+                    </Border>
+                </Border>
 
-                    <!-- Stat 3: Gold -->
-                    <StackPanel Grid.Column="2" 
-                                Orientation="Horizontal" 
-                                HorizontalAlignment="Center" 
-                                VerticalAlignment="Center">
-                        <Image Source="Textures/gold_icon.png" 
-                               Width="40" Height="40" 
-                               Stretch="Uniform"
-                               VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                        <Grid VerticalAlignment="Center">
-                            <!-- Text Shadow -->
-                            <TextBlock Text="{Binding Path=Gold}" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource TextShadow}"
-                                       Margin="2,2,0,0"/>
-                            <!-- Main Text -->
-                            <TextBlock Text="{Binding Path=Gold}" 
-                                       FontSize="28" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource GoldText}"/>
-                        </Grid>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                <!-- Stat 3: Gold - 4-Layer 3D Relief Frame -->
+                <Border Grid.Column="2" BorderBrush="{StaticResource FrameOutline}"
+                        BorderThickness="6"
+                        CornerRadius="12" Margin="3,0,0,0">
+                    <!-- Layer 2: Highlight Border (top-left light relief) -->
+                    <Border BorderBrush="{StaticResource FrameHighlight}"
+                            BorderThickness="5,5,0,0"
+                            CornerRadius="10">
+                        <!-- Layer 3: Shadow Border (bottom-right shadow relief) -->
+                        <Border BorderBrush="{StaticResource FrameShadow}"
+                                BorderThickness="0,0,5,5"
+                                CornerRadius="8">
+                            <!-- Layer 4: Background fill -->
+                            <Border Background="{StaticResource FrameBackground}"
+                                    CornerRadius="6"
+                                    Padding="10,5">
+                                <!-- Stat Content -->
+                                <StackPanel Orientation="Horizontal" 
+                                            HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center">
+                                    <Image Source="Textures/gold_icon.png" 
+                                           Width="40" Height="40" 
+                                           Stretch="Uniform"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"/>
+                                    <Grid VerticalAlignment="Center">
+                                        <!-- Text Shadow -->
+                                        <TextBlock Text="{Binding Path=Gold}" 
+                                                   FontSize="28" 
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource TextShadow}"
+                                                   Margin="2,2,0,0"/>
+                                        <!-- Main Text -->
+                                        <TextBlock Text="{Binding Path=Gold}" 
+                                                   FontSize="28" 
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource GoldText}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Border>
+                    </Border>
+                </Border>
+            </Grid>
         </Grid>
     </Viewbox>
 </Page>

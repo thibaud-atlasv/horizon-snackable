@@ -106,9 +106,11 @@ export class WarehouseController extends Component {
       const platform = this._platforms[i];
       const isActive = i < this._activePlatforms;
       console.log(`${LOG_TAG} Setting platform ${i} active: ${isActive}`);
-      const tc = platform.entity.getComponent(MeshComponent);
+      const tc = platform.entity.getComponent(TransformComponent);
       if (tc)
-        tc.isVisibleSelf = isActive;
+      {
+        tc.localPosition = new Vec3(tc.localPosition.x, isActive ? 0 : -10, tc.localPosition.z);
+      }
       if (!isActive) {
         // Release products from inactive platforms
         for (const product of platform.products) {
