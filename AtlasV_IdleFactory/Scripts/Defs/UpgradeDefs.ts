@@ -19,8 +19,15 @@ const CONVEYOR_SPEEDS = [CONVEYOR_BASE_SPEED, 1.5, 2.0, 2.5, 3.0, 3.5];
 const CONVEYOR_COSTS  = [50, 100, 200, 400, 800];
 
 // --- Warehouse: max stock capacity ---
-const WAREHOUSE_CAPS  = [WAREHOUSE_BASE_CAPACITY, 12, 18, 24];
-const WAREHOUSE_COSTS = [50, 100, 200, 300];
+const WAREHOUSE_CAPS  = [WAREHOUSE_BASE_CAPACITY,
+                        WAREHOUSE_BASE_CAPACITY * 2,
+                        WAREHOUSE_BASE_CAPACITY * 3,
+                        WAREHOUSE_BASE_CAPACITY * 4,
+                        WAREHOUSE_BASE_CAPACITY * 5,
+                        WAREHOUSE_BASE_CAPACITY * 6,
+                        WAREHOUSE_BASE_CAPACITY * 7,
+                        WAREHOUSE_BASE_CAPACITY * 8];
+const WAREHOUSE_COSTS = [50, 100, 200, 300, 400, 500, 600, 700];
 
 // --- Trucks: total truck count ---
 const TRUCK_COUNTS = [TRUCK_BASE_COUNT, 2, 3, 4, 5, 6];

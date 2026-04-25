@@ -125,9 +125,12 @@
             </Image.Visibility>
         </Image>
 
-        <!-- Tutorial hint — visible only on Start screen, anchored to bottom -->
+        <!-- Tutorial hint — visible only on Start screen, anchored just below the defeat line.
+             Defeat line in ScreenSpaceOverlay: Margin bottom=632 in a 4067px grid centered in 3640px canvas.
+             → line top = (632 - (4067-3640)/2) + 35 ≈ 454px from canvas bottom.
+             HintContainer sits flush below: VerticalAlignment=Bottom, Margin bottom=454. -->
         <Grid x:Name="HintContainer" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
-              Margin="0,0,0,220">
+              Margin="0,0,0,454">
             <Grid.Visibility>
                 <Binding Path="logoVisible">
                     <Binding.Converter>
@@ -136,9 +139,9 @@
                 </Binding>
             </Grid.Visibility>
             <b:Interaction.Triggers>
-                <b:PropertyChangedTrigger Binding="{Binding Path=logoVisible}">
+                <b:EventTrigger EventName="Loaded">
                     <b:ControlStoryboardAction Storyboard="{StaticResource HintPulseAnim}"/>
-                </b:PropertyChangedTrigger>
+                </b:EventTrigger>
             </b:Interaction.Triggers>
 
             <!-- Gradient band -->

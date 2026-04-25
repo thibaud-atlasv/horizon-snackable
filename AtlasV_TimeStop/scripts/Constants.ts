@@ -28,6 +28,8 @@ export const FLOOR_Y  = -6.13;  // -35px canvas depuis -6.13
 export const START_Y  = 6.13;   // symétrique — apparaît juste sous la zone score
 /** Top of the scoring zone (logs above this score 0). */
 export const PLAY_TOP = 3;  // ≈  5.49
+/** Bonus starts accumulating only below this Y — 514px dead zone at the top. */
+export const BONUS_START_Y = PLAY_TOP - (514 / (3640 / 16));
 
 // ─── Log Dimensions ───────────────────────────────────────────────────────────
 
@@ -73,18 +75,19 @@ export const RESUME_DELAY_MS = 280;   // pause after freeze before resuming fall
 // ─── Scoring Thresholds ───────────────────────────────────────────────────────
 // d = 1 - precision (distance from perfect). 0 = touching floor, 1 = at PLAY_TOP.
 
-export const PERFECT_DIST = 0.05;
-export const GREAT_DIST   = 0.13;
-export const GOOD_DIST    = 0.32;
-export const EARLY_DIST   = 0.6;
+export const PERFECT_DIST = 0.096;
+export const GREAT_DIST   = 0.256;
+export const GOOD_DIST    = 0.480;
+export const EARLY_DIST   = 0.904;
 
-export const SCORE_PERFECT = 1000;
-export const SCORE_GREAT   = 750;
-export const SCORE_GOOD    = 350;
-export const SCORE_EARLY   = 150;
-export const SCORE_MISS    = 30;
-/** Bonus: up to +250 pts based on precision (multiplied by precision 0–1). */
-export const SCORE_BONUS_MAX = 350;
+/** Grade bonus added on top of the linear precision bonus. Miss = 0. */
+export const SCORE_PERFECT = 100;
+export const SCORE_GREAT   = 75;
+export const SCORE_GOOD    = 50;
+export const SCORE_EARLY   = 25;
+export const SCORE_MISS    = 0;
+/** Linear bonus: precision × SCORE_BONUS_MAX, applied to all grades including Miss. */
+export const SCORE_BONUS_MAX = 1400;
 
 // ─── Log Physics ──────────────────────────────────────────────────────────────
 

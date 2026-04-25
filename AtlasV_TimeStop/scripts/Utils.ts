@@ -9,12 +9,12 @@
  */
 
 import {
+  BONUS_START_Y,
   EARLY_DIST,
   FLOOR_Y,
   GOOD_DIST,
   GREAT_DIST,
   PERFECT_DIST,
-  PLAY_TOP,
   SCORE_BONUS_MAX,
   SCORE_EARLY,
   SCORE_GOOD,
@@ -29,7 +29,7 @@ import { ScoreGrade } from './Types';
  * 0 = at PLAY_TOP (no score), 1 = at FLOOR_Y (perfect).
  */
 export function getPrecision(lowestY: number): number {
-  return Math.max(0, Math.min(1, (PLAY_TOP - lowestY) / (PLAY_TOP - FLOOR_Y)));
+  return Math.max(0, Math.min(1, (BONUS_START_Y - lowestY) / (BONUS_START_Y - FLOOR_Y)));
 }
 
 /**
@@ -40,12 +40,12 @@ export function calcScore(precision: number): { pts: number; grade: ScoreGrade }
   const d = 1 - precision;
 
   let grade: ScoreGrade;
-  let base:  number;
-  if      (d <= PERFECT_DIST) { grade = ScoreGrade.Perfect; base = SCORE_PERFECT; }
-  else if (d <= GREAT_DIST)   { grade = ScoreGrade.Great;   base = SCORE_GREAT;   }
-  else if (d <= GOOD_DIST)    { grade = ScoreGrade.Good;    base = SCORE_GOOD;    }
-  else if (d <= EARLY_DIST)   { grade = ScoreGrade.Early;   base = SCORE_EARLY;   }
-  else                        { grade = ScoreGrade.Miss;    base = SCORE_MISS;    }
+  let gradeBonus: number;
+  if      (d <= PERFECT_DIST) { grade = ScoreGrade.Perfect; gradeBonus = SCORE_PERFECT; }
+  else if (d <= GREAT_DIST)   { grade = ScoreGrade.Great;   gradeBonus = SCORE_GREAT;   }
+  else if (d <= GOOD_DIST)    { grade = ScoreGrade.Good;    gradeBonus = SCORE_GOOD;    }
+  else if (d <= EARLY_DIST)   { grade = ScoreGrade.Early;   gradeBonus = SCORE_EARLY;   }
+  else                        { grade = ScoreGrade.Miss;    gradeBonus = SCORE_MISS;    }
 
-  return { pts: base + Math.round(precision * SCORE_BONUS_MAX), grade };
+  return { pts: gradeBonus + Math.round(precision * SCORE_BONUS_MAX), grade };
 }

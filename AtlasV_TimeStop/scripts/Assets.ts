@@ -23,5 +23,9 @@ export namespace Assets {
   export const SlicedLeft  = new TextureAsset("@Textures/BambooSlicedLeft.png");
   export const SlicedRight = new TextureAsset("@Textures/BambooSlicedRight.png");
 
+  export const BambooChunk       = new TextureAsset("@Textures/bamboo_chunk.png");
+  export const ChunkSlicedLeft   = new TextureAsset("@Textures/BambooChunkSlicedLeft.png");
+  export const ChunkSlicedRight  = new TextureAsset("@Textures/BambooChunkSlicedRight.png");
+
   export const Debug = new TextureAsset("@Textures/debug.png");
 }

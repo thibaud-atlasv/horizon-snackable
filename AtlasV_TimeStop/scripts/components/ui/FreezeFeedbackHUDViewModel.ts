@@ -26,8 +26,8 @@ const GRADE_COLORS: Record<ScoreGrade, string> = {
   [ScoreGrade.Perfect]: '#FFD700',  // gold vif
   [ScoreGrade.Great]:   '#00E676',  // vert fluo
   [ScoreGrade.Good]:    '#00B0FF',  // bleu électrique
-  [ScoreGrade.Early]:   '#FF6D00',  // orange brûlant
-  [ScoreGrade.Miss]:    '#B0BEC5',  // gris bleuté
+  [ScoreGrade.Early]:   '#B0BEC5',  // orange brûlant
+  [ScoreGrade.Miss]:    '#FF6D00',  // gris bleuté
 };
 
 @uiViewModel()
