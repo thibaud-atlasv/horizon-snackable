@@ -19,9 +19,16 @@ import {
   WATER_SURFACE_Y,
   BUBBLE_RISE_SPEED_MIN, BUBBLE_RISE_SPEED_MAX,
   BUBBLE_SCALE_MIN, BUBBLE_SCALE_MAX,
+  BUBBLE_DRIFT_FREQ_MIN, BUBBLE_DRIFT_FREQ_MAX,
+  BUBBLE_DRIFT_AMP_MIN, BUBBLE_DRIFT_AMP_MAX,
+  BUBBLE_BREATH_FREQ_MIN, BUBBLE_BREATH_FREQ_MAX,
+  BUBBLE_ALPHA_FREQ_MIN, BUBBLE_ALPHA_FREQ_MAX,
+  HALF_SCREEN_WORLD_HEIGHT,
+  FISH_LEFT, FISH_RIGHT,
 } from '../Constants';
 import { Events } from '../Types';
 import { BubblePool } from '../Services/BubblePool';
+import { GameCameraService } from '../Services/GameCameraService';
 
 // =============================================================================
 //  BubbleController
@@ -67,11 +74,11 @@ export class BubbleController extends Component {
     this._baseScale  = scale;
     this._spawnX     = p.x;
     this._elapsed    = 0;
-    this._driftFreq  = 1.2 + Math.random() * 1.6;
-    this._driftAmp   = 0.04 + Math.random() * 0.06;
+    this._driftFreq  = BUBBLE_DRIFT_FREQ_MIN  + Math.random() * (BUBBLE_DRIFT_FREQ_MAX  - BUBBLE_DRIFT_FREQ_MIN);
+    this._driftAmp   = BUBBLE_DRIFT_AMP_MIN   + Math.random() * (BUBBLE_DRIFT_AMP_MAX   - BUBBLE_DRIFT_AMP_MIN);
     this._driftPhase = Math.random() * Math.PI * 2;
-    this._breathFreq = 1.8 + Math.random() * 1.4;
-    this._alphaFreq  = 0.8 + Math.random() * 0.8;
+    this._breathFreq = BUBBLE_BREATH_FREQ_MIN + Math.random() * (BUBBLE_BREATH_FREQ_MAX - BUBBLE_BREATH_FREQ_MIN);
+    this._alphaFreq  = BUBBLE_ALPHA_FREQ_MIN  + Math.random() * (BUBBLE_ALPHA_FREQ_MAX  - BUBBLE_ALPHA_FREQ_MIN);
     this._alphaPhase = Math.random() * Math.PI * 2;
 
     if (this._tc) {
@@ -94,15 +101,27 @@ export class BubbleController extends Component {
     const pos  = this._tc.worldPosition;
     const newY = pos.y + this._riseSpeed * dt;
 
+    // Release if bubble reached the water surface
     if (newY >= (WATER_SURFACE_Y - 0.5)) {
       this._active = false;
       BubblePool.get().release(this.entity);
       return;
     }
 
-    // Horizontal wobble — absolute offset from spawn X
+    // Release if bubble drifted off-screen (above camera top or outside X bounds)
+    const camCenterY = GameCameraService.get().getCameraCenterY();
     const driftX = Math.sin(this._elapsed * this._driftFreq + this._driftPhase) * this._driftAmp;
-    this._tc.worldPosition = new Vec3(this._spawnX + driftX, newY, pos.z);
+    const currentX = this._spawnX + driftX;
+    if (newY > camCenterY + HALF_SCREEN_WORLD_HEIGHT + 2
+        || currentX < FISH_LEFT - 2
+        || currentX > FISH_RIGHT + 2) {
+      this._active = false;
+      BubblePool.get().release(this.entity);
+      return;
+    }
+
+    // Horizontal wobble — absolute offset from spawn X
+    this._tc.worldPosition = new Vec3(currentX, newY, pos.z);
 
     // Scale breathing
     const s = this._baseScale * (1 + 0.08 * Math.sin(this._elapsed * this._breathFreq));

@@ -14,8 +14,8 @@ import {
 import { RESET_DELAY } from '../Constants';
 import { Events, GamePhase } from '../Types';
 import { PlayerProgressService } from '../Services/PlayerProgressService';
-import { GoldCoinsDebugService } from '../Services/GoldCoinsDebugService';
 import { GoldCoinsService } from '../Services/GoldCoinsService';
+import { BubblePool } from '../Services/BubblePool';
 
 // =============================================================================
 //  GameManager — phase orchestrator.
@@ -30,8 +30,8 @@ import { GoldCoinsService } from '../Services/GoldCoinsService';
 export class GameManager extends Component {
 
   private _networking = NetworkingService.get();
-  private _goldCoinsDebug = GoldCoinsDebugService.get();
-  private _goldCoins      = GoldCoinsService.get();
+  private _gold = GoldCoinsService.get();
+  private _bubbles = BubblePool.get();
   private _isServer   = true;
 
   private _phase      : GamePhase = GamePhase.Idle;
@@ -45,6 +45,7 @@ export class GameManager extends Component {
     if (this._isServer) return;
     EventService.sendLocally(Events.GameStarted, {});
     this._setPhase(GamePhase.Idle);
+    this._bubbles.prewarm();
   }
 
   @subscribe(OnPlayerCreateEvent)
@@ -59,7 +60,7 @@ export class GameManager extends Component {
   onCastRequested(_p: Events.CastRequestedPayload): void {
     if (this._isServer) return;
     if (this._phase === GamePhase.Idle) {
-this._setPhase(GamePhase.Throwing);
+      this._setPhase(GamePhase.Throwing);
     }
   }
 

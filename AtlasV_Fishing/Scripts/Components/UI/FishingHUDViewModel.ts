@@ -3,14 +3,18 @@ import {
   CustomUiComponent,
   NetworkingService,
   OnEntityStartEvent,
+  OnFocusedInteractionInputStartedEvent,
+  OnFocusedInteractionInputEndedEvent,
   UiViewModel,
   component,
   subscribe,
   uiViewModel,
   type Maybe,
 } from 'meta/worlds';
+import type { OnFocusedInteractionInputEventPayload } from 'meta/worlds';
 
 import { Events, HUDEvents } from '../../Types';
+import { GamePhase } from '../../Types';
 import { FishCollectionService } from '../../Services/FishCollectionService';
 import { FISH_DEFS } from '../../FishDefs';
 
@@ -26,6 +30,7 @@ export class FishingHUDData extends UiViewModel {
   progressBarWidth  : number  = 0;
   progressBarVisible: boolean = false;
   fishProgressText  : string  = `0/${TOTAL_FISH_COUNT}`;
+  isSwipeHintVisible: string  = 'False';
 }
 
 @component()
@@ -33,6 +38,8 @@ export class FishingHUDViewModel extends Component {
 
   private _vm  = new FishingHUDData();
   private _ui: Maybe<CustomUiComponent> = null;
+  private _isDiving  = false;
+  private _isTouching = false;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
@@ -66,5 +73,27 @@ export class FishingHUDViewModel extends Component {
     this._vm.progressPercent  = percent;
     this._vm.progressBarWidth = (percent / 100) * XP_BAR_WIDTH;
     this._vm.fishProgressText = `${discovered}/${TOTAL_FISH_COUNT}`;
+  }
+
+  @subscribe(Events.PhaseChanged)
+  onPhaseChanged(p: Events.PhaseChangedPayload): void {
+    this._isDiving = p.phase === GamePhase.Diving;
+    this._updateSwipeHint();
+  }
+
+  @subscribe(OnFocusedInteractionInputStartedEvent)
+  onTouchStart(_p: OnFocusedInteractionInputEventPayload): void {
+    this._isTouching = true;
+    this._updateSwipeHint();
+  }
+
+  @subscribe(OnFocusedInteractionInputEndedEvent)
+  onTouchEnd(_p: OnFocusedInteractionInputEventPayload): void {
+    this._isTouching = false;
+    this._updateSwipeHint();
+  }
+
+  private _updateSwipeHint(): void {
+    this._vm.isSwipeHintVisible = (this._isDiving && !this._isTouching) ? 'True' : 'False';
   }
 }

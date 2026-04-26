@@ -12,7 +12,6 @@ import {
 
 import { Events, NetworkEvents } from '../Types';
 import {
-  GOLD_REWARD_COMMON, GOLD_REWARD_RARE, GOLD_REWARD_LEGENDARY,
   LINE_MAX_LEVEL, HOOK_MAX_LEVEL,
   lineDepthAtLevel, hookMaxFishAtLevel, upgradeCost,
 } from '../Constants';
@@ -98,10 +97,7 @@ export class PlayerProgressService extends Service {
     this._counts.set(p.defId, (this._counts.get(p.defId) ?? 0) + 1);
     const def = FISH_DEFS.find(d => d.id === p.defId);
     if (def) {
-      const reward = def.rarity === 'legendary' ? GOLD_REWARD_LEGENDARY
-                   : def.rarity === 'rare'      ? GOLD_REWARD_RARE
-                   :                              GOLD_REWARD_COMMON;
-      this._gold += reward;
+      this._gold += def.gold;
     }
     this._persist();
     // Send updated gold to client

@@ -47,25 +47,22 @@ The hook's max dive depth increases as zones unlock, giving access to deeper fis
 ## Architecture
 
 ```
-ClientSetup           → camera lock, focused interaction, registers camera + flash plane to services
+ClientSetup           → camera lock, focused interaction, registers camera entity to GameCameraService
 GameManager           → phase state machine (Idle → Throwing → Diving → Surfacing → Launching → Reset)
 HookController        → hook physics, line rendering, fish collection, launch reward anim
 SimpleFishController  → per-fish swim AI, hooked follow, launch arc (implements IFishInstance)
 FishRegistry          → live IFishInstance spatial lookup (findHits)
-FishPoolService       → entity pool — activates/benches fish without spawning/destroying
-FishSpawnService      → decides when and where to activate fish from the pool
+FishPoolService       → entity pool — pre-spawns fish, activates/benches without spawning/destroying; rolls species by depth wave formula
 FishDefs              → static data: all 18 species definitions
 FishCollectionService → catch journal (unique counts, persisted via PlayerProgressService)
-ZoneProgressionService → tracks unlocked zones, bait floor Y
-GameCameraService     → vertical scroll following hook during dive + camera shake
+PlayerProgressService → server-side save/load; syncs gold, upgrades, catch journal to client
+GameCameraService     → vertical scroll following hook during dive + one-shot and continuous camera shake
 VFXService            → centralised juice: shake, flash, freeze frame, haptic stub, stretch/squash
-BubblePool            → pool of rising bubble entities attached to fish
-InteractiveHUDViewModel → buttons-only HUD layer (cast button + 3 upgrade buttons); isInteractable=true during Idle, isVisible=false otherwise to stop blocking swipe input
-GameHUDViewModel      → counters HUD layer (gold + depth); isInteractable=false (never blocks touch). Gold visible during above-water phases, depth visible during Diving, swap animation between them
-FishingHUDViewModel   → species progress bar, zone unlock notification (depth counter moved to GameHUD)
-CatchDisplayViewModel → post-run catch reveal panel with elastic animations
-GoldExplosionViewModel → poolable WorldSpace gold burst effect (spawned when fish convert to gold)
-GoldExplosionPool     → pre-spawns pool of GoldExplosion UI entities; on FishCollected, resolves rarity → gold value and plays explosion at fish position
+GoldCoinsService      → coin burst + gold value text animation on FishCollected (canvas-based, pooled)
+BubblePool            → pre-spawns bubble entities; fish request bubbles via acquire(); auto-release on surface hit
+InteractiveHUDViewModel → buttons-only HUD layer (cast button + upgrade buttons); isInteractable=true during Idle, isVisible=false otherwise to stop blocking swipe input
+GameHUDViewModel      → counters HUD layer (gold + depth); isInteractable=false (never blocks touch)
+FishingHUDViewModel   → species discovery progress bar
 ```
 
 ## VFX System

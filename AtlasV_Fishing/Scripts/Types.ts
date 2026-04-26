@@ -19,6 +19,7 @@ export interface IFishDef {
   id          : number;
   name        : string;
   rarity      : FishRarity;
+  gold        : number;     // gold awarded when caught; drives burst size and text color
   template    : TemplateAsset;
   sizeMin     : number;
   sizeMax     : number;
@@ -98,9 +99,8 @@ export namespace Events {
 
   export class InitBubblePayload { x: number = 0; y: number = 0; }
   export const InitBubble = new LocalEvent<InitBubblePayload>('EvInitBubble', InitBubblePayload);
-}
 
-export namespace Events {
+  // ── Collection & progression ─────────────────────────────────────────────────
   export class FishCaughtPayload { fishId: number = 0; defId: number = 0; }
   export const FishCaught = new LocalEvent<FishCaughtPayload>('EvFishCaught', FishCaughtPayload);
 
@@ -122,6 +122,7 @@ export namespace Events {
   export class BuyUpgradePayload { upgrade: 'line' | 'hook' = 'line'; }
   export const BuyUpgrade = new LocalEvent<BuyUpgradePayload>('EvBuyUpgrade', BuyUpgradePayload);
 }
+
 
 export namespace HUDEvents {
 

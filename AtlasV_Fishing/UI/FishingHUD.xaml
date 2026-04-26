@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d"
-      Background="Transparent">
+      Background="Transparent" d:DesignWidth="2000" d:DesignHeight="4000">
 
     <Page.Resources>
         <!-- UI Colors -->
@@ -20,7 +20,45 @@
         <SolidColorBrush x:Key="XPCursor1Brush" Color="#FF4A90D9"/>
         <SolidColorBrush x:Key="XPCursor2Brush" Color="#FF1a2a4a"/>
 
-        <!-- ══ HUD Show/Hide Storyboards ══════════════════════════════════ -->
+        <!-- Swipe Hint Show/Hide Storyboards -->
+        <Storyboard x:Key="SwipeHintFadeIn">
+            <DoubleAnimation Storyboard.TargetName="SwipeHintContainer"
+                             Storyboard.TargetProperty="Opacity"
+                             To="1" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+        <Storyboard x:Key="SwipeHintFadeOut">
+            <DoubleAnimation Storyboard.TargetName="SwipeHintContainer"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Swipe Hint Pulse Animation -->
+        <Storyboard x:Key="SwipeHintPulse" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetName="SwipeHintLeftArrow"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                             From="0" To="-25" Duration="0:0:0.7">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="SwipeHintRightArrow"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                             From="0" To="25" Duration="0:0:0.7">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- HUD Show/Hide Storyboards -->
         <Storyboard x:Key="HUDShowAnimation">
             <DoubleAnimation Storyboard.TargetName="HUDRootScale"
                              Storyboard.TargetProperty="ScaleX"
@@ -147,6 +185,85 @@
         </Grid>
 
         <!-- NEW ZONE UNLOCKED Message - Above XP Bar -->
+
+        <!-- ── Swipe Hint (center screen, Diving phase only) ──── -->
+        <Grid x:Name="SwipeHintContainer"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Margin="0,-200,0,0"
+              Opacity="0"
+              IsHitTestVisible="False">
+
+            <b:Interaction.Triggers>
+                <b:DataTrigger Binding="{Binding isSwipeHintVisible}" Value="True">
+                    <b:ControlStoryboardAction Storyboard="{StaticResource SwipeHintFadeIn}"/>
+                    <b:ControlStoryboardAction Storyboard="{StaticResource SwipeHintPulse}" ControlStoryboardOption="Play"/>
+                </b:DataTrigger>
+                <b:DataTrigger Binding="{Binding isSwipeHintVisible}" Value="False">
+                    <b:ControlStoryboardAction Storyboard="{StaticResource SwipeHintFadeOut}"/>
+                    <b:ControlStoryboardAction Storyboard="{StaticResource SwipeHintPulse}" ControlStoryboardOption="Stop"/>
+                </b:DataTrigger>
+            </b:Interaction.Triggers>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <!-- Left arrow triangle -->
+                <Path x:Name="SwipeHintLeftArrow"
+                      Data="M120,0 L0,75 L120,150 Z"
+                      Width="120" Height="150"
+                      Stretch="Fill"
+                      VerticalAlignment="Center"
+                      Margin="0,0,50,0"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Path.Fill>
+                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                            <GradientStop Color="#FF00E5FF" Offset="0"/>
+                            <GradientStop Color="#0000E5FF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Path.Fill>
+                    <Path.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </Path.RenderTransform>
+                </Path>
+
+                <!-- Center text -->
+                <TextBlock Text="Swipe"
+                           FontSize="150"
+                           FontWeight="Bold"
+                           Stroke="#FF000000"
+                           StrokeThickness="10"
+                           VerticalAlignment="Center">
+                    <TextBlock.Foreground>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#FF40E0D0" Offset="0"/>
+                            <GradientStop Color="#FF20B2AA" Offset="1"/>
+                        </LinearGradientBrush>
+                    </TextBlock.Foreground>
+                </TextBlock>
+
+                <!-- Right arrow triangle -->
+                <Path x:Name="SwipeHintRightArrow"
+                      Data="M0,0 L120,75 L0,150 Z"
+                      Width="120" Height="150"
+                      Stretch="Fill"
+                      VerticalAlignment="Center"
+                      Margin="50,0,0,0"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Path.Fill>
+                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                            <GradientStop Color="#0000E5FF" Offset="0"/>
+                            <GradientStop Color="#FF00E5FF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Path.Fill>
+                    <Path.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </Path.RenderTransform>
+                </Path>
+
+            </StackPanel>
+        </Grid>
 
         <!-- XP Progress Bar - Bottom of Screen -->
     </Grid>

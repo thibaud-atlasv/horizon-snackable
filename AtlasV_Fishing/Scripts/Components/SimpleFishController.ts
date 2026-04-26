@@ -16,6 +16,7 @@ import {
 
 import {
   FISH_LEFT, FISH_RIGHT,
+  FISH_PAUSE_DUR_MIN, FISH_PAUSE_DUR_MAX, FISH_BOB_AMP, FISH_BOB_FREQ, FISH_MIN_MOVE_DIST,
   BUBBLE_INTERVAL_MIN, BUBBLE_INTERVAL_MAX,
   BUBBLE_SPAWN_OFFSET_X, BUBBLE_SPAWN_OFFSET_Y,
 } from '../Constants';
@@ -23,12 +24,6 @@ import { Events, type IFishInstance } from '../Types';
 import { FishRegistry } from '../Services/FishRegistry';
 import { BubblePool } from '../Services/BubblePool';
 import { VFXService } from '../Services/VFXService';
-
-const PAUSE_DUR_MIN = 1.2;
-const PAUSE_DUR_MAX = 3.2;
-const BOB_AMP       = 0.06;
-const BOB_FREQ      = 0.55;
-const MIN_MOVE_DIST = 2.5;
 
 let _nextFishId = 1;
 
@@ -174,7 +169,7 @@ export class SimpleFishController extends Component implements IFishInstance {
 
     const t = WorldService.get().getWorldTime();
     this._updateMovement(dt);
-    this._currentY = this._baseY + Math.sin(t * BOB_FREQ + this._size * 10) * BOB_AMP;
+    this._currentY = this._baseY + Math.sin(t * FISH_BOB_FREQ + this._size * 10) * FISH_BOB_AMP;
     this._tc.worldPosition = new Vec3(this._currentX, this._currentY, 0);
     this._updateBubble(dt);
   }
@@ -203,7 +198,7 @@ export class SimpleFishController extends Component implements IFishInstance {
     const dx = this._targetX - this._currentX;
     if (Math.abs(dx) < 0.05) {
       this._pausing  = true;
-      this._pauseDur = PAUSE_DUR_MIN + Math.random() * (PAUSE_DUR_MAX - PAUSE_DUR_MIN);
+      this._pauseDur = FISH_PAUSE_DUR_MIN + Math.random() * (FISH_PAUSE_DUR_MAX - FISH_PAUSE_DUR_MIN);
       return;
     }
     const dir = Math.sign(dx);
@@ -229,7 +224,7 @@ export class SimpleFishController extends Component implements IFishInstance {
   private _randomTargetX(from: number): number {
     let t: number;
     do { t = FISH_LEFT + Math.random() * (FISH_RIGHT - FISH_LEFT); }
-    while (Math.abs(t - from) < MIN_MOVE_DIST);
+    while (Math.abs(t - from) < FISH_MIN_MOVE_DIST);
     return t;
   }
 }

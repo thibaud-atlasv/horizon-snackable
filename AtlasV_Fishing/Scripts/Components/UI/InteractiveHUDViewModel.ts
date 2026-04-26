@@ -58,8 +58,8 @@ export class InteractiveHUDData extends UiViewModel {
   isInteractive: boolean = true;
 
   /** Upgrade levels */
-  lineLevel: number = 1;
-  hookLevel: number = 1;
+  lineLevel: number = 0;
+  hookLevel: number = 0;
 
   /** Upgrade costs (display strings) */
   lineCost: string = '100';
@@ -97,21 +97,20 @@ export class InteractiveHUDViewModel extends Component {
   private _ui: Maybe<CustomUiComponent> = null;
 
   /** Track hide timer so we can cancel it if show is requested mid-hide */
-  private _hideTimerId: number = 0;
+  private _hideTimerId: ReturnType<typeof setTimeout> | null = null;
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
     if (NetworkingService.get().isServerContext()) return;
-    console.log('[InteractiveHUDViewModel] onStart');
     this._ui = this.entity.getComponent(CustomUiComponent);
     if (this._ui) this._ui.dataContext = this._vm;
   }
 
   @subscribe(OnEntityDestroyEvent)
   onDestroy(): void {
-    if (this._hideTimerId) {
-      clearInterval(this._hideTimerId);
-      this._hideTimerId = 0;
+    if (this._hideTimerId !== null) {
+      clearTimeout(this._hideTimerId);
+      this._hideTimerId = null;
     }
   }
 
@@ -119,21 +118,18 @@ export class InteractiveHUDViewModel extends Component {
   @subscribe(interactiveCastPressedEvent)
   private _onCastPressed(): void {
     if (NetworkingService.get().isServerContext()) return;
-    console.log('[InteractiveHUDViewModel] Cast pressed');
     EventService.sendLocally(Events.CastRequested, {});
   }
 
   @subscribe(interactiveBuyLineEvent)
   private _onBuyLine(): void {
     if (NetworkingService.get().isServerContext()) return;
-    console.log('[InteractiveHUDViewModel] Buy line');
     EventService.sendLocally(Events.BuyUpgrade, { upgrade: 'line' });
   }
 
   @subscribe(interactiveBuyHookEvent)
   private _onBuyHook(): void {
     if (NetworkingService.get().isServerContext()) return;
-    console.log('[InteractiveHUDViewModel] Buy hook');
     EventService.sendLocally(Events.BuyUpgrade, { upgrade: 'hook' });
   }
 
@@ -174,10 +170,9 @@ export class InteractiveHUDViewModel extends Component {
   // ── Show / Hide with isVisible gating ────────────────────────────────────
   /** Show: set isVisible=true FIRST so XAML can render, then trigger animation */
   private _showHUD(): void {
-    // Cancel any pending hide
-    if (this._hideTimerId) {
-      clearInterval(this._hideTimerId);
-      this._hideTimerId = 0;
+    if (this._hideTimerId !== null) {
+      clearTimeout(this._hideTimerId);
+      this._hideTimerId = null;
     }
 
     if (this._ui) this._ui.isVisible = true;
@@ -190,19 +185,17 @@ export class InteractiveHUDViewModel extends Component {
     this._vm.isHudVisible = 'False';
     this._vm.isInteractive = false;
 
-    // Cancel any previous pending hide
-    if (this._hideTimerId) {
-      clearInterval(this._hideTimerId);
-      this._hideTimerId = 0;
+    if (this._hideTimerId !== null) {
+      clearTimeout(this._hideTimerId);
+      this._hideTimerId = null;
     }
 
     // Delay isVisible=false until exit animation completes (~700ms)
-    this._hideTimerId = setInterval(() => {
-      clearInterval(this._hideTimerId);
-      this._hideTimerId = 0;
+    this._hideTimerId = setTimeout(() => {
+      this._hideTimerId = null;
       if (this._ui && this._vm.isHudVisible === 'False') {
         this._ui.isVisible = false;
       }
-    }, 700) as unknown as number;
+    }, 700);
   }
 }

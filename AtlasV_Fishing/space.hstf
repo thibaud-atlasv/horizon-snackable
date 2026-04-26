@@ -23,89 +23,6 @@
             "attributes": []
         },
         {
-            "id": "6617c851-7802-4e27-a10f-1c6524bc8a8e",
-            "name": "Mid(1)",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 3,
-                        "data": {
-                            "localPosition": {
-                                "x": 0.0,
-                                "y": -5.349667549133301,
-                                "z": -1.0100014209747315
-                            },
-                            "localRotation": {
-                                "x": 1.570451021194458,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "localScale": {
-                                "x": 10.739998817443848,
-                                "y": 2.000000476837158,
-                                "z": 24.860008239746095
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::MeshPlatformComponent",
-                        "version": 11,
-                        "data": {
-                            "mesh": {
-                                "packageOrRemoteId": "24407058055595655",
-                                "ingestionId": "7277538467424364748",
-                                "targetId": "2768521373"
-                            },
-                            "isVisibleSelf": false,
-                            "lightingParams": {
-                                "class": "horizon::platform_api::LightingParams",
-                                "data": {
-                                    "diffuseGISource": "LightProbes"
-                                }
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::ColorPlatformComponent",
-                        "version": 2,
-                        "data": {
-                            "color": {
-                                "r": 1.0,
-                                "g": 1.0,
-                                "b": 1.0,
-                                "a": 1.0
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                },
-                {
-                    "data": {
-                        "class": "horizon::platform_api::MaterialPlatformComponent",
-                        "version": 1,
-                        "data": {
-                            "materials": [
-                                {
-                                    "packageOrRemoteId": "26220234944285836",
-                                    "ingestionId": "11032850136812762580",
-                                    "targetId": "157013062"
-                                }
-                            ]
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
-        },
-        {
             "id": "e357b541-202d-424a-9d96-b3e3c4d44e07",
             "name": "SpawnPoint",
             "components": [
@@ -319,7 +236,7 @@
         },
         {
             "id": "b64be504-0239-4b05-8b3c-2beaf5229523",
-            "name": "Mid",
+            "name": "Background",
             "components": [
                 {
                     "data": {
@@ -1025,11 +942,6 @@
         }
     ],
     "relationships": [
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "6617c851-7802-4e27-a10f-1c6524bc8a8e",
-            "destination": "1293a97b-0174-449b-b0a8-12baafd20dd3"
-        },
         {
             "relationshipType": "RelationChildOf",
             "source": "e357b541-202d-424a-9d96-b3e3c4d44e07",

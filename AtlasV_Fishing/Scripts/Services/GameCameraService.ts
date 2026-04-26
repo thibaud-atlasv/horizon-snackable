@@ -1,10 +1,8 @@
 import {
-  CameraMode,
   CameraService,
   CameraComponent,
   OnWorldUpdateEvent,
   type OnWorldUpdateEventPayload,
-  Quaternion,
   Service,
   TransformComponent,
   Vec3,
@@ -16,6 +14,7 @@ import {
 
 import { Events, GamePhase } from '../Types';
 import { FishPoolService } from './FishPoolService';
+import { CAMERA_SCROLL_LERP_SPEED } from '../Constants';
 
 // =============================================================================
 //  GameCameraService — vertical scroll following hook during dive.
@@ -35,13 +34,11 @@ export class GameCameraService extends Service {
   private _basePosX = 0;
   private _basePosY = 0;
   private _basePosZ = 0;
-  private _baseRot!: Quaternion;
-  private _fov      = 60;
   private _ready    = false;
 
   private _scrollOffsetY = 0;
   private _scrollTargetY = 0;
-  private readonly _scrollLerpSpeed = 4.0;
+  private readonly _scrollLerpSpeed = CAMERA_SCROLL_LERP_SPEED;
 
   private _shakeTimer     = 0;
   private _shakeDuration  = 0;
@@ -54,9 +51,7 @@ export class GameCameraService extends Service {
   private _contShakeActive = false;
 
   private _phase: GamePhase = GamePhase.Idle;
-  private _camera : Maybe<CameraComponent> = null;
-
-
+  private _camera: Maybe<CameraComponent> = null;
 
   // ── Public API ───────────────────────────────────────────────────────────────
 
@@ -66,13 +61,9 @@ export class GameCameraService extends Service {
     this._basePosX = tc.worldPosition.x;
     this._basePosY = tc.worldPosition.y;
     this._basePosZ = tc.worldPosition.z;
-    this._baseRot  = tc.worldRotation;
-
     this._camera = entity.getComponent(CameraComponent);
-    if (this._camera)
-    {      
-      CameraService.get().setActiveCamera({camera:this._camera});
-      this._fov = this._camera.fieldOfView;
+    if (this._camera) {
+      CameraService.get().setActiveCamera({ camera: this._camera });
     }
 
     this._ready = true;
@@ -93,6 +84,10 @@ export class GameCameraService extends Service {
   stopContinuousShake(): void {
     this._contShakeAmp    = 0;
     this._contShakeActive = false;
+  }
+
+  getCameraCenterY(): number {
+    return this._basePosY + this._scrollOffsetY;
   }
 
   // ── Events ───────────────────────────────────────────────────────────────────
@@ -153,25 +148,13 @@ export class GameCameraService extends Service {
   // ── Private ───────────────────────────────────────────────────────────────────
 
   private _applyCamera(): void {
-    if (this._camera)
-    {
-      const tc = this._camera.entity.getComponent(TransformComponent);
-      if (!tc) return;
-      tc.worldPosition = new Vec3(
-        this._basePosX + this._shakeOffsetX,
-        this._basePosY + this._scrollOffsetY + this._shakeOffsetY,
-        this._basePosZ,
-      );
-    }
-    /*setCameraMode(CameraMode.Fixed, {
-      position: new Vec3(
-        this._basePosX + this._shakeOffsetX,
-        this._basePosY + this._scrollOffsetY + this._shakeOffsetY,
-        this._basePosZ,
-      ),
-      rotation: this._baseRot,
-      duration: 0,
-      fov:      this._fov,
-    });*/
+    if (!this._camera) return;
+    const tc = this._camera.entity.getComponent(TransformComponent);
+    if (!tc) return;
+    tc.worldPosition = new Vec3(
+      this._basePosX + this._shakeOffsetX,
+      this._basePosY + this._scrollOffsetY + this._shakeOffsetY,
+      this._basePosZ,
+    );
   }
 }

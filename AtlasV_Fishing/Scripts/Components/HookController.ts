@@ -23,14 +23,17 @@ import {
   WATER_SURFACE_Y, HALF_W, TIP_X, TIP_Y, HOOK_IDLE_X, HOOK_IDLE_Y,
   COLOR_LINE, COLOR_LINE_WATER,
   CAST_CENTER_VX, CAST_VX_RANDOM, CAST_VX_MIN, CAST_VY, CAST_GRAVITY,
-  DIVE_SPEED, DIVE_SWIPE_FORCE, DIVE_X_DRAG, DIVE_BOUNCE, DIVE_CENTER_PULL,
+  DIVE_SPEED, DIVE_SWIPE_FORCE, DIVE_SWIPE_MAX_SPEED, DIVE_X_DRAG, DIVE_BOUNCE, DIVE_CENTER_PULL,
+  LINE_THICKNESS,
   lineDepthAtLevel, hookMaxFishAtLevel,
   SURFACE_SPEED,
   LAUNCH_VY_MIN, LAUNCH_VY_MAX, LAUNCH_VX_SPREAD, LAUNCH_GRAVITY, LAUNCH_STAGGER, LAUNCH_EXIT_Y, LAUNCH_TIMEOUT,
+  HOOK_BUBBLE_INTERVAL_DIVE, HOOK_BUBBLE_INTERVAL_SURFACE, HOOK_BUBBLE_X_JITTER,
 } from '../Constants';
 import { Events, GamePhase, type IFishInstance } from '../Types';
 import { FishRegistry } from '../Services/FishRegistry';
 import { FishPoolService } from '../Services/FishPoolService';
+import { BubblePool } from '../Services/BubblePool';
 import { SimpleFishController } from './SimpleFishController';
 import { VFXService } from '../Services/VFXService';
 
@@ -87,6 +90,9 @@ export class HookController extends Component {
   private _hookedFish  : IFishInstance[] = [];
   private _swipeStartX  = 0;
 
+  // ── Hook bubble trail ─────────────────────────────────────────────────────────
+  private _bubbleTimer   = 0;
+
   // ── Launch state ─────────────────────────────────────────────────────────────
   private _launchQueue    : IFishInstance[] = [];
   private _launchTimer    = 0;
@@ -141,11 +147,13 @@ export class HookController extends Component {
 
     if (p.phase === GamePhase.Diving) {
       this._diveStart = this._hookY;
+      this._bubbleTimer = 0;
     }
 
     if (p.phase === GamePhase.Surfacing) {
       this._hookVX = 0;
       this._surfaceTimer = 0;
+      this._bubbleTimer = 0;
     }
 
     if (p.phase === GamePhase.Launching) {
@@ -175,8 +183,7 @@ export class HookController extends Component {
     const delta = p.screenPosition.x - this._swipeStartX;
     this._swipeStartX = p.screenPosition.x;
     this._hookVX += delta * DIVE_SWIPE_FORCE;
-    // Clamp so fish don't fly off-screen
-    this._hookVX = Math.max(-6, Math.min(6, this._hookVX));
+    this._hookVX = Math.max(-DIVE_SWIPE_MAX_SPEED, Math.min(DIVE_SWIPE_MAX_SPEED, this._hookVX));
 
     // Wiggle attached fish slightly for juicy feedback
     this._jiggleHookedFish(delta);
@@ -265,13 +272,14 @@ export class HookController extends Component {
     // Update hooked fish positions — cluster around hook
     this._updateHookedPositions();
 
+    // Bubble trail while underwater
+    this._tickHookBubbles(dt, HOOK_BUBBLE_INTERVAL_DIVE);
+
     // Check end conditions
     const depth = this._diveStart - this._hookY;
     const atMax = depth >= this._maxDepth;
     const full  = this._hookedFish.length >= this._maxFish;
     if (atMax || full) {
-      const reason = atMax ? 'max depth reached' : 'hook full';
-      console.log(`[Hook] Surface — ${reason} | depth: ${depth.toFixed(1)}/${this._maxDepth} | fish: ${this._hookedFish.length}/${this._maxFish} | line lv${this._lineLevel} | hook lv${this._hookLevel}`);
       EventService.sendLocally(Events.RequestSurface, {});
     }
   }
@@ -286,6 +294,9 @@ export class HookController extends Component {
 
     this._moveHook(this._hookX, this._hookY);
     this._updateHookedPositions();
+
+    // Bubble trail while underwater (faster interval for surfacing turbulence)
+    this._tickHookBubbles(dt, HOOK_BUBBLE_INTERVAL_SURFACE);
 
     // Crescendo shake over 1.5s, capped at 0.12
     this._surfaceTimer += dt;
@@ -359,6 +370,16 @@ export class HookController extends Component {
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
 
+  private _tickHookBubbles(dt: number, interval: number): void {
+    if (this._hookY >= WATER_SURFACE_Y) return;
+    this._bubbleTimer -= dt;
+    if (this._bubbleTimer <= 0) {
+      const jx = (Math.random() * 2 - 1) * HOOK_BUBBLE_X_JITTER;
+      BubblePool.get().acquire(this._hookX + jx, this._hookY);
+      this._bubbleTimer = interval;
+    }
+  }
+
   private _updateHookedPositions(): void {
     for (let i = 0; i < this._hookedFish.length; i++) {
       // Cluster fish around hook with slight offsets based on index
@@ -405,7 +426,7 @@ export class HookController extends Component {
     if (len < 0.001) return;
     const angDeg = Math.atan2(-dx, dy) * (180 / Math.PI);
     tc.worldPosition = new Vec3((x1 + x2) / 2, (y1 + y2) / 2, 0);
-    tc.localScale    = new Vec3(0.04, len, 0.04);
+    tc.localScale    = new Vec3(LINE_THICKNESS, len, LINE_THICKNESS);
     tc.worldRotation = Quaternion.fromEuler(new Vec3(0, 0, angDeg));
   }
 

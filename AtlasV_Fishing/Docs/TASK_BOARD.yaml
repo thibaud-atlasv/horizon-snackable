@@ -142,6 +142,31 @@ tasks:
     summary: Retiré bouton BAIT, agrandi LINE/HOOK (500px), nouveau format "16m → 32m" avec flèche Path, propriétés currentValue/nextValue bindées
     files: [UI/InteractiveHUD.xaml, Scripts/Components/UI/InteractiveHUDViewModel.ts]
 
+  - name: Swipe Helper UI
+    status: done
+    summary: Texte "Swipe" 150px avec dégradé turquoise vertical + stroke noir 10px. Flèches 120x150px. Espacement 50px. Animation pulse 25px.
+    files: [UI/FishingHUD.xaml, Scripts/Components/UI/FishingHUDViewModel.ts]
+
+  - name: Hook Bubble Trail
+    status: done
+    summary: Bulles spawnées sur le trajet du hook via BubblePool. Intervalle 0.12s en descente, 0.07s en remontée. Jitter X ±0.3 pour effet naturel.
+    files: [Scripts/Components/HookController.ts, Scripts/Constants.ts]
+
+  - name: Bubble Offscreen Release
+    status: done
+    summary: BubbleController release les bulles hors écran (au-dessus de la caméra +2 ou hors bounds X ±2). GameCameraService expose getCameraCenterY().
+    files: [Scripts/Components/BubbleController.ts, Scripts/Services/GameCameraService.ts]
+
+  - name: UI XAML Editor Fix
+    status: done
+    summary: Ajouté mc:Ignorable="d" manquant sur InteractiveHUD et GameHUD. Ajouté d:DesignWidth/Height sur FishingHUD. Les fichiers s'ouvrent maintenant dans l'éditeur.
+    files: [UI/InteractiveHUD.xaml, UI/GameHUD.xaml, UI/FishingHUD.xaml]
+
+  - name: Upgrade Button Sprites
+    status: done
+    summary: Icônes bait/hook en watermark collées à la bordure gauche des boutons (130x130, opacity 0.35, margin 0).
+    files: [UI/InteractiveHUD.xaml]
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []
