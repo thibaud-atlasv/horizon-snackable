@@ -1,3 +1,3 @@
 <Project>
-  <StartupDocument>UI/CatchDisplay.xaml</StartupDocument>
+  <StartupDocument>UI/GameHUD.xaml</StartupDocument>
 </Project>

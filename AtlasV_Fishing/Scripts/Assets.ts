@@ -31,4 +31,7 @@ export namespace Assets {
   // ── Scene Elements ────────────────────────────────────────────────────────────
   export const CubeTemplate   = new TemplateAsset('../Templates/Cube.hstf');
   export const BubbleTemplate = new TemplateAsset('../Templates/Bubble.hstf');
+
+  // ── UI Effects ──────────────────────────────────────────────────────────────
+  export const GoldExplosionUI = new TemplateAsset('../Templates/GameplayObjects/GoldExplosion.hstf');
 }

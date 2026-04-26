@@ -128,7 +128,39 @@ chopping_block:
     status: in_progress
     summary: Creating UI cover art banner with "FISHING" text centered
 
+  - name: Custom GameHUD UI
+    status: in_progress
+    summary: Created custom HUD with 3D rounded cartoon buttons, cast button, 3 upgrade buttons with gold prices, fish/gold counters in cartouches. ViewModel ready for hooking.
+    files: [UI/GameHUD.xaml, Scripts/Components/UI/GameHUDViewModel.ts]
+    subtasks:
+      - name: Main HUD Layout + ViewModel
+        status: done
+      - name: Hook to GameManager
+        status: done
+        summary: GameHUD visible en IDLE uniquement, bouton cast déclenche Events.CastRequested. FishingHUD visible en Diving/Surfacing avec compteur profondeur temps réel.
+        files: [Scripts/GameHUD/GameHUDViewModel.ts, Scripts/GameHUD/FishingHUDViewModel.ts, UI/FishingHUD.xaml, Scripts/Game/Types.ts, Scripts/Game/GameManager.ts]
+      - name: Premium Visual Style Refonte
+        status: done
+        summary: Double bordures blanc/noir, textes avec stroke outlines, shadows dégradées offset, effet buzzer orange sur cast button
+      - name: HUD Animations
+        status: done
+        summary: Animations staggered cascade - éléments désynchronisés (cartouches slide top, cast pop bottom, shop buttons un par un). Disparition cascade inversée. Plus cartoon et satisfaisant.
+
+  - name: Gold Explosion UI
+    status: in_progress
+    summary: WorldSpace CustomUI poolable avec animation explosion d'or (coins + texte valeur), courte et punchy pour effet feu d'artifice
+
 notes:
   - Mobile fishing game in portrait mode
   - 2D gameplay on XY plane (side view of water)
   - Style: Cartoon mobile unlit
+
+  - name: Gold Explosion UI
+    status: done
+    summary: WorldSpace CustomUI poolable avec animation explosion d'or (8 icônes explosent, texte valeur pop élastique, flash, fade out ~0.5s). Template + ViewModel avec play(value).
+    files: [UI/GoldExplosion.xaml, Scripts/Components/UI/GoldExplosionViewModel.ts, Templates/GameplayObjects/GoldExplosion.hstf]
+    subtasks:
+      - name: Integration with Gameplay
+        status: done
+        summary: GoldExplosionPool service avec pool de 6 instances, branchement Events.FishCollected, gold basé sur rareté (5/15/40)
+        files: [Scripts/Services/GoldExplosionPool.ts, Scripts/Types.ts, Scripts/Components/HookController.ts]

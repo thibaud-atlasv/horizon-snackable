@@ -7,20 +7,12 @@
       Background="Transparent">
 
     <Page.Resources>
-        <!-- Tropical Color Palette -->
-        <!-- Cast Mode Colors (Warm - Orange/Coral) -->
-        <SolidColorBrush x:Key="CastFillBrush" Color="#FFFF6B35"/>
-        <SolidColorBrush x:Key="CastBorderBrush" Color="#FFFFC857"/>
-        
-        <!-- Reel Mode Colors (Cool - Turquoise/Cyan) -->
-        <SolidColorBrush x:Key="ReelFillBrush" Color="#FF00CED1"/>
-        <SolidColorBrush x:Key="ReelBorderBrush" Color="#FF1E3A5F"/>
-        
         <!-- UI Colors -->
-        <SolidColorBrush x:Key="GaugeTrackBrush" Color="#60000000"/>
         <SolidColorBrush x:Key="CounterBackgroundBrush" Color="#B01E3A5F"/>
         <SolidColorBrush x:Key="CounterTextBrush" Color="#FFFFFFFF"/>
         <SolidColorBrush x:Key="CounterAccentBrush" Color="#FFFFC857"/>
+        <SolidColorBrush x:Key="WhiteBorder" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="BlackBorder" Color="#FF000000"/>
 
         <!-- XP Progress Bar Colors -->
         <SolidColorBrush x:Key="XPTrackBrush" Color="#CC2D2A26"/>
@@ -28,319 +20,134 @@
         <SolidColorBrush x:Key="XPCursor1Brush" Color="#FF4A90D9"/>
         <SolidColorBrush x:Key="XPCursor2Brush" Color="#FF1a2a4a"/>
 
-        <!-- XP Progress Bar Fade In Animation -->
-        <Storyboard x:Key="XPBarFadeIn">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="XPProgressContainer" Storyboard.TargetProperty="Opacity">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
+        <!-- ══ HUD Show/Hide Storyboards ══════════════════════════════════ -->
+        <Storyboard x:Key="HUDShowAnimation">
+            <DoubleAnimation Storyboard.TargetName="HUDRootScale"
+                             Storyboard.TargetProperty="ScaleX"
+                             From="0" To="1" Duration="0:0:0.45">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="HUDRootScale"
+                             Storyboard.TargetProperty="ScaleY"
+                             From="0" To="1" Duration="0:0:0.45">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="HUDRoot"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.25"/>
         </Storyboard>
+
+        <Storyboard x:Key="HUDHideAnimation">
+            <DoubleAnimation Storyboard.TargetName="HUDRootScale"
+                             Storyboard.TargetProperty="ScaleX"
+                             To="0" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="HUDRootScale"
+                             Storyboard.TargetProperty="ScaleY"
+                             To="0" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="HUDRoot"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.25"/>
+        </Storyboard>
+
+        <!-- XP Progress Bar Fade In Animation -->
+        <Storyboard x:Key="XPBarFadeIn"/>
 
         <!-- XP Progress Bar Fade Out Animation -->
-        <Storyboard x:Key="XPBarFadeOut">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="XPProgressContainer" Storyboard.TargetProperty="Opacity">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseIn"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-        </Storyboard>
+        <Storyboard x:Key="XPBarFadeOut"/>
 
         <!-- Zone Unlocked Pop In Animation (Elastic Scale + Fade) -->
-        <Storyboard x:Key="ZoneUnlockedPopIn">
-            <!-- Scale X: 0 -> 1.25 (overshoot) -> 1.0 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ZoneUnlockedContainer" 
-                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.25">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.0">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseInOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-            <!-- Scale Y: 0 -> 1.25 (overshoot) -> 1.0 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ZoneUnlockedContainer" 
-                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.25">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.0">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseInOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-            <!-- Opacity: 0 -> 1 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ZoneUnlockedContainer" 
-                                           Storyboard.TargetProperty="Opacity">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-        </Storyboard>
+        <Storyboard x:Key="ZoneUnlockedPopIn"/>
 
         <!-- Zone Unlocked Fade Out Animation -->
-        <Storyboard x:Key="ZoneUnlockedFadeOut">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ZoneUnlockedContainer" 
-                                           Storyboard.TargetProperty="Opacity">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseIn"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-            <!-- Scale down slightly on exit -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ZoneUnlockedContainer" 
-                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0.8">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseIn"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ZoneUnlockedContainer" 
-                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0.8">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseIn"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-        </Storyboard>
+        <Storyboard x:Key="ZoneUnlockedFadeOut"/>
     </Page.Resources>
 
     <!-- Main Layout Grid - 9:16 Portrait Mobile -->
     <Grid Margin="46,0,-46,0">
-        <!-- Fish Counter - Top Right Corner -->
 
-        <!-- Gauge Container - Left Side -->
-        <Grid x:Name="GaugeContainer"
-              HorizontalAlignment="Left"
-              VerticalAlignment="Center"
-              Margin="45,0,0,0"
-              Height="800" Width="120">
-            <Grid.Visibility>
-                <Binding Path="showGauge">
-                    <Binding.Converter>
-                        <BooleanToVisibilityConverter/>
-                    </Binding.Converter>
-                </Binding>
-            </Grid.Visibility>
+        <!-- HUDRoot wrapper — animated show/hide via isHudVisible binding -->
+        <Grid x:Name="HUDRoot"
+              RenderTransformOrigin="0.5,0.5"
+              Opacity="0">
+            <Grid.RenderTransform>
+                <ScaleTransform x:Name="HUDRootScale" ScaleX="0" ScaleY="0"/>
+            </Grid.RenderTransform>
 
-            <!-- Gauge Track Background -->
-            <Border x:Name="GaugeTrack"
-                    CornerRadius="30"
-                    Background="{StaticResource GaugeTrackBrush}"
-                    BorderBrush="{StaticResource CastBorderBrush}" BorderThickness="10,10,10,10"/>
-
-            <!-- Gauge Fill using ScaleTransform - scales from bottom (0,1 origin) -->
-            <Border x:Name="GaugeFillScaled"
-                    CornerRadius="26"
-                    Margin="8"
-                    Background="{Binding Path=gaugeColor}"
-                    VerticalAlignment="Stretch"
-                    RenderTransformOrigin="0.5,1">
-                <Border.RenderTransform>
-                    <ScaleTransform ScaleX="1" ScaleY="{Binding Path=gaugeValue}"/>
-                </Border.RenderTransform>
-            </Border>
-
-            <!-- Gauge Border Overlay (crisp rounded border on top) -->
-            <Border x:Name="GaugeBorderOverlay"
-                    CornerRadius="30"
-                    BorderBrush="{StaticResource CastBorderBrush}" BorderThickness="10,10,10,10"/>
-            <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Right" Width="14" Margin="0,80,10,-9">
-                <Rectangle Fill="#80FFFFFF" Height="8" Margin="0,0,0,100" Opacity="0.5"/>
-                <Rectangle Fill="#80FFFFFF" Height="8" Width="10" Margin="4,0,0,100" Opacity="0.5"/>
-                <Rectangle Fill="#80FFFFFF" Height="8" Margin="0,0,0,100" Opacity="0.5"/>
-                <Rectangle Fill="#80FFFFFF" Height="8" Width="10" Margin="4,0,0,100" Opacity="0.5"/>
-                <Rectangle Fill="#80FFFFFF" Height="8" Margin="0,0,0,100" Opacity="0.5"/>
-                <Rectangle Fill="#80FFFFFF" Height="8" Width="10" Margin="4,0,0,100" Opacity="0.5"/>
-                <Rectangle Fill="#80FFFFFF" Height="8" Margin="0,0,0,100" Opacity="0.5"/>
-            </StackPanel>
-
-            <!-- DataTriggers for Mode Switching (border colors only - fill color is bound to gaugeColor) -->
             <b:Interaction.Triggers>
-                <!-- Cast Mode (default/orange borders) -->
-                <b:DataTrigger Binding="{Binding Path=gaugeMode}" Value="cast">
-                    <b:ChangePropertyAction TargetName="GaugeTrack" PropertyName="BorderBrush" Value="{StaticResource CastBorderBrush}"/>
-                    <b:ChangePropertyAction TargetName="GaugeBorderOverlay" PropertyName="BorderBrush" Value="{StaticResource CastBorderBrush}"/>
+                <b:DataTrigger Binding="{Binding isHudVisible}" Value="True">
+                    <b:ControlStoryboardAction Storyboard="{StaticResource HUDShowAnimation}"/>
                 </b:DataTrigger>
-                
-                <!-- Reel Mode (turquoise/cyan borders) -->
-                <b:DataTrigger Binding="{Binding Path=gaugeMode}" Value="reel">
-                    <b:ChangePropertyAction TargetName="GaugeTrack" PropertyName="BorderBrush" Value="{StaticResource ReelBorderBrush}"/>
-                    <b:ChangePropertyAction TargetName="GaugeBorderOverlay" PropertyName="BorderBrush" Value="{StaticResource ReelBorderBrush}"/>
+                <b:DataTrigger Binding="{Binding isHudVisible}" Value="False">
+                    <b:ControlStoryboardAction Storyboard="{StaticResource HUDHideAnimation}"/>
                 </b:DataTrigger>
             </b:Interaction.Triggers>
-        </Grid>
 
-        <!-- Debug Phase Label - Bottom Center (hidden by default, set Visibility="Visible" to show) -->
+            <!-- ── Depth Counter (Top Center) ────────────────────────── -->
+            <Grid HorizontalAlignment="Center"
+                  VerticalAlignment="Top" Margin="0,200,0,0">
+                <!-- Drop shadow -->
+                <Border CornerRadius="72"
+                        Padding="54,24,66,24"
+                        Opacity="0.4"
+                        Margin="0,10,0,0"
+                        VerticalAlignment="Top">
+                    <Border.Background>
+                        <SolidColorBrush Color="#FF000000"/>
+                    </Border.Background>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Opacity="0">
+                        <TextBlock Text="⚓" FontSize="102" Margin="0,0,30,0"/>
+                        <TextBlock FontSize="96" FontWeight="Bold" Text="{Binding Path=depthText, FallbackValue=800m}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Outer white border -->
+                <Border CornerRadius="72"
+                        BorderBrush="{StaticResource WhiteBorder}"
+                        BorderThickness="8"
+                        Background="Transparent"
+                        VerticalAlignment="Top">
+
+                    <!-- Inner black border -->
+                    <Border CornerRadius="64"
+                            BorderBrush="{StaticResource BlackBorder}"
+                            BorderThickness="5"
+                            Padding="54,24,66,24">
+                        <Border.Background>
+                            <SolidColorBrush Color="#EE0C1B33"/>
+                        </Border.Background>
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="⚓"
+                                       FontSize="102"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,30,0"/>
+                            <TextBlock Text="{Binding depthText}"
+                                       FontSize="96"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       Stroke="#FF000000"
+                                       StrokeThickness="6"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Border>
+            </Grid>
+        </Grid>
 
         <!-- NEW ZONE UNLOCKED Message - Above XP Bar -->
-        <Grid x:Name="ZoneUnlockedContainer"
-              HorizontalAlignment="Center"
-              VerticalAlignment="Bottom"
-              Margin="0,0,0,180"
-              Opacity="0"
-              RenderTransformOrigin="0.5,0.5">
-            <Grid.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform ScaleX="0" ScaleY="0"/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </Grid.RenderTransform>
-            
-            <!-- DataTriggers for Pop In/Fade Out -->
-            <b:Interaction.Triggers>
-                <b:DataTrigger Binding="{Binding Path=zoneUnlockedVisible}" Value="True">
-                    <b:ControlStoryboardAction Storyboard="{StaticResource ZoneUnlockedPopIn}"/>
-                </b:DataTrigger>
-                <b:DataTrigger Binding="{Binding Path=zoneUnlockedVisible}" Value="False">
-                    <b:ControlStoryboardAction Storyboard="{StaticResource ZoneUnlockedFadeOut}"/>
-                </b:DataTrigger>
-            </b:Interaction.Triggers>
-
-            <!-- Glow/Background Effect -->
-            <Border CornerRadius="16"
-                    Padding="40,16"
-                    HorizontalAlignment="Center">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#C0000000" Offset="0"/>
-                        <GradientStop Color="#80000000" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-                <Border.BorderBrush>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="#FFFFD700" Offset="0"/>
-                        <GradientStop Color="#FFFFA500" Offset="0.5"/>
-                        <GradientStop Color="#FFFFD700" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.BorderBrush>
-                <Border.BorderThickness>4</Border.BorderThickness>
-                
-                <!-- Main Text with Outline Effect (stacked TextBlocks) -->
-                <Grid>
-                    <!-- Shadow/Outline Layer -->
-                    <TextBlock Text="NEW ZONE UNLOCKED!"
-                               FontSize="38"
-                               FontWeight="Bold"
-                               Foreground="#FF8B4513"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Margin="2,2,0,0"/>
-                    <!-- Main Gold Text -->
-                    <TextBlock Text="NEW ZONE UNLOCKED!"
-                               FontSize="38"
-                               FontWeight="Bold"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center">
-                        <TextBlock.Foreground>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#FFFFD700" Offset="0"/>
-                                <GradientStop Color="#FFFFA500" Offset="0.5"/>
-                                <GradientStop Color="#FFFFCC00" Offset="1"/>
-                            </LinearGradientBrush>
-                        </TextBlock.Foreground>
-                    </TextBlock>
-                </Grid>
-            </Border>
-        </Grid>
 
         <!-- XP Progress Bar - Bottom of Screen -->
-        <Grid x:Name="XPProgressContainer"
-              HorizontalAlignment="Center"
-              VerticalAlignment="Bottom"
-              Margin="0,0,0,80"
-              Width="880" Height="80"
-              Opacity="0">
-            
-            <!-- DataTriggers for Fade In/Out -->
-            <b:Interaction.Triggers>
-                <b:DataTrigger Binding="{Binding Path=progressBarVisible}" Value="True">
-                    <b:ControlStoryboardAction Storyboard="{StaticResource XPBarFadeIn}"/>
-                </b:DataTrigger>
-                <b:DataTrigger Binding="{Binding Path=progressBarVisible}" Value="False">
-                    <b:ControlStoryboardAction Storyboard="{StaticResource XPBarFadeOut}"/>
-                </b:DataTrigger>
-            </b:Interaction.Triggers>
-
-            <!-- Track Background (dark semi-transparent) -->
-            <Border CornerRadius="20"
-                    Background="{StaticResource XPTrackBrush}"
-                    BorderBrush="{StaticResource XPBorderBrush}"
-                    BorderThickness="4"/>
-
-            <!-- Progress Fill with Gradient -->
-            <Border x:Name="XPFillBorder"
-                    CornerRadius="16"
-                    Margin="6"
-                    HorizontalAlignment="Left"
-                    RenderTransformOrigin="0,0.5">
-                <Border.Width>
-                    <Binding Path="progressBarWidth"/>
-                </Border.Width>
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-                        <GradientStop Color="#FFFFA07A" Offset="0"/>
-                        <GradientStop Color="#FFFF6347" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-            </Border>
-
-            <!-- Cursor 1 - Depth Threshold Marker (Arrow pointing down) -->
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,6,0,0" Height="40">
-                <Grid.RenderTransform>
-                    <TranslateTransform X="{Binding Path=cursor1PixelPosition}"/>
-                </Grid.RenderTransform>
-                <Path Data="M 0,0 L 18,0 L 18,28 L 9,40 L 0,28 Z"
-                      HorizontalAlignment="Center"
-                      Margin="-9,0,0,0" Fill="{StaticResource CounterAccentBrush}"/>
-            </Grid>
-
-            <!-- Cursor 2 - Depth Threshold Marker (Arrow pointing down) -->
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,6,0,0" Height="40">
-                <Grid.RenderTransform>
-                    <TranslateTransform X="{Binding Path=cursor2PixelPosition}"/>
-                </Grid.RenderTransform>
-                <Path Data="M 0,0 L 18,0 L 18,28 L 9,40 L 0,28 Z"
-                      HorizontalAlignment="Center"
-                      Margin="-9,0,0,0" Fill="{StaticResource CounterAccentBrush}"/>
-            </Grid>
-
-            <!-- Fish Count Text (X/Y) -->
-            <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontSize="28"
-                       FontWeight="Bold"
-                       Foreground="White">
-                <TextBlock.Text>
-                    <Binding Path="fishProgressText"/>
-                </TextBlock.Text>
-            </TextBlock>
-        </Grid>
     </Grid>
 </Page>
