@@ -11,36 +11,33 @@ import {
   type Maybe,
 } from 'meta/worlds';
 
-import { Events, HUDEvents, GamePhase } from '../../Types';
+import { Events, HUDEvents } from '../../Types';
 import { FishCollectionService } from '../../Services/FishCollectionService';
 import { FISH_DEFS } from '../../FishDefs';
-import { UNLOCK_ZONE_2_UNIQUE, UNLOCK_ZONE_3_UNIQUE, WATER_SURFACE_Y } from '../../Constants';
+import { UNLOCK_ZONE_2_UNIQUE, UNLOCK_ZONE_3_UNIQUE } from '../../Constants';
 import { ZoneProgressionService } from '../../Services/ZoneProgressionService';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants ──────────────────────────────────────────────────────────────
 /** Total number of fish species in the game */
 const TOTAL_FISH_COUNT = FISH_DEFS.length;
 
 /** Width of the XP progress bar in pixels (must match XAML) */
 const XP_BAR_WIDTH = 868; // 880 - 12 (margins)
 
-/** Duration in seconds before the progress bar fades out */
-const PROGRESS_BAR_DISPLAY_DURATION = 3.5;
-
 /** Duration in seconds before the zone unlocked message fades out */
 const ZONE_UNLOCKED_DISPLAY_DURATION = 3.5;
 
-// ─── ViewModel ────────────────────────────────────────────────────────────────
+// ─── ViewModel ──────────────────────────────────────────────────────────────
 @uiViewModel()
 export class FishingHUDData extends UiViewModel {
   /** HUD visibility — string-valued for XAML DataTrigger ('True'/'False') */
   isHudVisible: string = 'False';
-  /** Depth counter text */
+  /** Depth counter text — kept for XAML compatibility but no longer driven */
   depthText: string = '0.0 m';
   /** Total unique species caught. */
   uniqueCaught: number = 0;
 
-  // ─── XP Progress Bar Properties ─────────────────────────────────────────────
+  // ─── XP Progress Bar Properties ─────────────────────────────────────────
   /** Number of fish discovered */
   fishDiscovered: number = 0;
   /** Total number of fish species */
@@ -62,17 +59,21 @@ export class FishingHUDData extends UiViewModel {
   /** Text display "X/Y" format */
   fishProgressText: string = '0/18';
 
-  // ─── Zone Unlocked Message Properties ─────────────────────────────────────────
+  // ─── Zone Unlocked Message Properties ─────────────────────────────────────
   /** Controls zone unlocked message visibility and animation trigger */
   zoneUnlockedVisible: boolean = false;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Component ──────────────────────────────────────────────────────────────
 /**
- * FishingHUDViewModel - binds the main gameplay HUD to reactive XAML.
+ * FishingHUDViewModel - binds the FishingHUD XAML for XP bar + zone unlock.
  *
- * -- Editor setup ----------------------------------------------------------------
- * Attach to the entity that has the CustomUiComponent for the main HUD XAML.
+ * Depth counter has been moved to GameHUDViewModel. This component now only
+ * manages XP progress bar and zone unlocked message.
+ *
+ * Component Attachment: Scene entity (FishingHUD entity)
+ * Component Networking: Local (UI only, client-side)
+ * Component Ownership: Not Networked
  */
 @component()
 export class FishingHUDViewModel extends Component {
@@ -80,10 +81,6 @@ export class FishingHUDViewModel extends Component {
   private _vm  = new FishingHUDData();
   private _ui: Maybe<CustomUiComponent> = null;
 
-  private _progressBarHideTime: number = 0;
-  private _progressBarTimerActive: boolean = false;
-
-  private _zoneUnlockedHideTime: number = 0;
   private _zoneUnlockedTimerActive: boolean = false;
 
   @subscribe(OnEntityStartEvent)
@@ -93,23 +90,6 @@ export class FishingHUDViewModel extends Component {
     if (this._ui) this._ui.dataContext = this._vm;
 
     this._updateProgressBar();
-  }
-
-  @subscribe(Events.PhaseChanged)
-  private _onPhase(p: Events.PhaseChangedPayload): void {
-    if (p.phase === GamePhase.Diving || p.phase === GamePhase.Surfacing) {
-      this._vm.isHudVisible = 'True';
-    } else {
-      this._vm.isHudVisible = 'False';
-      this._vm.depthText = '0.0 m';
-    }
-  }
-
-  // ── Depth counter (hook position) ─────────────────────────────────────
-  @subscribe(Events.HookMoved)
-  private _onHookMoved(p: Events.HookMovedPayload): void {
-    const depth = Math.max(0, WATER_SURFACE_Y - p.y);
-    this._vm.depthText = `${depth.toFixed(1)} m`;
   }
 
   private _lastUnlockedZones = 0;
@@ -131,7 +111,6 @@ export class FishingHUDViewModel extends Component {
   @subscribe(HUDEvents.HideCatch)
   _onHideCatch(_p: HUDEvents.HideCatchPayload): void {
     if (NetworkingService.get().isServerContext()) return;
-      this._progressBarTimerActive = false;
       this._vm.progressBarVisible = false;
   }
 
@@ -158,9 +137,6 @@ export class FishingHUDViewModel extends Component {
 
   public showProgressBar(): void {
     this._vm.progressBarVisible = true;
-    const currentTime = WorldService.get().getWorldTime();
-    this._progressBarHideTime = currentTime + PROGRESS_BAR_DISPLAY_DURATION;
-    this._progressBarTimerActive = true;
   }
 
   public setCursorPositions(cursor1: number, cursor2: number): void {

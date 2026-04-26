@@ -59,11 +59,11 @@ export class GoldExplosionViewModel extends Component {
       this._vm.isPlaying = 'True';
     }, 16);
 
-    // Auto-reset after animation duration (500ms + buffer)
+    // Auto-reset after animation completes (1100ms) + buffer
     this._resetTimer = setTimeout(() => {
       this._vm.isPlaying = 'False';
       if (this._ui) this._ui.isVisible = false;
       this._resetTimer = 0;
-    }, 600) as unknown as number;
+    }, 1200) as unknown as number;
   }
 }

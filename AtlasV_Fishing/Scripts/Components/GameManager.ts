@@ -14,6 +14,8 @@ import {
 import { RESET_DELAY } from '../Constants';
 import { Events, GamePhase } from '../Types';
 import { PlayerProgressService } from '../Services/PlayerProgressService';
+import { GoldExplosionPool } from '../Services/GoldExplosionPool';
+import { GoldCoinsDebugService } from '../Services/GoldCoinsDebugService';
 
 // =============================================================================
 //  GameManager — phase orchestrator.
@@ -28,6 +30,8 @@ import { PlayerProgressService } from '../Services/PlayerProgressService';
 export class GameManager extends Component {
 
   private _networking = NetworkingService.get();
+  private _goldexplosion = GoldExplosionPool.get();
+  private _goldCoinsDebug = GoldCoinsDebugService.get();
   private _isServer   = true;
 
   private _phase      : GamePhase = GamePhase.Idle;
