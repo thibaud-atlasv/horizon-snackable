@@ -214,7 +214,7 @@
                         "data": {
                             "localPosition": {
                                 "x": 0.0,
-                                "y": 0.0,
+                                "y": 7.5,
                                 "z": 25.0
                             }
                         }
@@ -418,8 +418,8 @@
                                 "version": 3,
                                 "data": {
                                     "localPosition": {
-                                        "x": -2.8599438667297365,
-                                        "y": 7.128177165985107,
+                                        "x": -2.8499999046325685,
+                                        "y": 7.150000095367432,
                                         "z": 0.0
                                     }
                                 }
@@ -899,7 +899,7 @@
                                 "ingestionId": "9342409214743278146",
                                 "targetId": "2149638574"
                             },
-                            "isInteractable": true
+                            "isInteractable": false
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -910,6 +910,100 @@
                         "definitionAsset": {
                             "packageOrRemoteId": "26220234944285836",
                             "ingestionId": "9124694803294270131",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "59b990dc-98b0-4b14-9972-89f301d46a7b",
+            "name": "GoldAnimationUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 7.0,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": -0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            }
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "GoldCoinsAnimatorViewModel",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26220234944285836",
+                            "ingestionId": "3466276922531895010",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
+            "id": "cb4f343f-dab8-4fc2-bdd9-42e64bd339f8",
+            "name": "InteractiveHUD",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "26220234944285836",
+                                "ingestionId": "13372736643571434094",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "InteractiveHUDViewModel",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "26220234944285836",
+                            "ingestionId": "18072767856663307312",
                             "targetId": "4237980480"
                         },
                         "data": {}
@@ -979,6 +1073,16 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "b9b63e00-d506-4748-a208-8fa550f6e08c",
+            "destination": "0400f1fe-065e-4d84-a3bd-86c89fab5c60"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "59b990dc-98b0-4b14-9972-89f301d46a7b",
+            "destination": "0400f1fe-065e-4d84-a3bd-86c89fab5c60"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "cb4f343f-dab8-4fc2-bdd9-42e64bd339f8",
             "destination": "0400f1fe-065e-4d84-a3bd-86c89fab5c60"
         }
     ]

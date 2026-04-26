@@ -1,0 +1,30 @@
+BEGIN_DESCRIPTION
+Unlit depth gradient shader. Colors each pixel based on world Y position,
+creating an underwater gradient from surface turquoise to deep-sea blue.
+END_DESCRIPTION
+
+BEGIN_OPTIONS
+  Template "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+  topColor("Top Color", Color) = (0.251, 0.878, 0.816, 1.0)
+  bottomColor("Bottom Color", Color) = (0.039, 0.086, 0.157, 1.0)
+  topY("Top Y", Float) = 5.0
+  bottomY("Bottom Y", Float) = -40.0
+END_PROPERTIES
+
+BEGIN_SURFACE
+
+void surfaceFunction(inout Surface s, inout SurfaceData d)
+{
+  float worldY = d.worldSpacePosition.y;
+  float t = clamp((matParams.topY - worldY) / (matParams.topY - matParams.bottomY), 0.0, 1.0);
+  vec3 color = mix(matParams.topColor.rgb, matParams.bottomColor.rgb, t);
+  s.baseColor = color;
+  s.emissive = color;
+  s.metallic = 0.0;
+  s.roughness = 1.0;
+}
+
+END_SURFACE

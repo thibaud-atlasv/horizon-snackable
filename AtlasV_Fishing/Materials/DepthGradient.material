@@ -1,0 +1,13 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "DepthGradient",
+    "shaderAssetId": {
+        "packageOrRemoteId": "26220234944285836",
+        "ingestionId": "10345051439323638001",
+        "targetId": "2708897769"
+    }
+}

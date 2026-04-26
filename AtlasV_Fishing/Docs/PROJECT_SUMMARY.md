@@ -60,8 +60,9 @@ ZoneProgressionService → tracks unlocked zones, bait floor Y
 GameCameraService     → vertical scroll following hook during dive + camera shake
 VFXService            → centralised juice: shake, flash, freeze frame, haptic stub, stretch/squash
 BubblePool            → pool of rising bubble entities attached to fish
-FishingHUDViewModel   → main HUD: depth counter during dive, species progress bar, zone unlock notification
-GameHUDViewModel      → idle HUD: fish/gold counters, cast button, upgrade buttons; auto-hides during gameplay
+InteractiveHUDViewModel → buttons-only HUD layer (cast button + 3 upgrade buttons); isInteractable=true during Idle, isVisible=false otherwise to stop blocking swipe input
+GameHUDViewModel      → counters HUD layer (gold + depth); isInteractable=false (never blocks touch). Gold visible during above-water phases, depth visible during Diving, swap animation between them
+FishingHUDViewModel   → species progress bar, zone unlock notification (depth counter moved to GameHUD)
 CatchDisplayViewModel → post-run catch reveal panel with elastic animations
 GoldExplosionViewModel → poolable WorldSpace gold burst effect (spawned when fish convert to gold)
 GoldExplosionPool     → pre-spawns pool of GoldExplosion UI entities; on FishCollected, resolves rarity → gold value and plays explosion at fish position
@@ -83,6 +84,10 @@ All juice flows through `VFXService`:
 Built-in trigger: `FishHooked` → freeze 60ms + shake 0.30s + flash 0.18s.
 
 The `isFrozen` flag is checked at the top of `HookController.onUpdate` and `SimpleFishController.onUpdate`. `GameCameraService` is exempt so shake continues during freeze.
+
+## Depth Gradient Shader
+
+An unlit surface shader (`Shaders/DepthGradient.surface`) colors geometry based on world Y position, creating the underwater atmosphere. The gradient transitions from turquoise at the surface (Y 5.0) to deep night blue at the abyss (Y -40.0). A matching material (`Materials/DepthGradient.material`) is ready to apply to water background meshes. The four tunable properties (top color, bottom color, top Y, bottom Y) can be adjusted per-material instance to fine-tune the look.
 
 ## Key Extension Points
 

@@ -7,176 +7,169 @@
       Background="Transparent" d:DesignWidth="300" d:DesignHeight="300">
 
     <Page.Resources>
-        <SolidColorBrush x:Key="GoldColor" Color="#FFFFD700"/>
-        <SolidColorBrush x:Key="GoldDark" Color="#FFD4A030"/>
 
-        <!-- ══ Master Explosion Storyboard ══════════════════════ -->
-        <Storyboard x:Key="GoldExplosionStoryboard">
+        <!--
+            FillBehavior="Stop": when the storyboard ends (1.1s), all animated values
+            revert to their base values automatically. This is the clean re-trigger fix —
+            no Stop DataTrigger needed. The next True transition always starts from base.
+        -->
+        <Storyboard x:Key="GoldExplosionStoryboard" FillBehavior="Stop">
 
-            <!-- ── Container flash: scale 0→1.5 in 0.05s, then 1.5→1 in 0.1s ── -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ContainerScale"
-                                           Storyboard.TargetProperty="ScaleX">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.05" Value="1.5">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+            <!-- ── Container explosive pop: 0 → 2.2 → 1 in 0.16s ── -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ContainerScale" Storyboard.TargetProperty="ScaleX">
+                <LinearDoubleKeyFrame KeyTime="0:0:0"    Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.07" Value="2.2">
+                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.16" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.5"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ContainerScale"
-                                           Storyboard.TargetProperty="ScaleY">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.05" Value="1.5">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ContainerScale" Storyboard.TargetProperty="ScaleY">
+                <LinearDoubleKeyFrame KeyTime="0:0:0"    Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.07" Value="2.2">
+                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.16" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.5"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
 
-            <!-- ── Text pop: scale 0→1.3 in 0.15s, 1.3→1 in 0.1s ── -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TextScale"
-                                           Storyboard.TargetProperty="ScaleX">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.3">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+            <!-- ── Text scale pop: 0 → 1.5 → 1 in 0.28s ── -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TextScale" Storyboard.TargetProperty="ScaleX">
+                <LinearDoubleKeyFrame KeyTime="0:0:0"    Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1.5">
+                    <EasingDoubleKeyFrame.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.5"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TextScale"
-                                           Storyboard.TargetProperty="ScaleY">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1.3">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TextScale" Storyboard.TargetProperty="ScaleY">
+                <LinearDoubleKeyFrame KeyTime="0:0:0"    Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1.5">
+                    <EasingDoubleKeyFrame.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.5"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction><QuadraticEase EasingMode="EaseOut"/></EasingDoubleKeyFrame.EasingFunction>
                 </EasingDoubleKeyFrame>
             </DoubleAnimationUsingKeyFrames>
 
-            <!-- ── Icon 0 (N): translate Y -90, rotate 360, fade out ── -->
+            <!-- ── Text floats up 100px over 0.85s (starts at 0.1s) ── -->
+            <DoubleAnimation Storyboard.TargetName="TextTranslate" Storyboard.TargetProperty="Y"
+                             From="0" To="-100" Duration="0:0:0.85" BeginTime="0:0:0.1">
+                <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+            <!-- ── Text fades out (0.55s → 0.95s) ── -->
+            <DoubleAnimation Storyboard.TargetName="TextGroup" Storyboard.TargetProperty="Opacity"
+                             From="1" To="0" Duration="0:0:0.4" BeginTime="0:0:0.55"/>
+
+            <!-- ════ Coins: fast burst in 0.12s, hold at max, fade 0.3s ════ -->
+
+            <!-- Icon 0 (N) -->
             <DoubleAnimation Storyboard.TargetName="Icon0Translate" Storyboard.TargetProperty="Y"
-                             From="0" To="-90" Duration="0:0:0.3" BeginTime="0:0:0">
+                             From="0" To="-160" Duration="0:0:0.12" BeginTime="0:0:0">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon0Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0"/>
             <DoubleAnimation Storyboard.TargetName="Icon0" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.1"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.15"/>
 
-            <!-- ── Icon 1 (NE): translate X 64 Y -64, rotate, fade ── -->
+            <!-- Icon 1 (NE) -->
             <DoubleAnimation Storyboard.TargetName="Icon1Translate" Storyboard.TargetProperty="X"
-                             From="0" To="64" Duration="0:0:0.3" BeginTime="0:0:0.02">
+                             From="0" To="113" Duration="0:0:0.12" BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon1Translate" Storyboard.TargetProperty="Y"
-                             From="0" To="-64" Duration="0:0:0.3" BeginTime="0:0:0.02">
+                             From="0" To="-113" Duration="0:0:0.12" BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon1Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0.02"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0.02"/>
             <DoubleAnimation Storyboard.TargetName="Icon1" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.12"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.17"/>
 
-            <!-- ── Icon 2 (E): translate X 90, rotate, fade ── -->
+            <!-- Icon 2 (E) -->
             <DoubleAnimation Storyboard.TargetName="Icon2Translate" Storyboard.TargetProperty="X"
-                             From="0" To="90" Duration="0:0:0.3" BeginTime="0:0:0.04">
+                             From="0" To="160" Duration="0:0:0.12" BeginTime="0:0:0.04">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon2Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0.04"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0.04"/>
             <DoubleAnimation Storyboard.TargetName="Icon2" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.14"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.19"/>
 
-            <!-- ── Icon 3 (SE): translate X 64 Y 64, rotate, fade ── -->
+            <!-- Icon 3 (SE) -->
             <DoubleAnimation Storyboard.TargetName="Icon3Translate" Storyboard.TargetProperty="X"
-                             From="0" To="64" Duration="0:0:0.3" BeginTime="0:0:0.06">
+                             From="0" To="113" Duration="0:0:0.12" BeginTime="0:0:0.06">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon3Translate" Storyboard.TargetProperty="Y"
-                             From="0" To="64" Duration="0:0:0.3" BeginTime="0:0:0.06">
+                             From="0" To="113" Duration="0:0:0.12" BeginTime="0:0:0.06">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon3Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0.06"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0.06"/>
             <DoubleAnimation Storyboard.TargetName="Icon3" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.16"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.21"/>
 
-            <!-- ── Icon 4 (S): translate Y 90, rotate, fade ── -->
+            <!-- Icon 4 (S) -->
             <DoubleAnimation Storyboard.TargetName="Icon4Translate" Storyboard.TargetProperty="Y"
-                             From="0" To="90" Duration="0:0:0.3" BeginTime="0:0:0.08">
+                             From="0" To="160" Duration="0:0:0.12" BeginTime="0:0:0.08">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon4Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0.08"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0.08"/>
             <DoubleAnimation Storyboard.TargetName="Icon4" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.18"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.23"/>
 
-            <!-- ── Icon 5 (SW): translate X -64 Y 64, rotate, fade ── -->
+            <!-- Icon 5 (SW) -->
             <DoubleAnimation Storyboard.TargetName="Icon5Translate" Storyboard.TargetProperty="X"
-                             From="0" To="-64" Duration="0:0:0.3" BeginTime="0:0:0.1">
+                             From="0" To="-113" Duration="0:0:0.12" BeginTime="0:0:0.10">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon5Translate" Storyboard.TargetProperty="Y"
-                             From="0" To="64" Duration="0:0:0.3" BeginTime="0:0:0.1">
+                             From="0" To="113" Duration="0:0:0.12" BeginTime="0:0:0.10">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon5Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0.1"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0.10"/>
             <DoubleAnimation Storyboard.TargetName="Icon5" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.2"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.25"/>
 
-            <!-- ── Icon 6 (W): translate X -90, rotate, fade ── -->
+            <!-- Icon 6 (W) -->
             <DoubleAnimation Storyboard.TargetName="Icon6Translate" Storyboard.TargetProperty="X"
-                             From="0" To="-90" Duration="0:0:0.3" BeginTime="0:0:0.12">
+                             From="0" To="-160" Duration="0:0:0.12" BeginTime="0:0:0.12">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon6Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0.12"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0.12"/>
             <DoubleAnimation Storyboard.TargetName="Icon6" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.22"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.27"/>
 
-            <!-- ── Icon 7 (NW): translate X -64 Y -64, rotate, fade ── -->
+            <!-- Icon 7 (NW) -->
             <DoubleAnimation Storyboard.TargetName="Icon7Translate" Storyboard.TargetProperty="X"
-                             From="0" To="-64" Duration="0:0:0.3" BeginTime="0:0:0.14">
+                             From="0" To="-113" Duration="0:0:0.12" BeginTime="0:0:0.14">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon7Translate" Storyboard.TargetProperty="Y"
-                             From="0" To="-64" Duration="0:0:0.3" BeginTime="0:0:0.14">
+                             From="0" To="-113" Duration="0:0:0.12" BeginTime="0:0:0.14">
                 <DoubleAnimation.EasingFunction><QuadraticEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="Icon7Rotate" Storyboard.TargetProperty="Angle"
-                             From="0" To="360" Duration="0:0:0.3" BeginTime="0:0:0.14"/>
+                             From="0" To="720" Duration="0:0:0.4" BeginTime="0:0:0.14"/>
             <DoubleAnimation Storyboard.TargetName="Icon7" Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.24"/>
+                             From="1" To="0" Duration="0:0:0.3" BeginTime="0:0:0.29"/>
 
-            <!-- ── Full container fade out: opacity 1→0 from 0.35s to 0.5s ── -->
-            <DoubleAnimation Storyboard.TargetName="RootContainer"
-                             Storyboard.TargetProperty="Opacity"
-                             From="1" To="0" Duration="0:0:0.15" BeginTime="0:0:0.35"/>
+            <!-- ── Container fade: 0.85s → 1.05s ── -->
+            <DoubleAnimation Storyboard.TargetName="RootContainer" Storyboard.TargetProperty="Opacity"
+                             From="1" To="0" Duration="0:0:0.2" BeginTime="0:0:0.85"/>
+
         </Storyboard>
     </Page.Resources>
 
-    <!-- ═══ Main Layout ═══════════════════════════════════ -->
     <Viewbox Width="300" Height="300" Stretch="Uniform">
         <Grid x:Name="RootContainer" Width="300" Height="300" Opacity="1"
               RenderTransformOrigin="0.5,0.5">
@@ -190,11 +183,10 @@
                 </b:DataTrigger>
             </b:Interaction.Triggers>
 
-            <!-- ── 8 Gold Icons on Canvas (centered at 150,150) ── -->
+            <!-- ── 8 Gold Icons (50×50, centered at 125,125) ── -->
             <Canvas Width="300" Height="300">
-                <!-- Icon 0 (N) -->
-                <Image x:Name="Icon0" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon0" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon0Rotate" Angle="0"/>
@@ -202,9 +194,8 @@
                         </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
-                <!-- Icon 1 (NE) -->
-                <Image x:Name="Icon1" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon1" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon1Rotate" Angle="0"/>
@@ -212,9 +203,8 @@
                         </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
-                <!-- Icon 2 (E) -->
-                <Image x:Name="Icon2" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon2" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon2Rotate" Angle="0"/>
@@ -222,9 +212,8 @@
                         </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
-                <!-- Icon 3 (SE) -->
-                <Image x:Name="Icon3" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon3" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon3Rotate" Angle="0"/>
@@ -232,9 +221,8 @@
                         </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
-                <!-- Icon 4 (S) -->
-                <Image x:Name="Icon4" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon4" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon4Rotate" Angle="0"/>
@@ -242,9 +230,8 @@
                         </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
-                <!-- Icon 5 (SW) -->
-                <Image x:Name="Icon5" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon5" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon5Rotate" Angle="0"/>
@@ -252,9 +239,8 @@
                         </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
-                <!-- Icon 6 (W) -->
-                <Image x:Name="Icon6" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon6" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon6Rotate" Angle="0"/>
@@ -262,9 +248,8 @@
                         </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
-                <!-- Icon 7 (NW) -->
-                <Image x:Name="Icon7" Source="Textures/gold_icon.png" Width="40" Height="40"
-                       Canvas.Left="130" Canvas.Top="130" RenderTransformOrigin="0.5,0.5">
+                <Image x:Name="Icon7" Source="Textures/gold_icon.png" Width="50" Height="50"
+                       Canvas.Left="125" Canvas.Top="125" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <TransformGroup>
                             <RotateTransform x:Name="Icon7Rotate" Angle="0"/>
@@ -274,26 +259,22 @@
                 </Image>
             </Canvas>
 
-            <!-- ── Gold value text (centered) ── -->
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Center"
-                  RenderTransformOrigin="0.5,0.5">
+            <!-- ── Gold value text — pops then floats up ── -->
+            <Grid x:Name="TextGroup" HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Opacity="1" RenderTransformOrigin="0.5,0.5">
                 <Grid.RenderTransform>
-                    <ScaleTransform x:Name="TextScale" ScaleX="1" ScaleY="1"/>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="TextScale" ScaleX="1" ScaleY="1"/>
+                        <TranslateTransform x:Name="TextTranslate" X="0" Y="0"/>
+                    </TransformGroup>
                 </Grid.RenderTransform>
-                <!-- Shadow -->
-                <TextBlock Text="{Binding goldValue}"
-                           FontSize="48" FontWeight="Bold"
-                           Foreground="#44000000"
+                <TextBlock Text="{Binding goldValue}" FontSize="64" FontWeight="Bold"
+                           Foreground="#88000000"
                            HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock.RenderTransform>
-                        <TranslateTransform Y="3" X="2"/>
-                    </TextBlock.RenderTransform>
+                    <TextBlock.RenderTransform><TranslateTransform Y="4" X="3"/></TextBlock.RenderTransform>
                 </TextBlock>
-                <!-- Main text -->
-                <TextBlock Text="{Binding goldValue}"
-                           FontSize="48" FontWeight="Bold"
-                           Foreground="#FFFFD700"
-                           Stroke="#FF000000" StrokeThickness="4"
+                <TextBlock Text="{Binding goldValue}" FontSize="64" FontWeight="Bold"
+                           Foreground="#FFFFD700" Stroke="#FF000000" StrokeThickness="5"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
         </Grid>

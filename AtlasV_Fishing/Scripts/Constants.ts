@@ -10,8 +10,8 @@ export const FISH_LEFT  = -5.5;
 export const FISH_RIGHT =  5.5;
 
 // ─── Hook idle position (tip of rod) ─────────────────────────────────────────
-export const TIP_X       = -2.5;
-export const TIP_Y       =  7.0;
+export const TIP_X       = -2.85;
+export const TIP_Y       =  7.15;
 export const HOOK_IDLE_X =  TIP_X;
 export const HOOK_IDLE_Y =  WATER_SURFACE_Y + 0.2;
 
@@ -29,7 +29,7 @@ export const CAST_GRAVITY        = -16.0;  // gravity applied during cast arc
  
 // ─── Dive physics ─────────────────────────────────────────────────────────────
 export const DIVE_SPEED          =  6.0;   // terminal descent speed once arc ends (units/s)
-export const DIVE_MAX_DEPTH      = 100.0;   // default (line level 0); runtime uses LINE_DEPTH_LEVELS
+export const DIVE_MAX_DEPTH      =  15.0;   // default (line level 0); runtime uses lineDepthAtLevel
 export const DIVE_SWIPE_FORCE    = 18.0;   // X velocity impulse per swipe unit (screen-space → world)
 export const DIVE_X_DRAG         =  1.8;   // horizontal drag during dive
 export const DIVE_BOUNCE         =  0.55;  // velocity restitution on wall bounce (0=dead, 1=perfect)
@@ -90,10 +90,9 @@ export const FLASH_DUR = 0.22;
 export const LINE_MAX_LEVEL  = 100;
 export const HOOK_MAX_LEVEL  =  90;
 
-/** Max dive depth at upgrade level n. depth(0)=10m, depth(100)=1000m. */
+/** Max dive depth at upgrade level n. depth(0)=15, each level adds 16 (one full screen). */
 export function lineDepthAtLevel(n: number): number {
-  if (n <= 0) return 15;
-  return 30 + Math.floor(970 * Math.pow((n - 1) / (LINE_MAX_LEVEL - 1), 1.5));
+  return 15 + n * 16;
 }
 
 /** Max fish per run at hook upgrade level n. fish(0)=1, fish(90)=90. */
@@ -110,6 +109,15 @@ export function upgradeCost(n: number): number {
 export const GOLD_REWARD_COMMON    = 5;
 export const GOLD_REWARD_RARE      = 15;
 export const GOLD_REWARD_LEGENDARY = 40;
+
+// ─── GoldCoins Canvas (GoldCoinsAnimator entity) ──────────────────────────────
+// Canvas design is 600×600 px (square). The entity is placed at
+// (0, CANVAS_CENTER_WORLD_Y, -0.1) and scaled uniformly to CANVAS_ENTITY_SCALE.
+// Tune CANVAS_ENTITY_SCALE until the canvas visually covers the above-water area.
+export const CANVAS_SIZE           = 600;   // design px
+export const CANVAS_WORLD_SPAN     = 12.0;  // world units the canvas covers on each axis
+export const CANVAS_CENTER_WORLD_Y = 7.0;   // world Y at canvas center (covers ~Y 1–13)
+export const CANVAS_ENTITY_SCALE   = 12.0;  // uniform entity scale (1 unit ≈ 1 world unit — tune me)
 
 // ─── Zone progression ─────────────────────────────────────────────────────────
 export const ZONE_COUNT             =  3;
