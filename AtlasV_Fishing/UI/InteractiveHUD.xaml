@@ -173,127 +173,62 @@
                              Storyboard.TargetProperty="Opacity"
                              From="0" To="1" Duration="0:0:0.15" BeginTime="0:0:0.4"/>
 
-            <!-- ── ShopBtn3Panel (BAIT): stagger +0.5s ── -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShopBtn3Scale"
-                                           Storyboard.TargetProperty="ScaleX" BeginTime="0:0:0.5">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.22" Value="1.1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShopBtn3Scale"
-                                           Storyboard.TargetProperty="ScaleY" BeginTime="0:0:0.5">
-                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.22" Value="1.1">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0">
-                    <EasingDoubleKeyFrame.EasingFunction>
-                        <QuadraticEase EasingMode="EaseOut"/>
-                    </EasingDoubleKeyFrame.EasingFunction>
-                </EasingDoubleKeyFrame>
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimation Storyboard.TargetName="ShopBtn3Translate"
-                             Storyboard.TargetProperty="Y"
-                             From="80" To="0" Duration="0:0:0.35" BeginTime="0:0:0.5">
-                <DoubleAnimation.EasingFunction>
-                    <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="ShopBtn3Panel"
-                             Storyboard.TargetProperty="Opacity"
-                             From="0" To="1" Duration="0:0:0.15" BeginTime="0:0:0.5"/>
         </Storyboard>
 
         <!-- ══ Staggered HUD Hide Animation ══════════════════ -->
         <Storyboard x:Key="HUDHideAnimation">
 
-            <!-- ── ShopBtn3Panel (BAIT) exits first ── -->
-            <DoubleAnimation Storyboard.TargetName="ShopBtn3Scale"
+            <!-- ── ShopBtn2Panel (HOOK) exits first ── -->
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Scale"
                              Storyboard.TargetProperty="ScaleX"
                              To="0" Duration="0:0:0.25" BeginTime="0:0:0">
                 <DoubleAnimation.EasingFunction>
                     <QuadraticEase EasingMode="EaseIn"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="ShopBtn3Scale"
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Scale"
                              Storyboard.TargetProperty="ScaleY"
                              To="0" Duration="0:0:0.25" BeginTime="0:0:0">
-                <DoubleAnimation.EasingFunction>
-                    <QuadraticEase EasingMode="EaseIn"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="ShopBtn3Translate"
-                             Storyboard.TargetProperty="Y"
-                             To="80" Duration="0:0:0.25" BeginTime="0:0:0">
-                <DoubleAnimation.EasingFunction>
-                    <QuadraticEase EasingMode="EaseIn"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="ShopBtn3Panel"
-                             Storyboard.TargetProperty="Opacity"
-                             To="0" Duration="0:0:0.25" BeginTime="0:0:0"/>
-
-            <!-- ── ShopBtn2Panel (HOOK) +0.05s ── -->
-            <DoubleAnimation Storyboard.TargetName="ShopBtn2Scale"
-                             Storyboard.TargetProperty="ScaleX"
-                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05">
-                <DoubleAnimation.EasingFunction>
-                    <QuadraticEase EasingMode="EaseIn"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="ShopBtn2Scale"
-                             Storyboard.TargetProperty="ScaleY"
-                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <QuadraticEase EasingMode="EaseIn"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="ShopBtn2Translate"
                              Storyboard.TargetProperty="Y"
-                             To="80" Duration="0:0:0.25" BeginTime="0:0:0.05">
+                             To="80" Duration="0:0:0.25" BeginTime="0:0:0">
                 <DoubleAnimation.EasingFunction>
                     <QuadraticEase EasingMode="EaseIn"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="ShopBtn2Panel"
                              Storyboard.TargetProperty="Opacity"
-                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05"/>
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0"/>
 
-            <!-- ── ShopBtn1Panel (LINE) +0.1s ── -->
+            <!-- ── ShopBtn1Panel (LINE) +0.05s ── -->
             <DoubleAnimation Storyboard.TargetName="ShopBtn1Scale"
                              Storyboard.TargetProperty="ScaleX"
-                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.1">
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <QuadraticEase EasingMode="EaseIn"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="ShopBtn1Scale"
                              Storyboard.TargetProperty="ScaleY"
-                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.1">
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <QuadraticEase EasingMode="EaseIn"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="ShopBtn1Translate"
                              Storyboard.TargetProperty="Y"
-                             To="80" Duration="0:0:0.25" BeginTime="0:0:0.1">
+                             To="80" Duration="0:0:0.25" BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <QuadraticEase EasingMode="EaseIn"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
             <DoubleAnimation Storyboard.TargetName="ShopBtn1Panel"
                              Storyboard.TargetProperty="Opacity"
-                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.1"/>
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05"/>
 
             <!-- ── CastButtonPanel +0.2s ── -->
             <DoubleAnimation Storyboard.TargetName="CastButtonScale"
@@ -493,7 +428,7 @@
 
         <!-- ── Upgrade Button Template (premium nested borders + 3D press) ── -->
         <ControlTemplate x:Key="UpgradeButtonTemplate" TargetType="Button">
-            <Grid MinWidth="340" Height="285">
+            <Grid MinWidth="500" Height="285">
                 <VisualStateManager.VisualStateGroups>
                     <VisualStateGroup x:Name="CommonStates">
                         <VisualState x:Name="Normal">
@@ -668,7 +603,7 @@
                     <Style TargetType="Button">
                         <Setter Property="Template" Value="{StaticResource UpgradeButtonTemplate}"/>
                         <Setter Property="Margin" Value="18,0"/>
-                        <Setter Property="MinWidth" Value="340"/>
+                        <Setter Property="MinWidth" Value="500"/>
                     </Style>
                 </StackPanel.Resources>
 
@@ -690,15 +625,26 @@
                                        Stroke="#FF000000"
                                        StrokeThickness="4"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock FontSize="33"
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource CyanAccent}"
-                                       Stroke="#FF000000"
-                                       StrokeThickness="3"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,2,0,0">
-                                <Run Text="Lv."/><Run Text="{Binding lineLevel}"/>
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding lineCurrentValue}"
+                                           FontSize="36"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource CyanAccent}"
+                                           Stroke="#FF000000"
+                                           StrokeThickness="3"/>
+                                <Path Data="M 0,4 L 8,10 L 0,16 Z"
+                                      Fill="White"
+                                      Stretch="Uniform"
+                                      Width="20" Height="20"
+                                      VerticalAlignment="Center"
+                                      Margin="10,0,10,0"/>
+                                <TextBlock Text="{Binding lineNextValue}"
+                                           FontSize="36"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource CyanAccent}"
+                                           Stroke="#FF000000"
+                                           StrokeThickness="3"/>
+                            </StackPanel>
                             <Border Height="2" Margin="6,5,6,5" CornerRadius="1">
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
@@ -741,15 +687,26 @@
                                        Stroke="#FF000000"
                                        StrokeThickness="4"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock FontSize="33"
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource CyanAccent}"
-                                       Stroke="#FF000000"
-                                       StrokeThickness="3"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,2,0,0">
-                                <Run Text="Lv."/><Run Text="{Binding hookLevel}"/>
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding hookCurrentValue}"
+                                           FontSize="36"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource CyanAccent}"
+                                           Stroke="#FF000000"
+                                           StrokeThickness="3"/>
+                                <Path Data="M 0,4 L 8,10 L 0,16 Z"
+                                      Fill="White"
+                                      Stretch="Uniform"
+                                      Width="20" Height="20"
+                                      VerticalAlignment="Center"
+                                      Margin="10,0,10,0"/>
+                                <TextBlock Text="{Binding hookNextValue}"
+                                           FontSize="36"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource CyanAccent}"
+                                           Stroke="#FF000000"
+                                           StrokeThickness="3"/>
+                            </StackPanel>
                             <Border Height="2" Margin="6,5,6,5" CornerRadius="1">
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
@@ -774,56 +731,7 @@
                     </Button>
                 </Grid>
 
-                <!-- BAIT Upgrade — wrapped in ShopBtn3Panel -->
-                <Grid x:Name="ShopBtn3Panel" Opacity="0" RenderTransformOrigin="0.5,0.5">
-                    <Grid.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform x:Name="ShopBtn3Scale" ScaleX="0" ScaleY="0"/>
-                            <TranslateTransform x:Name="ShopBtn3Translate" Y="80"/>
-                        </TransformGroup>
-                    </Grid.RenderTransform>
 
-                    <Button Command="{Binding Path=events.buyBait}">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="BAIT"
-                                       FontSize="48"
-                                       FontWeight="Bold"
-                                       Foreground="White"
-                                       Stroke="#FF000000"
-                                       StrokeThickness="4"
-                                       HorizontalAlignment="Center"/>
-                            <TextBlock FontSize="33"
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource CyanAccent}"
-                                       Stroke="#FF000000"
-                                       StrokeThickness="3"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,2,0,0">
-                                <Run Text="Lv."/><Run Text="{Binding baitLevel}"/>
-                            </TextBlock>
-                            <Border Height="2" Margin="6,5,6,5" CornerRadius="1">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-                                        <GradientStop Color="#00FFFFFF" Offset="0"/>
-                                        <GradientStop Color="#66FFFFFF" Offset="0.5"/>
-                                        <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Image Source="Textures/gold_icon.png"
-                                       Width="48" Height="48"
-                                       Margin="0,0,12,0"/>
-                                <TextBlock Text="{Binding baitCost}"
-                                           FontSize="42"
-                                           FontWeight="Bold"
-                                           Foreground="{StaticResource GoldText}"
-                                           Stroke="#FF000000"
-                                           StrokeThickness="4"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Button>
-                </Grid>
             </StackPanel>
         </Grid>
     </Grid>

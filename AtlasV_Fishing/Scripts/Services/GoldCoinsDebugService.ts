@@ -23,40 +23,26 @@ import {
   TIP_X,
   TIP_Y,
   WATER_SURFACE_Y,
+  worldToCanvas,
 } from '../Constants';
 import { GoldCoinsAnimatorViewModel } from '../Components/UI/GoldCoinsAnimatorViewModel';
 
 // ── Set to false to disable the debug overlay entirely ─────────────────────────
 const DEBUG_CANVAS = false;
 
-const COIN_PX   = 50;                          // matches XAML Image width/height
-const COIN_HALF = COIN_PX / 2;
-const PX_PER_WU = CANVAS_SIZE / CANVAS_WORLD_SPAN; // canvas pixels per world unit
+const COIN_HALF = 25;                               // half of XAML Image Width/Height="50"
+const PX_PER_WU = CANVAS_SIZE / CANVAS_WORLD_SPAN;  // canvas pixels per world unit
 
 // Slot layout
-const GRID_SLOTS      = 9;   // 3×3 calibration grid
-const FISH_SLOTS      = 4;   // rotating fish-event flashes
-const ROD_TIP_SLOTS   = 1;   // tip of the fishing rod
-const WATERLINE_COUNT = 11;  // line of coins at WATER_SURFACE_Y, X −5…+5 every 1 wu
-const TOTAL_SLOTS     = GRID_SLOTS + FISH_SLOTS + ROD_TIP_SLOTS + WATERLINE_COUNT;
+const GRID_SLOTS       = 9;   // 3×3 calibration grid
+const FISH_SLOTS       = 4;   // rotating fish-event flashes
+const ROD_TIP_SLOTS    = 1;   // tip of the fishing rod
+const WATERLINE_COUNT  = 11;  // line of coins at WATER_SURFACE_Y, X −5…+5 every 1 wu
+const TOTAL_SLOTS      = GRID_SLOTS + FISH_SLOTS + ROD_TIP_SLOTS + WATERLINE_COUNT;
 
-const SLOT_FISH_BASE     = GRID_SLOTS;
-const SLOT_ROD_TIP       = GRID_SLOTS + FISH_SLOTS;
+const SLOT_FISH_BASE      = GRID_SLOTS;
+const SLOT_ROD_TIP        = GRID_SLOTS + FISH_SLOTS;
 const SLOT_WATERLINE_BASE = SLOT_ROD_TIP + ROD_TIP_SLOTS;
-
-/**
- * Convert a world position to canvas TranslateTransform (x, y).
- * Result is the top-left offset for a COIN_PX × COIN_PX image centered at (wx, wy).
- *
- * Canvas X:  worldX=0            → canvas px 300 (center)
- * Canvas Y:  worldY=CANVAS_CENTER_WORLD_Y → canvas py 300 (center); Y is flipped.
- */
-function worldToCanvas(wx: number, wy: number): { x: number; y: number } {
-  return {
-    x:  wx * PX_PER_WU + CANVAS_SIZE / 2 - COIN_HALF,
-    y: -(wy - CANVAS_CENTER_WORLD_Y) * PX_PER_WU + CANVAS_SIZE / 2 - COIN_HALF,
-  };
-}
 
 // =============================================================================
 //  GoldCoinsDebugService

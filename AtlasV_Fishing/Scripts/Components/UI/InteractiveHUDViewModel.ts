@@ -15,7 +15,7 @@ import {
 } from 'meta/worlds';
 
 import { Events, GamePhase } from '../../Types';
-import { upgradeCost, LINE_MAX_LEVEL, HOOK_MAX_LEVEL } from '../../Constants';
+import { upgradeCost, LINE_MAX_LEVEL, HOOK_MAX_LEVEL, lineDepthAtLevel, hookMaxFishAtLevel } from '../../Constants';
 
 // ─── Module-level UiEvent declarations (unique prefixed IDs) ─────────────────
 @serializable()
@@ -45,15 +45,6 @@ export const interactiveBuyHookEvent = new UiEvent(
   InteractiveHUDBuyHookPayload,
 );
 
-@serializable()
-class InteractiveHUDBuyBaitPayload {
-  readonly parameter: string = '';
-}
-export const interactiveBuyBaitEvent = new UiEvent(
-  'InteractiveHUD-onBuyBait',
-  InteractiveHUDBuyBaitPayload,
-);
-
 // ─── ViewModel ──────────────────────────────────────────────────────────────
 @uiViewModel()
 export class InteractiveHUDData extends UiViewModel {
@@ -69,18 +60,21 @@ export class InteractiveHUDData extends UiViewModel {
   /** Upgrade levels */
   lineLevel: number = 1;
   hookLevel: number = 1;
-  baitLevel: number = 1;
 
   /** Upgrade costs (display strings) */
   lineCost: string = '100';
   hookCost: string = '150';
-  baitCost: string = '200';
+
+  /** Current/next upgrade value display */
+  lineCurrentValue: string = '';
+  lineNextValue: string = '';
+  hookCurrentValue: string = '';
+  hookNextValue: string = '';
 
   override readonly events = {
     castPressed: interactiveCastPressedEvent,
     buyLine: interactiveBuyLineEvent,
     buyHook: interactiveBuyHookEvent,
-    buyBait: interactiveBuyBaitEvent,
   };
 }
 
@@ -143,11 +137,6 @@ export class InteractiveHUDViewModel extends Component {
     EventService.sendLocally(Events.BuyUpgrade, { upgrade: 'hook' });
   }
 
-  @subscribe(interactiveBuyBaitEvent)
-  private _onBuyBait(): void {
-    if (NetworkingService.get().isServerContext()) return;
-  }
-
   // ── Phase visibility ─────────────────────────────────────────────────────
   @subscribe(Events.PhaseChanged)
   private _onPhase(p: Events.PhaseChangedPayload): void {
@@ -174,6 +163,12 @@ export class InteractiveHUDViewModel extends Component {
     this._vm.hookLevel = hookLevel;
     this._vm.lineCost = lineLevel < LINE_MAX_LEVEL ? `${upgradeCost(lineLevel + 1)}` : 'MAX';
     this._vm.hookCost = hookLevel < HOOK_MAX_LEVEL ? `${upgradeCost(hookLevel + 1)}` : 'MAX';
+
+    // Current/next upgrade value display
+    this._vm.lineCurrentValue = `${lineDepthAtLevel(lineLevel)}m`;
+    this._vm.lineNextValue = lineLevel < LINE_MAX_LEVEL ? `${lineDepthAtLevel(lineLevel + 1)}m` : 'MAX';
+    this._vm.hookCurrentValue = `${hookMaxFishAtLevel(hookLevel)}`;
+    this._vm.hookNextValue = hookLevel < HOOK_MAX_LEVEL ? `${hookMaxFishAtLevel(hookLevel + 1)}` : 'MAX';
   }
 
   // ── Show / Hide with isVisible gating ────────────────────────────────────

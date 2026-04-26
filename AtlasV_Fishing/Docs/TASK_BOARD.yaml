@@ -133,9 +133,14 @@ tasks:
     files: [UI/GoldCoinsAnimator.xaml, Scripts/Components/UI/GoldCoinsAnimatorViewModel.ts]
 
   - name: Depth Gradient Surface Shader
-    status: in_progress
-    summary: Surface shader qui colore les pixels en fonction du world Y - turquoise en surface, bleu profond en bas
-    files: [Shaders/DepthGradient.surface]
+    status: done
+    summary: Surface shader unlit qui colore les pixels selon world Y (turquoise surface → bleu nuit profond). Paramètres exposés: topColor, bottomColor, topY, bottomY.
+    files: [Shaders/DepthGradient.surface, Materials/DepthGradient.material]
+
+  - name: Upgrade Buttons Refonte
+    status: done
+    summary: Retiré bouton BAIT, agrandi LINE/HOOK (500px), nouveau format "16m → 32m" avec flèche Path, propriétés currentValue/nextValue bindées
+    files: [UI/InteractiveHUD.xaml, Scripts/Components/UI/InteractiveHUDViewModel.ts]
 
 chopping_block:
   disabled_systems: []

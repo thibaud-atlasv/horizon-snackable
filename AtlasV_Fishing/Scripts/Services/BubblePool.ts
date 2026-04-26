@@ -13,7 +13,7 @@ import {
 } from 'meta/worlds';
 
 import { Assets } from '../Assets';
-import { FISH_LEFT, FISH_RIGHT, WATER_SURFACE_Y, ZONE_FLOOR_Y } from '../Constants';
+import { FISH_LEFT, FISH_RIGHT, WATER_SURFACE_Y, BUBBLE_SPAWN_MIN_Y } from '../Constants';
 import { Events } from '../Types';
 
 const POOL_SIZE = 40;
@@ -44,7 +44,7 @@ export class BubblePool extends Service {
         networkMode:   NetworkMode.LocalOnly,
       });
       const x = FISH_LEFT + Math.random() * (FISH_RIGHT - FISH_LEFT);
-      const y = ZONE_FLOOR_Y[2] + Math.random() * (WATER_SURFACE_Y - ZONE_FLOOR_Y[2]);
+      const y = BUBBLE_SPAWN_MIN_Y + Math.random() * (WATER_SURFACE_Y - BUBBLE_SPAWN_MIN_Y);
       EventService.sendLocally(Events.InitBubble, { x, y }, { eventTarget: entity });
     }
     this._ready = true;

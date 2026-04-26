@@ -14,6 +14,8 @@ export const TIP_X       = -2.85;
 export const TIP_Y       =  7.15;
 export const HOOK_IDLE_X =  TIP_X;
 export const HOOK_IDLE_Y =  WATER_SURFACE_Y + 0.2;
+export const BAIT_IDLE_X =  HOOK_IDLE_X;
+export const BAIT_IDLE_Y =  HOOK_IDLE_Y;
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 export const COLOR_LINE       = { r: 0.95, g: 0.95, b: 0.82 };
@@ -80,6 +82,7 @@ export const BUBBLE_LIFETIME_MIN    = 2.5;
 export const BUBBLE_LIFETIME_MAX    = 6.5;
 export const BUBBLE_SPAWN_OFFSET_X  = 0.35;
 export const BUBBLE_SPAWN_OFFSET_Y  = 0.10;
+export const BUBBLE_SPAWN_MIN_Y     = -40.0; // lower Y bound for bubble initial position
 
 // ─── Flash ────────────────────────────────────────────────────────────────────
 export const FLASH_DUR = 0.22;
@@ -119,14 +122,16 @@ export const CANVAS_WORLD_SPAN     = 12.0;  // world units the canvas covers on 
 export const CANVAS_CENTER_WORLD_Y = 7.0;   // world Y at canvas center (covers ~Y 1–13)
 export const CANVAS_ENTITY_SCALE   = 12.0;  // uniform entity scale (1 unit ≈ 1 world unit — tune me)
 
-// ─── Zone progression ─────────────────────────────────────────────────────────
-export const ZONE_COUNT             =  3;
-export const ZONE_FLOOR_Y           = [-8.5, -24.5, -38.5] as readonly number[];
-export const ZONE_SPAWN_TOP_Y       = [4.0,  -9.5, -25.5]  as readonly number[];
-export const ZONE_SPAWN_BOT_Y       = [-8.5, -24.5, -38.5] as readonly number[];
-export const FISH_MAX_PER_ZONE      =  5;
-export const FISH_RESPAWN_INTERVAL  = 30;
-export const UNLOCK_ZONE_2_UNIQUE   =  3;
-export const UNLOCK_ZONE_3_UNIQUE   =  7;
-export const BAIT_IDLE_X            = HOOK_IDLE_X;
-export const BAIT_IDLE_Y            = HOOK_IDLE_Y;
+/**
+ * Convert a world position to canvas TranslateTransform (x, y) for a 50×50 coin icon.
+ * The returned offset places the icon's visual center at (wx, wy) in world space.
+ * Mirrors the XAML coin Image Width/Height="50" — update both if icon size changes.
+ */
+export function worldToCanvas(wx: number, wy: number): { x: number; y: number } {
+  const scale = CANVAS_SIZE / CANVAS_WORLD_SPAN;
+  return {
+    x:  wx * scale + CANVAS_SIZE / 2 - 25,
+    y: -(wy - CANVAS_CENTER_WORLD_Y) * scale + CANVAS_SIZE / 2 - 25,
+  };
+}
+

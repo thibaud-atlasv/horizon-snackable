@@ -103,34 +103,6 @@ export class GoldCoinsAnimatorViewModel extends Component {
     coin.opacity = opacity;
   }
 
-  /** Return current state of coin at `index`, or null if out of range. */
-  public getCoin(
-    index: number,
-  ): {
-    x: number;
-    y: number;
-    scaleX: number;
-    scaleY: number;
-    rotation: number;
-    opacity: number;
-  } | null {
-    const coin = this._vm.coins[index];
-    if (!coin) return null;
-    return {
-      x: coin.x,
-      y: coin.y,
-      scaleX: coin.scaleX,
-      scaleY: coin.scaleY,
-      rotation: coin.rotation,
-      opacity: coin.opacity,
-    };
-  }
-
-  /** Return the current number of coins. */
-  public getCoinCount(): number {
-    return this._vm.coins.length;
-  }
-
   // ── Texts ──────────────────────────────────────────────────────────
 
   /** Resize the texts array to `count`. Adds new default texts or trims extras. */
@@ -171,33 +143,4 @@ export class GoldCoinsAnimatorViewModel extends Component {
     item.color = color;
   }
 
-  /** Return current state of text item at `index`, or null if out of range. */
-  public getText(
-    index: number,
-  ): {
-    text: string;
-    x: number;
-    y: number;
-    scaleX: number;
-    scaleY: number;
-    opacity: number;
-    color: string;
-  } | null {
-    const item = this._vm.texts[index];
-    if (!item) return null;
-    return {
-      text: item.text,
-      x: item.x,
-      y: item.y,
-      scaleX: item.scaleX,
-      scaleY: item.scaleY,
-      opacity: item.opacity,
-      color: item.color,
-    };
-  }
-
-  /** Return the current number of text items. */
-  public getTextCount(): number {
-    return this._vm.texts.length;
-  }
 }

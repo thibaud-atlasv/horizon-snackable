@@ -11,7 +11,6 @@ import {
 } from 'meta/worlds';
 
 import { Events, NetworkEvents } from '../Types';
-import { UNLOCK_ZONE_2_UNIQUE, UNLOCK_ZONE_3_UNIQUE } from '../Constants';
 import {
   GOLD_REWARD_COMMON, GOLD_REWARD_RARE, GOLD_REWARD_LEGENDARY,
   LINE_MAX_LEVEL, HOOK_MAX_LEVEL,
@@ -81,19 +80,13 @@ export class PlayerProgressService extends Service {
       this._persist();
     }
 
-    const unique = this._counts.size;
-    const unlockedZones = unique >= UNLOCK_ZONE_3_UNIQUE ? 3
-                        : unique >= UNLOCK_ZONE_2_UNIQUE ? 2
-                        : 1;
-
     const catchDefIds = Array.from(this._counts.keys());
     EventService.sendGlobally(NetworkEvents.ProgressData, {
       catchDefIds,
-      catchCounts:   catchDefIds.map(id => this._counts.get(id)!),
-      unlockedZones,
-      gold:          this._gold,
-      lineLevel:     this._lineLevel,
-      hookLevel:     this._hookLevel,
+      catchCounts: catchDefIds.map(id => this._counts.get(id)!),
+      gold:        this._gold,
+      lineLevel:   this._lineLevel,
+      hookLevel:   this._hookLevel,
     });
   }
 
@@ -161,12 +154,11 @@ export class PlayerProgressService extends Service {
   onProgressData(p: NetworkEvents.ProgressDataPayload): void {
     if (NetworkingService.get().isServerContext()) return;
     EventService.sendLocally(Events.ProgressLoaded, {
-      catchDefIds:   p.catchDefIds,
-      catchCounts:   p.catchCounts,
-      unlockedZones: p.unlockedZones,
-      gold:          p.gold,
-      lineLevel:     p.lineLevel,
-      hookLevel:     p.hookLevel,
+      catchDefIds: p.catchDefIds,
+      catchCounts: p.catchCounts,
+      gold:        p.gold,
+      lineLevel:   p.lineLevel,
+      hookLevel:   p.hookLevel,
     });
   }
 

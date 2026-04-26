@@ -18,7 +18,6 @@ export interface RGB { r: number; g: number; b: number; }
 export interface IFishDef {
   id          : number;
   name        : string;
-  zone        : 1 | 2 | 3;
   rarity      : FishRarity;
   template    : TemplateAsset;
   sizeMin     : number;
@@ -105,16 +104,12 @@ export namespace Events {
   export class FishCaughtPayload { fishId: number = 0; defId: number = 0; }
   export const FishCaught = new LocalEvent<FishCaughtPayload>('EvFishCaught', FishCaughtPayload);
 
-  export class ZoneUnlockedPayload { zone: number = 1; }
-  export const ZoneUnlocked = new LocalEvent<ZoneUnlockedPayload>('EvZoneUnlocked', ZoneUnlockedPayload);
-
   export class ProgressLoadedPayload {
-    catchDefIds   : readonly number[] = [];
-    catchCounts   : readonly number[] = [];
-    unlockedZones : number            = 1;
-    gold          : number            = 0;
-    lineLevel     : number            = 0;
-    hookLevel     : number            = 0;
+    catchDefIds : readonly number[] = [];
+    catchCounts : readonly number[] = [];
+    gold        : number            = 0;
+    lineLevel   : number            = 0;
+    hookLevel   : number            = 0;
   }
   export const ProgressLoaded = new LocalEvent<ProgressLoadedPayload>('EvProgressLoaded', ProgressLoadedPayload);
 
@@ -151,10 +146,9 @@ export namespace NetworkEvents {
 
   @serializable()
   export class ProgressDataPayload {
-    readonly catchDefIds   : readonly number[] = [];
-    readonly catchCounts   : readonly number[] = [];
-    readonly unlockedZones : number            = 1;
-    readonly gold          : number            = 0;
+    readonly catchDefIds : readonly number[] = [];
+    readonly catchCounts : readonly number[] = [];
+    readonly gold        : number            = 0;
     readonly lineLevel     : number            = 0;
     readonly hookLevel     : number            = 0;
   }
