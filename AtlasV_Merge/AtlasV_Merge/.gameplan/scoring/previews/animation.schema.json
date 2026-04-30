@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Score Animation",
+  "elements": [{ "id": "sa_prev", "type": "image", "src": "./animation.png", "fit": "cover" }]
+}

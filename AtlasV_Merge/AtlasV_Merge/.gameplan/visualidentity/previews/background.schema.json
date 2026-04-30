@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Background",
+  "elements": [{ "id": "bg_prev", "type": "image", "src": "./background.png", "fit": "cover" }]
+}

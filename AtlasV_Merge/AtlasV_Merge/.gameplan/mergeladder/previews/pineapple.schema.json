@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Pineapple",
+  "elements": [{ "id": "pineapple_prev", "type": "image", "src": "./pineapple.png", "fit": "cover" }]
+}

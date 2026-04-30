@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "elements": [
+    { "id": "overview_title", "type": "heading", "value": "Suika Merge Game" }
+  ]
+}
