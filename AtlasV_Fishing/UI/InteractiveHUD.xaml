@@ -1,0 +1,733 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d"
+      Background="Transparent" d:DesignWidth="2000" d:DesignHeight="4000">
+
+    <Page.Resources>
+        <!-- ── Color Palette ──────────────────────────────────────── -->
+        <SolidColorBrush x:Key="Turquoise" Color="#FF00CED1"/>
+        <SolidColorBrush x:Key="TurquoiseDark" Color="#FF009B9E"/>
+        <SolidColorBrush x:Key="Orange" Color="#FFFF6B35"/>
+        <SolidColorBrush x:Key="OrangeDark" Color="#FFD45520"/>
+        <SolidColorBrush x:Key="Gold" Color="#FFFFC857"/>
+        <SolidColorBrush x:Key="GoldDark" Color="#FFD4A030"/>
+        <SolidColorBrush x:Key="DeepBlue" Color="#FF1E3A5F"/>
+        <SolidColorBrush x:Key="DeepBlueShadow" Color="#AA0E1A2F"/>
+        <SolidColorBrush x:Key="PanelBg" Color="#CC1A2D4A"/>
+        <SolidColorBrush x:Key="ButtonHighlight" Color="#40FFFFFF"/>
+
+        <SolidColorBrush x:Key="WhiteBorder" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="BlackBorder" Color="#FF000000"/>
+        <SolidColorBrush x:Key="DarkBlueFill" Color="#FF0C1B33"/>
+        <SolidColorBrush x:Key="CyanAccent" Color="#FF00E5FF"/>
+        <SolidColorBrush x:Key="VividOrange" Color="#FFFF6A00"/>
+        <SolidColorBrush x:Key="LightOrange" Color="#FFFFB366"/>
+        <SolidColorBrush x:Key="SkyBlue" Color="#FF4FC3F7"/>
+        <SolidColorBrush x:Key="DarkBlueGrad" Color="#FF0A1628"/>
+        <SolidColorBrush x:Key="GoldText" Color="#FFFFD54F"/>
+
+        <!-- ── Normal-state gradient brushes for restoration ── -->
+        <LinearGradientBrush x:Key="CastNormalGradient" StartPoint="0.5,0" EndPoint="0.5,1">
+            <GradientStop Color="#FFFF8C33" Offset="0"/>
+            <GradientStop Color="#FFFF5500" Offset="0.5"/>
+            <GradientStop Color="#FFD44500" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="CastPressedGradient" StartPoint="0.5,0" EndPoint="0.5,1">
+            <GradientStop Color="#FFD46A20" Offset="0"/>
+            <GradientStop Color="#FFBB3A00" Offset="0.5"/>
+            <GradientStop Color="#FFA03000" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="UpgNormalGradient" StartPoint="0.5,0" EndPoint="0.5,1">
+            <GradientStop Color="#FF2196D6" Offset="0"/>
+            <GradientStop Color="#FF0D2B4A" Offset="0.85"/>
+            <GradientStop Color="#FF091D33" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="UpgPressedGradient" StartPoint="0.5,0" EndPoint="0.5,1">
+            <GradientStop Color="#FF1878AA" Offset="0"/>
+            <GradientStop Color="#FF091D33" Offset="0.85"/>
+            <GradientStop Color="#FF06152A" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- ══ Staggered HUD Show Animation ══════════════════ -->
+        <Storyboard x:Key="HUDShowAnimation">
+
+            <!-- ── CastButtonPanel: scale pop 0→1.15→1, slide up from 100, fade in (stagger +0.15s) ── -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CastButtonScale"
+                                           Storyboard.TargetProperty="ScaleX" BeginTime="0:0:0.15">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.15">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CastButtonScale"
+                                           Storyboard.TargetProperty="ScaleY" BeginTime="0:0:0.15">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.15">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimation Storyboard.TargetName="CastButtonTranslate"
+                             Storyboard.TargetProperty="Y"
+                             From="100" To="0" Duration="0:0:0.35" BeginTime="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="CastButtonPanel"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.15" BeginTime="0:0:0.15"/>
+
+            <!-- ── ShopBtn1Panel (LINE): scale pop + slide, stagger +0.3s ── -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShopBtn1Scale"
+                                           Storyboard.TargetProperty="ScaleX" BeginTime="0:0:0.3">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.22" Value="1.1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShopBtn1Scale"
+                                           Storyboard.TargetProperty="ScaleY" BeginTime="0:0:0.3">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.22" Value="1.1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn1Translate"
+                             Storyboard.TargetProperty="Y"
+                             From="80" To="0" Duration="0:0:0.35" BeginTime="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn1Panel"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.15" BeginTime="0:0:0.3"/>
+
+            <!-- ── ShopBtn2Panel (HOOK): stagger +0.4s ── -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShopBtn2Scale"
+                                           Storyboard.TargetProperty="ScaleX" BeginTime="0:0:0.4">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.22" Value="1.1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShopBtn2Scale"
+                                           Storyboard.TargetProperty="ScaleY" BeginTime="0:0:0.4">
+                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.22" Value="1.1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <QuadraticEase EasingMode="EaseOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Translate"
+                             Storyboard.TargetProperty="Y"
+                             From="80" To="0" Duration="0:0:0.35" BeginTime="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Panel"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.15" BeginTime="0:0:0.4"/>
+
+        </Storyboard>
+
+        <!-- ══ Staggered HUD Hide Animation ══════════════════ -->
+        <Storyboard x:Key="HUDHideAnimation">
+
+            <!-- ── ShopBtn2Panel (HOOK) exits first ── -->
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Scale"
+                             Storyboard.TargetProperty="ScaleX"
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Scale"
+                             Storyboard.TargetProperty="ScaleY"
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Translate"
+                             Storyboard.TargetProperty="Y"
+                             To="80" Duration="0:0:0.25" BeginTime="0:0:0">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn2Panel"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0"/>
+
+            <!-- ── ShopBtn1Panel (LINE) +0.05s ── -->
+            <DoubleAnimation Storyboard.TargetName="ShopBtn1Scale"
+                             Storyboard.TargetProperty="ScaleX"
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn1Scale"
+                             Storyboard.TargetProperty="ScaleY"
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn1Translate"
+                             Storyboard.TargetProperty="Y"
+                             To="80" Duration="0:0:0.25" BeginTime="0:0:0.05">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShopBtn1Panel"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.25" BeginTime="0:0:0.05"/>
+
+            <!-- ── CastButtonPanel +0.2s ── -->
+            <DoubleAnimation Storyboard.TargetName="CastButtonScale"
+                             Storyboard.TargetProperty="ScaleX"
+                             To="0" Duration="0:0:0.3" BeginTime="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="CastButtonScale"
+                             Storyboard.TargetProperty="ScaleY"
+                             To="0" Duration="0:0:0.3" BeginTime="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="CastButtonTranslate"
+                             Storyboard.TargetProperty="Y"
+                             To="100" Duration="0:0:0.3" BeginTime="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="CastButtonPanel"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.3" BeginTime="0:0:0.2"/>
+        </Storyboard>
+
+        <!-- ── Cast Button Template (premium buzzer + 3D press) ────── -->
+        <ControlTemplate x:Key="CastButtonTemplate" TargetType="Button">
+            <Grid Width="560" Height="600">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="CastFaceTranslate"
+                                                 Storyboard.TargetProperty="Y"
+                                                 To="0" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <ElasticEase Springiness="3" Oscillations="1" EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="CastFaceScale"
+                                                 Storyboard.TargetProperty="ScaleX"
+                                                 To="1" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <ElasticEase Springiness="3" Oscillations="1" EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="CastFaceScale"
+                                                 Storyboard.TargetProperty="ScaleY"
+                                                 To="1" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <ElasticEase Springiness="3" Oscillations="1" EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CastInnerCircle"
+                                                               Storyboard.TargetProperty="Background">
+                                    <DiscreteObjectKeyFrame KeyTime="0:0:0"
+                                                            Value="{StaticResource CastNormalGradient}"/>
+                                </ObjectAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="MouseOver"/>
+                        <VisualState x:Name="Pressed">
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="CastFaceTranslate"
+                                                 Storyboard.TargetProperty="Y"
+                                                 To="15" Duration="0:0:0.08">
+                                    <DoubleAnimation.EasingFunction>
+                                        <QuadraticEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="CastFaceScale"
+                                                 Storyboard.TargetProperty="ScaleX"
+                                                 To="0.95" Duration="0:0:0.08">
+                                    <DoubleAnimation.EasingFunction>
+                                        <QuadraticEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="CastFaceScale"
+                                                 Storyboard.TargetProperty="ScaleY"
+                                                 To="0.95" Duration="0:0:0.08">
+                                    <DoubleAnimation.EasingFunction>
+                                        <QuadraticEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CastInnerCircle"
+                                                               Storyboard.TargetProperty="Background">
+                                    <DiscreteObjectKeyFrame KeyTime="0:0:0"
+                                                            Value="{StaticResource CastPressedGradient}"/>
+                                </ObjectAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="Disabled"/>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+
+                <!-- Gradient shadow ellipse offset below -->
+                <Border CornerRadius="280"
+                        VerticalAlignment="Bottom"
+                        Opacity="0.55" Background="#FF000000" Margin="10,0,10,40" Width="500" Height="500"/>
+
+                <!-- Button face group (moves down + scales on press) -->
+                <Grid x:Name="CastFaceGroup"
+                      Width="540" Height="540"
+                      VerticalAlignment="Top"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="CastFaceScale" ScaleX="1" ScaleY="1"/>
+                            <TranslateTransform x:Name="CastFaceTranslate" Y="0"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+
+                    <!-- Outer white border ring -->
+                    <Border CornerRadius="270"
+                            Width="540" Height="540"
+                            BorderBrush="{StaticResource WhiteBorder}"
+                            BorderThickness="8"
+                            Background="Transparent">
+
+                        <!-- Inner black border ring -->
+                        <Border CornerRadius="262"
+                                BorderBrush="{StaticResource BlackBorder}"
+                                BorderThickness="6"
+                                Background="Transparent">
+
+                        <!-- Light orange first ring -->
+                        <Border CornerRadius="256"
+                                Margin="2"
+                                BorderBrush="Transparent"
+                                BorderThickness="0" Background="#FFFFB366">
+
+                            <!-- Inner vivid orange gradient circle with black border (buzzer) -->
+                            <Border x:Name="CastInnerCircle"
+                                    CornerRadius="240"
+                                    Margin="18"
+                                    BorderBrush="{StaticResource BlackBorder}"
+                                    Background="{StaticResource CastNormalGradient}" BorderThickness="2,2,2,2">
+
+                                <Grid>
+                                    <!-- Inner highlight arc -->
+
+                                    <!-- Text shadow (behind, offset) -->
+                                    <TextBlock FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding Path=castButtonText, FallbackValue=Cast}" FontSize="175" FontFamily="Bangers" Margin="0,6,0,0" Foreground="#96000000">
+                                        <TextBlock.RenderTransform>
+                                            <TranslateTransform Y="5" X="3"/>
+                                        </TextBlock.RenderTransform>
+                                    </TextBlock>
+
+                                    <!-- Cast label with stroke -->
+                                    <TextBlock FontWeight="Bold"
+                                               Foreground="White"
+                                               Stroke="#FF000000"
+                                               StrokeThickness="5"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding Path=castButtonText, FallbackValue=Cast}" FontSize="175" FontFamily="Bangers"/>
+                                </Grid>
+                            </Border>
+                        </Border>
+                    </Border>
+                    </Border>
+                </Grid>
+            </Grid>
+        </ControlTemplate>
+
+        <!-- ── Upgrade Button Template (premium nested borders + 3D press) ── -->
+        <ControlTemplate x:Key="UpgradeButtonTemplate" TargetType="Button">
+            <Grid MinWidth="500" Height="285">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="UpgFaceTranslate"
+                                                 Storyboard.TargetProperty="Y"
+                                                 To="0" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <ElasticEase Springiness="3" Oscillations="1" EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="UpgFaceScale"
+                                                 Storyboard.TargetProperty="ScaleX"
+                                                 To="1" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <ElasticEase Springiness="3" Oscillations="1" EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="UpgFaceScale"
+                                                 Storyboard.TargetProperty="ScaleY"
+                                                 To="1" Duration="0:0:0.35">
+                                    <DoubleAnimation.EasingFunction>
+                                        <ElasticEase Springiness="3" Oscillations="1" EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="UpgGradFill"
+                                                               Storyboard.TargetProperty="Background">
+                                    <DiscreteObjectKeyFrame KeyTime="0:0:0"
+                                                            Value="{StaticResource UpgNormalGradient}"/>
+                                </ObjectAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="MouseOver"/>
+                        <VisualState x:Name="Pressed">
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="UpgFaceTranslate"
+                                                 Storyboard.TargetProperty="Y"
+                                                 To="9" Duration="0:0:0.08">
+                                    <DoubleAnimation.EasingFunction>
+                                        <QuadraticEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="UpgFaceScale"
+                                                 Storyboard.TargetProperty="ScaleX"
+                                                 To="0.95" Duration="0:0:0.08">
+                                    <DoubleAnimation.EasingFunction>
+                                        <QuadraticEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="UpgFaceScale"
+                                                 Storyboard.TargetProperty="ScaleY"
+                                                 To="0.95" Duration="0:0:0.08">
+                                    <DoubleAnimation.EasingFunction>
+                                        <QuadraticEase EasingMode="EaseOut"/>
+                                    </DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="UpgGradFill"
+                                                               Storyboard.TargetProperty="Background">
+                                    <DiscreteObjectKeyFrame KeyTime="0:0:0"
+                                                            Value="{StaticResource UpgPressedGradient}"/>
+                                </ObjectAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="Disabled"/>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+
+                <!-- Gradient shadow offset below -->
+                <Border CornerRadius="54"
+                        Margin="4,18,4,0"
+                        VerticalAlignment="Bottom"
+                        Height="258"
+                        Opacity="0.5">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#66000000" Offset="0"/>
+                            <GradientStop Color="#00000000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <!-- Face group (moves down + scales on press) -->
+                <Grid x:Name="UpgFaceGroup"
+                      VerticalAlignment="Top"
+                      Height="258"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="UpgFaceScale" ScaleX="1" ScaleY="1"/>
+                            <TranslateTransform x:Name="UpgFaceTranslate" Y="0"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+
+                    <!-- Outer white border -->
+                    <Border CornerRadius="54"
+                            BorderBrush="{StaticResource WhiteBorder}"
+                            BorderThickness="8"
+                            Background="Transparent">
+
+                        <!-- Inner black border -->
+                        <Border CornerRadius="49"
+                                BorderBrush="{StaticResource BlackBorder}"
+                                BorderThickness="5">
+
+                            <!-- Sky-blue to dark-blue gradient fill -->
+                            <Border x:Name="UpgGradFill"
+                                    CornerRadius="44"
+                                    Background="{StaticResource UpgNormalGradient}">
+
+                                <Grid Margin="36,18,36,18">
+                                    <!-- Inner highlight -->
+                                    <Border CornerRadius="40"
+                                            VerticalAlignment="Top"
+                                            Height="54"
+                                            Margin="0,-4,0,0"
+                                            Opacity="0.2">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                                <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                                                <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </Border>
+                    </Border>
+                </Grid>
+            </Grid>
+        </ControlTemplate>
+    </Page.Resources>
+
+    <!-- ═══ Main Layout ═══════════════════════════════════════ -->
+    <Grid>
+        <Grid x:Name="HUDRoot"
+              IsHitTestVisible="{Binding isInteractive}"
+              Opacity="1">
+
+            <b:Interaction.Triggers>
+                <b:DataTrigger Binding="{Binding isHudVisible}" Value="True">
+                    <b:ControlStoryboardAction Storyboard="{StaticResource HUDShowAnimation}"/>
+                </b:DataTrigger>
+                <b:DataTrigger Binding="{Binding isHudVisible}" Value="False">
+                    <b:ControlStoryboardAction Storyboard="{StaticResource HUDHideAnimation}"/>
+                </b:DataTrigger>
+            </b:Interaction.Triggers>
+
+            <!-- ── Central Cast Button ─── wrapped in CastButtonPanel ── -->
+            <Grid x:Name="CastButtonPanel" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="CastButtonScale" ScaleX="0" ScaleY="0"/>
+                        <TranslateTransform x:Name="CastButtonTranslate" Y="100"/>
+                    </TransformGroup>
+                </Grid.RenderTransform>
+
+                <Button HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,0,600"
+                        Template="{StaticResource CastButtonTemplate}"
+                        Command="{Binding Path=events.castPressed}"/>
+            </Grid>
+
+            <!-- ── Upgrade Buttons Row (Bottom) ─── each button individually wrapped ── -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,0,150">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Template" Value="{StaticResource UpgradeButtonTemplate}"/>
+                        <Setter Property="Margin" Value="18,0"/>
+                        <Setter Property="MinWidth" Value="500"/>
+                    </Style>
+                </StackPanel.Resources>
+
+                <!-- LINE Upgrade — wrapped in ShopBtn1Panel -->
+                <Grid x:Name="ShopBtn1Panel" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="ShopBtn1Scale" ScaleX="0" ScaleY="0"/>
+                            <TranslateTransform x:Name="ShopBtn1Translate" Y="80"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+
+                    <Button Command="{Binding Path=events.buyLine}">
+                        <Grid>
+                            <!-- Background watermark icon -->
+                            <Image Source="Textures/bait.png"
+                                   Width="130" Height="130"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.85"
+                                   Margin="-100,0,0,0"/>
+                            <!-- Text content on top -->
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="LINE"
+                                           FontSize="48"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Stroke="#FF000000"
+                                           StrokeThickness="4"
+                                           HorizontalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                                    <TextBlock Text="{Binding lineCurrentValue}"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource CyanAccent}"
+                                               Stroke="#FF000000"
+                                               StrokeThickness="3"/>
+                                    <Path Data="M 0,4 L 8,10 L 0,16 Z"
+                                          Fill="White"
+                                          Stretch="Uniform"
+                                          Width="20" Height="20"
+                                          VerticalAlignment="Center"
+                                          Margin="10,0,10,0"/>
+                                    <TextBlock Text="{Binding lineNextValue}"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource CyanAccent}"
+                                               Stroke="#FF000000"
+                                               StrokeThickness="3"/>
+                                </StackPanel>
+                                <Border Height="2" Margin="6,5,6,5" CornerRadius="1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                            <GradientStop Color="#00FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#66FFFFFF" Offset="0.5"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Image Source="Textures/gold_icon.png"
+                                           Width="48" Height="48"
+                                           Margin="0,0,12,0"/>
+                                    <TextBlock Text="{Binding lineCost}"
+                                               FontSize="42"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource GoldText}"
+                                               Stroke="#FF000000"
+                                               StrokeThickness="4"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                </Grid>
+
+                <!-- HOOK Upgrade — wrapped in ShopBtn2Panel -->
+                <Grid x:Name="ShopBtn2Panel" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="ShopBtn2Scale" ScaleX="0" ScaleY="0"/>
+                            <TranslateTransform x:Name="ShopBtn2Translate" Y="80"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+
+                    <Button Command="{Binding Path=events.buyHook}">
+                        <Grid>
+                            <!-- Background watermark icon -->
+                            <Image Source="Textures/hook.png"
+                                   Width="130" Height="130"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.85"
+                                   Margin="-100,0,0,0"/>
+                            <!-- Text content on top -->
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="HOOK"
+                                           FontSize="48"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Stroke="#FF000000"
+                                           StrokeThickness="4"
+                                           HorizontalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                                    <TextBlock Text="{Binding hookCurrentValue}"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource CyanAccent}"
+                                               Stroke="#FF000000"
+                                               StrokeThickness="3"/>
+                                    <Path Data="M 0,4 L 8,10 L 0,16 Z"
+                                          Fill="White"
+                                          Stretch="Uniform"
+                                          Width="20" Height="20"
+                                          VerticalAlignment="Center"
+                                          Margin="10,0,10,0"/>
+                                    <TextBlock Text="{Binding hookNextValue}"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource CyanAccent}"
+                                               Stroke="#FF000000"
+                                               StrokeThickness="3"/>
+                                </StackPanel>
+                                <Border Height="2" Margin="6,5,6,5" CornerRadius="1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                            <GradientStop Color="#00FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#66FFFFFF" Offset="0.5"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Image Source="Textures/gold_icon.png"
+                                           Width="48" Height="48"
+                                           Margin="0,0,12,0"/>
+                                    <TextBlock Text="{Binding hookCost}"
+                                               FontSize="42"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource GoldText}"
+                                               Stroke="#FF000000"
+                                               StrokeThickness="4"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                </Grid>
+
+
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

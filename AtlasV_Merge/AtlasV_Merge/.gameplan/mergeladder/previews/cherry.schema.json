@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Cherry",
+  "elements": [{ "id": "cherry_prev", "type": "image", "src": "./cherry.png", "fit": "cover" }]
+}

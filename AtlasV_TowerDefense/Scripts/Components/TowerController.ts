@@ -52,12 +52,9 @@ export class TowerController extends Component {
   @property() barrel: Maybe<Entity> = null;
   @property() spawnPoint: Maybe<Entity> = null;
   @property() shadow: Maybe<Entity> = null;
-  @property() modelTier1a: Maybe<Entity> = null;
-  @property() modelTier1b: Maybe<Entity> = null;
-  @property() modelTier2a: Maybe<Entity> = null;
-  @property() modelTier2b: Maybe<Entity> = null;
-  @property() modelTier3a: Maybe<Entity> = null;
-  @property() modelTier3b: Maybe<Entity> = null;
+  @property() modelTier1: Maybe<Entity> = null;
+  @property() modelTier2: Maybe<Entity> = null;
+  @property() modelTier3: Maybe<Entity> = null;
   private _shadowColor: Color = new Color(0, 0, 0, 0.4);
   private _currentTier: number = 0;
   // Adjust if barrel mesh is not aligned: 180 = mesh forward is +Z (default for this project)
@@ -72,6 +69,9 @@ export class TowerController extends Component {
       if (cc) this._shadowColor = cc.color;
     }
     this._setShadowAlpha(0);
+    this._setVisible(this.modelTier1, false);
+    this._setVisible(this.modelTier2, false);
+    this._setVisible(this.modelTier3, false);
   }
 
   @subscribe(Events.InitTower)
@@ -228,15 +228,9 @@ export class TowerController extends Component {
   }
 
   private _applyTierModel(): void {
-    const tiers: Array<[Maybe<Entity>, Maybe<Entity>]> = [
-      [this.modelTier1a, this.modelTier1b],
-      [this.modelTier2a, this.modelTier2b],
-      [this.modelTier3a, this.modelTier3b],
-    ];
+    const tiers: Array<Maybe<Entity>> = [this.modelTier1, this.modelTier2, this.modelTier3];
     for (let i = 0; i < tiers.length; i++) {
-      const visible = i === this._currentTier;
-      this._setVisible(tiers[i][0], visible);
-      this._setVisible(tiers[i][1], visible);
+      this._setVisible(tiers[i], i === this._currentTier);
     }
   }
 

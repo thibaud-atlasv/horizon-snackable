@@ -1,14 +1,14 @@
 {
     "id": "74f988c7-7204-4cef-929a-340f56799d22",
     "defaultTemplateAssetId": {
-        "packageOrRemoteId": "26435503376059174",
+        "packageOrRemoteId": "26835398609386284",
         "ingestionId": "16684681294291758304",
         "targetId": "2719744159"
     },
-    "organizationId": "896923280160081",
-    "organizationName": "thibaud_albyon's team",
-    "organizationScope": "thibaudalbyonsteam",
-    "worldId": "25494176720259103",
+    "organizationId": "661087583756217",
+    "organizationName": "Emporium of Wonders",
+    "organizationScope": "emporiumofwonders",
+    "worldId": "25629285060081989",
     "collisionLayers": [
         "Player",
         "World",
@@ -48,5 +48,6 @@
         "screenOrientation": "Portrait",
         "scalabilityProfile": {}
     },
-    "editorVersion": "76.0.0.29.105"
+    "editorVersion": "77.0.0.23.107",
+    "remotePackageId": "26835398609386284"
 }

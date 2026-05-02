@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Visual Identity",
+  "elements": [{ "id": "vi_preview", "type": "image", "src": "~/overview/banner-visualidentity.jpg", "fit": "cover" }]
+}

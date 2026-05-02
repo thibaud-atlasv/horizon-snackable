@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Melon",
+  "elements": [{ "id": "melon_prev", "type": "image", "src": "./melon.png", "fit": "cover" }]
+}

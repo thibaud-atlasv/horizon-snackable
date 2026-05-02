@@ -28,44 +28,12 @@
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
-                }
-            ],
-            "attributes": []
-        },
-        {
-            "id": "c631d0a3-5a0c-471b-abf7-5f1332248004",
-            "name": "DirectionalLight",
-            "components": [
-                {
-                    "data": {
-                        "class": "horizon::platform_api::TransformPlatformComponent",
-                        "version": 3,
-                        "data": {
-                            "localPosition": {
-                                "x": -0.07173556089401245,
-                                "y": 0.20000013709068299,
-                                "z": 1.3409368991851807
-                            },
-                            "localRotation": {
-                                "x": -1.5707963705062867,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "localScale": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            }
-                        }
-                    },
-                    "dataType": "horizon::DataDefinitionAsset"
                 },
                 {
                     "data": {
-                        "class": "horizon::platform_api::DistantLightPlatformComponent",
-                        "version": 3,
+                        "class": "horizon::light_baker::LightBakerPlatformComponent",
                         "data": {
-                            "intensity": 1.0
+                            "hasBakedLightMaps": true
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -188,7 +156,20 @@
                             "lightingParams": {
                                 "class": "horizon::platform_api::LightingParams",
                                 "data": {
-                                    "diffuseGISource": "LightProbes"
+                                    "diffuseGISource": "LightProbes",
+                                    "lightMapTexture": {
+                                        "packageOrRemoteId": "27219068287696221",
+                                        "ingestionId": "11104439410919137867",
+                                        "targetId": "1850524962"
+                                    },
+                                    "lightmapUvScale": {
+                                        "x": 0.7993443608283997,
+                                        "y": 0.820313036441803
+                                    },
+                                    "lightmapUvOffset": {
+                                        "x": 0.0009765625,
+                                        "y": 0.0009765625
+                                    }
                                 }
                             }
                         }
@@ -280,7 +261,20 @@
                             "lightingParams": {
                                 "class": "horizon::platform_api::LightingParams",
                                 "data": {
-                                    "diffuseGISource": "LightProbes"
+                                    "diffuseGISource": "LightProbes",
+                                    "lightMapTexture": {
+                                        "packageOrRemoteId": "27219068287696221",
+                                        "ingestionId": "5169474255681656637",
+                                        "targetId": "1850524962"
+                                    },
+                                    "lightmapUvScale": {
+                                        "x": 0.7949160933494568,
+                                        "y": 0.8161138296127319
+                                    },
+                                    "lightmapUvOffset": {
+                                        "x": 0.0009765625,
+                                        "y": 0.0009765625
+                                    }
                                 }
                             }
                         }
@@ -416,7 +410,7 @@
                             "localPosition": {
                                 "x": 0.0,
                                 "y": 8.5,
-                                "z": 0.0
+                                "z": -0.30000001192092898
                             },
                             "localRotation": {
                                 "x": -1.5707963705062867,
@@ -431,7 +425,9 @@
                     "data": {
                         "class": "horizon::platform_api::CameraPlatformComponent",
                         "version": 2,
-                        "data": {}
+                        "data": {
+                            "fieldOfView": 60.0
+                        }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
                 },
@@ -494,6 +490,50 @@
             "attributes": []
         },
         {
+            "id": "042c94c9-134b-425f-93a7-b8b03674da80",
+            "name": "TitleScreenUI",
+            "components": [
+                {
+                    "data": {
+                        "class": "horizon::platform_api::TransformPlatformComponent",
+                        "version": 3,
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "horizon::platform_api::CustomUiPlatformComponent",
+                        "version": 14,
+                        "data": {
+                            "customUiType": "ScreenSpace",
+                            "xaml": {
+                                "packageOrRemoteId": "27219068287696221",
+                                "ingestionId": "5295065433101848782",
+                                "targetId": "2149638574"
+                            },
+                            "isInteractable": true,
+                            "renderOrderOffset": 10
+                        }
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "TitleScreenComponent",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "27219068287696221",
+                            "ingestionId": "39213283329594284",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
+                }
+            ],
+            "attributes": []
+        },
+        {
             "id": "548ac183-ffa9-4bc4-b3c4-1e4c8af8f155",
             "name": "Plane",
             "components": [
@@ -525,7 +565,8 @@
                                 "packageOrRemoteId": "24407058055595655",
                                 "ingestionId": "7277538467424364748",
                                 "targetId": "2768521373"
-                            }
+                            },
+                            "isVisibleSelf": false
                         }
                     },
                     "dataType": "horizon::DataDefinitionAsset"
@@ -536,9 +577,9 @@
                         "version": 2,
                         "data": {
                             "color": {
-                                "r": 1.0,
-                                "g": 1.0,
-                                "b": 1.0,
+                                "r": 0.0,
+                                "g": 0.0,
+                                "b": 0.0,
                                 "a": 1.0
                             }
                         }
@@ -566,11 +607,6 @@
         }
     ],
     "relationships": [
-        {
-            "relationshipType": "RelationChildOf",
-            "source": "c631d0a3-5a0c-471b-abf7-5f1332248004",
-            "destination": "d992b497-ebac-470a-b132-5d7dbf4f9fcf"
-        },
         {
             "relationshipType": "RelationChildOf",
             "source": "61a96af8-55a1-41e6-a8f1-92f99649598d",
@@ -609,6 +645,11 @@
         {
             "relationshipType": "RelationChildOf",
             "source": "f74e5e5f-f67c-4567-a3cc-cf732682f35d",
+            "destination": "28aed172-4998-4d61-9aca-6ff7321b31f2"
+        },
+        {
+            "relationshipType": "RelationChildOf",
+            "source": "042c94c9-134b-425f-93a7-b8b03674da80",
             "destination": "28aed172-4998-4d61-9aca-6ff7321b31f2"
         },
         {

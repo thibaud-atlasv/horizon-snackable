@@ -1,0 +1,3 @@
+<Project>
+  <StartupDocument>xaml/title_screen.xaml</StartupDocument>
+</Project>

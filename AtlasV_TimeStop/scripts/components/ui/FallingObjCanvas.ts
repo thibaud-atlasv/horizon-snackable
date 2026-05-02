@@ -14,8 +14,8 @@ import {
 } from 'meta/worlds';
 import type { Maybe, OnWorldUpdateEventPayload } from 'meta/worlds';
 import { Assets } from '../../Assets';
-import { WIDTH, HEIGHT } from '../../Constants';
-import { Events, type FallingObjRenderState } from '../../Types';
+import { WIDTH, HEIGHT, FLOOR_Y } from '../../Constants';
+import { Events, FallingObjType, type FallingObjRenderState } from '../../Types';
 
 // ── Canvas / layout constants ──────────────────────────────────────────────
 // Must match the XAML root Panel width/height.
@@ -24,12 +24,15 @@ const CANVAS_H = 3640;
 const PX_PER_WU_X = CANVAS_W / WIDTH;
 const PX_PER_WU_Y = CANVAS_H / HEIGHT;
 const MAX_LOGS = 10;
+const MAX_BALLS = 5;
 
 // Native bamboo sprite dimensions (px).
-const SPRITE_H = 159;
-const SPRITE_LEFT_W = 175;
+const SPRITE_H = 128;
+
+const SPRITE_LEFT_W = 172;
+const SPRITE_RIGHT_W = 257;
 const SPRITE_CENTER_W = 192;
-const SPRITE_RIGHT_W = 275;
+
 const SPRITE_TOTAL_W = SPRITE_LEFT_W + SPRITE_CENTER_W + SPRITE_RIGHT_W;
 const LEFT_FRAC = SPRITE_LEFT_W / SPRITE_TOTAL_W;
 const CENTER_FRAC = SPRITE_CENTER_W / SPRITE_TOTAL_W;
@@ -49,6 +52,7 @@ const SLICE_DISPLAY_H = 200;
 const SLICE_FX_DISPLAY_W = SLICE_FX_W * (SLICE_DISPLAY_H / SLICE_FX_H);
 const SLICE_L_DISPLAY_W = SLICE_LEFT_W * (SLICE_DISPLAY_H / SLICE_LEFT_H);
 const SLICE_R_DISPLAY_W = SLICE_RIGHT_W * (SLICE_DISPLAY_H / SLICE_RIGHT_H);
+
 
 // Physics of ejected halves (canvas px / s).
 const SLICE_VX_BASE = 320;   // horizontal eject speed
@@ -135,6 +139,10 @@ export class FallingObjCanvas extends Component {
       this._items.push(this._makeItem(Assets.BambooCenter));
       this._items.push(this._makeItem(Assets.BambooRight));
     }
+    // Pre-allocate ball render slots: MAX_BALLS × 1 (single square sprite)
+    for (let i = 0; i < MAX_BALLS; i++) {
+      this._items.push(this._makeItem(Assets.BambooChunk));
+    }
     // Debug hitbox slots
     for (let i = 0; i < MAX_LOGS; i++) {
       this._items.push(this._makeItem(Assets.Debug));
@@ -155,15 +163,21 @@ export class FallingObjCanvas extends Component {
     this._lastStatesArray = p.states;
     for (const s of p.states) this._lastStates.set(s.objId, s);
 
+    // Partition states by type for slot-indexed rendering.
+    const logStates  = p.states.filter(s => s.type === FallingObjType.Log);
+    const ballStates = p.states.filter(s => s.type === FallingObjType.Ball);
+
+    // ── Logs (3 sprites each) ────────────────────────────────────────────────
     for (let i = 0; i < MAX_LOGS; i++) {
-      const left = this._items[i * 3];
+      const left   = this._items[i * 3];
       const center = this._items[i * 3 + 1];
-      const right = this._items[i * 3 + 2];
-      const state = p.states[i];
-      const dbg = this._items[MAX_LOGS * 3 + i];
+      const right  = this._items[i * 3 + 2];
+      const state  = logStates[i];
+      const dbg    = this._items[MAX_LOGS * 3 + MAX_BALLS + i];
 
       if (!state || state.alpha <= 0 || this._frozenIds.has(state.objId)) {
-        left.isVisible = center.isVisible = right.isVisible = dbg.isVisible = false;
+        left.isVisible = center.isVisible = right.isVisible = false;
+        if (dbg) dbg.isVisible = false;
         continue;
       }
 
@@ -171,19 +185,19 @@ export class FallingObjCanvas extends Component {
       const py = -(state.cy / HEIGHT) * CANVAS_H;
       const rotDeg = -state.angle * (180 / Math.PI);
 
-      const totalW = state.scaleX * PX_PER_WU_X;
-      const h = state.scaleY * PX_PER_WU_Y;
-      const leftW = LEFT_FRAC * totalW;
+      const totalW  = state.scaleX * PX_PER_WU_X;
+      const h       = state.scaleY * PX_PER_WU_Y;
+      const leftW   = LEFT_FRAC   * totalW;
       const centerW = CENTER_FRAC * totalW;
-      const rightW = RIGHT_FRAC * totalW;
+      const rightW  = RIGHT_FRAC  * totalW;
 
       const assemblyShiftX = (rightW - leftW) / 2;
-      const cos = Math.cos(state.angle);
-      const sin = Math.sin(state.angle);
+      const cos     = Math.cos(state.angle);
+      const sin     = Math.sin(state.angle);
       const overlap = 2;
-      const leftOffX = -assemblyShiftX - (centerW / 2 + leftW / 2 - overlap);
+      const leftOffX   = -assemblyShiftX - (centerW / 2 + leftW   / 2 - overlap);
       const centerOffX = -assemblyShiftX;
-      const rightOffX = -assemblyShiftX + centerW / 2 + rightW / 2 - overlap;
+      const rightOffX  = -assemblyShiftX + centerW / 2 + rightW  / 2 - overlap;
 
       left.isVisible = true;
       left.translateX = px + leftOffX * cos;
@@ -203,9 +217,37 @@ export class FallingObjCanvas extends Component {
       right.rotation = rotDeg; right.scaleX = 1; right.scaleY = 1;
       right.itemWidth = rightW; right.itemHeight = h;
 
-      dbg.isVisible = false;
-      dbg.translateX = px; dbg.translateY = py; dbg.rotation = rotDeg;
-      dbg.scaleX = 1; dbg.scaleY = 1; dbg.itemWidth = totalW; dbg.itemHeight = h;
+      if (dbg) {
+        dbg.isVisible = false;
+        dbg.translateX = px; dbg.translateY = py; dbg.rotation = rotDeg;
+        dbg.scaleX = 1; dbg.scaleY = 1; dbg.itemWidth = totalW; dbg.itemHeight = h;
+      }
+    }
+
+    // ── Balls (1 square sprite each) ─────────────────────────────────────────
+    const ballSlotBase = MAX_LOGS * 3;
+    for (let i = 0; i < MAX_BALLS; i++) {
+      const item  = this._items[ballSlotBase + i];
+      const state = ballStates[i];
+
+      if (!state || state.alpha <= 0 || this._frozenIds.has(state.objId)) {
+        item.isVisible = false;
+        continue;
+      }
+
+      const px   = (state.cx / WIDTH)  * CANVAS_W;
+      const py   = -(state.cy / HEIGHT) * CANVAS_H;
+      const size = state.scaleX * PX_PER_WU_X;
+
+      item.isVisible  = true;
+      item.translateX = px;
+      item.translateY = py;
+      item.rotation   = -state.angle * (180 / Math.PI);
+      item.scaleX     = 1;
+      item.scaleY     = 1;
+      item.itemWidth  = size;
+      item.itemHeight = size;
+      item.alpha      = state.alpha;
     }
   }
 
@@ -220,74 +262,109 @@ export class FallingObjCanvas extends Component {
 
     this._frozenIds.add(p.objId);
 
-    // Hide the log's 3 render items immediately so the slice replaces it.
-    const slotIndex = this._lastStatesArray.indexOf(state);
-    if (slotIndex >= 0 && slotIndex < MAX_LOGS) {
-      this._items[slotIndex * 3].isVisible = false;
-      this._items[slotIndex * 3 + 1].isVisible = false;
-      this._items[slotIndex * 3 + 2].isVisible = false;
-    }
-
-    // Canvas-space position of the log center at freeze.
-    const px = (state.cx / WIDTH) * CANVAS_W;
-    const py = -(state.cy / HEIGHT) * CANVAS_H;
+    const px    = (state.cx  / WIDTH)  * CANVAS_W;
+    const py    = -(state.cy / HEIGHT) * CANVAS_H;
     const angle = state.angle;
+    const cos   = Math.cos(angle);
+    const sin   = Math.sin(angle);
 
-    // Eject direction follows the log's local X axis (perpendicular to long axis).
-    // Left half goes left (along -local X), right half goes right (+local X).
-    // In canvas space: local X is (cos(angle), -sin(angle)) for CCW angle.
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
+    if (state.type === FallingObjType.Log) {
+      // Hide the log's 3 render items immediately.
+      const logStates = this._lastStatesArray.filter(s => s.type === FallingObjType.Log);
+      const slotIndex = logStates.indexOf(state);
+      if (slotIndex >= 0 && slotIndex < MAX_LOGS) {
+        this._items[slotIndex * 3].isVisible     = false;
+        this._items[slotIndex * 3 + 1].isVisible = false;
+        this._items[slotIndex * 3 + 2].isVisible = false;
+      }
 
-    // Half-width offset so pieces start flush at center.
-    const halfL = SLICE_L_DISPLAY_W / 2;
-    const halfR = SLICE_R_DISPLAY_W / 2;
+      const halfL  = SLICE_L_DISPLAY_W / 2;
+      const halfR  = SLICE_R_DISPLAY_W / 2;
+      const lStartX = px - halfL * cos;
+      const lStartY = py + halfL * sin;
+      const rStartX = px + halfR * cos;
+      const rStartY = py - halfR * sin;
+      const lVx = -SLICE_VX_BASE * cos + SLICE_VY_BASE * (-sin);
+      const lVy = -SLICE_VX_BASE * (-sin) + SLICE_VY_BASE * cos;
+      const rVx =  SLICE_VX_BASE * cos + SLICE_VY_BASE * (-sin);
+      const rVy =  SLICE_VX_BASE * (-sin) + SLICE_VY_BASE * cos;
+      const rotDeg   = -angle * (180 / Math.PI);
+      const fxDisplayH = SLICE_DISPLAY_H * (SLICE_FX_H / SLICE_LEFT_H);
 
-    // Left piece starts at center, offset to the left along log axis.
-    const lStartX = px - halfL * cos;
-    const lStartY = py + halfL * sin;  // canvas Y is down
+      const fxItem = this._makeItem(Assets.SlicedFX);
+      const lItem  = this._makeItem(Assets.SlicedLeft);
+      const rItem  = this._makeItem(Assets.SlicedRight);
 
-    // Right piece starts at center, offset to the right along log axis.
-    const rStartX = px + halfR * cos;
-    const rStartY = py - halfR * sin;
+      fxItem.isVisible = true; fxItem.translateX = px; fxItem.translateY = py;
+      fxItem.rotation = rotDeg; fxItem.scaleX = 0.5; fxItem.scaleY = 0.5; fxItem.alpha = 0;
+      fxItem.itemWidth = SLICE_FX_DISPLAY_W; fxItem.itemHeight = fxDisplayH;
 
-    // Velocity: eject along log axis + upward burst. Left goes left, right goes right.
-    const lVx = -SLICE_VX_BASE * cos + SLICE_VY_BASE * (-sin);
-    const lVy = -SLICE_VX_BASE * (-sin) + SLICE_VY_BASE * cos;  // canvas Y
-    const rVx = SLICE_VX_BASE * cos + SLICE_VY_BASE * (-sin);
-    const rVy = SLICE_VX_BASE * (-sin) + SLICE_VY_BASE * cos;
+      lItem.isVisible = true; lItem.translateX = lStartX; lItem.translateY = lStartY;
+      lItem.rotation = rotDeg; lItem.scaleX = 1; lItem.scaleY = 1;
+      lItem.itemWidth = SLICE_L_DISPLAY_W; lItem.itemHeight = SLICE_DISPLAY_H;
 
-    const rotDeg = -angle * (180 / Math.PI);
+      rItem.isVisible = true; rItem.translateX = rStartX; rItem.translateY = rStartY;
+      rItem.rotation = rotDeg; rItem.scaleX = 1; rItem.scaleY = 1;
+      rItem.itemWidth = SLICE_R_DISPLAY_W; rItem.itemHeight = SLICE_DISPLAY_H;
 
-    const fxItem = this._makeItem(Assets.SlicedFX);
-    const lItem = this._makeItem(Assets.SlicedLeft);
-    const rItem = this._makeItem(Assets.SlicedRight);
+      this._items.push(fxItem, lItem, rItem);
+      this._vm.items = [...this._items];
+      this._slices.push({
+        fxPx: px, fxPy: py,
+        lPx: lStartX, lPy: lStartY, lVx, lVy, lRot: rotDeg,
+        rPx: rStartX, rPy: rStartY, rVx, rVy, rRot: rotDeg,
+        angle, elapsed: 0,
+        fxItem, lItem, rItem,
+      });
 
-    // FX display size keeps native aspect ratio, based on display height.
-    const fxDisplayH = SLICE_DISPLAY_H * (SLICE_FX_H / SLICE_LEFT_H);
-    fxItem.isVisible = true; fxItem.translateX = px; fxItem.translateY = py;
-    fxItem.rotation = rotDeg; fxItem.scaleX = 0.5; fxItem.scaleY = 0.5; fxItem.alpha = 0;
-    fxItem.itemWidth = SLICE_FX_DISPLAY_W; fxItem.itemHeight = fxDisplayH;
+    } else {
+      // Ball — hide single ball slot.
+      const ballStates = this._lastStatesArray.filter(s => s.type === FallingObjType.Ball);
+      const ballSlotBase = MAX_LOGS * 3;
+      const slotIndex = ballStates.indexOf(state);
+      if (slotIndex >= 0 && slotIndex < MAX_BALLS) {
+        this._items[ballSlotBase + slotIndex].isVisible = false;
+      }
 
-    lItem.isVisible = true; lItem.translateX = lStartX; lItem.translateY = lStartY;
-    lItem.rotation = rotDeg; lItem.scaleX = 1; lItem.scaleY = 1;
-    lItem.itemWidth = SLICE_L_DISPLAY_W; lItem.itemHeight = SLICE_DISPLAY_H;
+      // Eject halves horizontally — sized to match the frozen ball.
+      const diameter   = state.scaleX * PX_PER_WU_X;
+      const halfW      = diameter / 2;
+      const lStartX    = px - halfW / 2;
+      const lStartY    = py;
+      const rStartX    = px + halfW / 2;
+      const rStartY    = py;
+      const lVx        = -SLICE_VX_BASE;
+      const lVy        =  SLICE_VY_BASE;
+      const rVx        =  SLICE_VX_BASE;
+      const rVy        =  SLICE_VY_BASE;
+      const fxDisplayH = SLICE_DISPLAY_H * (SLICE_FX_H / SLICE_LEFT_H);
 
-    rItem.isVisible = true; rItem.translateX = rStartX; rItem.translateY = rStartY;
-    rItem.rotation = rotDeg; rItem.scaleX = 1; rItem.scaleY = 1;
-    rItem.itemWidth = SLICE_R_DISPLAY_W; rItem.itemHeight = SLICE_DISPLAY_H;
+      const fxItem = this._makeItem(Assets.SlicedFX);
+      const lItem  = this._makeItem(Assets.ChunkSlicedLeft);
+      const rItem  = this._makeItem(Assets.ChunkSlicedRight);
 
-    // Append to the dynamic items list and rebuild the VM array.
-    this._items.push(fxItem, lItem, rItem);
-    this._vm.items = [...this._items];
+      fxItem.isVisible = true; fxItem.translateX = px; fxItem.translateY = py;
+      fxItem.rotation = 0; fxItem.scaleX = 0.5; fxItem.scaleY = 0.5; fxItem.alpha = 0;
+      fxItem.itemWidth = SLICE_FX_DISPLAY_W; fxItem.itemHeight = fxDisplayH;
 
-    this._slices.push({
-      fxPx: px, fxPy: py,
-      lPx: lStartX, lPy: lStartY, lVx, lVy, lRot: rotDeg,
-      rPx: rStartX, rPy: rStartY, rVx, rVy, rRot: rotDeg,
-      angle, elapsed: 0,
-      fxItem, lItem, rItem,
-    });
+      lItem.isVisible = true; lItem.translateX = lStartX; lItem.translateY = lStartY;
+      lItem.rotation = 0; lItem.scaleX = 1; lItem.scaleY = 1;
+      lItem.itemWidth = halfW; lItem.itemHeight = diameter;
+
+      rItem.isVisible = true; rItem.translateX = rStartX; rItem.translateY = rStartY;
+      rItem.rotation = 0; rItem.scaleX = 1; rItem.scaleY = 1;
+      rItem.itemWidth = halfW; rItem.itemHeight = diameter;
+
+      this._items.push(fxItem, lItem, rItem);
+      this._vm.items = [...this._items];
+      this._slices.push({
+        fxPx: px, fxPy: py,
+        lPx: lStartX, lPy: lStartY, lVx, lVy, lRot: 0,
+        rPx: rStartX, rPy: rStartY, rVx, rVy, rRot: 0,
+        angle: 0, elapsed: 0,
+        fxItem, lItem, rItem,
+      });
+    }
   }
 
   // ── Slice animation update ────────────────────────────────────────────
@@ -408,7 +485,9 @@ export class FallingObjCanvas extends Component {
     this._items = this._items.filter(
       item => item.texture !== Assets.SlicedFX &&
         item.texture !== Assets.SlicedLeft &&
-        item.texture !== Assets.SlicedRight
+        item.texture !== Assets.SlicedRight &&
+        item.texture !== Assets.ChunkSlicedLeft &&
+        item.texture !== Assets.ChunkSlicedRight
     );
     for (const item of this._items) item.isVisible = false;
     this._vm.items = [...this._items];
@@ -479,5 +558,13 @@ export class FallingObjCanvas extends Component {
     dbgRight.translateX = refRightOffX * dbgCos; dbgRight.translateY = -refRightOffX * dbgSin;
     dbgRight.rotation = -45; dbgRight.itemWidth = refRightW; dbgRight.itemHeight = refH;
     dbgRight.isVisible = true; this._items.push(dbgRight);
+
+    // Game-over line at FLOOR_Y.
+    const floorPy = -(FLOOR_Y / HEIGHT) * CANVAS_H;
+    const floorLine = this._makeItem(Assets.BambooCenter);
+    floorLine.translateX = 0; floorLine.translateY = floorPy;
+    floorLine.rotation = 0; floorLine.itemWidth = CANVAS_W; floorLine.itemHeight = 50;
+    floorLine.texture = Assets.Debug;
+    floorLine.isVisible = true; this._items.push(floorLine);
   }
 }

@@ -4,77 +4,162 @@ export const HALF_W = 4.5;
 
 // ─── Water ────────────────────────────────────────────────────────────────────
 export const WATER_SURFACE_Y = 4.5;
-export const WATER_BOTTOM_Y  = -8.0;
 
-// ─── Fish Zone ────────────────────────────────────────────────────────────────
+// ─── Fish spawn bounds (world X) ─────────────────────────────────────────────
 export const FISH_LEFT  = -5.5;
 export const FISH_RIGHT =  5.5;
 
-// ─── Rod (top-left, partially off-screen) ─────────────────────────────────────
-export const TIP_X       = -2.5;
-export const TIP_Y       =  7.0;
-export const BAIT_IDLE_X =  TIP_X;
-export const BAIT_IDLE_Y =  WATER_SURFACE_Y + 0.2;
+// ─── Hook idle position (tip of rod) ─────────────────────────────────────────
+export const TIP_X       = -2.85;
+export const TIP_Y       =  7.15;
+export const HOOK_IDLE_X =  TIP_X;
+export const HOOK_IDLE_Y =  WATER_SURFACE_Y + 0.2;
+export const BAIT_IDLE_X =  HOOK_IDLE_X;
+export const BAIT_IDLE_Y =  HOOK_IDLE_Y;
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 export const COLOR_LINE       = { r: 0.95, g: 0.95, b: 0.82 };
 export const COLOR_LINE_WATER = { r: 0.78, g: 0.90, b: 1.00 };
 export const COLOR_BUBBLE     = { r: 0.85, g: 0.95, b: 1.00 };
 
-// ─── Physics ─────────────────────────────────────────────────────────────────
-export const GRAVITY          = -2.8;
-export const PING_PONG_SPEED  =  0.9;   // gauge oscillation speed (units/s)
-export const MIN_LAUNCH_VX    = -0.5;  // negative = left of tip
-export const MAX_LAUNCH_VX    =  5.5;
-export const MAX_LAUNCH_VY    =  0.5;
-export const WATER_DRAG       =  5.0;   // horizontal deceleration in water
+// ─── Cast physics ─────────────────────────────────────────────────────────────
+export const CAST_CENTER_VX      =  2.5;   // base rightward velocity; lands hook near center from TIP_X=-2.5
+export const CAST_VX_RANDOM      =  1.0;   // ± random spread applied at cast moment
+export const CAST_VX_MIN         =  1.2;   // absolute floor so the arc never goes straight up
+export const CAST_VY             = 12.0;   // initial upward velocity on cast
+export const CAST_GRAVITY        = -16.0;  // gravity applied during cast arc
+ 
+// ─── Dive physics ─────────────────────────────────────────────────────────────
+export const DIVE_SPEED          =  6.0;   // terminal descent speed once arc ends (units/s)
+export const DIVE_MAX_DEPTH      =  15.0;   // default (line level 0); runtime uses lineDepthAtLevel
+export const DIVE_SWIPE_FORCE    = 18.0;   // X velocity impulse per swipe unit (screen-space → world)
+export const DIVE_X_DRAG         =  1.8;   // horizontal drag during dive
+export const DIVE_BOUNCE         =  0.55;  // velocity restitution on wall bounce (0=dead, 1=perfect)
+export const DIVE_CENTER_PULL    =  1.2;   // gentle spring force pulling hook toward center X
+export const DIVE_SWIPE_MAX_SPEED = 6.0;  // max horizontal hook speed from swipe input (units/s)
+export const HOOK_MAX_FISH       = 3;      // default (hook level 0); runtime uses HOOK_MAX_FISH_LEVELS
+export const HOOK_COLLECT_RADIUS = 0.9;    // collision radius multiplier (× fish size)
 
-export const REEL_BURST_ADD       =  1.0;
-export const REEL_BURST_MAX       =  2.0;
-export const REEL_BURST_DECAY     =  0.7;
-export const REEL_HOLD_DUR        =  0.18;
-// Fraction of total reel distance gained per tap (A+C: proportional tap, fish fatigue)
-export const REEL_TAP_JUMP_RATIO  =  0.08;  // 8% → ~13 taps regardless of depth
-export const REEL_SINK_SPEED      =  0.5;
-// Fish fatigue: sink resistance at surface vs at depth (0.0–1.0)
-export const REEL_FATIGUE_MIN     =  0.30;  // 30% resistance when fish reaches surface
-export const REEL_SMOOTH_SPEED    =  8.0;   // lerp speed for visual Y position (units/s feel)
+// ─── Hook line ────────────────────────────────────────────────────────────────
+export const LINE_THICKNESS = 0.04;        // X/Z scale of the line mesh cube
+
+// ─── Surface physics ─────────────────────────────────────────────────────────
+export const SURFACE_SPEED       = 30.0;  // units/s upward during Surfacing
+
+// ─── Launch physics (reward anim) ────────────────────────────────────────────
+export const LAUNCH_VY_MIN       = 12.0;  // min upward velocity per fish
+export const LAUNCH_VY_MAX       = 18.0;  // max upward velocity per fish
+export const LAUNCH_VX_SPREAD    =  4.0;  // ± horizontal spread
+export const LAUNCH_GRAVITY      = -9.0;  // gravity applied during launch arc
+export const LAUNCH_STAGGER      =  0.08; // seconds between each fish launch
+export const LAUNCH_EXIT_Y       = 10.0;  // Y above which a fish is considered "collected"
+export const LAUNCH_TIMEOUT      =  4.0;  // max seconds before AllFishCollected fires regardless
+
+// ─── Camera ───────────────────────────────────────────────────────────────────
+export const HALF_SCREEN_WORLD_HEIGHT  = 8.0;  // half-height of viewport in world units
+export const CAMERA_SCROLL_LERP_SPEED  = 4.0;  // how quickly camera lerps to scroll target (units/s factor)
+
+// ─── Fish behavior ────────────────────────────────────────────────────────────
+export const FISH_PAUSE_DUR_MIN = 1.2;  // min pause duration between swim targets (s)
+export const FISH_PAUSE_DUR_MAX = 3.2;  // max pause duration between swim targets (s)
+export const FISH_BOB_AMP       = 0.06; // vertical bob amplitude while swimming (units)
+export const FISH_BOB_FREQ      = 0.55; // vertical bob frequency (cycles/s)
+export const FISH_MIN_MOVE_DIST = 2.5;  // minimum distance to new swim target (prevents tiny hops)
 
 // ─── Timing ───────────────────────────────────────────────────────────────────
-export const RESET_DELAY  = 0.4;
-export const FLASH_DUR    = 0.22;
+export const RESET_DELAY  = 0.5;
 
-// ─── Catch Display ────────────────────────────────────────────────────────────
-export const CATCH_SCALE_MUL = 3.5;
-export const CATCH_ZOOM_DUR  = 0.55;
+// ─── Fish pool ────────────────────────────────────────────────────────────────
+// Pool counts per rarity (× number of species per rarity = total entities)
+// common: 6 species × 7 = 42  rare: 6 × 5 = 30  legendary: 6 × 3 = 18  → 90 total
+export const POOL_COUNT_COMMON    = 5;
+export const POOL_COUNT_RARE      = 3;
+export const POOL_COUNT_LEGENDARY = 1;
+export const POOL_PARK_Y          = 1000; // world Y used to park off-screen pool entities
+
+// Recycle margin: fish this far above camTop are teleported below camBottom
+export const POOL_RECYCLE_MARGIN  = 3.0;
+// Interval between activating a new fish from the bench (seconds)
+export const POOL_SPAWN_INTERVAL  = 0.3;
+// Number of fish activated immediately at game start to fill the visible area
+export const POOL_BURST_COUNT     = 10;
 
 // ─── Bubbles ─────────────────────────────────────────────────────────────────
+export const BUBBLE_POOL_SIZE       = 40;
 export const BUBBLE_RISE_SPEED_MIN  = 0.22;
 export const BUBBLE_RISE_SPEED_MAX  = 0.65;
 export const BUBBLE_SCALE_MIN       = 0.04;
 export const BUBBLE_SCALE_MAX       = 0.15;
-export const BUBBLE_INTERVAL_MIN    = 8.0;   // seconds between bubble spawns per fish
+export const BUBBLE_INTERVAL_MIN    = 8.0;
 export const BUBBLE_INTERVAL_MAX    = 15.0;
-export const BUBBLE_LIFETIME_MIN    = 2.5;   // seconds a bubble lives before disappearing
+export const BUBBLE_LIFETIME_MIN    = 2.5;
 export const BUBBLE_LIFETIME_MAX    = 6.5;
-export const BUBBLE_SPAWN_OFFSET_X  = 0.35;  // forward offset in front of the fish
-export const BUBBLE_SPAWN_OFFSET_Y  = 0.10;  // slight upward offset from fish center
+export const BUBBLE_SPAWN_OFFSET_X  = 0.35;
+export const BUBBLE_SPAWN_OFFSET_Y  = 0.10;
+export const BUBBLE_SPAWN_MIN_Y     = -40.0; // lower Y bound for bubble initial position
+export const BUBBLE_DRIFT_FREQ_MIN  = 1.2;   // horizontal wobble frequency range (cycles/s)
+export const BUBBLE_DRIFT_FREQ_MAX  = 2.8;
+export const BUBBLE_DRIFT_AMP_MIN   = 0.04;  // horizontal wobble amplitude range (units)
+export const BUBBLE_DRIFT_AMP_MAX   = 0.10;
+export const BUBBLE_BREATH_FREQ_MIN = 1.8;   // scale "breathing" frequency range (cycles/s)
+export const BUBBLE_BREATH_FREQ_MAX = 3.2;
+export const BUBBLE_ALPHA_FREQ_MIN  = 0.8;   // alpha oscillation frequency range (cycles/s)
+export const BUBBLE_ALPHA_FREQ_MAX  = 1.6;
 
-// ─── Zone System ──────────────────────────────────────────────────────────────
-export const ZONE_COUNT   = 3;
-export const ZONE_FLOOR_Y = [-8.5, -24.5, -38.5] as readonly number[];    // index 0 = zone 1
+// ─── Hook bubble trail ────────────────────────────────────────────────────────
+export const HOOK_BUBBLE_INTERVAL_DIVE    = 0.12;  // seconds between bubbles while diving
+export const HOOK_BUBBLE_INTERVAL_SURFACE = 0.07;  // faster during surfacing for turbulence
+export const HOOK_BUBBLE_X_JITTER         = 0.3;   // ± random X offset for natural look
 
-// Zone spawn Y: fish spawn randomly within these bounds in their zone
-export const ZONE_SPAWN_TOP_Y = [4.0,   -9.5, -25.5] as readonly number[];   // slightly below surface / zone boundary
-export const ZONE_SPAWN_BOT_Y = [-8.5, -24.5, -38.5] as readonly number[]; // slightly above floor
+// ─── Flash ────────────────────────────────────────────────────────────────────
+export const FLASH_DUR = 0.22;
 
-// ─── Camera ───────────────────────────────────────────────────────────────────
-export const HALF_SCREEN_WORLD_HEIGHT = 8;  // half-height of the viewport in world units (tune with FOV)
+// ─── Upgrades ─────────────────────────────────────────────────────────────────
+// All upgrade formulas use level n (1-based, n=0 means no upgrade bought yet).
 
-// ─── Zone Progression ─────────────────────────────────────────────────────────
-export const FISH_MAX_PER_ZONE     = 5;
-export const FISH_RESPAWN_INTERVAL = 30;  // seconds between respawns per zone
+export const LINE_MAX_LEVEL  = 100;
+export const HOOK_MAX_LEVEL  =  90;
 
-// ─── Zone Unlock Thresholds (unique species caught) ───────────────────────────
-export const UNLOCK_ZONE_2_UNIQUE = 3;   // zone 1: 3 commons + 1 rare
-export const UNLOCK_ZONE_3_UNIQUE = 7;  // zone 1 complete + 4 from zone 2
+/** Max dive depth at upgrade level n. depth(0)=15, each level adds 16 (one full screen). */
+export function lineDepthAtLevel(n: number): number {
+  return 15 + n * 16;
+}
+
+/** Max fish per run at hook upgrade level n. fish(0)=1, fish(90)=90. */
+export function hookMaxFishAtLevel(n: number): number {
+  return n + 1;
+}
+
+/** Gold cost to buy upgrade level n (1-based). cost(1)=8g, cost(100)≈50k. */
+export function upgradeCost(n: number): number {
+  return Math.floor(8 * Math.pow(n, 1.9));
+}
+
+// ─── Gold coins animation ─────────────────────────────────────────────────────
+export const COIN_POOL_SIZE     = 60;   // max simultaneous coin sprites in the animator
+export const TEXT_POOL_SIZE     = 10;   // max simultaneous gold-value text sprites
+export const COIN_ROT_SPEED_MIN = 280;  // coin spin speed range (deg/s)
+export const COIN_ROT_SPEED_MAX = 600;
+
+// ─── GoldCoins Canvas (GoldCoinsAnimator entity) ──────────────────────────────
+// Canvas design is 600×600 px (square). The entity is placed at
+// (0, CANVAS_CENTER_WORLD_Y, -0.1) and scaled uniformly to CANVAS_ENTITY_SCALE.
+// Tune CANVAS_ENTITY_SCALE until the canvas visually covers the above-water area.
+export const CANVAS_SIZE           = 600;   // design px
+export const CANVAS_WORLD_SPAN     = 12.0;  // world units the canvas covers on each axis
+export const CANVAS_CENTER_WORLD_Y = 7.0;   // world Y at canvas center (covers ~Y 1–13)
+export const CANVAS_ENTITY_SCALE   = 12.0;  // uniform entity scale (1 unit ≈ 1 world unit — tune me)
+
+/**
+ * Convert a world position to canvas TranslateTransform (x, y) for a 50×50 coin icon.
+ * The returned offset places the icon's visual center at (wx, wy) in world space.
+ * Mirrors the XAML coin Image Width/Height="50" — update both if icon size changes.
+ */
+export function worldToCanvas(wx: number, wy: number): { x: number; y: number } {
+  const scale = CANVAS_SIZE / CANVAS_WORLD_SPAN;
+  return {
+    x:  wx * scale + CANVAS_SIZE / 2 - 25,
+    y: -(wy - CANVAS_CENTER_WORLD_Y) * scale + CANVAS_SIZE / 2 - 25,
+  };
+}
+

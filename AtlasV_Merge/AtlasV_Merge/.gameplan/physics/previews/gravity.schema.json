@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Gravity",
+  "elements": [{ "id": "gravity_prev", "type": "image", "src": "./gravity.png", "fit": "cover" }]
+}

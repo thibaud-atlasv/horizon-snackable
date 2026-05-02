@@ -1,0 +1,31 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "BG_4",
+    "attributes": [
+        {
+            "name": "baseColorTex",
+            "value": {
+                "type": "assetId",
+                "assetIdValue": {
+                    "packageOrRemoteId": "27219068287696221",
+                    "ingestionId": "12518700302052707679",
+                    "targetId": "1850524962"
+                }
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "30952996677677480",
+        "ingestionId": "8676292661488983804",
+        "targetId": "2708897769"
+    },
+    "baseMaterialAssetId": {
+        "packageOrRemoteId": "27219068287696221",
+        "ingestionId": "456695105857760629",
+        "targetId": "157013062"
+    }
+}

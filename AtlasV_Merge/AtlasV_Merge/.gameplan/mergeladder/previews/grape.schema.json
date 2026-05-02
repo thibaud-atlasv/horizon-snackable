@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Grape",
+  "elements": [{ "id": "grape_prev", "type": "image", "src": "./grape.png", "fit": "cover" }]
+}

@@ -26,6 +26,7 @@ export class WaveService extends Service {
   private _totalWaves: number = 0;
   private _phase: GamePhase = GamePhase.Idle;
   private _timer: number = 0;
+  private _ftueWaiting: boolean = false;
 
   // ── Spawn queue ───────────────────────────────────────────────────────────────
   private _spawnQueue: string[] = [];
@@ -47,6 +48,7 @@ export class WaveService extends Service {
     this._waveIndex    = 0;
     this._phase        = GamePhase.Idle;
     this._timer        = 0;
+    this._ftueWaiting  = false;
     this._spawnQueue   = [];
     this._spawnTimer   = 0;
     this._spawnedCount = 0;
@@ -54,7 +56,8 @@ export class WaveService extends Service {
   }
 
   startGame(): void {
-    this._waveIndex = 0;
+    this._waveIndex   = 0;
+    this._ftueWaiting = false;
     this._enterBuild();
   }
 
@@ -72,7 +75,7 @@ export class WaveService extends Service {
       this._timer -= dt;
     }
 
-    if (this._phase === GamePhase.Build && this._timer <= 0) {
+    if (this._phase === GamePhase.Build && this._timer <= 0 && !this._ftueWaiting) {
       this._enterWave();
     } else if (this._phase === GamePhase.WaveClear && this._timer <= 0) {
       if (this._waveIndex >= this._totalWaves) {
@@ -83,6 +86,13 @@ export class WaveService extends Service {
     }
 
     this._tickSpawn(dt);
+  }
+
+  @subscribe(Events.TowerPlaced)
+  onTowerPlaced(_p: Events.TowerPlacedPayload): void {
+    if (!this._ftueWaiting) return;
+    this._ftueWaiting = false;
+    this._timer = WAVE_BUILD_DURATION;
   }
 
   @subscribe(Events.SkipBuild)
@@ -134,7 +144,13 @@ export class WaveService extends Service {
 
   private _enterBuild(): void {
     this._phase = GamePhase.Build;
-    this._timer = this._waveIndex === 0 ? WAVE_BUILD_DURATION : 0;
+    if (this._waveIndex === 0) {
+      this._ftueWaiting = true;
+      this._timer = 0;
+      EventService.sendLocally(Events.FtueHint, new Events.FtueHintPayload());
+    } else {
+      this._timer = 0;
+    }
     this._sendPhase(GamePhase.Build);
   }
 

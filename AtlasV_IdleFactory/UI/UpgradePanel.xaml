@@ -30,131 +30,182 @@
             <Canvas/>
         </ItemsPanelTemplate>
 
-        <!-- Upgrade Item Button Style -->
+        <!-- Upgrade Button Style with 4-layer 3D relief and press effect -->
         <Style x:Key="UpgradeItemButtonStyle" TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <!-- Outer Border: Green thick border -->
-                        <Border x:Name="OuterBorder"
-                                BorderBrush="{StaticResource PanelBorder}"
-                                BorderThickness="4"
-                                CornerRadius="12"
-                                RenderTransformOrigin="0.5,0.5">
+                        <!-- Outermost container with TranslateTransform for press shift -->
+                        <Border x:Name="OuterContainer" RenderTransformOrigin="0.5,0.5">
                             <Border.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform x:Name="ItemScale" ScaleX="1" ScaleY="1"/>
-                                    <TranslateTransform x:Name="ItemTranslate" X="0" Y="0"/>
-                                </TransformGroup>
+                                <TranslateTransform x:Name="PressTransform" Y="0"/>
                             </Border.RenderTransform>
-                            <!-- Inner Border: Dark gray border with semi-transparent background -->
-                            <Border x:Name="ItemBorder" 
-                                    Background="{StaticResource ActiveButtonBg}"
-                                    BorderBrush="{StaticResource InnerButtonBorder}"
-                                    BorderThickness="3"
-                                    CornerRadius="8"
-                                    Padding="15">
-                                <ContentPresenter x:Name="ContentArea"/>
+                            
+                            <!-- Layer 1: Outline Border - outermost visual border -->
+                            <Border x:Name="OutlineBorder"
+                                    CornerRadius="12"
+                                    BorderThickness="6"
+                                    Visibility="{Binding OutlineVisible, Converter={StaticResource BoolToVisibility}}">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{Binding OutlineColor}"/>
+                                </Border.BorderBrush>
+                                
+                                <!-- Layer 2: Highlight Border - top-left light relief -->
+                                <Border CornerRadius="10"
+                                        BorderThickness="5,5,0,0"
+                                        Visibility="{Binding HighlightBorderVisible, Converter={StaticResource BoolToVisibility}}">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{Binding HighlightBorderColor}"/>
+                                    </Border.BorderBrush>
+                                    
+                                    <!-- Layer 3: Shadow Border - bottom-right shadow relief -->
+                                    <Border x:Name="ShadowBorder"
+                                            CornerRadius="8"
+                                            BorderThickness="0,0,5,5"
+                                            Visibility="{Binding ShadowBorderVisible, Converter={StaticResource BoolToVisibility}}">
+                                        <Border.BorderBrush>
+                                            <SolidColorBrush Color="{Binding ShadowBorderColor}"/>
+                                        </Border.BorderBrush>
+                                        
+                                        <!-- Layer 4: Button Background Border -->
+                                        <Border x:Name="BackgroundBorder"
+                                                CornerRadius="6"
+                                                Padding="15"
+                                                Visibility="{Binding ButtonVisible, Converter={StaticResource BoolToVisibility}}">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{Binding ButtonBackgroundColor}"/>
+                                            </Border.Background>
+                                            
+                                            <!-- Grid to layer content and press overlay -->
+                                            <Grid>
+                                                <!-- Content: Title and Price -->
+                                                <ContentPresenter x:Name="ContentArea"/>
+                                                
+                                                <!-- Press overlay - darkens button when pressed -->
+                                                <Border x:Name="PressOverlay"
+                                                        Background="#30000000"
+                                                        CornerRadius="6"
+                                                        Visibility="Collapsed"/>
+                                            </Grid>
+                                        </Border>
+                                    </Border>
+                                </Border>
                             </Border>
                         </Border>
+                        
+                        <!-- Press Effect Triggers -->
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <!-- Shift button down 4px -->
+                                <Setter TargetName="PressTransform" Property="Y" Value="4"/>
+                                <!-- Reduce shadow border thickness (flatten the 3D effect) -->
+                                <Setter TargetName="ShadowBorder" Property="BorderThickness" Value="0,0,2,2"/>
+                                <!-- Show dark overlay to darken background -->
+                                <Setter TargetName="PressOverlay" Property="Visibility" Value="Visible"/>
+                            </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="OuterBorder" Property="BorderBrush" Value="{StaticResource DisabledButtonBorder}"/>
-                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource DisabledButtonBg}"/>
-                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{StaticResource DisabledButtonBorder}"/>
-                                <Setter TargetName="OuterBorder" Property="Opacity" Value="0.7"/>
+                                <!-- Reduce opacity when disabled -->
+                                <Setter TargetName="OutlineBorder" Property="Opacity" Value="0.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
         </Style>
 
         <!-- Upgrade Item DataTemplate -->
         <DataTemplate x:Key="UpgradeItemTemplate">
+            <!-- Outer positioning wrapper with TranslateTransform -->
             <Border RenderTransformOrigin="0.5,0.5">
                 <Border.RenderTransform>
                     <TranslateTransform X="{Binding PositionX}" Y="{Binding PositionY}"/>
                 </Border.RenderTransform>
-                <Border x:Name="AnimationContainer" 
-                        RenderTransformOrigin="0.5,0.5">
                 
-                <!-- DataTrigger: plays animation when AnimationTrigger > 0 -->
-                <b:Interaction.Triggers>
-                    <b:DataTrigger Binding="{Binding AnimationTrigger}" Comparison="GreaterThan" Value="0">
-                        <b:ControlStoryboardAction>
-                            <b:ControlStoryboardAction.Storyboard>
-                                <Storyboard>
-                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)">
-                                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.08">
-                                            <EasingDoubleKeyFrame.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.0">
-                                            <EasingDoubleKeyFrame.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseIn"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                    </DoubleAnimationUsingKeyFrames>
-                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)">
-                                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.08">
-                                            <EasingDoubleKeyFrame.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.0">
-                                            <EasingDoubleKeyFrame.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseIn"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                    </DoubleAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </b:ControlStoryboardAction.Storyboard>
-                        </b:ControlStoryboardAction>
-                    </b:DataTrigger>
-                </b:Interaction.Triggers>
-                
-                <Button Style="{StaticResource UpgradeItemButtonStyle}"
-                        Command="{Binding DataContext.events.UpgradeItemClick, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                        CommandParameter="{Binding UpgradeId}"
-                        IsEnabled="{Binding IsEnabled}">
-                    <StackPanel HorizontalAlignment="Stretch">
-                        <!-- Top: Small Title with shadow -->
-                        <Grid HorizontalAlignment="Center">
-                            <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Normal"
-                                       Foreground="{StaticResource TextShadow}" Margin="1,1,0,0"
-                                       HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Normal"
-                                       Foreground="{StaticResource ButtonText}"
-                                       HorizontalAlignment="Center"/>
-                        </Grid>
-                        <!-- Middle: Small Description -->
-                        <TextBlock Text="{Binding Description}" FontSize="14"
-                                   Foreground="{StaticResource DescriptionText}"
-                                   TextWrapping="Wrap" Margin="0,4,0,8"
-                                   HorizontalAlignment="Center" TextAlignment="Center" Visibility="Collapsed"/>
-                        <!-- Bottom: BIG PRICE with gold icon - dominant element, centered -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Image Source="Textures/gold_icon.png" 
-                                   Width="32" Height="32" 
-                                   Stretch="Uniform"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,6,0"/>
-                            <Grid>
-                                <TextBlock Text="{Binding Price}" FontSize="38" FontWeight="Bold"
-                                           Foreground="{StaticResource TextShadow}"
-                                           VerticalAlignment="Center" Margin="1,1,0,0"/>
-                                <TextBlock Text="{Binding Price}" FontSize="38" FontWeight="Bold"
-                                           Foreground="{StaticResource PriceText}"
-                                           VerticalAlignment="Center"/>
+                <!-- Animation Container with ScaleTransform -->
+                <Border x:Name="AnimationContainer" RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    </Border.RenderTransform>
+                    
+                    <!-- DataTrigger: plays animation when AnimationTrigger > 0 -->
+                    <b:Interaction.Triggers>
+                        <b:DataTrigger Binding="{Binding AnimationTrigger}" Comparison="GreaterThan" Value="0">
+                            <b:ControlStoryboardAction>
+                                <b:ControlStoryboardAction.Storyboard>
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)">
+                                            <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.08">
+                                                <EasingDoubleKeyFrame.EasingFunction>
+                                                    <QuadraticEase EasingMode="EaseOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.0">
+                                                <EasingDoubleKeyFrame.EasingFunction>
+                                                    <QuadraticEase EasingMode="EaseIn"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)">
+                                            <LinearDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.08">
+                                                <EasingDoubleKeyFrame.EasingFunction>
+                                                    <QuadraticEase EasingMode="EaseOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1.0">
+                                                <EasingDoubleKeyFrame.EasingFunction>
+                                                    <QuadraticEase EasingMode="EaseIn"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </b:ControlStoryboardAction.Storyboard>
+                            </b:ControlStoryboardAction>
+                        </b:DataTrigger>
+                    </b:Interaction.Triggers>
+                    
+                    <!-- Button with all visual layers inside ControlTemplate for IsPressed triggers -->
+                    <Button Style="{StaticResource UpgradeItemButtonStyle}"
+                            Command="{Binding DataContext.events.UpgradeItemClick, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding UpgradeId}"
+                            IsEnabled="{Binding IsEnabled}">
+                        
+                        <!-- Content: Title and Price -->
+                        <StackPanel HorizontalAlignment="Stretch">
+                            <!-- Top: Small Title with shadow -->
+                            <Grid HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding Title}" FontSize="18" Foreground="{StaticResource TextShadow}" Margin="1,1,0,0"
+                                           HorizontalAlignment="Center" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Title}" FontSize="18" HorizontalAlignment="Center" FontWeight="Bold">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{Binding ButtonTextColor}"/>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
                             </Grid>
+                            <!-- Middle: Small Description -->
+                            <TextBlock Text="{Binding Description}" FontSize="14"
+                                       Foreground="{StaticResource DescriptionText}"
+                                       TextWrapping="Wrap" Margin="0,4,0,8"
+                                       HorizontalAlignment="Center" TextAlignment="Center" Visibility="Collapsed"/>
+                            <!-- Bottom: BIG PRICE with gold icon - dominant element, centered -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Image Source="Textures/gold_icon.png" 
+                                       Width="32" Height="32" 
+                                       Stretch="Uniform"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,6,0"/>
+                                <Grid>
+                                    <TextBlock Text="{Binding Price}" FontSize="38" FontWeight="Bold"
+                                               Foreground="{StaticResource TextShadow}"
+                                               VerticalAlignment="Center" Margin="1,1,0,0"/>
+                                    <TextBlock Text="{Binding Price}" FontSize="38" FontWeight="Bold"
+                                               Foreground="{StaticResource PriceText}"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                </Button>
+                    </Button>
                 </Border>
             </Border>
         </DataTemplate>

@@ -16,6 +16,8 @@ import { INTRO_DURATION_MS } from '../../Constants';
 export class GameHUDViewModelData extends UiViewModel {
   score: number = 0;
   scoreAnimating: boolean = false;
+  scoreVisible: boolean = false;
+  logoVisible: boolean = true;
 
   centerText: string = '';
   showCenterText: boolean = false;
@@ -53,10 +55,16 @@ export class GameHUDViewModel extends Component {
     switch (p.phase) {
       case GamePhase.Start:
         this._showCenterText('TAP TO START', '#FF5D10');
-        this._viewModel.tapToStartPulsing = true;
+        this._viewModel.scoreVisible = false;
+        this._viewModel.logoVisible = true;
+        // Defer pulsing so XAML bindings are mounted before the trigger fires
+        this._viewModel.tapToStartPulsing = false;
+        setTimeout(() => { this._viewModel.tapToStartPulsing = true; }, 100);
         break;
       case GamePhase.Intro:
         this._viewModel.tapToStartPulsing = false;
+        this._viewModel.scoreVisible = true;
+        this._viewModel.logoVisible = false;
         this._startIntroSequence();
         break;
       case GamePhase.Falling:
@@ -97,6 +105,8 @@ export class GameHUDViewModel extends Component {
     this._clearScoreAnimTimer();
     this._viewModel.score = 0;
     this._viewModel.scoreAnimating = false;
+    this._viewModel.scoreVisible = false;
+    this._viewModel.logoVisible = true;
     this._viewModel.tapToStartPulsing = false;
     this._hideCenterText();
   }

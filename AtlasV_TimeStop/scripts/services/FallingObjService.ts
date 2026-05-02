@@ -36,6 +36,13 @@ import {
   TOTAL_ROUNDS,
   VX_INIT_MAX,
   VX_INIT_MIN,
+  BALL_RADIUS_MIN,
+  BALL_RADIUS_MAX,
+  BALL_VX_MIN,
+  BALL_VX_MAX,
+  BALL_VY_INIT,
+  BALL_GRAVITY,
+  BALL_BOUNCE_DAMPING,
 } from '../Constants';
 import { calcScore, getPrecision } from '../Utils';
 import {
@@ -181,13 +188,85 @@ class LogSim implements IFallingObj {
   }
 }
 
+// ── Ball simulation ───────────────────────────────────────────────────────────
+
+class BallSim implements IFallingObj {
+  readonly objType = FallingObjType.Ball;
+
+  readonly objId: number;
+  cx:             number;
+  cy:             number = START_Y;
+  radius:         number;
+  private _vx:      number  = 0;
+  private _vy:      number  = BALL_VY_INIT;
+  private _angle:   number  = 0;   // radians, accumulated
+  private _torque:  number  = 0;   // rad/s, constant spin
+  private _launched: boolean = false;
+  private _dead:    boolean = false;
+
+  constructor(objId: number, cx: number) {
+    this.objId  = objId;
+    this.cx     = cx;
+    this.radius = BALL_RADIUS_MIN + Math.random() * (BALL_RADIUS_MAX - BALL_RADIUS_MIN);
+    const vxSign = Math.random() < 0.5 ? 1 : -1;
+    this._vx     = vxSign * (BALL_VX_MIN + Math.random() * (BALL_VX_MAX - BALL_VX_MIN));
+    // Spin in the same direction as horizontal drift, 0.3–1.2 turns/s
+    const TORQUE_MIN = 0.3 * Math.PI * 2;
+    const TORQUE_MAX = 1.2 * Math.PI * 2;
+    this._torque = vxSign * (TORQUE_MIN + Math.random() * (TORQUE_MAX - TORQUE_MIN));
+  }
+
+  waiting(): boolean  { return !this._launched; }
+  isFrozen(): boolean { return this._dead; }
+
+  activate(): void { this._launched = true; }
+
+  freeze(): void { this._dead = true; }
+
+  tick(dt: number): void {
+    if (this._dead || !this._launched) return;
+
+    this._vy    -= BALL_GRAVITY * dt;
+    this.cy     += this._vy * dt;
+    this.cx     += this._vx * dt;
+    this._angle += this._torque * dt;
+
+    const left  = BOUNDS.x + this.radius;
+    const right = BOUNDS.x + BOUNDS.w - this.radius;
+    if (this.cx < left) {
+      this.cx  = left;
+      this._vx = Math.abs(this._vx) * BALL_BOUNCE_DAMPING;
+    } else if (this.cx > right) {
+      this.cx  = right;
+      this._vx = -Math.abs(this._vx) * BALL_BOUNCE_DAMPING;
+    }
+  }
+
+  getLowestY(): number  { return this.cy - this.radius; }
+  getWorldX(): number   { return this.cx; }
+
+  toRenderState(): FallingObjRenderState {
+    return {
+      objId:    this.objId,
+      type:     FallingObjType.Ball,
+      cx:       this.cx,
+      cy:       this.cy,
+      angle:    this._angle,
+      scaleX:   this.radius * 2,
+      scaleY:   this.radius * 2,
+      alpha:    1,
+      launched: this._launched,
+    };
+  }
+}
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 @service()
 export class FallingObjService extends Service {
 
   private _sims:   Map<number, LogSim>    = new Map();
-  private _balls:  Map<number, IFallingObj> = new Map();
+  private _balls:  Map<number, BallSim>   = new Map();
   private _paused:       boolean      = false;
   private _faultedObjId: Maybe<number> = null;
 
@@ -200,9 +279,8 @@ export class FallingObjService extends Service {
     this._sims.set(sim.objId, sim);
   }
 
-  // Entity-based types (Ball, etc.) register here.
-  registerBall(obj: IFallingObj): void {
-    this._balls.set(obj.objId, obj);
+  registerBall(sim: BallSim): void {
+    this._balls.set(sim.objId, sim);
   }
 
   unregister(objId: number): void {
@@ -244,22 +322,28 @@ export class FallingObjService extends Service {
 
   @subscribe(Events.InitFallingObj)
   onInitFallingObj(p: Events.InitFallingObjPayload): void {
-    const sim = new LogSim(p.objId, p.cx, p.roundIndex, p.config);
-    this.registerLog(sim);
+    if (p.config['type'] === FallingObjType.Ball) {
+      this.registerBall(new BallSim(p.objId, p.cx));
+    } else {
+      this.registerLog(new LogSim(p.objId, p.cx, p.roundIndex, p.config));
+    }
   }
 
   @subscribe(Events.FallingObjActivate)
   onActivate(p: Events.FallingObjActivatePayload): void {
     this._sims.get(p.objId)?.activate();
+    this._balls.get(p.objId)?.activate();
   }
 
   @subscribe(Events.FallingObjFreeze)
   onFreeze(p: Events.FallingObjFreezePayload): void {
-    const sim = this._sims.get(p.objId);
-    if (!sim || sim.isFrozen()) return;
+    const log  = this._sims.get(p.objId);
+    const ball = this._balls.get(p.objId);
+    const obj  = log ?? ball;
+    if (!obj || obj.isFrozen()) return;
 
-    const lowestY = sim.getLowestY();
-    sim.freeze();
+    const lowestY = obj.getLowestY();
+    obj.freeze();
     this.unregister(p.objId);
 
     const { pts, grade } = calcScore(getPrecision(lowestY));
@@ -298,10 +382,21 @@ export class FallingObjService extends Service {
           EventService.sendLocally(Events.FallingObjHitFloor, { objId: sim.objId });
         }
       }
+      for (const ball of this._balls.values()) {
+        ball.tick(dt);
+        if (ball.getLowestY() <= FLOOR_Y) {
+          ball.freeze();
+          this._faultedObjId = ball.objId;
+          EventService.sendLocally(Events.FallingObjHitFloor, { objId: ball.objId });
+        }
+      }
     }
 
     for (const sim of this._sims.values()) {
       states.push(sim.toRenderState());
+    }
+    for (const ball of this._balls.values()) {
+      states.push(ball.toRenderState());
     }
 
     EventService.sendLocally(Events.RenderFallingObjs, { states });

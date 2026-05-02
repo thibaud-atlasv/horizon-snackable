@@ -33,7 +33,7 @@
                     "data": {
                         "class": "BallController",
                         "definitionAsset": {
-                            "packageOrRemoteId": "26435503376059174",
+                            "packageOrRemoteId": "26835398609386284",
                             "ingestionId": "17350012393790739168",
                             "targetId": "4237980480"
                         },
@@ -50,7 +50,7 @@
             "id": "2deb180a-dae6-4d3e-8a23-83abda44133a",
             "name": "soccerBall",
             "type": {
-                "packageOrRemoteId": "26435503376059174",
+                "packageOrRemoteId": "26835398609386284",
                 "ingestionId": "14059976347820549374",
                 "targetId": "2719744159"
             },
@@ -153,7 +153,7 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "26435503376059174",
+                                    "packageOrRemoteId": "26835398609386284",
                                     "ingestionId": "7354422100507416042",
                                     "targetId": "157013062"
                                 }

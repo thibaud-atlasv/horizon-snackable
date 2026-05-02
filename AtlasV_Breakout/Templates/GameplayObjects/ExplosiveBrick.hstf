@@ -33,7 +33,7 @@
                     "data": {
                         "class": "ExplosiveBrick",
                         "definitionAsset": {
-                            "packageOrRemoteId": "18093430051423157088",
+                            "packageOrRemoteId": "26904326832536512",
                             "ingestionId": "14978280332589620853",
                             "targetId": "4237980480"
                         },
@@ -78,7 +78,7 @@
                         "version": 11,
                         "data": {
                             "mesh": {
-                                "packageOrRemoteId": "18093430051423157088",
+                                "packageOrRemoteId": "26904326832536512",
                                 "ingestionId": "17138942523137658178",
                                 "targetId": "3500183637"
                             }

@@ -1,0 +1,57 @@
+{
+    "__attr__": {
+        "__version__": {
+            "version": 1
+        }
+    },
+    "name": "DepthGradient",
+    "attributes": [
+        {
+            "name": "topColor",
+            "value": {
+                "type": "Floats",
+                "floatValues": [
+                    0.007843137718737126,
+                    0.07058823853731156,
+                    0.3921568691730499,
+                    1.0
+                ]
+            }
+        },
+        {
+            "name": "bottomColor",
+            "value": {
+                "type": "Floats",
+                "floatValues": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "name": "bottomY",
+            "value": {
+                "type": "Floats",
+                "floatValues": [
+                    -250.0
+                ]
+            }
+        },
+        {
+            "name": "topY",
+            "value": {
+                "type": "Floats",
+                "floatValues": [
+                    -5.0
+                ]
+            }
+        }
+    ],
+    "shaderAssetId": {
+        "packageOrRemoteId": "26220234944285836",
+        "ingestionId": "10345051439323638001",
+        "targetId": "2708897769"
+    }
+}

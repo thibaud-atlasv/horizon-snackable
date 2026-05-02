@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Watermelon",
+  "elements": [{ "id": "watermelon_prev", "type": "image", "src": "./watermelon.png", "fit": "cover" }]
+}

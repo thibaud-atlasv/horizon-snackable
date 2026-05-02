@@ -1,11 +1,30 @@
-# H2_Timestop — Claude Code Context
+## Language
+
+All code, comments, documentation, and files in this project must be written in **English**.
+
+---
 
 ## Project
 
 Mobile **portrait** single-player game built with **Meta Horizon Worlds SDK** (TypeScript).
 Platform: Meta Horizon Studio · Language: TypeScript ES2022 · Target: mobile portrait, local single-player.
 
-Skill files with deeper reference material: `Assistant/skills/SKILLS.md`
+The game has to be "snackable" (short session, no required explanation) and follow the 3 S:
+ - Simple
+ - Satisfying
+ - Short
+
+---
+
+## Collaboration
+
+When facing a non-trivial design decision, present options to the user before implementing.
+Include trade-offs, not just recommendations. A good prompt looks like:
+
+> "Two approaches here — A does X (simpler, less flexible) vs B does Y (more setup, easier to extend). Which fits better?"
+
+Do not over-engineer in anticipation of unspecified features. Build what is needed now.
+**Events, interfaces, and features are added at implementation time — not upfront.**
 
 ---
 
@@ -16,9 +35,11 @@ ALL gameplay runs **client-side only**. The server context is never used for log
 Every `Component.onStart()` must guard at the top:
 
 ```typescript
+private _networkingService = NetworkingService.get();
+
 @subscribe(OnEntityStartEvent)
 onStart(): void {
-  if (NetworkingService.get().isServerContext()) return;
+  if (this._networkingService.isServerContext()) return;
 }
 ```
 
@@ -38,185 +59,119 @@ const entity = await WorldService.get().spawnTemplate({
 
 ## Architecture
 
+### Core Principle: Small, Composable, No Assumptions
+
+Keep the core minimal. Each system does one thing. New features add new files — they don't modify existing ones unless necessary.
+
+Do not add interfaces, events, or abstractions for capabilities not yet implemented.
+
 ### Communication: Event-Driven, No Direct References
 
 ```typescript
 // Broadcast to all subscribers
-EventService.sendLocally(Events.SomethingHappened, { value: 42 });
+EventService.sendLocally(Events.EnemyDied, { enemyId: 42, reward: 10 });
 
-// Target a specific entity (e.g. a just-spawned entity)
-EventService.sendLocally(Events.InitObj, { objId: 0 }, { eventTarget: entity });
+// Target a specific entity
+EventService.sendLocally(Events.InitEnemy, { defId: 0 }, { eventTarget: entity });
 
 // Subscribe (works in both Component and Service)
-@subscribe(Events.SomethingHappened)
-private onSomethingHappened(p: Events.SomethingHappenedPayload): void { ... }
+@subscribe(Events.EnemyDied)
+private onEnemyDied(p: Events.EnemyDiedPayload): void { ... }
 ```
 
 ### Services — Preferred Singleton Pattern
 
-Use `@service()` for all cross-cutting logic and registries. Services auto-initialize, are globally accessible, and can subscribe to events. No `dispose()` needed — reset state in a `@subscribe(Events.Restart)` handler instead.
+`Service` base class already exposes a polymorphic static `get()` — **do not override it**.
+Use `Service.inject(MyService)` or `Service.injectWeak(MyService)` to declare dependencies in other services; access services via `MyService.get()`.
 
 ```typescript
 import { Service, service, subscribe, OnServiceReadyEvent } from 'meta/worlds';
 
 @service()
-export class MyRegistry extends Service {
-  // Strong dependency (blocks init until fulfilled)
-  private readonly _other = Service.inject(OtherService);
-  // Weak dependency (may be null)
-  private readonly _optional = Service.injectWeak(OptionalService);
+export class MyService extends Service {
+  // Strong dependency — blocks init until OtherService is ready
+  private readonly _other : OtherService = Service.inject(OtherService);
+  private readonly _other2 : Maybe<OtherService2> = Service.injectWeak(OtherService2);
 
-  private _items: Map<number, IMyInterface> = new Map();
-
-  @subscribe(OnServiceReadyEvent)
-  onReady(): void {
-    // Safe to send events and access injected services here
-  }
-
-  @subscribe(Events.Restart)
-  onRestart(): void {
-    this._items.clear();  // Reset state instead of dispose()
-  }
-}
-
-// Access from any component:
-const registry = MyRegistry.get();
-```
-
-### Content Extensibility Patterns
-
-Three patterns for adding features without modifying existing files. Use the simplest one that fits.
-
----
-
-#### A — Registry + Interface (current project pattern)
-
-Enum identifies the type; a `Record` maps it to assets; each object implements an interface. Adding a type = 1 file + 1 line in `Assets.ts` + config in `LevelConfig`.
-
-```typescript
-// Types.ts — add enum value + interface
-export enum ObjType { Log = 0, Ball = 1 }
-export interface IFallingObj { objId: number; getLowestY(): number; }
-
-// Assets.ts — add template entry
-export const ObjTemplates: Record<ObjType, TemplateAsset> = {
-  [ObjType.Log]:  new TemplateAsset('../Templates/GameplayObjects/Log.hstf'),
-  [ObjType.Ball]: new TemplateAsset('../Templates/GameplayObjects/Ball.hstf'),
-};
-
-// BallObj.ts — self-contained, implements IFallingObj
-@component()
-export class BallObj extends Component implements IFallingObj { ... }
-```
-
----
-
-#### B — Auto-Registration (preferred when enum maintenance becomes a burden)
-
-Each type registers itself at module load. **Zero changes to any existing file** when adding or removing a type.
-
-```typescript
-// ObjectRegistry.ts — service that accepts self-registration
-@service()
-export class ObjectRegistry extends Service {
-  private static _pending: ObjDef[] = [];
-  private _defs = new Map<string, ObjDef>();
-
-  static register(def: ObjDef): void {
-    ObjectRegistry._pending.push(def);  // called before service init
-  }
+  private _data: Map<number, string> = new Map();
 
   @subscribe(OnServiceReadyEvent)
   onReady(): void {
-    for (const def of ObjectRegistry._pending) this._defs.set(def.id, def);
+    // Safe to call injected services and send events here
   }
-
-  get(id: string): ObjDef | undefined { return this._defs.get(id); }
-  all(): ObjDef[] { return [...this._defs.values()]; }
 }
 
-// DiamondObj.ts — entirely self-contained, no enum, no Assets.ts edit
-ObjectRegistry.register({
-  id: 'diamond',
-  template: new TemplateAsset('../Templates/GameplayObjects/Diamond.hstf'),
-  config: { gravity: 8, bounceX: 0.95 },
-});
-@component()
-export class DiamondObj extends Component implements IFallingObj { ... }
+// Access from any component or service:
+const svc = MyService.get();
 ```
 
-**Use when:** content types are numerous or AI-generated; removing a feature must leave zero traces.
+### `Maybe<T>`
 
----
-
-#### C — Pipeline / Chain of Responsibility (for multi-step processing)
-
-When several independent rules apply in sequence (scoring, spawn selection, input filtering). Each rule is a separate file; adding/removing one never touches the others.
+`Maybe<T>` is an SDK alias for `T | null`. Use it for fields that are set after construction (e.g. in `onStart`):
 
 ```typescript
-// IScoringRule.ts
-export interface IScoringRule {
-  apply(ctx: ScoringContext): ScoringContext;
-}
-
-// ScoringService.ts — owns and runs the chain
-@service()
-export class ScoringService extends Service {
-  private _rules: IScoringRule[] = [
-    new PrecisionBonus(),
-    new ComboMultiplier(),
-  ];
-
-  compute(ctx: ScoringContext): number {
-    return this._rules.reduce((c, r) => r.apply(c), ctx).total;
-  }
-}
-
-// ComboMultiplier.ts — standalone rule, zero deps on other rules
-export class ComboMultiplier implements IScoringRule {
-  apply(ctx: ScoringContext): ScoringContext {
-    return { ...ctx, total: ctx.total * (1 + ctx.combo * 0.1) };
-  }
-}
+import type { Maybe } from 'meta/worlds';
+private _transform: Maybe<TransformComponent> = null;
 ```
 
-**Use when:** multiple independent rules accumulate on the same value (scoring, difficulty scaling, spawn filtering).
+### `OnEntityCreateEvent` vs `OnEntityStartEvent`
 
----
+- **`OnEntityCreateEvent`** — fires when the component is attached to its entity. The scene is not fully ready; other entities may not exist yet. Use for self-contained setup that doesn't depend on the scene (e.g. attaching a ViewModel to a `CustomUiComponent`).
+- **`OnEntityStartEvent`** — fires after the full scene is initialized. Safe to query other entities, call services, and send events. **Prefer this for all game logic.**
 
-#### D — Data-Driven Config (behavior variation without branching)
+### Assets — Single Source of Truth
 
-When types differ only in values, not logic. One generic component reads its profile; all variation lives in a config table.
+`Assets.ts` is the **only** file that contains `new TemplateAsset(...)` calls. Never declare template assets elsewhere.
+Never use `@property()` to pass templates — asset paths live in code, not in the editor.
 
 ```typescript
-// In LevelConfig.ts or a dedicated ProfileConfig.ts
-export const PHYSICS_PROFILES: Record<string, PhysicsProfile> = {
-  log:     { gravity: 2.5, bounceX: 0.82, rotates: true  },
-  ball:    { gravity: 5.0, bounceX: 0.88, rotates: false },
-  feather: { gravity: 0.8, bounceX: 0.50, rotates: true  },
-};
-
-// Generic component — no type-specific branching
-@subscribe(Events.InitFallingObj)
-onInit(p: Events.InitFallingObjPayload): void {
-  const profile = PHYSICS_PROFILES[p.objType];
-  this._gravity = profile.gravity;
-  this._bounceX = profile.bounceX;
+// Assets.ts
+export namespace Assets {
+  export const Arrow  = new TemplateAsset('@Templates/Towers/Arrow.hstf');
+  export const EnemyBasic = new TemplateAsset('@Templates/Enemies/Basic.hstf');
+  export const Projectile = new TemplateAsset('@Templates/Projectile.hstf');
 }
 ```
 
-**Use when:** objects share the same lifecycle and physics model but differ in tuning. Adding a variant = one line in the config table.
+Def files reference assets by name — they never construct TemplateAssets directly:
+
+```typescript
+// Defs/TowerDefs.ts
+import { Assets } from '../Assets';
+export const TOWER_DEFS: ITowerDef[] = [
+  { id: 'arrow', ..., template: Assets.Arrow },
+];
+```
+
+Catalog services read def arrays in `onReady()` — def files never call `register()`:
+
+```typescript
+@subscribe(OnServiceReadyEvent)
+onReady(): void {
+  for (const def of TOWER_DEFS) this._defs.set(def.id, def);
+}
+```
+
+### Content Definition Pattern
+
+New content, or levels are added as entries in definition files or new files — no code changes required elsewhere:
+
+```typescript
+// Defs/TowerDefs.ts
+export const TOWER_DEFS: ITowerDef[] = [
+  { id: TowerType.Arrow, name: 'Arrow', cost: 50, damage: 10, range: 3, fireRate: 1.0 },
+];
+```
 
 ---
 
-### Modularity Rules
+## Modularity Rules
 
-- No direct component references (except for api component: transform, camera, customui etc...) — events only or reference entity
+- No direct component references (except API components: transform, camera, customui) — events only
 - One class per file; file name matches class name
 - `Types.ts` and `Constants.ts` must not import from any sibling file
-- All assets declared in `Assets.ts` by path (never via `@property()`)
-- A manager/service orchestrates; a gameplay object handles its own behavior
-- Prefer data in config tables over `if/switch` on type — new variant = new row, not new branch
+- All template assets declared in `Assets.ts` by path — never via `@property()`
+- A service orchestrates; a component handles its own visuals and local behavior
 
 ---
 
@@ -228,20 +183,14 @@ onInit(p: Events.InitFallingObjPayload): void {
 import {
   Component, OnEntityStartEvent, NetworkingService,
   TransformComponent, EventService,
-  component, property, subscribe,
-  type Maybe,
+  component, subscribe,
 } from 'meta/worlds';
 
 @component()
 export class MyComponent extends Component {
-  // Inspector-tunable: must have a default value
-  @property() private myValue: number = 1;
-  // MHS must assign before run (error if not set in editor)
-  @property() private requiredAsset!: TemplateAsset;
-  // Nullable entity reference
-  @property() private target: Maybe<Entity> = null;
+  @property() myValue: number = 1;  // inspector-tunable, must have default
 
-  private _transform!: TransformComponent;  // set in onStart
+  private _transform: Maybe<TransformComponent> = null;  // set in onStart
 
   @subscribe(OnEntityStartEvent)
   onStart(): void {
@@ -254,26 +203,25 @@ export class MyComponent extends Component {
 ### Per-Frame Update
 
 ```typescript
-import { OnWorldUpdateEvent, OnWorldUpdateEventPayload, ExecuteOn, subscribe } from 'meta/worlds';
+import { OnWorldUpdateEvent, ExecuteOn, subscribe } from 'meta/worlds';
+import type { OnWorldUpdateEventPayload } from 'meta/worlds';
 
+// ExecuteOn.Owner — runs on owning client only, no extra server guard needed
 @subscribe(OnWorldUpdateEvent, { execution: ExecuteOn.Owner })
 onUpdate(payload: OnWorldUpdateEventPayload): void {
-  const dt = payload.deltaTime;  // seconds since last frame
+  const dt = payload.deltaTime;
 }
 ```
-
-`ExecuteOn.Owner` ensures the loop only runs on the owning client — no additional server guard needed.
 
 ### Transform
 
 ```typescript
 const t = this.entity.getComponent(TransformComponent)!;
-t.localPosition = new Vec3(x, y, z);     // local position
-t.worldPosition = new Vec3(x, y, z);     // world position
+// read/write access
+t.localPosition = new Vec3(x, y, z);
+t.worldPosition = new Vec3(x, y, z);
 t.localScale    = new Vec3(sx, sy, sz);
-t.localRotation = Quaternion.fromEuler(new Vec3(rx, ry, rz));  // degrees
-t.worldPosition   // read current world position
-t.worldRotation   // read current world rotation
+t.localRotation = Quaternion.fromEuler(new Vec3(rx, ry, rz)); // degrees
 ```
 
 ### Color
@@ -281,29 +229,12 @@ t.worldRotation   // read current world rotation
 ```typescript
 import { ColorComponent, Color } from 'meta/worlds';
 const c = this.entity.getComponent(ColorComponent)!;
-c.color = new Color(r, g, b, a);  // r/g/b/a in [0, 1]; alpha optional (default 1)
-```
-
-### Template Assets (in Assets.ts)
-
-```typescript
-import { TemplateAsset } from 'meta/worlds';
-import { MyObjType } from './Types';
-
-export namespace Assets {
-  // Pluggable map: add new types here only, core systems read this
-  export const MyObjTemplates: Record<MyObjType, TemplateAsset> = {
-    [MyObjType.Foo]: new TemplateAsset('../Templates/GameplayObjects/Foo.hstf'),
-    [MyObjType.Bar]: new TemplateAsset('../Templates/GameplayObjects/Bar.hstf'),
-  };
-  export const FloatingText = new TemplateAsset('../Templates/GameplayObjects/FloatingText.hstf');
-}
+c.color = new Color(r, g, b, a); // r/g/b/a in [0, 1]; alpha optional (default 1)
 ```
 
 ### Camera Setup (ClientSetup.ts)
 
 ```typescript
-// ExecuteOn.Owner — runs on owning client only (= local player in solo)
 @subscribe(OnEntityStartEvent, { execution: ExecuteOn.Owner })
 onStart(): void {
   setTimeout(() => {
@@ -315,7 +246,7 @@ onStart(): void {
       position: cameraTransform.worldPosition,
       rotation: cameraTransform.worldRotation,
       duration: 0,
-      fov: cameraComponent?.fieldOfView ?? 60,
+      fov: 60,
     });
   }, this.initDelay * 1000);
 }
@@ -323,78 +254,48 @@ onStart(): void {
 // Touch → local event
 @subscribe(OnFocusedInteractionInputStartedEvent)
 onTouchStarted(_p: OnFocusedInteractionInputEventPayload): void {
-  EventService.sendLocally(Events.PlayerTap, {});
+  EventService.sendLocally(Events.SomeTapEvent, {});
 }
 ```
 
 ### HUD / UI (XAML + CustomUiComponent + UiViewModel)
 
 ```typescript
-import { CustomUiComponent, UiViewModel, uiViewModel } from 'meta/worlds';
-import type { Maybe } from 'meta/worlds';
-
-// 1. Define the ViewModel (fields auto-bind to XAML)
 @uiViewModel()
 export class MyHUDData extends UiViewModel {
-  score: number = 0;
-  centerText: string = '';
-  showCenterText: boolean = false;
+  gold: number = 0;
+  lives: number = 20;
 }
 
-// 2. In the Component:
+// In component:
 private _vm = new MyHUDData();
-private _ui: Maybe<CustomUiComponent> = null;
 
 @subscribe(OnEntityStartEvent)
 onStart(): void {
   if (NetworkingService.get().isServerContext()) return;
-  this._ui = this.entity.getComponent(CustomUiComponent);
-  if (this._ui) this._ui.dataContext = this._vm;
+  const ui = this.entity.getComponent(CustomUiComponent);
+  if (ui) ui.dataContext = this._vm;
 }
-
-// 3. Update a binding (triggers reactive UI update automatically)
-this._vm.score = 42;
-
-// 4. XAML binding syntax:
-// <Label text="{score}" />
-// <Panel visible="{showCenterText}"><Label text="{centerText}" /></Panel>
+// Update: this._vm.gold = 42;  // auto-triggers XAML reactive update
 ```
+
+UI (XAML) and UiViewModel files are generated by the MHS assistant — do not create them manually.
 
 ### Events Pattern (Types.ts)
 
-Group events by concern into namespaces. All payload fields must have default values.
-
 ```typescript
-import { LocalEvent, NetworkEvent, serializable } from 'meta/worlds';
-
-// Local events (client-only, no @serializable needed)
 export namespace Events {
-  export class PhaseChangedPayload { readonly phase: GamePhase = GamePhase.Start; }
-  export const PhaseChanged = new LocalEvent<PhaseChangedPayload>('EvPhaseChanged', PhaseChangedPayload);
-
-  export class RestartPayload {}
-  export const Restart = new LocalEvent<RestartPayload>('EvRestart', RestartPayload);
+  export class EnemyDiedPayload { enemyId: number = 0; reward: number = 0; }
+  export const EnemyDied = new LocalEvent<EnemyDiedPayload>('EvEnemyDied', EnemyDiedPayload);
 }
-
-// HUD-specific events (keeps GameManager decoupled from UI)
-export namespace HUDEvents {
-  export class UpdateScorePayload { readonly score: number = 0; }
-  export const UpdateScore = new LocalEvent<UpdateScorePayload>('EvHUDUpdateScore', UpdateScorePayload);
-}
-
-// Network events — payload MUST be @serializable, use sendGlobally
-export namespace NetworkEvents {
-  @serializable()
-  export class UpdateScorePayload { readonly score: number = 0; }
-  export const UpdateScore = new NetworkEvent<UpdateScorePayload>('EvNetUpdateScore', UpdateScorePayload);
-}
-// Usage: EventService.sendGlobally(NetworkEvents.UpdateScore, { score: 100 });
 ```
 
 Rules:
 - Event string IDs must be **globally unique** — always prefix with `Ev`
-- `@serializable()` only for `NetworkEvent` payloads (not `LocalEvent`)
-- `NetworkEvent` payloads: all fields `readonly`, class must have a no-arg constructor
+- No `@serializable()` on `LocalEvent` payloads
+- All payload fields must have default values
+- `@subscribe`-decorated handlers must **not** be `private` — the framework calls them externally; `private` triggers TS6133 "declared but never read"
+- Unused parameters: prefix with `_` — `onReset(_p: Events.ResetPayload): void`
 
 ---
 
@@ -409,30 +310,28 @@ Right-Handed Y-Up (RUB):
 | Z    | backward | forward  |
 
 Play area (portrait mobile): **9 × 16 world units**, centered on origin.
-Defined in `Constants.ts` as `BOUNDS`, `WIDTH`, `HEIGHT`.
 
 ---
 
 ## File Organization
 
+Information about the game will be stored in `Docs\PROJECT_SUMMARY.md`
+
 ```
 Scripts/
-  Types.ts           ← ALL interfaces, enums, events, payloads — no sibling imports
-  Constants.ts       ← BOUNDS, play-area dims, tuning values — no sibling imports
-  Assets.ts          ← ALL TemplateAsset refs (Record<EnumType, TemplateAsset> maps)
-  ClientSetup.ts     ← Camera + touch input init (ExecuteOn.Owner)
-  GameManager.ts     ← Phase, score, round progression, win/lose (Component)
-  LevelConfig.ts     ← Per-round tuning: object types, counts, difficulty
-  CollisionManager.ts← Generic AABB collision singleton (reuse as-is)
-  UI/
-    GameHUDViewModel.ts      ← Component + @uiViewModel() data class; HUDEvents
-  [YourObject].ts   ← One component per file;
-  Shared/            ← Cross-feature utilities (only when truly shared)
+  Types.ts                ← Enums, interfaces, events (added as needed)
+  Constants.ts            ← Grid dimensions, play-area bounds, tuning values
+  Assets.ts               ← ALL TemplateAsset refs (paths in code, never @property)
 
-Templates/   ← .hstf templates for each spawnable type
+  Components/             ← Components: GameManager, ClientSetup, entity controllers
+  Services/               ← Services and registries: all singletons, one responsibility each
+  Defs/                   ← Static data tables: content definitions, level configs, tuning tables
 
-Assistant/skills/    ← Reference docs for Claude
-Docs/               ← Human-readable project docs
+Templates/
+UI/                     ← XAML panels 
+Docs/                   ← Game specific details, art direction, project summary
+Assistant/
+  Skills/               ← Skills for the MHS AI assistant, extensions features should be added there
 ```
 
 ---
@@ -441,20 +340,17 @@ Docs/               ← Human-readable project docs
 
 | Element | Convention | Example |
 |---------|------------|---------|
-| Class | PascalCase | `GameManager`, `BallObj` |
-| Interface | `I` prefix | `IFallingObj`, `ICollider` |
-| Enum | PascalCase, explicit values | `GamePhase { Start = 0 }` |
-| Private field | `_` prefix | `_velocity`, `_health` |
-| `@property()` field | camelCase, no prefix | `moveSpeed`, `initDelay` |
-| Event string ID | `Ev` prefix | `'EvPlayerDied'`, `'EvRestart'` |
-| Module constant | UPPER_SNAKE_CASE | `BOUNDS`, `FLOOR_Y` |
+| Class | PascalCase | `EnemyController`, `TowerService` |
+| Interface | `I` prefix | `ITowerDef`, `IEnemyDef` |
+| Enum | PascalCase, explicit values | `TowerType { Arrow = 0, Cannon = 1 }` |
+| Private field | `_` prefix | `_gold`, `_health` |
+| `@property()` field | camelCase, no prefix | `defId`, `spawnDelay` |
+| Event string ID | `Ev` prefix | `'EvEnemyDied'`, `'EvTowerPlaced'` |
+| Module constant | UPPER_SNAKE_CASE | `GRID_COLS`, `ENEMY_BASE_SPEED` |
 
-- All internal fields and methods: `private`
-- Fields set in `onStart`: definite assignment `!` — `private _t!: TransformComponent`
-- Unused parameters: prefix with `_` — `onReset(_p: Events.ResetPayload)`
+- `const` by default; `let` only when reassignment is needed
 - Never use `any` — use `unknown` with narrowing, or a typed interface
 - Use `import type` for compile-time-only types
-- `const` by default; `let` only when reassignment is needed
 - Comments only for non-obvious logic
 
 ---
@@ -463,17 +359,16 @@ Docs/               ← Human-readable project docs
 
 | Pitfall | Correct approach |
 |---------|-----------------|
-| Forgetting server guard in `onStart` | Every Component `onStart` must check `isServerContext()` |
+| Forgetting server guard in `onStart` | Every Component `onStart` must check `NetworkingService.get().isServerContext()` |
 | `Types.ts` importing from a sibling | `Types.ts` has zero local imports |
+| Spawning without `NetworkMode.LocalOnly` | All spawns must be `NetworkMode.LocalOnly` |
+| Calling `dispose()` on a `@service()` | Services are singletons — subscribe to a reset event and reassign fields instead: `this._score = 0; this._round = 1;` |
+| `static get()` on a derived service | Don't override — use the inherited `MyService.get()` directly |
+| Assets via `@property()` | Declare all asset paths in `Assets.ts` with `new TemplateAsset(...)` |
 | `t.position.set(...)` on TransformComponent | Use `t.localPosition = new Vec3(...)` or `t.worldPosition = ...` |
-| `customUi.dataModel` | The property is `customUi.dataContext = myViewModel` |
-| `@serializable()` on a LocalEvent payload | Only `NetworkEvent` payloads need `@serializable()` |
-| Spawning without `NetworkMode.LocalOnly` | All spawns must be `NetworkMode.LocalOnly` for solo |
-| Calling `dispose()` on a `@service()` | Services persist — reset state manually |
-| Holding a game piece component reference | Store only entity or api/core components (transform, camera, customUI etc..). For game pieces communicate only via events |
-| Payload fields without default values | Every event payload field needs a default value |
-| Magic numbers in gameplay code | Named constants in `Constants.ts`; per-instance via `@property()` |
-| Active code on module load | Don't code feature or call advanced features directly from loading a module, wait for game cycle start or update or service started instead. Don't rely on module load order  |
+| Magic numbers in gameplay code | Named constants in `Constants.ts` |
+| Adding events/interfaces "just in case" | Only add what is needed for the current feature |
+| Active code on module load | Wait for `OnServiceReadyEvent` or `OnEntityStartEvent` |
 
 ---
 
@@ -486,3 +381,13 @@ Docs/               ← Human-readable project docs
 | World App | `%USERPROFILE%\AppData\Local\Temp\world_app` | Preview runtime errors |
 
 Navigate to: latest date folder → largest session number subfolder → log files inside.
+
+---
+
+## Full SDK Reference
+
+| API | Path |
+|-----|------|
+| `meta/worlds` | `C:\Program Files\Meta Horizon Studio STC\v76\asset_hub\sdk_packages\meta\worlds_sdk\index.d.ts` |
+
+Refer to this file only when the pattern above doesn't cover the API you need.

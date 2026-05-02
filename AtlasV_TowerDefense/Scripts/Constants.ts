@@ -29,7 +29,7 @@ export const ENEMY_SPAWN_INTERVAL  = 0.75; // seconds between enemy spawns withi
 
 // ─── Economy ──────────────────────────────────────────────────────────────────
 
-export const START_GOLD  = 150;
+export const START_GOLD  = 120;
 export const START_LIVES = 10;
 export const WAVE_BONUS_GOLD = 15; // flat gold awarded at end of each wave
 export const INCOME_RATE = 0.15;   // 10% of gold on hand → bonus at wave end

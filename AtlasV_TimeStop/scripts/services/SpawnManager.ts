@@ -18,7 +18,7 @@ import {
 } from '../Constants';
 import { ROUND_DEFS, totalObjCount } from '../LevelConfig';
 import { Assets } from '../Assets';
-import { Events, FallingObjType } from '../Types';
+import { Events } from '../Types';
 
 @service()
 export class SpawnManager extends Service {
@@ -47,15 +47,14 @@ export class SpawnManager extends Service {
       for (let i = 0, n = waveDef.count; i < n; i++) {
         const cx = this._pickCx(slot++, total);
 
-        if (waveDef.type === FallingObjType.Log) {
-          // Logs are simulated by FallingObjService — no entity spawn needed.
-          EventService.sendLocally(Events.InitFallingObj, {
-            objId: this._nextObjId++,
-            cx,
-            config: waveDef,
-            roundIndex: this._currentRound,
-          });
-        }
+        // Both Logs and Balls are simulated by FallingObjService.
+        // The config carries the type so the service can branch accordingly.
+        EventService.sendLocally(Events.InitFallingObj, {
+          objId: this._nextObjId++,
+          cx,
+          config: waveDef,
+          roundIndex: this._currentRound,
+        });
         spawned++;
       }
     }

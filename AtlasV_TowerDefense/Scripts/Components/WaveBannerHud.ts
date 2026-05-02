@@ -53,6 +53,7 @@ export class WaveBannerHud extends Component {
   // Animation state (local to each client)
   private _animating: boolean = false;
   private _elapsed: number = 0;
+  private _holding: boolean = false; // FTUE: banner stays visible until dismissed
 
   // ── Lifecycle ─────────────────────────────────────────────────────
 
@@ -75,6 +76,26 @@ export class WaveBannerHud extends Component {
    * When a wave starts, begin the banner animation.
    * WaveStarted is a LocalEvent so it fires on all sides — guard for client only.
    */
+  @subscribe(Events.FtueHint, { execution: ExecuteOn.Owner })
+  onFtueHint(_p: Events.FtueHintPayload): void {
+    if (NetworkingService.get().isServerContext()) return;
+    if (!this.viewModel) return;
+    this.viewModel.waveText = 'Place a tower to begin!';
+    this.viewModel.opacity = 1;
+    this.viewModel.visible = true;
+    this._animating = false;
+    this._holding = true;
+  }
+
+  @subscribe(Events.TowerPlaced, { execution: ExecuteOn.Owner })
+  onTowerPlaced(_p: Events.TowerPlacedPayload): void {
+    if (!this._holding) return;
+    if (!this.viewModel) return;
+    this._holding = false;
+    this._elapsed = 0;
+    this._animating = true;
+  }
+
   @subscribe(Events.WaveStarted, { execution: ExecuteOn.Owner })
   onWaveStarted(payload: Events.WaveStartedPayload): void {
     if (NetworkingService.get().isServerContext()) return;

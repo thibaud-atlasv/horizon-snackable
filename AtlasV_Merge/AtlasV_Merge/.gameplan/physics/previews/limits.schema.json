@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "title": "Velocity Limits",
+  "elements": [{ "id": "limits_prev", "type": "image", "src": "./limits.png", "fit": "cover" }]
+}

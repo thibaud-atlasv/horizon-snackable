@@ -26,16 +26,34 @@ export const ROUND_DEFS: RoundConfig[] = [
   { objects: [{ type: FallingObjType.Log, count: 3, bounce: true,  pivot: false }]},
   // R4
   { objects: [{ type: FallingObjType.Log, count: 4, bounce: true,  pivot: false }]},
-  // R5
-  { objects: [{ type: FallingObjType.Log, count: 3, bounce: true,  pivot: true  }]},
+  // R5 — first ball appears
+  { objects: [
+    { type: FallingObjType.Log,  count: 2, bounce: true, pivot: true  },
+    { type: FallingObjType.Ball, count: 1, bounce: true, pivot: false },
+  ]},
   // R6
-  { objects: [{ type: FallingObjType.Log, count: 5, bounce: true,  pivot: true  }]},
+  { objects: [
+    { type: FallingObjType.Log,  count: 3, bounce: true, pivot: true  },
+    { type: FallingObjType.Ball, count: 1, bounce: true, pivot: false },
+  ]},
   // R7
-  { objects: [{ type: FallingObjType.Log, count: 4, bounce: true,  pivot: true  }]},
+  { objects: [
+    { type: FallingObjType.Log,  count: 3, bounce: true, pivot: true  },
+    { type: FallingObjType.Ball, count: 2, bounce: true, pivot: false },
+  ]},
   // R8
-  { objects: [{ type: FallingObjType.Log, count: 5, bounce: true,  pivot: true  }]},
+  { objects: [
+    { type: FallingObjType.Log,  count: 3, bounce: true, pivot: true  },
+    { type: FallingObjType.Ball, count: 2, bounce: true, pivot: false },
+  ]},
   // R9
-  { objects: [{ type: FallingObjType.Log, count: 5, bounce: true,  pivot: true  }]},
+  { objects: [
+    { type: FallingObjType.Log,  count: 4, bounce: true, pivot: true  },
+    { type: FallingObjType.Ball, count: 2, bounce: true, pivot: false },
+  ]},
   // R10
-  { objects: [{ type: FallingObjType.Log, count: 6, bounce: true,  pivot: true  }]},
+  { objects: [
+    { type: FallingObjType.Log,  count: 4, bounce: true, pivot: true  },
+    { type: FallingObjType.Ball, count: 3, bounce: true, pivot: false },
+  ]},
 ];

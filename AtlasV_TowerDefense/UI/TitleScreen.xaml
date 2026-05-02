@@ -51,7 +51,7 @@
 
             <!-- Row 1: Logo Image - Large and Prominent -->
             <Image Grid.Row="1"
-                   Source="/Root;component/KeyArts/GoblinClash_logo.png" Stretch="UniformToFill"/>
+                   Source="/Root;component/Textures/GoblinClash_logo.png" Stretch="UniformToFill"/>
 
             <!-- Row 3: JOUER Button with 3D Medieval Style -->
             <Grid Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">

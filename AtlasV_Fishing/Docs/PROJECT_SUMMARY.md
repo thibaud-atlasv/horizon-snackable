@@ -1,98 +1,98 @@
-# H3_Fishing — Project Summary
+# AtlasV Fishing — Project Summary
 
 ## Concept
-Mobile portrait fishing game (9×16 world units). The player casts a bait, hooks a fish, reels it up, and builds a collection journal across sessions. Future scope: 3D animated fish with families, new gameplay mechanics (multiple hooks, time trials, seasonal events), and a full UI overhaul.
 
-## Prototype Reference
-Ported from `../../fish` (landscape prototype). Core mechanics preserved, architecture rewritten for extensibility.
+Mobile portrait fishing game (9×16 world units) built with Meta Horizon Worlds SDK.
+Single player, local-only. Designed to be **snackable** — a satisfying session in under 3 minutes with no explanation needed.
+
+The game is built around 3 S:
+- **Simple** — one tap to cast, swipe to steer, automatic everything else
+- **Satisfying** — juice at every beat: freeze frames, shake, flash, stretch/squash
+- **Short** — one run = cast → dive → surface → catch reveal → reset
 
 ## Gameplay Loop
-1. **Idle** — Bait hangs from rod, fish swim at depth.
-2. **Charging** — Player holds screen → gauge oscillates.
-3. **Casting** — Release → bait flies under gravity, enters water.
-4. **Reeling** — Bait hits fish → tap rapidly to reel up against resistance.
-5. **Catch Display** — Fish zooms to center, journal shows name/rarity/count.
-6. **Wave Reset** — Caught fish removed, new wave spawns (slightly faster).
+
+1. **Idle** — Hook hangs from rod at water surface, fish swim at depth.
+2. **Throwing** — Tap anywhere → hook launches in a physics arc toward the center of the play area (slight random spread). No player input during flight.
+3. **Diving** — Hook enters water and descends automatically. Player swipes horizontally to steer. Fish within range attach to the hook automatically.
+4. **Surfacing** — Hook automatically rises at speed, dragging hooked fish up.
+5. **Launching** — Fish fly upward in a staggered arc reward animation and exit the screen.
+6. **Reset** — Brief pause, then back to Idle.
+
+There is no reel mechanic, no power gauge, no timing challenge. The engagement comes from steering during the dive and the anticipation of what you'll catch.
 
 ## Fish Database
-18 species across 3 zones. Rarity tiers: common / rare / legendary — affect spawn weight and visual flair.
 
-| Zone | Depth | Species |
-|------|-------|---------|
-| 1 — Surface | Y 4.5 → -8.0 | Clownfish, Koi, Blue Discus, Butterflyfish, Angelfish, Rainbow Fish |
-| 2 — Mid-depth | Y -8.0 → -24.0 | Silver Carp, Green Discus, Dolphin, Flame Angelfish, Sand Flounder, Sea Turtle |
-| 3 — Abyss | Y -24.0 → -38.5 | Violet Barracuda, Blue Flounder, Reef Shark, Pink Dolphin, Barracuda, Pink Shark |
+18 species across 3 zones. Rarity: common / rare / legendary.
 
-All zones spawn fish independently of unlock state (fish exist at depth even before the player can reach them).
+| Zone | Depth (world Y) | Species |
+|------|-----------------|---------|
+| 1 — Surface   | 4.5 → -8.5  | Clownfish, Koi, Blue Discus, Butterflyfish, Angelfish, Rainbow Fish |
+| 2 — Mid-depth | -8.5 → -24.5 | Silver Carp, Green Discus, Dolphin, Flame Angelfish, Sand Flounder, Sea Turtle |
+| 3 — Abyss     | -24.5 → -38.5 | Violet Barracuda, Blue Flounder, Reef Shark, Pink Dolphin, Barracuda, Pink Shark |
+
+Fish from all zones swim at depth regardless of unlock state.
 
 ## Zone Progression
-Zones are unlocked by catching unique species — no XP system.
+
+Zones unlock by catching unique species — no XP, no currency.
 
 | Unlock | Threshold |
 |--------|-----------|
-| Zone 2 | 4 unique species (zone 1: 3 commons + 1 rare) |
-| Zone 3 | 10 unique species (all of zone 1 + 4 from zone 2) |
+| Zone 2 | 3 unique species |
+| Zone 3 | 7 unique species |
 
-`ZoneProgressionService` tracks the unlocked zone count and bait floor Y. `PlayerProgressService` recomputes the zone on each session load from the persisted catch list.
+The hook's max dive depth increases as zones unlock, giving access to deeper fish.
 
-### Fish Visual Types
-- **3D Models**: All 18 species use imported 3D meshes.
-
-## Architecture At a Glance
+## Architecture
 
 ```
-ClientSetup       → camera lock, touch → Events.PlayerTouchStart/End
-GameManager       → state machine, physics, collision via FishRegistry
-FishRegistry      → fish def database + live IFishInstance refs
-FishDefs          → auto-registers defs at module load (Pattern B)
-FishController    → per-fish AI, implements IFishInstance
-FishSpawnService  → spawns wave entities, sends Events.InitFish
-FishCollectionService → catch journal (in-memory, persistence-ready)
-BaitController    → visual: moves bait entity on Events.BaitMoved
-GaugeController   → visual: power/reel gauge with FishingGaugeData ViewModel (UI/FishingGauge.xaml)
-CatchDisplayViewModel → catch reveal screen with CatchDisplayData ViewModel (UI/CatchDisplay.xaml)
-FishingLineRenderer → visual: line from rod to bait
-WaterLayerController → 10-layer animated water with caustics
-AmbientFXController  → god rays, floating particles, seaweed
-BubbleController  → single rising bubble entity (self-destructs)
-BubbleSpawner     → ambient bubble emitter
-FishingHUDViewModel  → main HUD XAML data context (UI/FishingHUD.xaml)
-  - Cast/Reel gauge with dynamic color gradient
-  - Progress Bar: Shows unique species discovery progress (X/18) with fade in/out animation
-    - Appears on catch, auto-hides after 3.5 seconds
-    - Two depth threshold cursors marking zone unlock milestones (4/18 and 10/18)
-    - Positions controlled via `cursor1Position` and `cursor2Position` (0-100%)
-  - Zone Unlocked Message: Celebratory "NEW ZONE UNLOCKED!" notification
-    - Positioned above the XP progress bar
-    - Impactful elastic scale pop-in animation (BackEase overshoot 0→1.25→1.0)
-    - Golden gradient text with shadow outline for visibility
-    - Semi-transparent dark background with golden gradient border
-    - Auto-hides after 3.5 seconds with fade-out and scale-down
-    - Triggered via `showZoneUnlocked()` method on FishingHUDViewModel
-CatchDisplayViewModel → WorldSpace UI centered in front of camera with satisfying cascade reward animations:
-  - Animations triggered programmatically via `playAnimation()` method (not auto-play on load)
-  - Elastic "pop" panel with overshoot (BackEase)
-  - 5-point star shapes (Path geometry) with golden fill and stroke, animate sequentially by rarity
-  - NEW! badge pop animation for first catches
-  - Fish ID journal number slide-in (#001, #002...)
-  - Catch count pop with elastic bounce
-  - Pulsing "tap to continue" indicator
-  - Large centered empty space for 3D fish model display
-  - Navigation arrows (◀ ▶) to browse caught fish collection:
-    - Circular turquoise buttons positioned outside main panel
-    - Touch-friendly 70px size with press animation (scale down effect)
-    - Visible only when multiple fish have been caught
-    - Fires HUDEvents.NavigateCatch to cycle through journal
+ClientSetup           → camera lock, focused interaction, registers camera entity to GameCameraService
+GameManager           → phase state machine (Idle → Throwing → Diving → Surfacing → Launching → Reset)
+HookController        → hook physics, line rendering, fish collection, launch reward anim
+SimpleFishController  → per-fish swim AI, hooked follow, launch arc (implements IFishInstance)
+FishRegistry          → live IFishInstance spatial lookup (findHits)
+FishPoolService       → entity pool — pre-spawns fish, activates/benches without spawning/destroying; rolls species by depth wave formula
+FishDefs              → static data: all 18 species definitions
+FishCollectionService → catch journal (unique counts, persisted via PlayerProgressService)
+PlayerProgressService → server-side save/load; syncs gold, upgrades, catch journal to client
+GameCameraService     → vertical scroll following hook during dive + one-shot and continuous camera shake
+VFXService            → centralised juice: shake, flash, freeze frame, haptic stub, stretch/squash
+GoldCoinsService      → coin burst + gold value text animation on FishCollected (canvas-based, pooled)
+BubblePool            → pre-spawns bubble entities; fish request bubbles via acquire(); auto-release on surface hit
+InteractiveHUDViewModel → buttons-only HUD layer (cast button + upgrade buttons); isInteractable=true during Idle, isVisible=false otherwise to stop blocking swipe input
+GameHUDViewModel      → counters HUD layer (gold + depth); isInteractable=false (never blocks touch)
+FishingHUDViewModel   → species discovery progress bar
 ```
 
-## Key Extensibility Points
-See `Assistant/skills/scripting/fishing-extensibility.md` for the full guide.
+## VFX System
 
-| Goal | Where to change |
-|------|----------------|
-| Add a fish species | One line in `FishDefs.ts` (or a new file) |
-| Add a fish family | New file, call `FishRegistry.register()` |
-| New gameplay mechanic | Subscribe to `Events.PhaseChanged` + inject logic |
-| New scoring rule | Add `IScoringRule` to a new `ScoringService` (Pattern C) |
-| Environmental variant | New `@component()` subscribing to phase/wave events |
-| Custom wave | Add entry to `LevelConfig.WAVE_CONFIGS` |
+All juice flows through `VFXService`:
+
+| Method | Effect |
+|--------|--------|
+| `shake(dur, amp)` | Camera shake via GameCameraService |
+| `flash(dur, r, g, b)` | Full-screen color overlay fade-out |
+| `freeze(durationMs)` | Global time-stop (camera exempt) |
+| `haptic(intensity)` | Stub — ready for SDK haptic API |
+| `stretch(entity, factor, dur)` | Scale Y up / X down then recover |
+| `squash(entity, factor, dur)` | Scale Y down / X up then recover |
+
+Built-in trigger: `FishHooked` → freeze 60ms + shake 0.30s + flash 0.18s.
+
+The `isFrozen` flag is checked at the top of `HookController.onUpdate` and `SimpleFishController.onUpdate`. `GameCameraService` is exempt so shake continues during freeze.
+
+## Depth Gradient Shader
+
+An unlit surface shader (`Shaders/DepthGradient.surface`) colors geometry based on world Y position, creating the underwater atmosphere. The gradient transitions from turquoise at the surface (Y 5.0) to deep night blue at the abyss (Y -40.0). A matching material (`Materials/DepthGradient.material`) is ready to apply to water background meshes. The four tunable properties (top color, bottom color, top Y, bottom Y) can be adjusted per-material instance to fine-tune the look.
+
+## Key Extension Points
+
+| Goal | Where |
+|------|-------|
+| Add a fish species | One entry in `FishDefs.ts` |
+| Add a juice trigger | Subscribe to an event in `VFXService`, call shake/flash/freeze |
+| Add a trail or particle FX | New method in `VFXService` |
+| New gameplay phase | Add value to `GamePhase` enum, handle in `GameManager` + `HookController` |
+| Tweak cast arc | `CAST_CENTER_VX`, `CAST_VX_RANDOM`, `CAST_VY`, `CAST_GRAVITY` in `Constants.ts` |
+| Tweak dive feel | `DIVE_SPEED`, `DIVE_SWIPE_FORCE`, `DIVE_CENTER_PULL`, `DIVE_BOUNCE` in `Constants.ts` |

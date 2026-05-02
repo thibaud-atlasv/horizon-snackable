@@ -33,7 +33,7 @@
                     "data": {
                         "class": "GoalkeeperController",
                         "definitionAsset": {
-                            "packageOrRemoteId": "26435503376059174",
+                            "packageOrRemoteId": "26835398609386284",
                             "ingestionId": "9131982423574994816",
                             "targetId": "4237980480"
                         },
@@ -101,7 +101,7 @@
                         "data": {
                             "materials": [
                                 {
-                                    "packageOrRemoteId": "26435503376059174",
+                                    "packageOrRemoteId": "26835398609386284",
                                     "ingestionId": "7354422100507416042",
                                     "targetId": "157013062"
                                 }
@@ -194,7 +194,7 @@
             "id": "fd895512-ddb4-4647-b895-3a4ed7ef4553",
             "name": "Visual",
             "type": {
-                "packageOrRemoteId": "26435503376059174",
+                "packageOrRemoteId": "26835398609386284",
                 "ingestionId": "5631148487119134614",
                 "targetId": "2719744159"
             },

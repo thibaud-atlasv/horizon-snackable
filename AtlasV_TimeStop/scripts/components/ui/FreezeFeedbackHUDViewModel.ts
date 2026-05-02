@@ -23,11 +23,11 @@ const GRADE_NAMES: Record<ScoreGrade, string> = {
 };
 
 const GRADE_COLORS: Record<ScoreGrade, string> = {
-  [ScoreGrade.Perfect]: '#FFE566',  // bright gold
-  [ScoreGrade.Great]:   '#3fcf3f',  // pale mint — distinct from bg green, different from white
-  [ScoreGrade.Good]:    '#66D4FF',  // sky blue
-  [ScoreGrade.Early]:   '#FFB347',  // peach orange
-  [ScoreGrade.Miss]:    '#CCCCCC',  // medium grey
+  [ScoreGrade.Perfect]: '#FFD700',  // gold vif
+  [ScoreGrade.Great]:   '#00E676',  // vert fluo
+  [ScoreGrade.Good]:    '#00B0FF',  // bleu électrique
+  [ScoreGrade.Early]:   '#B0BEC5',  // orange brûlant
+  [ScoreGrade.Miss]:    '#FF6D00',  // gris bleuté
 };
 
 @uiViewModel()
