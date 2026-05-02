@@ -1,0 +1,595 @@
+<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="clr-namespace:horizon.ui_noesis;assembly=ui_noesis"
+      Background="Black">
+
+  <Grid.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+    <!-- Shared Button Style: Action Buttons (dark blue-purple with purple accent) -->
+    <Style x:Key="ActionButtonStyle" TargetType="Button">
+      <Setter Property="Width" Value="140" />
+      <Setter Property="Height" Value="54" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#E8EAD8" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="OuterGlow" BorderBrush="#559B7FCC" BorderThickness="1" CornerRadius="10" Padding="0">
+              <Border x:Name="RootBorder" CornerRadius="9" Padding="8,4">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#2A4A6C" Offset="0" />
+                    <GradientStop Color="#1A3A5C" Offset="0.5" />
+                    <GradientStop Color="#0D1E35" Offset="1" />
+                  </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform>
+                  <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                </Border.RenderTransform>
+                <Border.RenderTransformOrigin>
+                  <Point X="0.5" Y="0.5" />
+                </Border.RenderTransformOrigin>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="PressScale" Property="ScaleX" Value="0.94" />
+                <Setter TargetName="PressScale" Property="ScaleY" Value="0.94" />
+                <Setter TargetName="OuterGlow" Property="BorderBrush" Value="#889B7FCC" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Cast Button Style (warm amber/gold) -->
+    <Style x:Key="CastButtonStyle" TargetType="Button">
+      <Setter Property="Width" Value="220" />
+      <Setter Property="Height" Value="64" />
+      <Setter Property="FontSize" Value="26" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#080D14" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="OuterGlow" BorderBrush="#88E8A84C" BorderThickness="2" CornerRadius="14" Padding="0">
+              <Border x:Name="RootBorder" CornerRadius="12" Padding="12,6">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#F5D08A" Offset="0" />
+                    <GradientStop Color="#E8A84C" Offset="0.5" />
+                    <GradientStop Color="#C08030" Offset="1" />
+                  </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform>
+                  <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                </Border.RenderTransform>
+                <Border.RenderTransformOrigin>
+                  <Point X="0.5" Y="0.5" />
+                </Border.RenderTransformOrigin>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="PressScale" Property="ScaleX" Value="0.94" />
+                <Setter TargetName="PressScale" Property="ScaleY" Value="0.94" />
+                <Setter TargetName="OuterGlow" Property="BorderBrush" Value="#CCF5D08A" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Utility Button Style (moonlight / cool) -->
+    <Style x:Key="UtilityButtonStyle" TargetType="Button">
+      <Setter Property="Width" Value="56" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#C8D8E8" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="OuterGlow" BorderBrush="#55C8D8E8" BorderThickness="1" CornerRadius="12" Padding="0">
+              <Border x:Name="RootBorder" CornerRadius="11" Padding="4">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#1A3A5C" Offset="0" />
+                    <GradientStop Color="#0D1E35" Offset="0.6" />
+                    <GradientStop Color="#080D14" Offset="1" />
+                  </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform>
+                  <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                </Border.RenderTransform>
+                <Border.RenderTransformOrigin>
+                  <Point X="0.5" Y="0.5" />
+                </Border.RenderTransformOrigin>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="PressScale" Property="ScaleX" Value="0.93" />
+                <Setter TargetName="PressScale" Property="ScaleY" Value="0.93" />
+                <Setter TargetName="OuterGlow" Property="BorderBrush" Value="#88C8D8E8" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Lure/Tackle Utility Button (warm lantern) -->
+    <Style x:Key="LureButtonStyle" TargetType="Button">
+      <Setter Property="Width" Value="56" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#E8A84C" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="OuterGlow" BorderBrush="#55E8A84C" BorderThickness="1" CornerRadius="12" Padding="0">
+              <Border x:Name="RootBorder" CornerRadius="11" Padding="4">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#2A3020" Offset="0" />
+                    <GradientStop Color="#1A2518" Offset="0.6" />
+                    <GradientStop Color="#0D1510" Offset="1" />
+                  </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform>
+                  <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                </Border.RenderTransform>
+                <Border.RenderTransformOrigin>
+                  <Point X="0.5" Y="0.5" />
+                </Border.RenderTransformOrigin>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="PressScale" Property="ScaleX" Value="0.93" />
+                <Setter TargetName="PressScale" Property="ScaleY" Value="0.93" />
+                <Setter TargetName="OuterGlow" Property="BorderBrush" Value="#88E8A84C" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Generic Styled Button (for menus, close, etc.) -->
+    <Style x:Key="MenuButtonStyle" TargetType="Button">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#C8D8E8" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="RootBorder" CornerRadius="8" Padding="12,6"
+                    BorderBrush="#331A3A5C" BorderThickness="1">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                  <GradientStop Color="#1A3A5C" Offset="0" />
+                  <GradientStop Color="#0D1E35" Offset="1" />
+                </LinearGradientBrush>
+              </Border.Background>
+              <Border.RenderTransform>
+                <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+              </Border.RenderTransform>
+              <Border.RenderTransformOrigin>
+                <Point X="0.5" Y="0.5" />
+              </Border.RenderTransformOrigin>
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="PressScale" Property="ScaleX" Value="0.95" />
+                <Setter TargetName="PressScale" Property="ScaleY" Value="0.95" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Title Play Button Style (gold, large) -->
+    <Style x:Key="PlayButtonStyle" TargetType="Button">
+      <Setter Property="Width" Value="200" />
+      <Setter Property="Height" Value="54" />
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#080D14" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="OuterGlow" BorderBrush="#88E8A84C" BorderThickness="2" CornerRadius="12" Padding="0">
+              <Border x:Name="RootBorder" CornerRadius="10" Padding="10,4">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#F5D08A" Offset="0" />
+                    <GradientStop Color="#E8A84C" Offset="0.6" />
+                    <GradientStop Color="#C08030" Offset="1" />
+                  </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform>
+                  <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                </Border.RenderTransform>
+                <Border.RenderTransformOrigin>
+                  <Point X="0.5" Y="0.5" />
+                </Border.RenderTransformOrigin>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="PressScale" Property="ScaleX" Value="0.94" />
+                <Setter TargetName="PressScale" Property="ScaleY" Value="0.94" />
+                <Setter TargetName="OuterGlow" Property="BorderBrush" Value="#CCF5D08A" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Grid.Resources>
+
+  <Viewbox Stretch="Uniform">
+    <Grid Width="480" Height="800">
+
+      <!-- Layer 1: DrawingSurface for game rendering -->
+      <local:DrawingSurface Width="480" Height="800" Commands="{Binding drawCommands}" />
+
+      <!-- Layer 2: HUD overlay (top) — Affection bar + emotion name -->
+      <StackPanel VerticalAlignment="Top" Margin="16,16,16,0"
+                  Visibility="{Binding hudVisible, Converter={StaticResource BoolToVis}}">
+        <TextBlock Text="{Binding fishNameText}" FontSize="20" FontWeight="Bold"
+                   Foreground="#9B7FCC" FontFamily="Roboto" />
+        <!-- Affection Bar -->
+        <Grid Height="6" Margin="0,6,0,0" Width="200" HorizontalAlignment="Left">
+          <Border Background="#1A3A5C" CornerRadius="3" />
+          <Border Background="#9B7FCC" CornerRadius="3" HorizontalAlignment="Left"
+                  Width="{Binding affectionBarWidth}" />
+        </Grid>
+        <!-- Emotion Name -->
+        <TextBlock Text="{Binding emotionName}" FontSize="14"
+                   Foreground="#8A9AB0" FontFamily="Roboto" Margin="0,4,0,0" />
+      </StackPanel>
+
+      <!-- Layer 3: Skip button (top-right) - uses Opacity to prevent layout shifts -->
+      <Button Content="SKIP ▸▸" Width="80" Height="32"
+              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0"
+              Command="{Binding events.onFloaterSkipBeat}"
+              Style="{StaticResource MenuButtonStyle}"
+              Opacity="{Binding skipButtonOpacity}"
+              IsEnabled="{Binding skipButtonVisible}" />
+
+      <!-- Layer 4: Dialogue Panel (XAML-based) -->
+      <Grid VerticalAlignment="Bottom" Margin="20,0,20,200"
+            Visibility="{Binding dialogueVisible, Converter={StaticResource BoolToVis}}">
+        <Border Background="#D90D1520" BorderBrush="#2A4060"
+                BorderThickness="1" CornerRadius="12" Padding="12">
+          <StackPanel VerticalAlignment="Top">
+            <!-- Speaker name: hidden during scenery/narration dialogue -->
+            <TextBlock Text="{Binding speakerName}"
+                       Foreground="{Binding speakerColor}"
+                       FontSize="14" FontWeight="Bold" FontFamily="Roboto"
+                       Margin="0,0,0,4"
+                       Visibility="{Binding speakerNameVisible, Converter={StaticResource BoolToVis}}" />
+            <!-- Dialogue text: centered + italic during scenery variant -->
+            <TextBlock Text="{Binding dialogueText}"
+                       Foreground="#E8EAD8" FontSize="13" FontFamily="Roboto"
+                       TextWrapping="Wrap" LineHeight="20"
+                       TextAlignment="{Binding dialogueTextAlignment}"
+                       FontStyle="{Binding dialogueTextFontStyle}" />
+            <!-- Blinking tap indicator (fixed-height container prevents layout shift) -->
+            <Grid Height="24">
+              <TextBlock Text="&#x25BC;"
+                       Visibility="{Binding tapIndicatorVisible, Converter={StaticResource BoolToVis}}"
+                       Foreground="#E8EAD8" FontSize="14"
+                       HorizontalAlignment="Right" Margin="0,2,4,0"
+                       Opacity="0.8">
+                <TextBlock.Triggers>
+                  <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                    <BeginStoryboard>
+                      <Storyboard RepeatBehavior="Forever">
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0.9" To="0.2" Duration="0:0:0.7"
+                                         AutoReverse="True" />
+                      </Storyboard>
+                    </BeginStoryboard>
+                  </EventTrigger>
+                </TextBlock.Triggers>
+              </TextBlock>
+            </Grid>
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- Layer 5: Action Menu (2x2 Grid: Wait, Twitch, Drift, Reel) -->
+      <Grid VerticalAlignment="Bottom" Margin="40,0,40,48"
+            Visibility="{Binding actionMenuVisible, Converter={StaticResource BoolToVis}}">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Row="0" Grid.Column="0" Content="WAIT" Margin="4"
+                Style="{StaticResource ActionButtonStyle}"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="wait" />
+        <Button Grid.Row="0" Grid.Column="1" Content="TWITCH" Margin="4"
+                Style="{StaticResource ActionButtonStyle}"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="twitch" />
+        <Button Grid.Row="1" Grid.Column="0" Content="DRIFT" Margin="4"
+                Style="{StaticResource ActionButtonStyle}"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="drift" />
+        <Button Grid.Row="1" Grid.Column="1" Content="REEL" Margin="4"
+                Style="{StaticResource ActionButtonStyle}"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="reel" />
+      </Grid>
+
+      <!-- Layer 5b: Cast Button + Equipped Lure Indicator (LakeIdle state) -->
+      <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,80"
+                  Visibility="{Binding castButtonVisible, Converter={StaticResource BoolToVis}}">
+        <TextBlock Text="{Binding equippedLureName}" FontSize="12"
+                   Foreground="#8A9AB0" FontFamily="Roboto" HorizontalAlignment="Center"
+                   Margin="0,0,0,8" />
+        <Button Content="Cast" Style="{StaticResource CastButtonStyle}"
+                Command="{Binding events.onFloaterCastStart}" />
+      </StackPanel>
+
+      <!-- Layer 5c: Journal Button (top-right corner) -->
+      <Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,56,16,0"
+              Style="{StaticResource UtilityButtonStyle}"
+              Command="{Binding events.onJournalOpen}"
+              Visibility="{Binding journalButtonVisible, Converter={StaticResource BoolToVis}}">
+        <Image Source="sprites/icon_journal.png" Width="28" Height="28" Stretch="Uniform" />
+      </Button>
+
+      <!-- Layer 5d: Tackle Box Button (bottom-left corner) -->
+      <Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16,0,0,24"
+              Style="{StaticResource LureButtonStyle}"
+              Command="{Binding events.onInventoryOpen}"
+              Visibility="{Binding inventoryButtonVisible, Converter={StaticResource BoolToVis}}">
+        <Image Source="sprites/icon_tacklebox.png" Width="28" Height="28" Stretch="Uniform" />
+      </Button>
+
+      <!-- Layer 6: Title Screen -->
+      <Grid Visibility="{Binding titleVisible, Converter={StaticResource BoolToVis}}"
+            Background="#DD080D14">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+          <TextBlock Text="Hooked on a Feeling" FontSize="36" FontWeight="Bold" FontFamily="Teko"
+                     Foreground="#9B7FCC" HorizontalAlignment="Center" Margin="0,0,0,8" />
+          <TextBlock Text="a fishing story" FontSize="16" FontFamily="Roboto"
+                     Foreground="#8A9AB0" HorizontalAlignment="Center" Margin="0,0,0,40" />
+          <Button Content="Play" Style="{StaticResource PlayButtonStyle}"
+                  Command="{Binding events.onFloaterStartGame}" />
+        </StackPanel>
+      </Grid>
+
+      <!-- Layer 7: Departure overlay -->
+      <Grid Visibility="{Binding departureVisible, Converter={StaticResource BoolToVis}}"
+            Background="#AA080D14">
+        <TextBlock Text="{Binding departureText}" FontSize="18" FontFamily="Roboto"
+                   Foreground="#C8D8E8" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="Wrap" TextAlignment="Center" Margin="40" />
+      </Grid>
+
+      <!-- Layer 7b: Tier Transition Notification -->
+      <Border Visibility="{Binding tierTransitionVisible, Converter={StaticResource BoolToVis}}"
+              Background="#CC0D1520" BorderBrush="#9B7FCC" BorderThickness="1"
+              CornerRadius="12" Padding="20,12"
+              HorizontalAlignment="Center" VerticalAlignment="Center"
+              MaxWidth="320">
+        <TextBlock Text="{Binding tierTransitionText}"
+                   Foreground="#E8EAD8" FontSize="16" FontFamily="Roboto"
+                   TextAlignment="Center" TextWrapping="Wrap" />
+      </Border>
+
+      <!-- Layer 7c: No-Lure Warning -->
+      <Border Visibility="{Binding noLureWarningVisible, Converter={StaticResource BoolToVis}}"
+              Background="#CC0D1520" BorderBrush="#E8A84C" BorderThickness="1"
+              CornerRadius="12" Padding="20,16"
+              HorizontalAlignment="Center" VerticalAlignment="Center"
+              MaxWidth="320">
+        <TextBlock Text="Equip a lure from your Tackle Box first"
+                   Foreground="#E8A84C" FontSize="15" FontFamily="Roboto"
+                   TextAlignment="Center" TextWrapping="Wrap" />
+      </Border>
+
+      <!-- Layer 7d: Catch Sequence (2-choice overlay) -->
+      <Grid Visibility="{Binding catchChoiceVisible, Converter={StaticResource BoolToVis}}"
+            Background="#CC080D14">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+          <Button Content="Reel" Width="240" Height="56" Margin="0,8"
+                  Command="{Binding events.onFloaterCatchChoice}" CommandParameter="reel"
+                  Foreground="White" FontSize="22" FontWeight="Bold"
+                  Style="{StaticResource MenuButtonStyle}" />
+          <Button Content="{Binding catchChoiceReleaseLabel}" Width="240" Height="56" Margin="0,8"
+                  Command="{Binding events.onFloaterCatchChoice}" CommandParameter="release"
+                  Foreground="White" FontSize="22" FontWeight="Bold"
+                  Style="{StaticResource MenuButtonStyle}" />
+        </StackPanel>
+      </Grid>
+
+      <!-- Layer 7e: Ending Overlay -->
+      <Grid Visibility="{Binding endingVisible, Converter={StaticResource BoolToVis}}"
+            Background="#EE080D14">
+        <TextBlock Text="{Binding endingText}" FontSize="16" FontFamily="Roboto"
+                   Foreground="#C8D8E8" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="Wrap" TextAlignment="Center" Margin="40"
+                   LineHeight="24" />
+      </Grid>
+
+      <!-- Layer 8: Idle (between casts) -->
+      <Grid Visibility="{Binding idleVisible, Converter={StaticResource BoolToVis}}"
+            Background="#88080D14">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+          <TextBlock Text="{Binding idlePromptText}" FontSize="18" FontFamily="Roboto"
+                     Foreground="#C8D8E8" HorizontalAlignment="Center" Margin="0,0,0,20" />
+          <Button Content="Cast Again" Style="{StaticResource CastButtonStyle}"
+                  Width="180" Height="50" FontSize="18"
+                  Command="{Binding events.onFloaterNewCast}" />
+        </StackPanel>
+      </Grid>
+
+      <!-- Layer 9: Inventory (Tackle Box) Overlay -->
+      <Grid Visibility="{Binding inventoryVisible, Converter={StaticResource BoolToVis}}"
+            Background="#EE080D14">
+        <Grid Margin="24,60,24,60">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Tackle Box" FontSize="22" FontWeight="Bold"
+                       Foreground="#E8A84C" FontFamily="Teko" HorizontalAlignment="Center" />
+            <TextBlock Text="Select a lure to equip" FontSize="13"
+                       Foreground="#8A9AB0" FontFamily="Roboto" HorizontalAlignment="Center"
+                       Margin="0,4,0,0" />
+          </StackPanel>
+
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+              <Border Margin="0,4" CornerRadius="8" Padding="10,8" Background="#1A3A5C">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="36" Height="36" Background="#C0392B" CornerRadius="6" />
+                  <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Red Spinner" FontSize="14" FontWeight="Bold" Foreground="#E8EAD8" />
+                    <TextBlock Text="Attracts all fish" FontSize="11" Foreground="#8A9AB0" />
+                  </StackPanel>
+                  <Button Grid.Column="2" Content="Equip" Width="60" Height="30" FontSize="11"
+                          Command="{Binding events.onInventoryEquip}" CommandParameter="red_spinner"
+                          Style="{StaticResource MenuButtonStyle}" />
+                </Grid>
+              </Border>
+              <Border Margin="0,4" CornerRadius="8" Padding="10,8" Background="#1A3A5C">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="36" Height="36" Background="#F39C12" CornerRadius="6" />
+                  <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Gold Teardrop" FontSize="14" FontWeight="Bold" Foreground="#E8EAD8" />
+                    <TextBlock Text="Cautious fish" FontSize="11" Foreground="#8A9AB0" />
+                  </StackPanel>
+                  <Button Grid.Column="2" Content="Equip" Width="60" Height="30" FontSize="11"
+                          Command="{Binding events.onInventoryEquip}" CommandParameter="gold_teardrop"
+                          Style="{StaticResource MenuButtonStyle}" />
+                </Grid>
+              </Border>
+              <Border Margin="0,4" CornerRadius="8" Padding="10,8" Background="#1A3A5C">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="36" Height="36" Background="#27AE60" CornerRadius="6" />
+                  <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Feather Fly" FontSize="14" FontWeight="Bold" Foreground="#E8EAD8" />
+                    <TextBlock Text="Surface dwellers" FontSize="11" Foreground="#8A9AB0" />
+                  </StackPanel>
+                  <Button Grid.Column="2" Content="Equip" Width="60" Height="30" FontSize="11"
+                          Command="{Binding events.onInventoryEquip}" CommandParameter="feather_fly"
+                          Style="{StaticResource MenuButtonStyle}" />
+                </Grid>
+              </Border>
+            </StackPanel>
+          </ScrollViewer>
+
+          <StackPanel Grid.Row="2" Margin="0,12,0,0" HorizontalAlignment="Center">
+            <TextBlock FontSize="12" Foreground="#8A9AB0" HorizontalAlignment="Center">
+              <Run Text="Equipped: " />
+              <Run Text="{Binding equippedLureName}" Foreground="#E8A84C" FontWeight="Bold" />
+            </TextBlock>
+          </StackPanel>
+
+          <Button Grid.Row="3" Content="Close" Width="140" Height="40"
+                  Command="{Binding events.onInventoryClose}" Margin="0,12,0,0"
+                  Style="{StaticResource MenuButtonStyle}" />
+        </Grid>
+      </Grid>
+
+      <!-- Layer 10: Journal Overlay -->
+      <Grid Visibility="{Binding journalVisible, Converter={StaticResource BoolToVis}}"
+            Background="#F5080D14">
+        <Grid Margin="16,40,16,40">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <TextBlock Grid.Row="0" Text="Journal" FontSize="26" FontWeight="Bold"
+                     Foreground="#E8A84C" FontFamily="Teko" HorizontalAlignment="Center"
+                     Margin="0,0,0,8" />
+
+          <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                      Margin="0,0,0,12">
+            <Button Content="Pond Notes" Width="130" Height="34" Margin="4,0"
+                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="0"
+                    Style="{StaticResource MenuButtonStyle}" />
+            <Button Content="Lure Box" Width="110" Height="34" Margin="4,0"
+                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="1"
+                    Style="{StaticResource MenuButtonStyle}" />
+            <Button Content="Keepsakes" Width="110" Height="34" Margin="4,0"
+                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="2"
+                    Style="{StaticResource MenuButtonStyle}" />
+          </StackPanel>
+
+          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <Grid>
+              <TextBlock Text="{Binding journalPondNotesText}"
+                         Visibility="{Binding journalTab1Visible, Converter={StaticResource BoolToVis}}"
+                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
+                         TextWrapping="Wrap" LineHeight="18" />
+              <TextBlock Text="{Binding journalLureBoxText}"
+                         Visibility="{Binding journalTab2Visible, Converter={StaticResource BoolToVis}}"
+                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
+                         TextWrapping="Wrap" LineHeight="18" />
+              <TextBlock Text="{Binding journalKeepsakesText}"
+                         Visibility="{Binding journalTab3Visible, Converter={StaticResource BoolToVis}}"
+                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
+                         TextWrapping="Wrap" LineHeight="18" />
+            </Grid>
+          </ScrollViewer>
+
+          <Button Grid.Row="3" Content="Close" Width="140" Height="40"
+                  Command="{Binding events.onJournalClose}" Margin="0,12,0,0"
+                  Style="{StaticResource MenuButtonStyle}" />
+        </Grid>
+      </Grid>
+
+    </Grid>
+  </Viewbox>
+</Grid>

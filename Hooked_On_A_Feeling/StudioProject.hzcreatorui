@@ -1,0 +1,3 @@
+<Project>
+  <StartupDocument>xaml/floater.xaml</StartupDocument>
+</Project>
