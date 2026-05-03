@@ -24,20 +24,20 @@ export const COLOR_NEREIA_GOLD = '#E8A84C';
 // === Float ===
 export const FLOAT_X = CANVAS_WIDTH / 2;
 export const FLOAT_Y = CANVAS_HEIGHT * 0.58;
-export const FLOAT_WIDTH = 12;
-export const FLOAT_HEIGHT = 20;
+export const FLOAT_WIDTH = 24;
+export const FLOAT_HEIGHT = 40;
 export const FLOAT_BOB_AMPLITUDE = 3;
 export const FLOAT_BOB_SPEED = 2.5;
 
 // === Fish Portrait (Zone 2: left-aligned above dialogue bubble) ===
 export const FISH_PORTRAIT_SIZE = 140;
-export const FISH_PORTRAIT_X = 20; // Aligned with dialogue bubble left edge (DIALOGUE_BUBBLE_MARGIN)
-export const FISH_PORTRAIT_Y = CANVAS_HEIGHT * 0.38;
+export const FISH_PORTRAIT_X = 50; // Shifted right from 20
+export const FISH_PORTRAIT_Y = CANVAS_HEIGHT * 0.44; // Shifted down from 0.38
 
 // === Dialogue Bubble (Zone 3: separate from portrait) ===
 export const DIALOGUE_BUBBLE_MARGIN = 20;
 export const DIALOGUE_BUBBLE_X = DIALOGUE_BUBBLE_MARGIN;
-export const DIALOGUE_BUBBLE_Y = CANVAS_HEIGHT * 0.62;
+export const DIALOGUE_BUBBLE_Y = CANVAS_HEIGHT * 0.62 + 100;
 export const DIALOGUE_BUBBLE_WIDTH = CANVAS_WIDTH - DIALOGUE_BUBBLE_MARGIN * 2;
 export const DIALOGUE_BUBBLE_HEIGHT = 120;
 export const DIALOGUE_BUBBLE_RADIUS = 12;
@@ -108,6 +108,11 @@ export const SPLASH_RIPPLE_COUNT = 3;
 export const SPLASH_RIPPLE_DELAY = 0.12;
 export const SPLASH_RIPPLE_MAX_RADIUS = 45;
 export const SPLASH_RIPPLE_EXPAND_SPEED = 80;
+
+// Float Idle Ripples (periodic ripples while float is stationary in water)
+export const FLOAT_IDLE_RIPPLE_INTERVAL = 2.5; // seconds between spawns
+export const FLOAT_IDLE_RIPPLE_MAX_RADIUS = 70; // wider spread on title screen
+export const FLOAT_IDLE_RIPPLE_EXPAND_SPEED = 35; // slower expansion for longer duration
 export const SPLASH_DURATION = 0.8;
 export const FLOAT_LANDED_PAUSE = 0.5;
 
@@ -156,6 +161,7 @@ export const CAST_LANDING_NEAR_Y = CANVAS_HEIGHT * 0.68; // Close to fisherman (
 export const CAST_LANDING_FAR_Y = CANVAS_HEIGHT * 0.42;  // Far from fisherman (top of pond area)
 // X can vary slightly for realism
 export const CAST_LANDING_X_VARIANCE = 20; // +/- pixels from center
+export const CAST_LANDING_X_OFFSET = 40; // Shift all landings to the right
 
 // === 3D Physics Cast Parameters ===
 export const CAST_3D_GRAVITY_Y = -9.8; // m/s^2
@@ -273,11 +279,21 @@ export const ACTION_ANIM_TWITCH_AMPLITUDE_Y = -10;  // pixels - sharp upward jer
 export const ACTION_ANIM_TWITCH_AMPLITUDE_X = 4;    // pixels - slight horizontal wiggle
 
 // === Emotion Icon Constants ===
-export const EMOTION_ICON_SIZE = 56;
+export const EMOTION_ICON_SIZE = 48;
+
+// === Character Ripple Animation (expansion + fade, same as splash ripples) ===
+export const CHAR_RIPPLE_SPAWN_INTERVAL = 2.5; // seconds between new ripple spawns (synced with float)
+export const CHAR_RIPPLE_MAX_RADIUS = 100; // max horizontal radius before removal (larger than float)
+export const CHAR_RIPPLE_EXPAND_SPEED = 50; // pixels/sec expansion rate
+export const CHAR_RIPPLE_Y_SQUISH = 0.35; // vertical squish factor (ellipse)
+
+// === Fade Transition ===
+export const FADE_OUT_DURATION = 0.6; // seconds to fade to black
+export const FADE_IN_DURATION = 0.6;  // seconds to fade back in
 
 // === Nothing Bites ===
 export const NOTHING_BITES_DURATION = 2.5; // seconds before auto-returning to idle
-export const EMOTION_ICON_Y_OFFSET = -12; // Just above portrait top edge
+export const EMOTION_ICON_Y_OFFSET = -30; // Higher above portrait top edge
 export const EMOTION_ICON_DURATION = 2.5; // seconds total
 export const FLOAT_SURPRISE_EMOJI_DURATION = 0.25; // seconds — quick flash before portrait appears
 export const EMOTION_ICON_BOUNCE_TIME = 0.4; // seconds for bounce-in animation

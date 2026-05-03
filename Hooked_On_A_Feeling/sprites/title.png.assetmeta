@@ -2,7 +2,7 @@
     "class": "horizon::AssetMetadata",
     "version": 1,
     "data": {
-        "id": "4418000803714407671",
+        "id": "17126960460563343094",
         "pipelineVersion": 1,
         "assetBuilderSettings": [
             {
@@ -10,8 +10,8 @@
                 "version": 10003,
                 "data": {
                     "target": "tex",
-                    "streamable": true,
-                    "streamCount": 2,
+                    "streamable": false,
+                    "streamCount": 0,
                     "cpuReadable": false,
                     "textureSettings": {
                         "class": "horizon::renderer::tool::TextureAssetBuilderTextureSettings",

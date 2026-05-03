@@ -9,7 +9,7 @@ import { serializable, property } from 'meta/platform_api';
 /** Server → Client: loaded save data from PlayerVariablesService */
 @serializable()
 export class SaveDataLoadedPayload {
-  @property()
+  @property({maxLength: 10000})
   readonly data: string = '';
 }
 export const OnSaveDataLoaded = new NetworkEvent('FloaterSaveDataLoaded', SaveDataLoadedPayload);
@@ -17,7 +17,7 @@ export const OnSaveDataLoaded = new NetworkEvent('FloaterSaveDataLoaded', SaveDa
 /** Client → Server: request to persist save data */
 @serializable()
 export class SaveDataRequestPayload {
-  @property()
+  @property({maxLength: 10000})
   readonly data: string = '';
 }
 export const OnSaveDataRequested = new NetworkEvent('FloaterSaveDataRequested', SaveDataRequestPayload);

@@ -1,3 +1,4 @@
+import type { Maybe, TextureAsset } from 'meta/worlds';
 import { ActionId } from './Constants';
 
 // === Game States ===
@@ -170,6 +171,7 @@ export interface FishCharacter {
   tier: AffectionTier;
   currentDrift: DriftState;
   tierFloor: number;
+  portrait?: TextureAsset;
 }
 
 // === Cast State ===

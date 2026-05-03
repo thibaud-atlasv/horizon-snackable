@@ -13,6 +13,7 @@ import {
   Component,
   component,
   subscribe,
+  Color,
 } from 'meta/platform_api';
 import {
   OnEntityCreateEvent,
@@ -20,7 +21,7 @@ import {
   OnWorldUpdateEvent,
   OnWorldUpdateEventPayload,
 } from 'meta/platform_api';
-import { CustomUiComponent, DrawingCommandsBuilder } from 'meta/custom_ui';
+import { CustomUiComponent, DrawingCommandsBuilder, SolidBrush } from 'meta/custom_ui';
 import {
   FocusedInteractionService,
   OnFocusedInteractionInputStartedEvent,
@@ -58,6 +59,7 @@ import {
   FloaterCatchChoicePayload,
 } from './FloaterViewModel';
 import { FloaterRenderer } from './FloaterRenderer';
+
 import { FlagSystem } from './FlagSystem';
 import { SaveSystem } from './SaveSystem';
 import { AffectionSystem } from './AffectionSystem';
@@ -85,6 +87,7 @@ import {
   CAST_FLIGHT_TIME, CAST_MIN_ARC_HEIGHT, CAST_MAX_ARC_HEIGHT,
   SPLASH_RIPPLE_COUNT, SPLASH_RIPPLE_DELAY,
   SPLASH_RIPPLE_EXPAND_SPEED, FLOAT_LANDED_PAUSE,
+  FLOAT_IDLE_RIPPLE_INTERVAL, FLOAT_IDLE_RIPPLE_MAX_RADIUS, FLOAT_IDLE_RIPPLE_EXPAND_SPEED,
   FISH_PORTRAIT_X, FISH_PORTRAIT_Y, FISH_PORTRAIT_SIZE,
   EMOTION_ICON_DURATION, EMOTION_ICON_FADE_TIME, EMOTION_ICON_SPACING, EMOTION_ICON_Y_OFFSET, EMOTION_ICON_BOUNCE_TIME, FLOAT_SURPRISE_EMOJI_DURATION,
   FLOAT_X, FLOAT_Y, FLOAT_BOB_SPEED, FLOAT_BOB_AMPLITUDE,
@@ -100,6 +103,7 @@ import {
   CAST_3D_BASE_SPEED, CAST_3D_POWER_MULTIPLIER, CAST_3D_START_DEPTH, CAST_3D_SCALE_MULTIPLIER,
   CAST_3D_CALC_MIN_FLIGHT_TIME, CAST_3D_CALC_MAX_FLIGHT_TIME,
   CAST_LANDING_NEAR_Y, CAST_LANDING_FAR_Y, CAST_LANDING_X_VARIANCE,
+  CAST_LANDING_X_OFFSET,
   POV_CAST_START_X, POV_CAST_START_Y, POV_CAST_START_SCALE, POV_CAST_END_SCALE, POV_CAST_FLIGHT_TIME,
   POV_CAST_PEAK_X, POV_CAST_PEAK_Y, POV_CAST_PEAK_SCALE, POV_CAST_PEAK_T,
   POV_LINE_START_X, POV_LINE_START_Y,
@@ -110,19 +114,22 @@ import {
   RodState,
   ActionId,
   NOTHING_BITES_DURATION,
+  FADE_OUT_DURATION, FADE_IN_DURATION,
+  CHAR_RIPPLE_SPAWN_INTERVAL, CHAR_RIPPLE_MAX_RADIUS, CHAR_RIPPLE_EXPAND_SPEED,
 } from './Constants';
 import { Vec3D } from './Vec3D';
 import {
   GamePhase, DriftState, ExpressionState,
   AffectionTier, TIER_NAMES, EmotionIconType, CatchChoice, EndingType,
 } from './Types';
-import type { Beat, ActionEffect, FishCharacter, FishAffection, SaveData, SplashRipple, FloatingEmotionIcon, EmotionIconAnchor, CharacterConfig } from './Types';
+import type { Beat, ActionEffect, FishCharacter, FishAffection, SaveData, SplashRipple, FloatingEmotionIcon, EmotionIconAnchor, CharacterConfig, FishSaveData } from './Types';
 
 @component()
 export class FloaterGame extends Component {
   // Core systems
   private builder: DrawingCommandsBuilder = new DrawingCommandsBuilder();
   private renderer: Maybe<FloaterRenderer> = null;
+
   private flagSystem: FlagSystem = new FlagSystem();
   private saveSystem: SaveSystem = new SaveSystem();
   private affectionSystem: AffectionSystem = new AffectionSystem();
@@ -161,6 +168,26 @@ export class FloaterGame extends Component {
   private tierNotifyTimer: number = 0;
   private noLureWarningTimer: number = 0;
   private nothingBitesTimer: number = 0;
+  private departureFadeTimer: number = 0;
+
+  // Fade Transition (title → idle)
+  private fadeState: 'none' | 'fading_out' | 'fading_in' = 'none';
+  private fadeTimer: number = 0;
+  private fadeAlpha: number = 0;
+
+  // Action Button Animation State
+  private actionMenuAnimState: 'hidden' | 'appearing' | 'visible' | 'responding' | 'disappearing' = 'hidden';
+  private actionMenuAnimTimer: number = 0;
+  private selectedActionId: ActionId | null = null;
+  private readonly ACTION_APPEAR_DURATION: number = 0.25;
+  private readonly ACTION_DISAPPEAR_DURATION: number = 0.2;
+
+  // Idle Button Bar Animation State
+  private idleBarAnimState: 'hidden' | 'appearing' | 'visible' | 'responding' | 'disappearing' = 'hidden';
+  private idleBarAnimTimer: number = 0;
+  private selectedIdleBtn: 'bait' | 'cast' | 'journal' | null = null;
+  private readonly IDLE_BAR_APPEAR_DURATION: number = 0.25;
+  private readonly IDLE_BAR_DISAPPEAR_DURATION: number = 0.2;
 
   // Silent Beat (Four Minutes)
   private silentBeatActive: boolean = false;
@@ -185,8 +212,16 @@ export class FloaterGame extends Component {
   // Skip system
   private canSkip: boolean = false;
 
+  // Character Ripples (expansion + fade, spawned periodically when portrait visible)
+  private characterRipples: SplashRipple[] = [];
+  private charRippleSpawnTimer: number = 0;
+
   // Cast Mechanics
   private powerGaugeValue: number = 0;
+
+  // Float Idle Ripples (periodic expansion + fade while float is stationary)
+  private floatIdleRipples: SplashRipple[] = [];
+  private floatIdleRippleTimer: number = 0;
   private powerGaugeDir: number = 1;
   private castFlightT: number = 0;
   private castPower: number = 50;
@@ -244,6 +279,10 @@ export class FloaterGame extends Component {
   // Emotion Icons
   private floatingIcons: FloatingEmotionIcon[] = [];
 
+  // Progress Dots (rendered on DrawingSurface instead of XAML text)
+  private progressDotsTotal: number = 0;
+  private progressDotsFilled: number = 0;
+
   // Catch Sequence
   private catchDialogueIndex: number = 0;
   private catchDialogueShown: boolean = false;
@@ -285,10 +324,15 @@ export class FloaterGame extends Component {
     this.time += clampedDt;
 
     this.saveSystem.update(clampedDt, () => this.buildSaveData());
+    this.updateFadeTransition(clampedDt);
     this.updatePhase(clampedDt);
     this.updateFloat(clampedDt);
     this.updateActionAnimation(clampedDt);
+    this.updateActionButtonAnimation(clampedDt);
+    this.updateIdleBarAnimation(clampedDt);
     this.updateEmotionIcons(clampedDt);
+    this.updateCharacterRipples(clampedDt);
+    this.updateFloatIdleRipples(clampedDt);
     this.updatePortraitAnimation(clampedDt);
     this.render();
   }
@@ -297,9 +341,10 @@ export class FloaterGame extends Component {
 
   @subscribe(onFloaterStartGame)
   onStartGame(): void {
-    console.log('[FloaterGame] Start game → LakeIdle');
-    floaterVM.titleVisible = false;
-    this.enterLakeIdle();
+    console.log('[FloaterGame] Start game → fade to black');
+    this.fadeState = 'fading_out';
+    this.fadeTimer = 0;
+    this.fadeAlpha = 0;
   }
 
   @subscribe(onFloaterActionSelected)
@@ -330,9 +375,12 @@ export class FloaterGame extends Component {
     this.phase = GamePhase.CastCharging;
     this.powerGaugeValue = 0;
     this.powerGaugeDir = 1;
-    floaterVM.castButtonVisible = false;
-    floaterVM.inventoryButtonVisible = false;
-    floaterVM.journalButtonVisible = false;
+    // Disable idle buttons during the entire cast sequence
+    floaterVM.idleBaitBtnEnabled = false;
+    floaterVM.idleCastBtnEnabled = false;
+    floaterVM.idleJournalBtnEnabled = false;
+    // Idle bar stays visible during CastCharging but mark Cast selected
+    this.setIdleBarResponding('cast');
   }
 
   @subscribe(onFloaterCatchChoice)
@@ -351,10 +399,20 @@ export class FloaterGame extends Component {
 
   // === Journal/Inventory Events ===
   @subscribe(onJournalOpen)
-  onJournalOpenEvent(): void { floaterVM.journalVisible = true; floaterVM.setJournalTab(0); }
+  onJournalOpenEvent(): void {
+    this.setIdleBarResponding('journal');
+    floaterVM.journalVisible = true;
+    floaterVM.setJournalTab(0);
+  }
 
   @subscribe(onJournalClose)
-  onJournalCloseEvent(): void { floaterVM.journalVisible = false; }
+  onJournalCloseEvent(): void {
+    floaterVM.journalVisible = false;
+    // Reset idle bar to visible state after closing journal
+    if (this.phase === GamePhase.LakeIdle || this.phase === GamePhase.Idle) {
+      this.showIdleBar();
+    }
+  }
 
   @subscribe(onJournalTabSwitch)
   onJournalTabSwitchEvent(payload: FloaterTabSelectedPayload): void {
@@ -385,11 +443,18 @@ export class FloaterGame extends Component {
   @subscribe(onInventoryOpen)
   onInventoryOpenEvent(): void {
     if (this.phase !== GamePhase.LakeIdle && this.phase !== GamePhase.Idle) return;
+    this.setIdleBarResponding('bait');
     floaterVM.inventoryVisible = true;
   }
 
   @subscribe(onInventoryClose)
-  onInventoryCloseEvent(): void { floaterVM.inventoryVisible = false; }
+  onInventoryCloseEvent(): void {
+    floaterVM.inventoryVisible = false;
+    // Reset idle bar to visible state after closing inventory
+    if (this.phase === GamePhase.LakeIdle || this.phase === GamePhase.Idle) {
+      this.showIdleBar();
+    }
+  }
 
   @subscribe(onInventoryEquip)
   onInventoryEquipEvent(payload: FloaterLureSelectedPayload): void {
@@ -459,6 +524,7 @@ export class FloaterGame extends Component {
     this.castIndexWithinTier = 0;
     this.equippedLureId = null;
     this.perFishCastIndex = {};
+    this.savedFishRecords = {};
     this.flagSystem = new FlagSystem();
     this.questSystem = new QuestSystem();
     this.cgGallerySystem = new CGGallerySystem();
@@ -481,6 +547,10 @@ export class FloaterGame extends Component {
     floaterVM.journalVisible = false;
     floaterVM.inventoryButtonVisible = false;
     floaterVM.journalButtonVisible = false;
+    floaterVM.idleBarVisible = false;
+    floaterVM.idleBarOpacity = 0;
+    floaterVM.idleBarTranslateY = 40;
+    this.idleBarAnimState = 'hidden';
     floaterVM.cgViewerVisible = false;
     floaterVM.resetConfirmVisible = false;
 
@@ -489,6 +559,26 @@ export class FloaterGame extends Component {
   }
 
   // === Touch Input ===
+  private screenToCanvas(screenPos: Vec2): { x: number; y: number } {
+    const screenAspect = CameraModeProvisionalService.get().aspectRatio;
+    let canvasX: number;
+    let canvasY: number;
+
+    if (screenAspect > GAME_ASPECT_RATIO) {
+      const gameWidthInScreenSpace = GAME_ASPECT_RATIO / screenAspect;
+      const offsetX = (1.0 - gameWidthInScreenSpace) / 2.0;
+      canvasX = ((screenPos.x - offsetX) / gameWidthInScreenSpace) * CANVAS_WIDTH;
+      canvasY = screenPos.y * CANVAS_HEIGHT;
+    } else {
+      const gameHeightInScreenSpace = screenAspect / GAME_ASPECT_RATIO;
+      const offsetY = (1.0 - gameHeightInScreenSpace) / 2.0;
+      canvasX = screenPos.x * CANVAS_WIDTH;
+      canvasY = ((screenPos.y - offsetY) / gameHeightInScreenSpace) * CANVAS_HEIGHT;
+    }
+
+    return { x: canvasX, y: canvasY };
+  }
+
   @subscribe(OnFocusedInteractionInputStartedEvent)
   onTouchStart(payload: OnFocusedInteractionInputEventPayload): void {
     if (payload.interactionIndex !== 0) return;
@@ -525,6 +615,33 @@ export class FloaterGame extends Component {
   }
 
   // === Phase Logic ===
+  private updateFadeTransition(dt: number): void {
+    if (this.fadeState === 'none') return;
+
+    this.fadeTimer += dt;
+
+    if (this.fadeState === 'fading_out') {
+      this.fadeAlpha = Math.min(1, this.fadeTimer / FADE_OUT_DURATION);
+      if (this.fadeAlpha >= 1) {
+        // Fully black — switch state and start fade-in
+        this.fadeAlpha = 1;
+        this.fadeState = 'fading_in';
+        this.fadeTimer = 0;
+        // Perform the actual state transition while screen is black
+        floaterVM.titleVisible = false;
+        this.enterLakeIdle();
+        console.log('[FloaterGame] Fade out complete → entering LakeIdle, fading in');
+      }
+    } else if (this.fadeState === 'fading_in') {
+      this.fadeAlpha = Math.max(0, 1 - this.fadeTimer / FADE_IN_DURATION);
+      if (this.fadeAlpha <= 0) {
+        this.fadeAlpha = 0;
+        this.fadeState = 'none';
+        console.log('[FloaterGame] Fade in complete');
+      }
+    }
+  }
+
   private updatePhase(dt: number): void {
     switch (this.phase) {
       case GamePhase.CastCharging: this.updatePowerGauge(dt); break;
@@ -575,8 +692,15 @@ export class FloaterGame extends Component {
       case GamePhase.CatchSequence: this.updateTypewriter(dt); break;
       case GamePhase.Departure:
         this.phaseTimer += dt;
-        this.fishAlpha = Math.max(0, 1 - this.phaseTimer / DEPARTURE_DURATION);
         this.updateTypewriter(dt);
+        // Character stays fully visible during departure dialogue.
+        // Fade out only starts when showing the LAST departure line.
+        if (this.currentLineIndex >= this.currentLines.length - 1) {
+          this.departureFadeTimer += dt;
+          this.fishAlpha = Math.max(0, 1 - this.departureFadeTimer / DEPARTURE_DURATION);
+        } else {
+          this.fishAlpha = 1;
+        }
         break;
       default: break;
     }
@@ -620,6 +744,83 @@ export class FloaterGame extends Component {
 
   private updateFloat(dt: number): void {
     if (this.floatDip > 0) this.floatDip = Math.max(0, this.floatDip - dt * 20);
+  }
+
+  // === Character Ripples (expansion + fade) ===
+  private updateCharacterRipples(dt: number): void {
+    // Only spawn/update when portrait is visible
+    if (this.fishAlpha <= 0) {
+      this.characterRipples = [];
+      this.charRippleSpawnTimer = 0;
+      return;
+    }
+
+    // Spawn new ripples periodically
+    this.charRippleSpawnTimer += dt;
+    if (this.charRippleSpawnTimer >= CHAR_RIPPLE_SPAWN_INTERVAL) {
+      this.charRippleSpawnTimer -= CHAR_RIPPLE_SPAWN_INTERVAL;
+      const centerX = FISH_PORTRAIT_X + this.portraitOffsetX + FISH_PORTRAIT_SIZE / 2;
+      const rippleY = FISH_PORTRAIT_Y + this.portraitOffsetY + FISH_PORTRAIT_SIZE * 0.5;
+      this.characterRipples.push({ x: centerX, y: rippleY, radius: 0, maxRadius: CHAR_RIPPLE_MAX_RADIUS, alpha: 1 });
+    }
+
+    // Update existing ripples (expand + fade)
+    for (let i = this.characterRipples.length - 1; i >= 0; i--) {
+      const ripple = this.characterRipples[i];
+      ripple.radius += CHAR_RIPPLE_EXPAND_SPEED * dt;
+      ripple.alpha = Math.max(0, 1 - ripple.radius / ripple.maxRadius);
+      if (ripple.alpha <= 0) {
+        this.characterRipples.splice(i, 1);
+      }
+    }
+  }
+
+  // === Float Idle Ripples (periodic expansion + fade while float is stationary) ===
+  private updateFloatIdleRipples(dt: number): void {
+    // Determine if float is stationary (same phases as showStaticFloat in render + Title)
+    const showStaticFloat = this.phase === GamePhase.Title
+      || this.phase === GamePhase.FloatBounce
+      || this.phase === GamePhase.Approach
+      || this.phase === GamePhase.Exchange
+      || this.phase === GamePhase.ActionSelect
+      || this.phase === GamePhase.FishReaction
+      || this.phase === GamePhase.Departure
+      || this.phase === GamePhase.CatchSequence
+      || this.phase === GamePhase.NothingBites;
+
+    if (!showStaticFloat) {
+      // Reset when float is not visible
+      this.floatIdleRipples = [];
+      this.floatIdleRippleTimer = 0;
+      return;
+    }
+
+    // For Title phase, use a fixed center position
+    const rippleX = this.phase === GamePhase.Title ? CANVAS_WIDTH / 2 : this.landingTargetX;
+    const rippleY = this.phase === GamePhase.Title ? 570 : this.landingTargetY;
+
+    // Spawn new ripple periodically
+    this.floatIdleRippleTimer += dt;
+    if (this.floatIdleRippleTimer >= FLOAT_IDLE_RIPPLE_INTERVAL) {
+      this.floatIdleRippleTimer -= FLOAT_IDLE_RIPPLE_INTERVAL;
+      this.floatIdleRipples.push({
+        x: rippleX,
+        y: rippleY + 12, // Descend de 12px pour être au niveau de l'eau
+        radius: 0,
+        maxRadius: FLOAT_IDLE_RIPPLE_MAX_RADIUS,
+        alpha: 1,
+      });
+    }
+
+    // Update existing ripples (expand + fade)
+    for (let i = this.floatIdleRipples.length - 1; i >= 0; i--) {
+      const ripple = this.floatIdleRipples[i];
+      ripple.radius += FLOAT_IDLE_RIPPLE_EXPAND_SPEED * dt;
+      ripple.alpha = Math.max(0, 1 - ripple.radius / ripple.maxRadius);
+      if (ripple.alpha <= 0) {
+        this.floatIdleRipples.splice(i, 1);
+      }
+    }
   }
 
   // === Portrait Animation ===
@@ -694,9 +895,21 @@ export class FloaterGame extends Component {
 
     // Initialize or restore fish state for selected character
     if (this.fish.id !== selectedCharacter.id) {
+      // Save current fish's live state into savedFishRecords before switching
+      this.savedFishRecords[this.fish.id] = {
+        affection: this.fishAffection.value,
+        tier: this.fishAffection.tier,
+        drift: this.fish.currentDrift,
+        tierFloor: this.fishAffection.floor,
+        peakValue: this.fishAffection.peakValue,
+        lastChangeSessionId: this.fishAffection.lastChangeSessionId,
+        lastChangeDelta: this.fishAffection.lastChangeDelta,
+        floor: this.fishAffection.floor,
+      };
+
       this.fish = selectedCharacter.initialState();
-      // Restore affection from per-fish save if available
-      const savedFishData = this.buildSaveData().fish[selectedCharacter.id];
+      // Restore affection from savedFishRecords (populated during loadGame)
+      const savedFishData = this.savedFishRecords[selectedCharacter.id];
       if (savedFishData) {
         this.fish.affection = savedFishData.affection;
         this.fish.tier = savedFishData.tier;
@@ -710,8 +923,10 @@ export class FloaterGame extends Component {
           lastChangeSessionId: savedFishData.lastChangeSessionId ?? '',
           lastChangeDelta: savedFishData.lastChangeDelta ?? 0,
         });
+        console.log(`[FloaterGame] Restored ${selectedCharacter.id} from saved records: affection=${savedFishData.affection}, tier=${savedFishData.tier}`);
       } else {
         this.fishAffection = this.affectionSystem.createAffection(selectedCharacter.id);
+        console.log(`[FloaterGame] No saved data for ${selectedCharacter.id}, starting fresh`);
       }
     }
 
@@ -737,6 +952,7 @@ export class FloaterGame extends Component {
         }
       }
       this.castIndexWithinTier = 0;
+      this.perFishCastIndex[this.fish.id] = 0; // CRITICAL: sync perFishCastIndex after tier reset
       this.saveSystem.requestSave();
     }
 
@@ -751,6 +967,7 @@ export class FloaterGame extends Component {
     this.fishAlpha = 0;
     this.approachEmotionSpawned = false;
     this.fish.currentExpression = ExpressionState.Neutral;
+    this.hideIdleBar();
 
     floaterVM.hudVisible = true;
     floaterVM.fishNameText = this.fish.name;
@@ -816,8 +1033,8 @@ export class FloaterGame extends Component {
       this.currentLineIndex++;
       if (this.currentLineIndex >= this.currentLines.length) {
         // All reaction lines shown — advance to next beat
+        // Keep selected button state persistent (don't reset until new choices appear)
         this.isShowingReaction = false;
-        floaterVM.actionMenuVisible = false;
         this.currentBeatIndex++;
 
         const beat = this.beats[this.currentBeatIndex - 1];
@@ -848,7 +1065,7 @@ export class FloaterGame extends Component {
       // If this is a silent beat, enter ActionSelect with restricted buttons
       if (this.silentBeatActive && !this.silentBeatUnlocked) {
         this.phase = GamePhase.ActionSelect;
-        floaterVM.actionMenuVisible = true;
+        this.showActionButtons();
         floaterVM.actionWaitEnabled = true;
         floaterVM.actionTwitchEnabled = false;
         floaterVM.actionDriftEnabled = false;
@@ -856,7 +1073,7 @@ export class FloaterGame extends Component {
         floaterVM.skipButtonVisible = false; floaterVM.skipButtonOpacity = 0;
       } else {
         this.phase = GamePhase.ActionSelect;
-        floaterVM.actionMenuVisible = true;
+        this.showActionButtons();
         floaterVM.actionWaitEnabled = true;
         floaterVM.actionTwitchEnabled = true;
         floaterVM.actionDriftEnabled = true;
@@ -885,13 +1102,8 @@ export class FloaterGame extends Component {
       this.silentBeatActive = false;
     }
 
-    // Reset action button states to enabled
-    floaterVM.actionWaitEnabled = true;
-    floaterVM.actionTwitchEnabled = true;
-    floaterVM.actionDriftEnabled = true;
-    floaterVM.actionReelEnabled = true;
-
-    floaterVM.actionMenuVisible = false;
+    // Set buttons to responding state (selected highlighted, others dimmed & disabled)
+    this.setActionButtonsResponding(actionId);
 
     // Apply affection
     this.affectionSystem.applyDelta(this.fishAffection, effect.affectionDelta, this.sessionId);
@@ -909,6 +1121,7 @@ export class FloaterGame extends Component {
         if (this.fish.tier !== oldTier) {
           console.log(`[FloaterGame] Tier promotion! ${TIER_NAMES[oldTier]} → ${TIER_NAMES[this.fish.tier]}, resetting castIndexWithinTier from ${this.castIndexWithinTier} to 0`);
           this.castIndexWithinTier = 0;
+          this.perFishCastIndex[this.fish.id] = 0; // CRITICAL: sync perFishCastIndex after tier reset
         }
       }
     }
@@ -959,23 +1172,28 @@ export class FloaterGame extends Component {
   private enterDeparture(drift: DriftState): void {
     this.phase = GamePhase.Departure;
     this.phaseTimer = 0;
+    this.departureFadeTimer = 0;
     // Fix: DriftState.None is truthy ('none'), so || fallback doesn't work.
     // Explicitly default to Warm if drift is None or not in departures map.
     const effectiveDrift = (drift === DriftState.None) ? DriftState.Warm : drift;
     this.fish.currentDrift = effectiveDrift;
-    floaterVM.actionMenuVisible = false;
+    this.hideActionButtons();
     floaterVM.skipButtonVisible = false;
+
+    // Clear emoji icons at the start of departure (they don't need to stay)
+    this.floatingIcons = [];
+
+    // Character stays fully visible until the last departure line
+    this.fishAlpha = 1;
 
     // Get departure data from cast
     const cast = getCastForTier(this.fish.tier, this.castIndexWithinTier, this.fish.id);
     const departureData = cast.departures[effectiveDrift] || cast.departures[DriftState.Warm];
 
     // Use tap-to-advance dialogue system for departure lines
+    // NOTE: departure icon is NOT spawned since we clear icons at departure start
     if (departureData) {
       this.currentLines = departureData.dialogue;
-      if (departureData.icon && departureData.icon !== EmotionIconType.None) {
-        this.spawnEmotionIcon(departureData.icon);
-      }
       if (departureData.flagsToSet) {
         for (const flag of departureData.flagsToSet) { this.flagSystem.set(flag, true); }
       }
@@ -1025,8 +1243,7 @@ export class FloaterGame extends Component {
     floaterVM.departureVisible = false;
     floaterVM.hudVisible = false;
     floaterVM.idleVisible = true;
-    floaterVM.inventoryButtonVisible = true;
-    floaterVM.journalButtonVisible = true;
+    this.hideIdleBar();
     this.fishAlpha = 0;
     this.saveSystem.requestSave();
   }
@@ -1036,7 +1253,7 @@ export class FloaterGame extends Component {
     this.phase = GamePhase.CatchSequence;
     this.catchDialogueIndex = 0;
     this.catchDialogueShown = false;
-    floaterVM.actionMenuVisible = false;
+    this.hideActionButtons();
     floaterVM.skipButtonVisible = false;
 
     // Show silence dialogue
@@ -1103,7 +1320,7 @@ export class FloaterGame extends Component {
     floaterVM.departureVisible = false;
     floaterVM.catchChoiceVisible = false;
     floaterVM.hudVisible = false;
-    floaterVM.actionMenuVisible = false;
+    this.hideActionButtons();
 
     // Mark catch as used
     this.flagSystem.set(`${this.fish.id}.catch_available`, false);
@@ -1310,6 +1527,248 @@ export class FloaterGame extends Component {
     }
   }
 
+  // === Action Button Container Animation ===
+  private updateActionButtonAnimation(dt: number): void {
+    if (this.actionMenuAnimState === 'hidden') return;
+
+    this.actionMenuAnimTimer += dt;
+
+    switch (this.actionMenuAnimState) {
+      case 'appearing': {
+        const t = Math.min(1, this.actionMenuAnimTimer / this.ACTION_APPEAR_DURATION);
+        // Ease-out cubic for smooth appear
+        const eased = 1 - Math.pow(1 - t, 3);
+        floaterVM.actionMenuOpacity = eased;
+        // Pure vertical slide up from below (40px → 0px)
+        floaterVM.actionMenuTranslateY = 40 * (1 - eased);
+        if (t >= 1) {
+          this.actionMenuAnimState = 'visible';
+          floaterVM.actionMenuOpacity = 1;
+          floaterVM.actionMenuTranslateY = 0;
+        }
+        break;
+      }
+      case 'disappearing': {
+        const t = Math.min(1, this.actionMenuAnimTimer / this.ACTION_DISAPPEAR_DURATION);
+        // Ease-in for disappear
+        const eased = t * t;
+        floaterVM.actionMenuOpacity = 1 - eased;
+        // Pure vertical slide down (0px → 40px)
+        floaterVM.actionMenuTranslateY = 40 * eased;
+        if (t >= 1) {
+          this.actionMenuAnimState = 'hidden';
+          floaterVM.actionMenuVisible = false;
+          floaterVM.actionMenuOpacity = 0;
+          floaterVM.actionMenuTranslateY = 40;
+        }
+        break;
+      }
+      case 'visible':
+      case 'responding':
+        // No timer-based animation; state driven by game events
+        break;
+    }
+  }
+
+  /** Start showing action buttons with appear animation.
+   *  If buttons are already visible (e.g., transitioning from 'responding' state back to
+   *  interactive), snaps directly to idle state without re-triggering the appear animation. */
+  private showActionButtons(): void {
+    // If buttons are already on screen (responding or visible), snap to idle — no animation
+    if (this.actionMenuAnimState === 'responding' || this.actionMenuAnimState === 'visible') {
+      this.actionMenuAnimState = 'visible';
+      this.selectedActionId = null;
+      floaterVM.actionMenuOpacity = 1;
+      floaterVM.actionMenuTranslateY = 0;
+      // Snap per-button states to uniform (no animation, instant)
+      floaterVM.actionWaitBtnOpacity = 1;
+      floaterVM.actionTwitchBtnOpacity = 1;
+      floaterVM.actionDriftBtnOpacity = 1;
+      floaterVM.actionReelBtnOpacity = 1;
+      floaterVM.actionWaitBtnScale = 1;
+      floaterVM.actionTwitchBtnScale = 1;
+      floaterVM.actionDriftBtnScale = 1;
+      floaterVM.actionReelBtnScale = 1;
+      floaterVM.actionWaitBtnTranslateY = 0;
+      floaterVM.actionTwitchBtnTranslateY = 0;
+      floaterVM.actionDriftBtnTranslateY = 0;
+      floaterVM.actionReelBtnTranslateY = 0;
+      return;
+    }
+
+    // Buttons are hidden or disappearing — trigger full appear animation
+    this.actionMenuAnimState = 'appearing';
+    this.actionMenuAnimTimer = 0;
+    this.selectedActionId = null;
+    floaterVM.actionMenuVisible = true;
+    floaterVM.actionMenuOpacity = 0;
+    floaterVM.actionMenuTranslateY = 40;
+    // Reset all per-button states to uniform
+    floaterVM.actionWaitBtnOpacity = 1;
+    floaterVM.actionTwitchBtnOpacity = 1;
+    floaterVM.actionDriftBtnOpacity = 1;
+    floaterVM.actionReelBtnOpacity = 1;
+    floaterVM.actionWaitBtnScale = 1;
+    floaterVM.actionTwitchBtnScale = 1;
+    floaterVM.actionDriftBtnScale = 1;
+    floaterVM.actionReelBtnScale = 1;
+    floaterVM.actionWaitBtnTranslateY = 0;
+    floaterVM.actionTwitchBtnTranslateY = 0;
+    floaterVM.actionDriftBtnTranslateY = 0;
+    floaterVM.actionReelBtnTranslateY = 0;
+  }
+
+  /** Mark selected button and dim others (responding state) */
+  private setActionButtonsResponding(selectedId: ActionId): void {
+    this.actionMenuAnimState = 'responding';
+    this.selectedActionId = selectedId;
+    // Selected: full opacity + translate up, others: dimmed + no translation
+    const buttons: Array<{id: ActionId; opacityProp: 'actionWaitBtnOpacity' | 'actionTwitchBtnOpacity' | 'actionDriftBtnOpacity' | 'actionReelBtnOpacity'; translateYProp: 'actionWaitBtnTranslateY' | 'actionTwitchBtnTranslateY' | 'actionDriftBtnTranslateY' | 'actionReelBtnTranslateY'}> = [
+      { id: ActionId.Wait, opacityProp: 'actionWaitBtnOpacity', translateYProp: 'actionWaitBtnTranslateY' },
+      { id: ActionId.Twitch, opacityProp: 'actionTwitchBtnOpacity', translateYProp: 'actionTwitchBtnTranslateY' },
+      { id: ActionId.Drift, opacityProp: 'actionDriftBtnOpacity', translateYProp: 'actionDriftBtnTranslateY' },
+      { id: ActionId.Reel, opacityProp: 'actionReelBtnOpacity', translateYProp: 'actionReelBtnTranslateY' },
+    ];
+    for (const btn of buttons) {
+      if (btn.id === selectedId) {
+        floaterVM[btn.opacityProp] = 1;
+        floaterVM[btn.translateYProp] = -8;
+      } else {
+        floaterVM[btn.opacityProp] = 0.5;
+        floaterVM[btn.translateYProp] = 3;
+      }
+    }
+    // Disable all buttons during response
+    floaterVM.actionWaitEnabled = false;
+    floaterVM.actionTwitchEnabled = false;
+    floaterVM.actionDriftEnabled = false;
+    floaterVM.actionReelEnabled = false;
+  }
+
+  /** Hide action buttons with disappear animation */
+  private hideActionButtons(): void {
+    if (this.actionMenuAnimState === 'hidden') return;
+    this.actionMenuAnimState = 'disappearing';
+    this.actionMenuAnimTimer = 0;
+    this.selectedActionId = null;
+  }
+
+  /** Reset action buttons to visible idle state (no selection highlight, not interactive) */
+  private resetActionButtonsToVisible(): void {
+    this.actionMenuAnimState = 'visible';
+    this.selectedActionId = null;
+    floaterVM.actionMenuOpacity = 1;
+    floaterVM.actionMenuTranslateY = 0;
+    floaterVM.actionWaitBtnOpacity = 1;
+    floaterVM.actionTwitchBtnOpacity = 1;
+    floaterVM.actionDriftBtnOpacity = 1;
+    floaterVM.actionReelBtnOpacity = 1;
+    floaterVM.actionWaitBtnScale = 1;
+    floaterVM.actionTwitchBtnScale = 1;
+    floaterVM.actionDriftBtnScale = 1;
+    floaterVM.actionReelBtnScale = 1;
+    floaterVM.actionWaitBtnTranslateY = 0;
+    floaterVM.actionTwitchBtnTranslateY = 0;
+    floaterVM.actionDriftBtnTranslateY = 0;
+    floaterVM.actionReelBtnTranslateY = 0;
+    // Keep buttons disabled during exchange dialogue
+    floaterVM.actionWaitEnabled = false;
+    floaterVM.actionTwitchEnabled = false;
+    floaterVM.actionDriftEnabled = false;
+    floaterVM.actionReelEnabled = false;
+  }
+
+  // === Idle Button Bar Animation ===
+  private updateIdleBarAnimation(dt: number): void {
+    if (this.idleBarAnimState === 'hidden') return;
+    this.idleBarAnimTimer += dt;
+
+    switch (this.idleBarAnimState) {
+      case 'appearing': {
+        const t = Math.min(1, this.idleBarAnimTimer / this.IDLE_BAR_APPEAR_DURATION);
+        const eased = 1 - Math.pow(1 - t, 3);
+        floaterVM.idleBarOpacity = eased;
+        floaterVM.idleBarTranslateY = 40 * (1 - eased);
+        if (t >= 1) {
+          this.idleBarAnimState = 'visible';
+          floaterVM.idleBarOpacity = 1;
+          floaterVM.idleBarTranslateY = 0;
+        }
+        break;
+      }
+      case 'disappearing': {
+        const t = Math.min(1, this.idleBarAnimTimer / this.IDLE_BAR_DISAPPEAR_DURATION);
+        const eased = t * t;
+        floaterVM.idleBarOpacity = 1 - eased;
+        floaterVM.idleBarTranslateY = 40 * eased;
+        if (t >= 1) {
+          this.idleBarAnimState = 'hidden';
+          floaterVM.idleBarVisible = false;
+          floaterVM.idleBarOpacity = 0;
+          floaterVM.idleBarTranslateY = 40;
+        }
+        break;
+      }
+      case 'visible':
+      case 'responding':
+        break;
+    }
+  }
+
+  private showIdleBar(): void {
+    if (this.idleBarAnimState === 'visible' || this.idleBarAnimState === 'responding') {
+      this.idleBarAnimState = 'visible';
+      this.selectedIdleBtn = null;
+      floaterVM.idleBarOpacity = 1;
+      floaterVM.idleBarTranslateY = 0;
+      floaterVM.idleBaitBtnOpacity = 1;
+      floaterVM.idleBaitBtnTranslateY = 0;
+      floaterVM.idleCastBtnOpacity = 1;
+      floaterVM.idleCastBtnTranslateY = 0;
+      floaterVM.idleJournalBtnOpacity = 1;
+      floaterVM.idleJournalBtnTranslateY = 0;
+      return;
+    }
+    this.idleBarAnimState = 'appearing';
+    this.idleBarAnimTimer = 0;
+    this.selectedIdleBtn = null;
+    floaterVM.idleBarVisible = true;
+    floaterVM.idleBarOpacity = 0;
+    floaterVM.idleBarTranslateY = 40;
+    floaterVM.idleBaitBtnOpacity = 1;
+    floaterVM.idleBaitBtnTranslateY = 0;
+    floaterVM.idleCastBtnOpacity = 1;
+    floaterVM.idleCastBtnTranslateY = 0;
+    floaterVM.idleJournalBtnOpacity = 1;
+    floaterVM.idleJournalBtnTranslateY = 0;
+  }
+
+  private hideIdleBar(): void {
+    if (this.idleBarAnimState === 'hidden') return;
+    this.idleBarAnimState = 'disappearing';
+    this.idleBarAnimTimer = 0;
+    this.selectedIdleBtn = null;
+  }
+
+  private setIdleBarResponding(btn: 'bait' | 'cast' | 'journal'): void {
+    this.idleBarAnimState = 'responding';
+    this.selectedIdleBtn = btn;
+    const btns: Array<{id: string; opProp: 'idleBaitBtnOpacity' | 'idleCastBtnOpacity' | 'idleJournalBtnOpacity'; tyProp: 'idleBaitBtnTranslateY' | 'idleCastBtnTranslateY' | 'idleJournalBtnTranslateY'}> = [
+      { id: 'bait', opProp: 'idleBaitBtnOpacity', tyProp: 'idleBaitBtnTranslateY' },
+      { id: 'cast', opProp: 'idleCastBtnOpacity', tyProp: 'idleCastBtnTranslateY' },
+      { id: 'journal', opProp: 'idleJournalBtnOpacity', tyProp: 'idleJournalBtnTranslateY' },
+    ];
+    for (const b of btns) {
+      if (b.id === btn) {
+        floaterVM[b.opProp] = 1;
+        floaterVM[b.tyProp] = -8;
+      } else {
+        floaterVM[b.opProp] = 0.5;
+        floaterVM[b.tyProp] = 0;
+      }
+    }
+  }
+
   // === Affection Display ===
   /** Get the correct portrait texture for the current fish character */
   private getPortraitTexture(): typeof nereiaNeutralTexture {
@@ -1325,6 +1784,27 @@ export class FloaterGame extends Component {
     floaterVM.affectionBarWidth = (percent / 100) * 200; // 200px max width
     floaterVM.emotionName = TIER_NAMES[this.fishAffection.tier];
     floaterVM.tierText = TIER_NAMES[this.fishAffection.tier];
+
+    // New HUD: portrait visibility toggles, name+mood (split), progress dots
+    floaterVM.hudShowNereia = this.fish.id === 'nereia';
+    floaterVM.hudShowKasha = this.fish.id === 'kasha';
+    floaterVM.hudPortrait = this.fish.portrait;
+    floaterVM.hudNameColor = this.fish.accentColor;
+    floaterVM.hudNameText = this.fish.name;
+    floaterVM.hudMoodText = `(${TIER_NAMES[this.fishAffection.tier]})`;
+    floaterVM.hudMoodColor = this.getMoodColor(this.fishAffection.tier);
+    // Keep legacy field for backward compat
+    floaterVM.hudNameMoodText = `${this.fish.name} (${TIER_NAMES[this.fishAffection.tier]})`;
+
+    // Progress dots: show TOTAL casts for this character (all tiers combined)
+    // Filled = cumulative casts completed so far (past tiers + current tier progress)
+    const totalCastsAllTiers = characterRegistry.getTotalCastCount(this.fish.id);
+    const cumulativeCompleted = characterRegistry.getCumulativeCastIndex(this.fish.id, this.fish.tier, this.castIndexWithinTier);
+    this.progressDotsTotal = totalCastsAllTiers;
+    this.progressDotsFilled = Math.min(cumulativeCompleted, totalCastsAllTiers);
+    // Update XAML dot properties
+    floaterVM.setProgressDots(this.progressDotsTotal, this.progressDotsFilled);
+    console.log(`[FloaterGame] syncAffectionDisplay: dots total=${this.progressDotsTotal}, filled=${this.progressDotsFilled}, tier=${TIER_NAMES[this.fish.tier]}, castIdx=${this.castIndexWithinTier}, fishId=${this.fish.id}`);
   }
 
   /** Get the minimum affection value needed to be in a tier */
@@ -1338,6 +1818,18 @@ export class FloaterGame extends Component {
     }
   }
 
+  /** Get a color representing the current mood/tier */
+  private getMoodColor(tier: AffectionTier): string {
+    switch (tier) {
+      case AffectionTier.Unaware: return '#8A9AB0';   // Muted blue-grey
+      case AffectionTier.Curious: return '#9BB8CC';   // Light teal
+      case AffectionTier.Familiar: return '#A8CC9B';  // Soft green
+      case AffectionTier.Trusting: return '#E8A84C';  // Warm gold
+      case AffectionTier.Bonded: return '#CC7FCC';    // Warm purple/pink
+      default: return '#8A9AB0';
+    }
+  }
+
   private showTierTransition(newTierName: string): void {
     floaterVM.tierTransitionVisible = true;
     floaterVM.tierTransitionText = `${this.fish.name} feels closer.\nRelationship: ${newTierName}`;
@@ -1348,10 +1840,15 @@ export class FloaterGame extends Component {
   private enterLakeIdle(): void {
     this.phase = GamePhase.LakeIdle;
     this.fishAlpha = 0;
-    floaterVM.castButtonVisible = true;
+    floaterVM.castButtonVisible = false;
     floaterVM.hudVisible = false;
-    floaterVM.inventoryButtonVisible = true;
-    floaterVM.journalButtonVisible = true;
+    floaterVM.inventoryButtonVisible = false;
+    floaterVM.journalButtonVisible = false;
+    // Re-enable idle buttons when returning to lake idle
+    floaterVM.idleBaitBtnEnabled = true;
+    floaterVM.idleCastBtnEnabled = true;
+    floaterVM.idleJournalBtnEnabled = true;
+    this.showIdleBar();
   }
 
   private updatePowerGauge(dt: number): void {
@@ -1585,7 +2082,7 @@ export class FloaterGame extends Component {
     const normalizedPower = power / 100;
     this.landingTargetY = CAST_LANDING_NEAR_Y + (CAST_LANDING_FAR_Y - CAST_LANDING_NEAR_Y) * normalizedPower;
     // Slight X variance for realism (seeded from power to be deterministic)
-    this.landingTargetX = FLOAT_X + (normalizedPower - 0.5) * CAST_LANDING_X_VARIANCE * 0.5;
+    this.landingTargetX = FLOAT_X + CAST_LANDING_X_OFFSET + (normalizedPower - 0.5) * CAST_LANDING_X_VARIANCE * 0.5;
 
     // Target position: power-adjusted landing spot at normal scale (1.0)
     const target3D = this.unproject2Dto3D(this.landingTargetX, this.landingTargetY, 1.0);
@@ -1676,7 +2173,6 @@ export class FloaterGame extends Component {
     const endX = this.landingTargetX; // Power-adjusted landing position
     const endY = this.landingTargetY; // Power-adjusted landing position
     const endScale = POV_CAST_END_SCALE;
-
     let currentX: number;
     let currentY: number;
     let currentScale: number;
@@ -1746,8 +2242,10 @@ export class FloaterGame extends Component {
       this.landingLineSnapshot = [];
     }
 
-    this.castFloatX = this.landingTargetX;
-    this.castFloatY = this.landingTargetY;
+    // Keep castFloatX/Y as-is (they hold the physics-computed position)
+    // Update landingTarget to match current float position for ripples & rest line
+    this.landingTargetX = this.castFloatX;
+    this.landingTargetY = this.castFloatY;
     this.floatLandedTimer = 0;
     this.splashTimer = 0;
     this.splashRipples = [];
@@ -1769,7 +2267,7 @@ export class FloaterGame extends Component {
       }
     }
     // FIX Issue 3: Continue physics line settling during FloatLanded
-    this.settleLineSegments(dt);
+    //this.settleLineSegments(dt);
     if (this.floatLandedTimer >= FLOAT_LANDED_PAUSE) { this.splashRipples = []; this.enterFloatBounce(); }
   }
 
@@ -1849,20 +2347,28 @@ export class FloaterGame extends Component {
   }
 
   // === Save/Load ===
+
+  /** Cached fish save data for characters not currently active.
+   *  Populated from loaded save data and preserved across character switches. */
+  private savedFishRecords: Record<string, FishSaveData> = {};
+
   private buildSaveData(): SaveData {
+    // Merge: start with all previously saved fish records, then overlay current fish
+    const allFish: Record<string, FishSaveData> = { ...this.savedFishRecords };
+    // Always write current fish's live state (most up-to-date)
+    allFish[this.fish.id] = {
+      affection: this.fishAffection.value,
+      tier: this.fishAffection.tier,
+      drift: this.fish.currentDrift,
+      tierFloor: this.fishAffection.floor,
+      peakValue: this.fishAffection.peakValue,
+      lastChangeSessionId: this.fishAffection.lastChangeSessionId,
+      lastChangeDelta: this.fishAffection.lastChangeDelta,
+      floor: this.fishAffection.floor,
+    };
+
     return {
-      fish: {
-        [this.fish.id]: {
-          affection: this.fishAffection.value,
-          tier: this.fishAffection.tier,
-          drift: this.fish.currentDrift,
-          tierFloor: this.fishAffection.floor,
-          peakValue: this.fishAffection.peakValue,
-          lastChangeSessionId: this.fishAffection.lastChangeSessionId,
-          lastChangeDelta: this.fishAffection.lastChangeDelta,
-          floor: this.fishAffection.floor,
-        },
-      },
+      fish: allFish,
       flags: this.flagSystem.serialize(),
       seenBeats: Array.from(this.seenBeats),
       castCount: this.castCount,
@@ -1876,6 +2382,13 @@ export class FloaterGame extends Component {
   private loadGame(): void {
     const data = this.saveSystem.loadSave();
     if (data) {
+      // Populate savedFishRecords with ALL fish data from save
+      this.savedFishRecords = {};
+      for (const fishId of Object.keys(data.fish)) {
+        this.savedFishRecords[fishId] = { ...data.fish[fishId] };
+      }
+      console.log(`[FloaterGame] Loaded ${Object.keys(this.savedFishRecords).length} fish records: ${Object.keys(this.savedFishRecords).join(', ')}`);
+
       const fishData = data.fish[this.fish.id];
       if (fishData) {
         this.fish.affection = fishData.affection;
@@ -1906,6 +2419,7 @@ export class FloaterGame extends Component {
       console.log(`[FloaterGame] Loaded save: castCount=${this.castCount}, castIndexWithinTier=${this.castIndexWithinTier}, tier=${TIER_NAMES[this.fish.tier]}`);
     } else {
       console.log('[FloaterGame] No save data found, starting fresh');
+      this.savedFishRecords = {};
     }
   }
 
@@ -1914,6 +2428,21 @@ export class FloaterGame extends Component {
     if (!this.renderer) return;
     this.renderer.clear();
     this.renderer.drawBackground();
+
+    // Draw title logo and decorative floater on title screen
+    if (this.phase === GamePhase.Title) {
+      // Draw idle ripples behind the float
+      this.renderer.drawSplashRipples(this.floatIdleRipples);
+      // Draw fishing line from off-screen to the bobbing float
+      const titleFloatX = CANVAS_WIDTH / 2;
+      const titleBobOffset = Math.sin(this.time * FLOAT_BOB_SPEED) * FLOAT_BOB_AMPLITUDE;
+      const titleFloatY = 570 + titleBobOffset;
+      this.renderer.drawCastFishingLine(titleFloatX, titleFloatY, 1.0, USE_POV_CAST_ANIMATION);
+      // Draw bobbing float
+      this.renderer.drawFloatAtScaled(titleFloatX, titleFloatY, 1.0, true);
+      // Draw title logo on top
+      this.renderer.drawTitleLogo();
+    }
 
     // Only show static float during active phases (hide during Title, LakeIdle, Idle, CastCharging, Ending)
     const showStaticFloat = this.phase === GamePhase.FloatBounce
@@ -1931,15 +2460,17 @@ export class FloaterGame extends Component {
       const dipOffset = this.floatDip;
       const floatDrawX = this.landingTargetX + this.actionAnimOffsetX;
       const floatDrawY = this.landingTargetY + bobOffset + dipOffset + this.actionAnimOffsetY;
+      // Draw periodic idle ripples FIRST (behind float)
+      this.renderer.drawSplashRipples(this.floatIdleRipples);
       this.renderer.drawCastFishingLine(floatDrawX, floatDrawY, 1.0, USE_POV_CAST_ANIMATION);
       // During FloatBounce, draw float with bounce offset
       if (this.phase === GamePhase.FloatBounce && !this.showingSurpriseEmoji) {
         const t = this.floatBounceTimer / FLOAT_BOUNCE_DURATION;
         const amplitude = FLOAT_BOUNCE_AMPLITUDE * (1 - t);
         const bobY = amplitude * Math.sin(t * FLOAT_BOUNCE_COUNT * 2 * Math.PI);
-        this.renderer.drawFloatAtScaled(this.landingTargetX, this.landingTargetY + bobY, 1.0);
+        this.renderer.drawFloatAtScaled(this.landingTargetX, this.landingTargetY + bobY, 1.0, true);
       } else {
-        this.renderer.drawFloatAtScaled(floatDrawX, floatDrawY, 1.0);
+        this.renderer.drawFloatAtScaled(floatDrawX, floatDrawY, 1.0, true);
       }
     }
 
@@ -1959,15 +2490,20 @@ export class FloaterGame extends Component {
       } else {
         this.renderer.drawCastFishingLine(this.castFloatX, this.castFloatY, 1.0, USE_POV_CAST_ANIMATION);
       }
-      this.renderer.drawFloatAt(this.castFloatX, this.castFloatY);
+      this.renderer.drawFloatAt(this.castFloatX, this.castFloatY, true);
       this.renderer.drawSplashRipples(this.splashRipples);
     }
     if (this.phase === GamePhase.CastCharging) this.renderer.drawPowerGauge(this.powerGaugeValue);
-    if (this.fishAlpha > 0) this.renderer.drawFishPortrait(this.fishAlpha, this.portraitOffsetX, this.portraitOffsetY, this.getPortraitTexture());
+    if (this.fishAlpha > 0) {
+      this.renderer.drawCharacterRipples(this.characterRipples, this.fishAlpha);
+      this.renderer.drawFishPortrait(this.fishAlpha, this.portraitOffsetX, this.portraitOffsetY, this.getPortraitTexture());
+    }
 
 
     // Draw floating emotion icons
     this.renderer.drawFloatingEmotionIcons(this.floatingIcons);
+
+    // Progress dots are now rendered in XAML (see floater.xaml HUD section)
 
     // Update XAML dialogue panel — controlled by phase, not text length (prevents flicker)
     const isDialoguePhase = this.phase === GamePhase.Exchange
@@ -1995,6 +2531,15 @@ export class FloaterGame extends Component {
       floaterVM.tapIndicatorVisible = false;
     }
 
+    // Draw fade overlay (on top of everything)
+    if (this.fadeAlpha > 0) {
+      const fadeBrush = new SolidBrush(new Color(0, 0, 0, this.fadeAlpha));
+      this.builder.drawRect(fadeBrush, null, {
+        x: 0, y: 0,
+        width: CANVAS_WIDTH, height: CANVAS_HEIGHT,
+      });
+    }
+
     floaterVM.drawCommands = this.builder.build();
   }
 
@@ -2005,8 +2550,27 @@ export class FloaterGame extends Component {
       service.enableFocusedInteraction({
         disableFocusExitButton: true,
         disableEmotesButton: true,
-        interactionStringId: 'floater_touch',
+        interactionStringId: 'floater_game',
       });
+
+      // Disable default tap/trail visual feedback since the game has its own UI
+      service.setTapOptions(false, {
+        startColor: new Color(0, 0, 0, 0),
+        endColor: new Color(0, 0, 0, 0),
+        duration: 0,
+        startScale: 0,
+        endScale: 0,
+      });
+
+      service.setTrailOptions(false, {
+        startColor: new Color(0, 0, 0, 0),
+        endColor: new Color(0, 0, 0, 0),
+        startWidth: 0,
+        endWidth: 0,
+        length: 0,
+      });
+
+      console.log('[FloaterGame] Touch input enabled, default UI hidden');
     } catch (e) {
       console.log('[FloaterGame] Failed to enable touch input');
     }
@@ -2033,20 +2597,46 @@ export class FloaterGame extends Component {
       && this.phase !== GamePhase.LakeIdle && this.phase !== GamePhase.CastCharging
       && this.phase !== GamePhase.CastFlying && this.phase !== GamePhase.FloatLanded
       && this.phase !== GamePhase.Ending;
-    floaterVM.actionMenuVisible = this.phase === GamePhase.ActionSelect;
+    floaterVM.actionMenuVisible = this.phase === GamePhase.ActionSelect || this.phase === GamePhase.FishReaction || this.phase === GamePhase.Exchange;
+    if (this.phase === GamePhase.ActionSelect) {
+      this.actionMenuAnimState = 'visible';
+      floaterVM.actionMenuOpacity = 1;
+      floaterVM.actionMenuTranslateY = 0;
+    } else if ((this.phase === GamePhase.FishReaction || this.phase === GamePhase.Exchange) && this.actionMenuAnimState !== 'hidden') {
+      this.actionMenuAnimState = 'visible';
+      floaterVM.actionMenuOpacity = 1;
+      floaterVM.actionMenuTranslateY = 0;
+    } else {
+      this.actionMenuAnimState = 'hidden';
+      floaterVM.actionMenuOpacity = 0;
+      floaterVM.actionMenuTranslateY = 40;
+    }
     floaterVM.departureVisible = false; // Departure now uses dialogue panel
     floaterVM.idleVisible = this.phase === GamePhase.Idle;
     floaterVM.skipButtonVisible = this.canSkip;
     floaterVM.skipButtonOpacity = this.canSkip ? 1 : 0;
-    floaterVM.castButtonVisible = this.phase === GamePhase.LakeIdle;
+    floaterVM.castButtonVisible = false;
+    floaterVM.inventoryButtonVisible = false;
+    floaterVM.journalButtonVisible = false;
     floaterVM.fishNameText = this.fish.name;
     floaterVM.inventoryVisible = false;
     floaterVM.journalVisible = false;
     floaterVM.noLureWarningVisible = false;
     floaterVM.catchChoiceVisible = false;
     floaterVM.endingVisible = this.phase === GamePhase.Ending;
-    floaterVM.inventoryButtonVisible = this.phase === GamePhase.LakeIdle || this.phase === GamePhase.Idle;
-    floaterVM.journalButtonVisible = this.phase === GamePhase.LakeIdle || this.phase === GamePhase.Idle;
+    // Idle bar visibility sync
+    const showIdleBarSync = this.phase === GamePhase.LakeIdle || this.phase === GamePhase.CastCharging
+      || this.phase === GamePhase.CastFlying || this.phase === GamePhase.FloatLanded || this.phase === GamePhase.FloatBounce;
+    floaterVM.idleBarVisible = showIdleBarSync;
+    if (showIdleBarSync) {
+      this.idleBarAnimState = 'visible';
+      floaterVM.idleBarOpacity = 1;
+      floaterVM.idleBarTranslateY = 0;
+    } else {
+      this.idleBarAnimState = 'hidden';
+      floaterVM.idleBarOpacity = 0;
+      floaterVM.idleBarTranslateY = 40;
+    }
     floaterVM.tierTransitionVisible = this.tierNotifyTimer > 0;
     this.syncAffectionDisplay();
 

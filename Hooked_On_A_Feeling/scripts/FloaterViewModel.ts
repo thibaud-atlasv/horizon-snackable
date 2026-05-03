@@ -1,6 +1,7 @@
 import { uiViewModel, UiViewModel, UiEvent } from 'meta/custom_ui';
 import { DrawingCommandData } from 'meta/custom_ui';
 import { serializable } from 'meta/platform_api';
+import type { TextureAsset } from 'meta/worlds';
 
 // === Event Payloads ===
 @serializable()
@@ -48,6 +49,12 @@ export const onResetSavePressed = new UiEvent('onResetSavePressed');
 export const onResetSaveConfirm = new UiEvent('onResetSaveConfirm');
 export const onResetSaveCancel = new UiEvent('onResetSaveCancel');
 
+
+@uiViewModel()
+export class DotViewModel extends UiViewModel {
+  color: string = ""
+}
+
 // === ViewModel ===
 @uiViewModel()
 export class FloaterViewModel extends UiViewModel {
@@ -83,6 +90,33 @@ export class FloaterViewModel extends UiViewModel {
   // Affection bar (replaces mood icons)
   affectionBarWidth: number = 0; // 0-200 pixels (mapped from 0-100%)
   emotionName: string = 'Unaware';
+
+  // Redesigned HUD: portrait icon + name/mood + progress dots
+  hudPortrait?: TextureAsset;
+  hudShowNereia: boolean = true;
+  hudShowKasha: boolean = false;
+  hudNameMoodText: string = '';
+  hudNameText: string = '';
+  hudMoodText: string = '';
+  hudNameColor: string = '#9B7FCC';
+  hudMoodColor: string = '#8A9AB0';
+  progressDotsText: string = '';
+
+  // Progress dots — dynamic collection bound to ItemsControl
+  progressDots: readonly DotViewModel[] = [];
+
+  /** Update progress dots from total and filled counts */
+  setProgressDots(total: number, filled: number): void {
+    const filledColor = '#9B7FCC';
+    const emptyColor = '#3D2E66';
+    const dots: DotViewModel[] = [];
+    for (let i = 0; i < total; i++) {
+      const item = new DotViewModel();
+      item.color = i < filled ? filledColor : emptyColor;
+      dots.push(item);
+    }
+    this.progressDots = dots;
+  }
 
   // Tier transition notification
   tierTransitionVisible: boolean = false;
@@ -156,7 +190,40 @@ export class FloaterViewModel extends UiViewModel {
   actionDriftEnabled: boolean = true;
   actionReelEnabled: boolean = true;
 
-  // === Journal Button ===
+  // Action button animation state (driven from game loop)
+  actionMenuOpacity: number = 0;
+  actionMenuScale: number = 0.8;
+  actionMenuTranslateY: number = 30;
+  actionWaitBtnOpacity: number = 1;
+  actionTwitchBtnOpacity: number = 1;
+  actionDriftBtnOpacity: number = 1;
+  actionReelBtnOpacity: number = 1;
+  actionWaitBtnScale: number = 1;
+  actionTwitchBtnScale: number = 1;
+  actionDriftBtnScale: number = 1;
+  actionReelBtnScale: number = 1;
+  actionWaitBtnTranslateY: number = 0;
+  actionTwitchBtnTranslateY: number = 0;
+  actionDriftBtnTranslateY: number = 0;
+  actionReelBtnTranslateY: number = 0;
+
+  // === Idle Button Bar (Bait / Cast / Journal) ===
+  idleBarVisible: boolean = false;
+  idleBarOpacity: number = 0;
+  idleBarTranslateY: number = 40;
+  // Per-button animation
+  idleBaitBtnOpacity: number = 1;
+  idleBaitBtnTranslateY: number = 0;
+  idleCastBtnOpacity: number = 1;
+  idleCastBtnTranslateY: number = 0;
+  idleJournalBtnOpacity: number = 1;
+  idleJournalBtnTranslateY: number = 0;
+  // Per-button enabled state (disabled during cast sequence)
+  idleBaitBtnEnabled: boolean = true;
+  idleCastBtnEnabled: boolean = true;
+  idleJournalBtnEnabled: boolean = true;
+
+  // === Journal Button (legacy, kept for backward compat) ===
   journalButtonVisible: boolean = false;
 
   /** Switch journal tab by index (0-3). */

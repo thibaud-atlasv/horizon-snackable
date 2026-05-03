@@ -7,12 +7,12 @@ export const nereiaNeutralTexture: TextureAsset = new TextureAsset("@sprites/ner
 export const kashaNeutralTexture: TextureAsset = new TextureAsset("@sprites/char_veiltail_neutral.png");
 
 // === Fishing Float ===
-export const fishingFloatTexture: TextureAsset = new TextureAsset("@sprites/fishing_float.png");
+export const fishingFloatTexture: TextureAsset = new TextureAsset("@sprites/float_bobber.png");
 
 // === Backgrounds ===
 export const bgLilyShallowsTexture: TextureAsset = new TextureAsset("@sprites/bg_lily_shallows.png");
 
-// === Mood Icons (5 affection stages) ===
+// === Mood Icons (5 affection stagesf) ===
 export const moodIconUnawareTexture: TextureAsset = new TextureAsset("@sprites/mood_icon_unaware.png");
 export const moodIconCuriousTexture: TextureAsset = new TextureAsset("@sprites/mood_icon_curious.png");
 export const moodIconFamiliarTexture: TextureAsset = new TextureAsset("@sprites/mood_icon_familiar.png");
@@ -30,13 +30,19 @@ export const emotionSadnessTexture: TextureAsset = new TextureAsset("@sprites/em
 export const emotionBoredomTexture: TextureAsset = new TextureAsset("@sprites/emotion_boredom.png");
 export const emotionDelightTexture: TextureAsset = new TextureAsset("@sprites/emotion_delight.png");
 
+// === Title Logo ===
+export const titleTexture: TextureAsset = new TextureAsset("@sprites/title.png");
+
 // === UI / Title ===
-export const titleTextTexture: TextureAsset = new TextureAsset("@sprites/title_text.png");
-export const taglineTextTexture: TextureAsset = new TextureAsset("@sprites/tagline_text.png");
-export const logoHorizonTexture: TextureAsset = new TextureAsset("@sprites/logo_horizon.png");
 export const iconJournalTexture: TextureAsset = new TextureAsset("@sprites/icon_journal.png");
 export const iconTackleboxTexture: TextureAsset = new TextureAsset("@sprites/icon_tacklebox.png");
 export const iconPadlockTexture: TextureAsset = new TextureAsset("@sprites/icon_padlock.png");
+
+// === Action Icons (Floater Mini-Game) ===
+export const actionIconWaitTexture: TextureAsset = new TextureAsset("@sprites/action_icon_wait.png");
+export const actionIconTwitchTexture: TextureAsset = new TextureAsset("@sprites/action_icon_twitch.png");
+export const actionIconDriftTexture: TextureAsset = new TextureAsset("@sprites/action_icon_drift.png");
+export const actionIconReelTexture: TextureAsset = new TextureAsset("@sprites/action_icon_reel.png");
 
 // === CG Gallery ===
 export const cgNereiaLoveEndTexture: TextureAsset = new TextureAsset("@sprites/nereia_love_end.png");

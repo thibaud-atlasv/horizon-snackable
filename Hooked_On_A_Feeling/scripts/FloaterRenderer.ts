@@ -8,6 +8,7 @@ import {
   DrawingCommandsBuilder,
   DrawingCommandData,
   SolidBrush,
+  LinearGradientBrush,
   Pen,
   Font,
   FontFamily,
@@ -31,6 +32,7 @@ import {
   GAUGE_BORDER_RADIUS, GAUGE_INDICATOR_HEIGHT,
   COLOR_GAUGE_BG, COLOR_GAUGE_FILL, COLOR_GAUGE_INDICATOR, COLOR_GAUGE_BORDER,
   EMOTION_ICON_SIZE, EMOTION_ICON_BOUNCE_TIME, EMOTION_ICON_FADE_TIME,
+  CHAR_RIPPLE_Y_SQUISH,
 } from './Constants';
 import type { SplashRipple, FloatingEmotionIcon } from './Types';
 import { EmotionIconType } from './Types';
@@ -38,6 +40,7 @@ import { Vec3D } from './Vec3D';
 import {
   bgLilyShallowsTexture,
   nereiaNeutralTexture,
+  titleTexture,
   emotionCuriosityTexture, emotionSurpriseTexture, emotionWarmthTexture,
   emotionShockTexture, emotionHesitationTexture, emotionContentmentTexture,
   emotionSadnessTexture, emotionBoredomTexture, emotionDelightTexture,
@@ -85,6 +88,16 @@ export class FloaterRenderer {
     this.builder.drawRect(this.bgBrush, null, { x: 0, y: 0, width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
   }
 
+  /** Draw the title logo sprite centered horizontally near the top of the screen. */
+  drawTitleLogo(): void {
+    const logoWidth = 340;
+    const logoHeight = 170;
+    const x = (CANVAS_WIDTH - logoWidth) / 2;
+    const y = 85;
+    const logoBrush = new ImageBrush(titleTexture);
+    this.builder.drawRect(logoBrush, null, { x, y, width: logoWidth, height: logoHeight });
+  }
+
   drawFishPortrait(alpha: number, offsetX: number = 0, offsetY: number = 0, portraitTexture: TextureAsset = nereiaNeutralTexture): void {
     if (alpha <= 0) return;
     const size = FISH_PORTRAIT_SIZE;
@@ -108,8 +121,20 @@ export class FloaterRenderer {
       { x: drawX, y: drawY, width: scaledSize, height: scaledSize });
   }
 
-
-
+  /** Draw expanding + fading character ripples (same technique as splash ripples).
+   *  Positioned at the middle of the portrait (water line). */
+  drawCharacterRipples(ripples: SplashRipple[], portraitAlpha: number): void {
+    if (portraitAlpha <= 0) return;
+    for (const ripple of ripples) {
+      if (ripple.alpha <= 0 || ripple.radius <= 0) continue;
+      const effectiveAlpha = ripple.alpha * portraitAlpha * 0.6;
+      const rippleBrush = new SolidBrush(new Color(0.78, 0.88, 1.0, effectiveAlpha));
+      const ripplePen = new Pen(rippleBrush, 1.5);
+      this.builder.drawEllipse(null, ripplePen,
+        { x: ripple.x, y: ripple.y },
+        { x: ripple.radius, y: ripple.radius * CHAR_RIPPLE_Y_SQUISH });
+    }
+  }
 
 
   drawCastFishingLine(floaterX: number, floaterY: number, flightProgress: number, usePOV: boolean = false): void {
@@ -138,27 +163,43 @@ export class FloaterRenderer {
     const controlX = midX + Math.abs(dy) * 0.05;
     const controlY = midY - Math.abs(dx) * sagFactor;
 
-    const pathData = `M ${startX.toFixed(1)} ${startY.toFixed(1)} Q ${controlX.toFixed(1)} ${controlY.toFixed(1)} ${floaterX.toFixed(1)} ${floaterY.toFixed(1)}`;
+    // Connect line to top center of float (where the brass ring is) instead of center
+    const lineEndY = floaterY - FLOAT_HEIGHT / 2 + 5;
+    const pathData = `M ${startX.toFixed(1)} ${startY.toFixed(1)} Q ${controlX.toFixed(1)} ${controlY.toFixed(1)} ${floaterX.toFixed(1)} ${lineEndY.toFixed(1)}`;
     this.builder.drawPath(null, this.linePen, pathData);
   }
 
-  drawFloatAt(x: number, y: number): void {
+  drawFloatAt(x: number, y: number, inWater: boolean = false): void {
     const halfW = FLOAT_WIDTH / 2;
     const halfH = FLOAT_HEIGHT / 2;
     this.builder.drawRect(this.floatBrush, null,
       { x: x - halfW, y: y - halfH, width: FLOAT_WIDTH, height: FLOAT_HEIGHT });
+
+    // Overlay a water submersion gradient when the float is resting in water
+    if (inWater) {
+      this.drawWaterGradientOverlay(x - halfW, y - halfH, FLOAT_WIDTH, FLOAT_HEIGHT);
+    }
   }
 
   /** Draw float at position with scale (for POV depth effect) */
-  drawFloatAtScaled(x: number, y: number, scale: number): void {
+  drawFloatAtScaled(x: number, y: number, scale: number, inWater: boolean = false): void {
     if (scale <= 0.01) return;
-    const halfW = FLOAT_WIDTH / 2;
-    const halfH = FLOAT_HEIGHT / 2;
     const scaledW = FLOAT_WIDTH * scale;
     const scaledH = FLOAT_HEIGHT * scale;
 
     this.builder.drawRect(this.floatBrush, null,
       { x: x - scaledW / 2, y: y - scaledH / 2, width: scaledW, height: scaledH });
+
+    // Overlay a water submersion gradient when the float is resting in water
+    if (inWater) {
+      this.drawWaterGradientOverlay(x - scaledW / 2, y - scaledH / 2, scaledW, scaledH);
+    }
+  }
+
+  /** Draw a vertical gradient overlay to simulate the lower portion of the float being submerged.
+   *  Top is fully transparent, bottom fades to a semi-transparent blue-white. */
+  private drawWaterGradientOverlay(rectX: number, rectY: number, width: number, height: number): void {
+    // was ugly
   }
 
   drawSplashRipples(ripples: SplashRipple[]): void {
@@ -304,11 +345,14 @@ export class FloaterRenderer {
     const startX = usePOV ? POV_LINE_START_X : LINE_START_X;
     const startY = usePOV ? POV_LINE_START_Y : LINE_START_Y;
 
+    // Connect line to top center of float (brass ring) instead of center
+    const lineEndY = targetY - FLOAT_HEIGHT / 2 + 5;
+
     // Resting Bézier control point (same math as drawCastFishingLine with flightProgress=1.0)
     const midX = (startX + targetX) / 2;
-    const midY = (startY + targetY) / 2;
+    const midY = (startY + lineEndY) / 2;
     const dx = targetX - startX;
-    const dy = targetY - startY;
+    const dy = lineEndY - startY;
     const sagFactor = 0.15;
     const controlX = midX + Math.abs(dy) * 0.05;
     const controlY = midY - Math.abs(dx) * sagFactor;
@@ -321,7 +365,7 @@ export class FloaterRenderer {
       // Quadratic Bézier: B(t) = (1-t)²·P0 + 2·(1-t)·t·P1 + t²·P2
       const oneMinusT = 1 - t;
       const bx = oneMinusT * oneMinusT * startX + 2 * oneMinusT * t * controlX + t * t * targetX;
-      const by = oneMinusT * oneMinusT * startY + 2 * oneMinusT * t * controlY + t * t * targetY;
+      const by = oneMinusT * oneMinusT * startY + 2 * oneMinusT * t * controlY + t * t * lineEndY;
       restingPoints.push({ x: bx, y: by });
     }
 
@@ -363,6 +407,38 @@ export class FloaterRenderer {
     }
 
     this.builder.drawPath(null, this.linePen, pathData);
+  }
+
+  /**
+   * Draw progress dots as vector circles on the DrawingSurface.
+   * Replaces the XAML TextBlock that used ● and ○ Unicode characters
+   * which don't render in Meta Horizon Studio.
+   * @param totalDots Total number of dots to draw
+   * @param filledDots Number of filled (completed) dots
+   * @param x Starting X position
+   * @param y Center Y position
+   */
+  drawProgressDots(totalDots: number, filledDots: number, x: number, y: number): void {
+    if (totalDots <= 0) return;
+
+    const dotRadius = 5;
+    const dotSpacing = 14;
+    const filledBrush = new SolidBrush(Color.fromHex(COLOR_NEREIA_ACCENT));
+    const emptyBrush = new SolidBrush(new Color(0.61, 0.5, 0.8, 0.3)); // Dim purple
+    const emptyPenBrush = new SolidBrush(Color.fromHex(COLOR_NEREIA_ACCENT));
+    const emptyPen = new Pen(emptyPenBrush, 1.2);
+
+    for (let i = 0; i < totalDots; i++) {
+      const cx = x + i * dotSpacing + dotRadius;
+      const cy = y;
+      if (i < filledDots) {
+        // Filled dot
+        this.builder.drawEllipse(filledBrush, null, { x: cx, y: cy }, { x: dotRadius, y: dotRadius });
+      } else {
+        // Empty dot (outline only)
+        this.builder.drawEllipse(emptyBrush, emptyPen, { x: cx, y: cy }, { x: dotRadius, y: dotRadius });
+      }
+    }
   }
 
   /**

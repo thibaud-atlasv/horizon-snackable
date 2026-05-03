@@ -104,6 +104,35 @@ class CharacterRegistry {
     return character.getCastsForTier(tier).length;
   }
 
+  /** Get total number of casts across ALL tiers for a character */
+  getTotalCastCount(characterId: string): number {
+    const character = this.characters.get(characterId);
+    if (!character) return 0;
+    let total = 0;
+    const tiers = [AffectionTier.Unaware, AffectionTier.Curious, AffectionTier.Familiar, AffectionTier.Trusting, AffectionTier.Bonded];
+    for (const tier of tiers) {
+      total += character.getCastsForTier(tier).length;
+    }
+    return total;
+  }
+
+  /** Get the cumulative cast index (across all tiers) given current tier and within-tier index */
+  getCumulativeCastIndex(characterId: string, currentTier: AffectionTier, withinTierIndex: number): number {
+    const character = this.characters.get(characterId);
+    if (!character) return 0;
+    let cumulative = 0;
+    const tiers = [AffectionTier.Unaware, AffectionTier.Curious, AffectionTier.Familiar, AffectionTier.Trusting, AffectionTier.Bonded];
+    for (const tier of tiers) {
+      if (tier < currentTier) {
+        cumulative += character.getCastsForTier(tier).length;
+      } else if (tier === currentTier) {
+        cumulative += withinTierIndex;
+        break;
+      }
+    }
+    return cumulative;
+  }
+
   /** Check if all casts in a tier are exhausted */
   isTierExhausted(characterId: string, tier: AffectionTier, castIndex: number): boolean {
     const character = this.characters.get(characterId);

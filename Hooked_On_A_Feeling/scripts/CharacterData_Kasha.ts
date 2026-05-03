@@ -11,6 +11,7 @@
 import type { CharacterConfig, CastData, FishCharacter, CatchSequenceData } from './Types';
 import { AffectionTier, ExpressionState, DriftState, EmotionIconType } from './Types';
 import { ActionId } from './Constants';
+import { kashaNeutralTexture, nereiaNeutralTexture } from './Assets';
 
 // ============================================================
 // TIER 1: The Champion (Casts 1-2)
@@ -168,12 +169,13 @@ export const KASHA_CHARACTER: CharacterConfig = {
     id: 'kasha',
     name: 'Kasha',
     species: 'Siamese Fighting Fish (Betta)',
-    accentColor: '#D33A2C',
+    accentColor: '#D4833A',
     currentExpression: ExpressionState.Neutral,
     affection: 0,
     tier: AffectionTier.Unaware,
     currentDrift: DriftState.None,
     tierFloor: 0,
+    portrait: kashaNeutralTexture,
   }),
 
   catchSequenceData: KASHA_CATCH_SEQUENCE_DATA,

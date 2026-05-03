@@ -10,6 +10,7 @@
 import type { CharacterConfig, CastData, FishCharacter, CatchSequenceData, Beat } from './Types';
 import { AffectionTier, ExpressionState, DriftState, EmotionIconType } from './Types';
 import { ActionId } from './Constants';
+import { nereiaNeutralTexture } from './Assets';
 
 // ============================================================================
 // TIER 1: First Contact (Casts 1–2)
@@ -520,9 +521,6 @@ export const NEREIA_CHARACTER: CharacterConfig = {
 
   portraitAssets: {
     neutral: '@sprites/nereia_neutral.png',
-    curious: '@sprites/nereia_curious.png',
-    warm: '@sprites/nereia_warm.png',
-    alarmed: '@sprites/nereia_alarmed.png',
   },
 
   preferredLures: ['gold_teardrop', 'shell_hook'],
@@ -559,6 +557,7 @@ export const NEREIA_CHARACTER: CharacterConfig = {
     tier: AffectionTier.Unaware,
     currentDrift: DriftState.None,
     tierFloor: 0,
+    portrait: nereiaNeutralTexture,
   }),
 
   catchSequenceData: NEREIA_CATCH_SEQUENCE_DATA,
