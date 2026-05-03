@@ -105,8 +105,7 @@ import { TextureAsset } from 'meta/worlds';
 export const playerTexture: TextureAsset = new TextureAsset("@sprites/player.png");
 export const enemySlimeTexture: TextureAsset = new TextureAsset("@sprites/enemy_slime.png");
 export const backgroundTexture: TextureAsset = new TextureAsset("@sprites/background.png");
-export const logoTitleTexture: TextureAsset = new TextureAsset("@sprites/logo_title.png");
-export const labelScoreTexture: TextureAsset = new TextureAsset("@sprites/label_score.png");
+export const : TextureAsset = new TextureAsset("@sprites/logo_title.png");
 ```
 
 ### Using Assets in Draw Calls

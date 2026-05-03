@@ -379,8 +379,8 @@ export class FloaterGame extends Component {
     floaterVM.idleBaitBtnEnabled = false;
     floaterVM.idleCastBtnEnabled = false;
     floaterVM.idleJournalBtnEnabled = false;
-    // Idle bar stays visible during CastCharging but mark Cast selected
-    this.setIdleBarResponding('cast');
+    // Hide idle bar immediately when cast starts (animate out)
+    this.hideIdleBar();
   }
 
   @subscribe(onFloaterCatchChoice)
@@ -2427,7 +2427,13 @@ export class FloaterGame extends Component {
   private render(): void {
     if (!this.renderer) return;
     this.renderer.clear();
-    this.renderer.drawBackground();
+
+    // Use title background on title screen, pond background elsewhere
+    if (this.phase === GamePhase.Title) {
+      this.renderer.drawTitleBackground();
+    } else {
+      this.renderer.drawBackground();
+    }
 
     // Draw title logo and decorative floater on title screen
     if (this.phase === GamePhase.Title) {
@@ -2440,8 +2446,6 @@ export class FloaterGame extends Component {
       this.renderer.drawCastFishingLine(titleFloatX, titleFloatY, 1.0, USE_POV_CAST_ANIMATION);
       // Draw bobbing float
       this.renderer.drawFloatAtScaled(titleFloatX, titleFloatY, 1.0, true);
-      // Draw title logo on top
-      this.renderer.drawTitleLogo();
     }
 
     // Only show static float during active phases (hide during Title, LakeIdle, Idle, CastCharging, Ending)
@@ -2624,9 +2628,8 @@ export class FloaterGame extends Component {
     floaterVM.noLureWarningVisible = false;
     floaterVM.catchChoiceVisible = false;
     floaterVM.endingVisible = this.phase === GamePhase.Ending;
-    // Idle bar visibility sync
-    const showIdleBarSync = this.phase === GamePhase.LakeIdle || this.phase === GamePhase.CastCharging
-      || this.phase === GamePhase.CastFlying || this.phase === GamePhase.FloatLanded || this.phase === GamePhase.FloatBounce;
+    // Idle bar visibility sync — only visible during LakeIdle (hides when cast starts)
+    const showIdleBarSync = this.phase === GamePhase.LakeIdle;
     floaterVM.idleBarVisible = showIdleBarSync;
     if (showIdleBarSync) {
       this.idleBarAnimState = 'visible';

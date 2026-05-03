@@ -11,6 +11,7 @@ export const fishingFloatTexture: TextureAsset = new TextureAsset("@sprites/floa
 
 // === Backgrounds ===
 export const bgLilyShallowsTexture: TextureAsset = new TextureAsset("@sprites/bg_lily_shallows.png");
+export const titleBackgroundTexture: TextureAsset = new TextureAsset("@sprites/title_background.png");
 
 // === Mood Icons (5 affection stagesf) ===
 export const moodIconUnawareTexture: TextureAsset = new TextureAsset("@sprites/mood_icon_unaware.png");
@@ -30,8 +31,6 @@ export const emotionSadnessTexture: TextureAsset = new TextureAsset("@sprites/em
 export const emotionBoredomTexture: TextureAsset = new TextureAsset("@sprites/emotion_boredom.png");
 export const emotionDelightTexture: TextureAsset = new TextureAsset("@sprites/emotion_delight.png");
 
-// === Title Logo ===
-export const titleTexture: TextureAsset = new TextureAsset("@sprites/title.png");
 
 // === UI / Title ===
 export const iconJournalTexture: TextureAsset = new TextureAsset("@sprites/icon_journal.png");
@@ -43,6 +42,11 @@ export const actionIconWaitTexture: TextureAsset = new TextureAsset("@sprites/ac
 export const actionIconTwitchTexture: TextureAsset = new TextureAsset("@sprites/action_icon_twitch.png");
 export const actionIconDriftTexture: TextureAsset = new TextureAsset("@sprites/action_icon_drift.png");
 export const actionIconReelTexture: TextureAsset = new TextureAsset("@sprites/action_icon_reel.png");
+
+// === HUD Action Icons ===
+export const tackleboxIconTexture: TextureAsset = new TextureAsset("@sprites/action_icon_tacklebox.png");
+export const castIconTexture: TextureAsset = new TextureAsset("@sprites/action_icon_cast.png");
+export const journalIconTexture: TextureAsset = new TextureAsset("@sprites/action_icon_journal.png");
 
 // === CG Gallery ===
 export const cgNereiaLoveEndTexture: TextureAsset = new TextureAsset("@sprites/nereia_love_end.png");

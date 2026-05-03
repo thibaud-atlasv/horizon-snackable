@@ -39,8 +39,8 @@ import { EmotionIconType } from './Types';
 import { Vec3D } from './Vec3D';
 import {
   bgLilyShallowsTexture,
+  titleBackgroundTexture,
   nereiaNeutralTexture,
-  titleTexture,
   emotionCuriosityTexture, emotionSurpriseTexture, emotionWarmthTexture,
   emotionShockTexture, emotionHesitationTexture, emotionContentmentTexture,
   emotionSadnessTexture, emotionBoredomTexture, emotionDelightTexture,
@@ -69,6 +69,7 @@ export class FloaterRenderer {
   private builder: DrawingCommandsBuilder;
 
   private bgBrush: ImageBrush;
+  private titleBgBrush: ImageBrush;
   private floatBrush: ImageBrush;
   private lineBrush: SolidBrush;
   private linePen: Pen;
@@ -76,6 +77,7 @@ export class FloaterRenderer {
   constructor(builder: DrawingCommandsBuilder) {
     this.builder = builder;
     this.bgBrush = new ImageBrush(bgLilyShallowsTexture, { stretch: Stretch.UniformToFill });
+    this.titleBgBrush = new ImageBrush(titleBackgroundTexture, { stretch: Stretch.UniformToFill });
     this.floatBrush = new ImageBrush(fishingFloatTexture);
     this.lineBrush = new SolidBrush(new Color(0.78, 0.85, 0.91, 0.5));
     this.linePen = new Pen(this.lineBrush, 1.5);
@@ -88,14 +90,8 @@ export class FloaterRenderer {
     this.builder.drawRect(this.bgBrush, null, { x: 0, y: 0, width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
   }
 
-  /** Draw the title logo sprite centered horizontally near the top of the screen. */
-  drawTitleLogo(): void {
-    const logoWidth = 340;
-    const logoHeight = 170;
-    const x = (CANVAS_WIDTH - logoWidth) / 2;
-    const y = 85;
-    const logoBrush = new ImageBrush(titleTexture);
-    this.builder.drawRect(logoBrush, null, { x, y, width: logoWidth, height: logoHeight });
+  drawTitleBackground(): void {
+    this.builder.drawRect(this.titleBgBrush, null, { x: 0, y: 0, width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
   }
 
   drawFishPortrait(alpha: number, offsetX: number = 0, offsetY: number = 0, portraitTexture: TextureAsset = nereiaNeutralTexture): void {

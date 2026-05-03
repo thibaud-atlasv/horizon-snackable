@@ -552,7 +552,7 @@
                   <Border x:Name="BtnBorder" CornerRadius="44"
                           Width="87" Height="87">
                     <Border.Background>
-                      <ImageBrush ImageSource="sprites/icon_tacklebox.png" Stretch="UniformToFill" />
+                      <ImageBrush ImageSource="sprites/action_icon_tacklebox.png" Stretch="UniformToFill" />
                     </Border.Background>
                     <Border.RenderTransform>
                       <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
@@ -587,11 +587,7 @@
                   <Border x:Name="BtnBorder" CornerRadius="50"
                           Width="100" Height="100">
                     <Border.Background>
-                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#2A4A6C" Offset="0" />
-                        <GradientStop Color="#1A3A5C" Offset="0.5" />
-                        <GradientStop Color="#0D1E35" Offset="1" />
-                      </LinearGradientBrush>
+                      <ImageBrush ImageSource="sprites/action_icon_cast.png" Stretch="UniformToFill" />
                     </Border.Background>
                     <Border.RenderTransform>
                       <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
@@ -599,8 +595,6 @@
                     <Border.RenderTransformOrigin>
                       <Point X="0.5" Y="0.5" />
                     </Border.RenderTransformOrigin>
-                    <TextBlock Text="⟶" FontSize="36" Foreground="#DDCDD6DC"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <ControlTemplate.Triggers>
                     <Trigger Property="IsPressed" Value="True">
@@ -628,7 +622,7 @@
                   <Border x:Name="BtnBorder" CornerRadius="44"
                           Width="87" Height="87">
                     <Border.Background>
-                      <ImageBrush ImageSource="sprites/icon_journal.png" Stretch="UniformToFill" />
+                      <ImageBrush ImageSource="sprites/action_icon_journal.png" Stretch="UniformToFill" />
                     </Border.Background>
                     <Border.RenderTransform>
                       <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />

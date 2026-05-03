@@ -1,108 +1,118 @@
 /**
- * CharacterData_Kasha — Complete character configuration for Kasha.
- * A Siamese Fighting Fish (betta splendens). Loud, competitive, performative.
- * Hides vulnerability behind bravado. Calls Floater "baka."
- * Real name: Aki (revealed in Tier 5).
+ * CharacterData_Kasha — Kasha's character configuration.
  *
- * Contains: metadata, portrait assets, lure preferences, quest hints,
- * ALL tier dialogue (Tiers 1-5 inline), catch sequence, and initial state factory.
+ * Phase A: dialogue content lives in Story_Kasha.ts (Ink format) and is
+ * compiled into Beat[] on demand by InkBeatAdapter. This file holds only
+ * the metadata, departures, catch sequence, and character config.
  */
 
 import type { CharacterConfig, CastData, FishCharacter, CatchSequenceData } from './Types';
-import { AffectionTier, ExpressionState, DriftState, EmotionIconType } from './Types';
-import { ActionId } from './Constants';
-import { kashaNeutralTexture, nereiaNeutralTexture } from './Assets';
+import { AffectionTier, DriftState, EmotionIconType, ExpressionState } from './Types';
+import { inkCast } from './InkBeatAdapter';
+import { kashaNeutralTexture } from './Assets';
+
+const CHARACTER_ID = 'kasha';
 
 // ============================================================
-// TIER 1: The Champion (Casts 1-2)
+// Cast definitions (id, name, tier) — dialogue pulled from Ink
 // ============================================================
 
-const KASHA_TIER1_CASTS: CastData[] = [
-  // === Cast 1: The Champion ===
-  { id: 'kasha_t1_c1', tier: AffectionTier.Unaware, name: 'The Champion', beats: [
-    { beatId: 'kasha_t1_c1_b1', fishLines: ['Tch.', 'Another one.', 'You picked the wrong corner, you know.', 'This one is taken.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 0, resultExpression: ExpressionState.Curious, responseLines: ['...What.', 'What is that. That face.', "Don't just stand there looking\u2014 ugh, whatever. Stay if you want.", 'Not like I care.'], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['Hah\u2014', "Oh, you've got a mouth. Good.", 'I was getting bored.', "Don't disappoint me, baka."], emotionIcon: EmotionIconType.Surprise, flagsToSet: ['kasha.first_nickname'] }, [ActionId.Drift]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ["Wait\u2014 no, wait.", "I didn't say leave.", "I said it was taken. That's different.", '...Tch. Forget it. Stay.'], emotionIcon: EmotionIconType.Hesitation }, [ActionId.Reel]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Heh.', "You're either brave or you're stupid.", "I'll figure out which."], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['kasha.first_test_passed'] } }, seen: false },
-    { beatId: 'kasha_t1_c1_b2', fishLines: ["So you're the new face.", "Everyone's been whispering about it.", "'Someone new is around. Someone who stays.'", "Pff. As if that's interesting.", "...It's a little interesting."], actionEffects: { [ActionId.Wait]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['The usual ones.', "The silent one keeps a\u2014 she's got a list or something. Files, whatever.", "Creepy. Don't talk to her.", 'Actually, do. See if she even answers.', "...She'll answer you. She doesn't answer me."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['kasha.knows_nereia'] }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['HAH\u2014', 'Of who. The walking statue?', 'Please.', "Kasha doesn't get jealous.", "...I just said my own name in third person, didn't I.", 'Forget that.'], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['mood.kasha.third_person_slip'] }, [ActionId.Drift]: { affectionDelta: -1, resultExpression: ExpressionState.Alarmed, responseLines: ['\u2014', '...', 'What is that supposed to mean.', "Don't say weird things to people you just met, baka.", 'Tch.'], emotionIcon: EmotionIconType.Surprise, flagsToSet: ['mood.kasha.fissure_first'] }, [ActionId.Reel]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['Wow. Direct.', 'I like that.', '...Wait, no. Bad. Boring question.', 'Ask me something specific. Anything specific.', "I'll consider answering."], emotionIcon: EmotionIconType.Curiosity } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['Oi.', 'Come back.', "I'm not done with you.", '...Tomorrow.', "Don't be late, baka."], icon: EmotionIconType.Warmth }, [DriftState.Warm]: { dialogue: ['Tch.', "You're alright.", 'Maybe.'], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ['Whatever.', "I'll see if you come back or not.", "Doesn't matter to me."], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ["...You're weird.", 'Not in the good way.', 'Maybe try again.', "Or don't. Whatever."], icon: EmotionIconType.Hesitation }, [DriftState.Scared]: { dialogue: ['...', "Don't come back tomorrow."], icon: EmotionIconType.Shock } } },
+interface CastDef {
+  start: string;
+  name: string;
+  tier: AffectionTier;
+}
 
-  // === Cast 2: The Audience ===
-  { id: 'kasha_t1_c2', tier: AffectionTier.Unaware, name: 'The Audience', beats: [
-    { beatId: 'kasha_t1_c2_b1', fishLines: ['You came back.', 'Hah. Of course you did.', "I told you I wasn't done.", "...Don't read into that."], actionEffects: { [ActionId.Wait]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['Yeah.', 'Yeah, you are.', '...', "Stop looking at me like that. I'm thinking."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.first_quiet'] }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['I MISSED\u2014 no.', "I observed your continued absence. That's different.", "Pff. 'Missed me.' Listen to yourself.", "...You're insufferable, baka.", 'Stay.'], emotionIcon: EmotionIconType.Surprise }, [ActionId.Drift]: { affectionDelta: 0, resultExpression: ExpressionState.Neutral, responseLines: ['I\u2014 no. I did not.', 'I was going to be here regardless.', 'Whether you came or not.', '...That is not the same thing as wanting you to come.', 'Stop trying to read me.'], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Reel]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...', "You're really pushing it today.", '...', 'Stay.', "Don't make me say it twice."], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.told_him_stay'] } }, seen: false },
-    { beatId: 'kasha_t1_c2_b2', fishLines: ['So. Things you should know.', "Rule one: I'm the loudest person around here. That's not up for debate. That's a fact.", "Rule two: nobody \u2014 and I mean nobody \u2014 has ever bested me.", 'I am the champion. Of this corner. By right.', "Rule three: don't bother trying. You'll embarrass yourself.", "Rule four: if you do try, do it well, because if you embarrass yourself I'll have to mock you and I'm tired today.", '...', 'Why are you smiling.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ["That's the wrong answer.", '...', 'But fine.', 'Keep your reasons.'], emotionIcon: EmotionIconType.Hesitation }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['Of\u2014 shut up.', 'Of everything that matters.', "Don't make me list them. The list is long.", 'Trust me.', "...There's a list. There is."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 0, resultExpression: ExpressionState.Neutral, responseLines: ['...', 'What kind of question is that.', 'Of course they have. People challenge me constantly.', '...Constantly.', 'Next question.'], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['secret.kasha.never_challenged'] }, [ActionId.Reel]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...', 'To what.', "Don't say something stupid. Be specific.", "I am \u2014 I'm listening.", 'Specifically.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.challenge_accepted'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['Tomorrow.', 'Same corner.', "Don't bring anyone else.", '...Just you.', 'Baka.'], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.2.approaching'] }, [DriftState.Warm]: { dialogue: ['Maybe tomorrow.', "I haven't decided.", "...I've decided. Tomorrow."], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ["Whatever. I'll be here.", 'If you come, you come.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', 'Maybe think about whether you actually want to come back.', "I'm not begging."], icon: EmotionIconType.Hesitation }, [DriftState.Scared]: { dialogue: ['Just go.', '...', 'Just go, baka.'], icon: EmotionIconType.Shock } } },
+const KASHA_CAST_DEFS: CastDef[] = [
+  { start: 'kasha_t1_c1_b1',  name: 'The Champion',          tier: AffectionTier.Unaware },
+  { start: 'kasha_t1_c2_b1',  name: 'The Audience',          tier: AffectionTier.Unaware },
+  { start: 'kasha_t2_c3_b1',  name: 'The Test',              tier: AffectionTier.Curious },
+  { start: 'kasha_t2_c4_b1',  name: 'The Lie She Told',      tier: AffectionTier.Curious },
+  { start: 'kasha_t3_c5_b1',  name: 'The Thing About Before', tier: AffectionTier.Familiar },
+  { start: 'kasha_t3_c6_b1',  name: 'The Day After',         tier: AffectionTier.Familiar },
+  { start: 'kasha_t3_c7_b1',  name: 'The Question She Asks', tier: AffectionTier.Familiar },
+  { start: 'kasha_t4_c8_b1',  name: 'The Offer',             tier: AffectionTier.Trusting },
+  { start: 'kasha_t4_c9_b1',  name: 'The Trophy Refused',    tier: AffectionTier.Trusting },
+  { start: 'kasha_t5_c10_b1', name: 'The Name',              tier: AffectionTier.Bonded },
 ];
 
 // ============================================================
-// TIER 2: The Test (Casts 3-4)
+// Departures per cast (keyed by cast id, e.g. 'kasha_t1_c1')
 // ============================================================
 
-const KASHA_TIER2_CASTS: CastData[] = [
-  // === Cast 3: The Test ===
-  { id: 'kasha_t2_c3', tier: AffectionTier.Curious, name: 'The Test', beats: [
-    { beatId: 'kasha_t2_c3_b1', fishLines: ['Okay.', 'New rules.', 'If you want to keep showing up, you have to earn it.', "I'm raising the standard.", "Don't look at me like that. This is good for you."], actionEffects: { [ActionId.Wait]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ["I\u2014 haven't decided yet.", 'It will reveal itself.', 'Stay alert.', "...Don't laugh. I am being serious."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['Hah\u2014!', "That's the right energy.", 'Wrong attitude, but right energy.', "I'll allow it.", '...', "...You're enjoying this. Aren't you."], emotionIcon: EmotionIconType.Surprise }, [ActionId.Drift]: { affectionDelta: 0, resultExpression: ExpressionState.Neutral, responseLines: ['Yes I do.', '...', 'Yes I do, baka.', "You wouldn't understand."], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['mood.kasha.fissure_widen'] }, [ActionId.Reel]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Why would you ask that.', 'What \u2014 what kind of question is that.', "You don't get anything. You get to keep showing up. That's the prize.", "...That's a real prize.", 'Stop smirking.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.prize_admitted'] } }, seen: false },
-    { beatId: 'kasha_t2_c3_b2', fishLines: ['Question one: who is the most important person around here.', 'Answer carefully.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', "Don't say it like that.", "Say it like you're joking. Say it like a joke.", "Don't just say it.", '...', 'Pass. You pass.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.unmasked_briefly'] }, [ActionId.Twitch]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['Pff.', 'Correct answer. Acceptable delivery.', 'B+.', "I'm a hard grader."], emotionIcon: EmotionIconType.Surprise }, [ActionId.Drift]: { affectionDelta: 0, resultExpression: ExpressionState.Neutral, responseLines: ['...', 'Yes.', '...', 'No.', "I don't know. Move on. Next question."], emotionIcon: EmotionIconType.Hesitation }, [ActionId.Reel]: { affectionDelta: -2, resultExpression: ExpressionState.Alarmed, responseLines: ['...', 'Wow.', 'Get out.', 'Get out of my corner.', '...', "I'm joking. ...Mostly. Sit back down.", 'But also \u2014 wow.'], emotionIcon: EmotionIconType.Surprise, flagsToSet: ['mood.kasha.wounded_pride'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['You passed.', '...Some of it.', 'Come back tomorrow. New test.', "Don't get cocky, baka."], icon: EmotionIconType.Warmth }, [DriftState.Warm]: { dialogue: ['Mm.', 'Acceptable performance.', 'Tomorrow.'], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ["We'll see.", 'Maybe.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', 'I expected better.', 'From you specifically.'], icon: EmotionIconType.Hesitation }, [DriftState.Scared]: { dialogue: ["Don't bother coming back.", '...', 'I mean it.'], icon: EmotionIconType.Shock } } },
-
-  // === Cast 4: The Lie She Told ===
-  { id: 'kasha_t2_c4', tier: AffectionTier.Curious, name: 'The Lie She Told', beats: [
-    { beatId: 'kasha_t2_c4_b1', fishLines: ['Took you long enough.', 'I was about to leave.', "You're lucky I'm patient.", "...Don't laugh. I AM patient."], actionEffects: { [ActionId.Wait]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Yeah.', 'I noticed.', '...', 'Took you a minute. I was about to whistle.', 'I would not have whistled.'], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.would_have_whistled'] }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['\u2014', 'I did not.', "I was bored. I move when I'm bored.", "Don't read into it.", "...Stop smirking. That was not an admission."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', "Don't say things like that.", "Just \u2014 don't.", '...', 'Sit down.'], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.tender_hit'] }, [ActionId.Reel]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['Hah\u2014', 'Listen to him.', "'Stay where I can find you.' Bossy.", '...', 'Maybe.'], emotionIcon: EmotionIconType.Warmth } }, seen: false },
-    { beatId: 'kasha_t2_c4_b2', fishLines: ['About what I said. Last time.', 'About people challenging me constantly.', '...', 'That was a slight exaggeration.', 'Slight.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Significantly slight.', '...', 'Nobody challenges me, baka.', 'Nobody bothers.', '...', "I'm the champion because I'm the only one playing."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['secret.kasha.never_challenged_truth'] }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['EXCUSE me. It is not bluffing.', 'It is \u2014 strategic positioning.', 'I am a strategist.', '...I am a very lonely strategist.', 'Tch.', 'Forget I said that last part.'], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['secret.kasha.lonely'] }, [ActionId.Drift]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ["Don't.", "Don't apologise for things that aren't yours.", "It's annoying.", '...', "It's nice. But it's annoying."], emotionIcon: EmotionIconType.Hesitation }, [ActionId.Reel]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', 'You said that already.', 'Last time.', '...', 'Are you actually going to.', "Or are you just going to keep saying it."], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.first_real_challenge'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['Tomorrow.', '...', 'Bring something.', "I don't know what. Surprise me.", "Don't bring nothing, baka."], icon: EmotionIconType.Warmth }, [DriftState.Warm]: { dialogue: ['Tomorrow, then.', '...', 'Same corner.'], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ['Mm.', 'Maybe.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', "Don't push it.", "I told you something. Don't make me regret it."], icon: EmotionIconType.Hesitation }, [DriftState.Scared]: { dialogue: ['...', "I shouldn't have told you that.", "Don't come back."], icon: EmotionIconType.Shock, flagsToSet: ['mood.kasha.regret_admission'] } } },
-];
+const KASHA_DEPARTURES: Record<string, CastData['departures']> = {
+  kasha_t1_c1: {
+    [DriftState.Charmed]: { dialogue: ['Oi.', 'Come back.', "I'm not done with you.", '...Tomorrow.', "Don't be late, baka."], icon: EmotionIconType.Warmth },
+    [DriftState.Warm]:    { dialogue: ['Tch.', "You're alright.", 'Maybe.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ['Whatever.', "I'll see if you come back or not.", "Doesn't matter to me."], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ["...You're weird.", 'Not in the good way.', 'Maybe try again.', "Or don't. Whatever."], icon: EmotionIconType.Hesitation },
+    [DriftState.Scared]:  { dialogue: ['...', "Don't come back tomorrow."], icon: EmotionIconType.Shock },
+  },
+  kasha_t1_c2: {
+    [DriftState.Charmed]: { dialogue: ['Tomorrow.', 'Same corner.', "Don't bring anyone else.", '...Just you.', 'Baka.'], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.2.approaching'] },
+    [DriftState.Warm]:    { dialogue: ['Maybe tomorrow.', "I haven't decided.", "...I've decided. Tomorrow."], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ["Whatever. I'll be here.", 'If you come, you come.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', 'Maybe think about whether you actually want to come back.', "I'm not begging."], icon: EmotionIconType.Hesitation },
+    [DriftState.Scared]:  { dialogue: ['Just go.', '...', 'Just go, baka.'], icon: EmotionIconType.Shock },
+  },
+  kasha_t2_c3: {
+    [DriftState.Charmed]: { dialogue: ['You passed.', '...Some of it.', 'Come back tomorrow. New test.', "Don't get cocky, baka."], icon: EmotionIconType.Warmth },
+    [DriftState.Warm]:    { dialogue: ['Mm.', 'Acceptable performance.', 'Tomorrow.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ["We'll see.", 'Maybe.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', 'I expected better.', 'From you specifically.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Scared]:  { dialogue: ["Don't bother coming back.", '...', 'I mean it.'], icon: EmotionIconType.Shock },
+  },
+  kasha_t2_c4: {
+    [DriftState.Charmed]: { dialogue: ['Tomorrow.', '...', 'Bring something.', "I don't know what. Surprise me.", "Don't bring nothing, baka."], icon: EmotionIconType.Warmth },
+    [DriftState.Warm]:    { dialogue: ['Tomorrow, then.', '...', 'Same corner.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ['Mm.', 'Maybe.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', "Don't push it.", "I told you something. Don't make me regret it."], icon: EmotionIconType.Hesitation },
+    [DriftState.Scared]:  { dialogue: ['...', "I shouldn't have told you that.", "Don't come back."], icon: EmotionIconType.Shock, flagsToSet: ['mood.kasha.regret_admission'] },
+  },
+  kasha_t3_c5: {
+    [DriftState.Opened]:  { dialogue: ['...', 'Tomorrow.', "Don't bring it up.", '...', "Don't not bring it up either.", "Just — be normal. Be a baka. The way you usually are."], icon: EmotionIconType.Warmth },
+    [DriftState.Raw]:     { dialogue: ['...', 'Tomorrow.', "I'll be here."], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ['...', 'Whatever.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', 'I told you too much.', "I'm not doing that again."], icon: EmotionIconType.Surprise },
+    [DriftState.Scared]:  { dialogue: ['...', "Don't come back.", 'I mean it this time.'], icon: EmotionIconType.Shock, flagsToSet: ['mood.kasha.shame_spiral'] },
+  },
+  kasha_t3_c6: {
+    [DriftState.Charmed]: { dialogue: ['Tomorrow.', '...', "Bring nothing again. I don't need anything except— just come.", 'Just you, baka.'], icon: EmotionIconType.Warmth },
+    [DriftState.Warm]:    { dialogue: ['Tomorrow.', 'Be on time.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ['Mm. Tomorrow.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', "I don't know if I'll be here.", "Don't count on it."], icon: EmotionIconType.Hesitation },
+    [DriftState.Scared]:  { dialogue: ['...'], icon: EmotionIconType.Shock },
+  },
+  kasha_t3_c7: {
+    [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', 'Bring whatever you want. Or nothing.', 'Just come.', "Don't be late, baka."], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.4.approaching'] },
+    [DriftState.Warm]:    { dialogue: ['Tomorrow.', '...', "I won't keep asking why you come.", '...For now.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ['Whatever.', 'Tomorrow.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', "Maybe don't come tomorrow.", 'Give me a day.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Scared]:  { dialogue: ['...', 'I asked. You answered wrong.', "I don't want to see you for a while."], icon: EmotionIconType.Shock },
+  },
+  kasha_t4_c8: {
+    [DriftState.Charmed]: { dialogue: ['Tomorrow.', '...', 'Same time. Same corner.', "I'll be — I'll be here.", 'Be on time, baka.'], icon: EmotionIconType.Warmth },
+    [DriftState.Opened]:  { dialogue: ['Tomorrow.', '...', 'I need to think about today.', "Don't worry. It was good thinking."], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ['Mm.', 'Tomorrow, I guess.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', "I shouldn't have offered.", 'Forget I did.'], icon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.offer_retracted'] },
+    [DriftState.Scared]:  { dialogue: ['...', 'I made a mistake.', "Don't come back tomorrow."], icon: EmotionIconType.Shock, flagsToSet: ['mood.kasha.shame_deep'] },
+  },
+  kasha_t4_c9: {
+    [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', 'I want to tell you my real name.', 'Not tonight. Tomorrow.', 'Be on time.', 'Baka.'], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.5.approaching', 'secret.kasha.real_name_intent'] },
+    [DriftState.Opened]:  { dialogue: ['...', 'Tomorrow.', 'I have one more thing I want to say.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Neutral]: { dialogue: ['Mm.', 'Tomorrow. Maybe.'], icon: EmotionIconType.None },
+    [DriftState.Wary]:    { dialogue: ['...', 'I told you too much.', 'Again.', 'I keep doing that with you.'], icon: EmotionIconType.Hesitation },
+    [DriftState.Scared]:  { dialogue: ['...', "I think I'm going to leave.", 'Not tomorrow. Soon.', '...', "I told someone the truth and they didn't know what to do with it."], icon: EmotionIconType.Shock },
+  },
+  kasha_t5_c10: {
+    [DriftState.Charmed]: { dialogue: ['...'], icon: EmotionIconType.Warmth },
+    [DriftState.Warm]:    { dialogue: ['...'], icon: EmotionIconType.Hesitation },
+  },
+};
 
 // ============================================================
-// TIER 3: The Slip (Casts 5-7)
+// Catch sequence + drift-away journal text
 // ============================================================
-
-const KASHA_TIER3_CASTS: CastData[] = [
-  // === Cast 5: The Thing About Before ===
-  { id: 'kasha_t3_c5', tier: AffectionTier.Familiar, name: 'The Thing About Before', beats: [
-    { beatId: 'kasha_t3_c5_b1', fishLines: ['Okay. So.', 'There was this time\u2014 no.', 'Forget that. There was a\u2014 no, also bad.', '...', 'Why is this hard.', "It shouldn't be hard. It's a story."], actionEffects: { [ActionId.Wait]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', "Don't say that.", 'When people say that I take longer.', '...', 'Thank you.', "...Don't react to that."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.first_thank_you'] }, [ActionId.Twitch]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['Hah. Bossy.', 'Fine.', 'Story one. Once. Before.', 'There was somebody who was better at me at everything I did.', 'End of story.', '...', "Wait. That's a bad story. Forget that one too."], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['secret.kasha.somebody_better'] }, [ActionId.Drift]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['...', 'I want to.', '...', "I want to and I don't want to.", "Stop being kind. It's making it worse."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.wants_to_tell'] }, [ActionId.Reel]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...', 'I came from somewhere else.', 'Before here.', 'I left it.', 'The end.', "...Don't ask follow-up questions, baka."], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['secret.kasha.came_from_elsewhere'] } }, seen: false },
-    { beatId: 'kasha_t3_c5_b2', fishLines: ['There was a person.', "I'm not going to say who.", 'And there was another person, and the second person liked the first person more than they liked me.', "It wasn't a fair fight.", '...', "It wasn't a fight at all, actually.", 'I just lost. Without playing.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Yeah.', '...', "That's how I felt about it too."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.silence_understood'] }, [ActionId.Twitch]: { affectionDelta: -2, resultExpression: ExpressionState.Alarmed, responseLines: ['...', 'Wow.', "Tell me how it works, then.", 'Since you know.', '...', "Tch. Forget it. I shouldn't have said anything."], emotionIcon: EmotionIconType.Surprise, flagsToSet: ['mood.kasha.shut_down'] }, [ActionId.Drift]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Yeah.', '...', 'Yeah, it did.', "Don't make me say more about it."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.acknowledged_hurt'] }, [ActionId.Reel]: { affectionDelta: -1, resultExpression: ExpressionState.Alarmed, responseLines: ['...', "Don't.", "Don't do that.", "Don't compare me to them. Don't measure me against them.", "That's the whole \u2014 that's exactly the \u2014", 'Forget it.'], emotionIcon: EmotionIconType.Surprise, flagsToSet: ['mood.kasha.do_not_measure'] } }, seen: false },
-  ], departures: { [DriftState.Opened]: { dialogue: ['...', 'Tomorrow.', "Don't bring it up.", '...', "Don't not bring it up either.", "Just \u2014 be normal. Be a baka. The way you usually are."], icon: EmotionIconType.Warmth }, [DriftState.Raw]: { dialogue: ['...', 'Tomorrow.', "I'll be here."], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ['...', 'Whatever.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', 'I told you too much.', "I'm not doing that again."], icon: EmotionIconType.Surprise }, [DriftState.Scared]: { dialogue: ['...', "Don't come back.", 'I mean it this time.'], icon: EmotionIconType.Shock, flagsToSet: ['mood.kasha.shame_spiral'] } } },
-
-  // === Cast 6: The Day After ===
-  { id: 'kasha_t3_c6', tier: AffectionTier.Familiar, name: 'The Day After', beats: [
-    { beatId: 'kasha_t3_c6_b1', fishLines: ['Hey.', '...', "Don't say anything.", 'About yesterday.', "I'm pretending I didn't say it.", 'Help me pretend.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Thank you.', '...', "I said it again. I'm doing it more now. Stop me."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.thank_you_recurring'] }, [ActionId.Twitch]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Tch.', "You're cruel.", '...', 'Fine. It happened.', 'But we are not doing that again. Not today.'], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Good.', '...', 'Sit down. Be loud about something else.', 'I need noise.'], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.needs_noise'] }, [ActionId.Reel]: { affectionDelta: 0, resultExpression: ExpressionState.Neutral, responseLines: ['\u2014', 'Stop.', 'Stop right there.', 'We agreed.', '...', '...Thank you.', 'But stop.'], emotionIcon: EmotionIconType.Surprise, flagsToSet: ['mood.kasha.thanked_under_protest'] } }, seen: false },
-    { beatId: 'kasha_t3_c6_b2', fishLines: ['Question.', "If you had to pick one of the three idiots around the corner \u2014 not me, three other idiots \u2014 to fight you in a duel, who would you pick.", "Don't say a name. Describe them.", 'I want to test your judgment.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', "That is the worst answer.", "That is the best worst answer.", '...', 'How do you do that.', 'How do you say something so stupid that it works.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.melted_briefly'] }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['Hah\u2014', 'Wrong answer. There is no match for me.', 'Try again.', '...', "Actually, don't try again. That answer is fine. I was being dramatic."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: -1, resultExpression: ExpressionState.Alarmed, responseLines: ['...', "You're really committed to making me jealous of her, huh.", '...', 'Fine. Pick her. See if I care.', "I don't.", "...I do. A little. Stop."], emotionIcon: EmotionIconType.Surprise, flagsToSet: ['mood.kasha.nereia_jealousy'] }, [ActionId.Reel]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', "You can't just say things like that.", 'There are rules.', '...', 'Say it again.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.demanded_repeat'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['Tomorrow.', '...', "Bring nothing again. I don't need anything except\u2014 just come.", 'Just you, baka.'], icon: EmotionIconType.Warmth }, [DriftState.Warm]: { dialogue: ['Tomorrow.', 'Be on time.'], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ['Mm. Tomorrow.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', "I don't know if I'll be here.", "Don't count on it."], icon: EmotionIconType.Hesitation }, [DriftState.Scared]: { dialogue: ['...'], icon: EmotionIconType.Shock } } },
-
-  // === Cast 7: The Question She Asks ===
-  { id: 'kasha_t3_c7', tier: AffectionTier.Familiar, name: 'The Question She Asks', beats: [
-    { beatId: 'kasha_t3_c7_b1', fishLines: ['I have a question.', "Don't make a thing about it.", "It's a small question.", '...', "It's not a small question."], actionEffects: { [ActionId.Wait]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Why do you keep coming back.', '...', "Don't say something cute. Don't say 'because of you.' I will lose my mind.", 'Tell me actually.'], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.real_question_asked'] }, [ActionId.Twitch]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Why do you keep coming back.', "And don't be cute.", 'I am asking actually.'], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', "Don't be generous.", "I'm trying to ask a specific thing.", '...', 'Why do you keep coming back.'], emotionIcon: EmotionIconType.Hesitation }, [ActionId.Reel]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Why.', 'Why me.', '...', 'And not \u2014 you know. Not anyone else.'], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['mood.kasha.why_me'] } }, seen: false },
-    { beatId: 'kasha_t3_c7_b2', fishLines: ['...', "Tell me why you're here."], actionEffects: { [ActionId.Wait]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', 'That is.', '...', "That is the worst possible thing you could have said and also the only acceptable thing.", 'Get out.', "Don't get out. Stay.", '...', 'I hate you.', "(I don't.)"], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.alive_compliment_received'] }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Curious, responseLines: ['Pff.', 'Acceptable.', 'True.', 'I am very interesting.', '...Thanks.', "Did I just\u2014 forget that. Forget I said that."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', "That's not.", "That's not how I would have phrased it.", '...', 'But yeah.', 'I do let you.', '...', "I've never let anyone before."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['secret.kasha.first_let'] }, [ActionId.Reel]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Want is a strong word.', '...', 'I like that word.', 'Use it more.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.want_word'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', "Bring whatever you want. Or nothing.", 'Just come.', "Don't be late, baka."], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.4.approaching'] }, [DriftState.Warm]: { dialogue: ['Tomorrow.', '...', "I won't keep asking why you come.", '...For now.'], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ['Whatever.', 'Tomorrow.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', "Maybe don't come tomorrow.", 'Give me a day.'], icon: EmotionIconType.Hesitation }, [DriftState.Scared]: { dialogue: ['...', 'I asked. You answered wrong.', "I don't want to see you for a while."], icon: EmotionIconType.Shock } } },
-];
-
-// ============================================================
-// TIER 4: The Trophy (Casts 8-9)
-// ============================================================
-
-const KASHA_TIER4_CASTS: CastData[] = [
-  // === Cast 8: The Offer ===
-  { id: 'kasha_t4_c8', tier: AffectionTier.Trusting, name: 'The Offer', beats: [
-    { beatId: 'kasha_t4_c8_b1', fishLines: ['Okay.', 'Listen.', "I've been thinking.", "Don't comment on that. I do think. Sometimes.", '...', 'I want to offer you something.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Me.', '...', "I'm offering you me.", '...', "Don't make that face. Hear me out."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['secret.kasha.offering_self'] }, [ActionId.Twitch]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Fine. Fine.', "I'm offering me. As a\u2014 prize. Or something.", "Don't make that face.", "I knew you'd make a face."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', 'Stop being patient at me.', "It's working and I hate it.", '...', "I want to offer you me. As \u2014 yeah. As something.", "I haven't worked out what."], emotionIcon: EmotionIconType.Hesitation }, [ActionId.Reel]: { affectionDelta: 1, resultExpression: ExpressionState.Curious, responseLines: ['...', "I'm offering myself.", 'To you.', '...', "Don't say anything yet.", 'I am not done explaining.'], emotionIcon: EmotionIconType.Curiosity } }, seen: false },
-    { beatId: 'kasha_t4_c8_b2', fishLines: ['Here is the thing.', "I've been the champion of this corner because nobody has ever bothered to take it from me.", 'I told you that already.', "I'm telling you again because it matters for what I'm about to say.", '...', 'If you wanted to. You could take it.', "I'm telling you that you could.", "I'm \u2014 I'm saying.", 'I would let you.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', "I knew you'd do that.", 'Just sit there. Quietly. Like she would.', '...', 'I hate that you understood what I meant.', '...', 'Thank you.'], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.offer_understood'] }, [ActionId.Twitch]: { affectionDelta: -1, resultExpression: ExpressionState.Neutral, responseLines: ['...', 'Wow.', 'Wow, baka.', 'You took me literally.', '...', "You \u2014 actually, fine. That's on me. I framed it badly.", "Move on. We're moving on."], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['mood.kasha.framing_failed'] }, [ActionId.Drift]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', 'I know.', '...', 'I wanted to.', '...', "It's the first time I've wanted to give somebody something.", "Don't make me explain it more than that."], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.first_gift'] }, [ActionId.Reel]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', 'Oh.', '...', "That's \u2014 okay.", "That's a lot.", '...', 'Say it again. Slower.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.want_you_received'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['Tomorrow.', '...', 'Same time. Same corner.', "I'll be \u2014 I'll be here.", 'Be on time, baka.'], icon: EmotionIconType.Warmth }, [DriftState.Opened]: { dialogue: ['Tomorrow.', '...', 'I need to think about today.', "Don't worry. It was good thinking."], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ['Mm.', 'Tomorrow, I guess.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', "I shouldn't have offered.", 'Forget I did.'], icon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.offer_retracted'] }, [DriftState.Scared]: { dialogue: ['...', 'I made a mistake.', "Don't come back tomorrow."], icon: EmotionIconType.Shock, flagsToSet: ['mood.kasha.shame_deep'] } } },
-
-  // === Cast 9: The Trophy Refused ===
-  { id: 'kasha_t4_c9', tier: AffectionTier.Trusting, name: 'The Trophy Refused', beats: [
-    { beatId: 'kasha_t4_c9_b1', fishLines: ['Hey.', '...', "I'm going to do something today.", "I'm going to be quiet.", 'Just for a minute.', "Don't panic. I'll be loud again. I just want to try it."], actionEffects: { [ActionId.Wait]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Thank you.', '...', 'I think I want to keep being quiet for a while.', 'Sit with me.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.shared_silence'] }, [ActionId.Twitch]: { affectionDelta: 0, resultExpression: ExpressionState.Neutral, responseLines: ['...', 'Yeah.', 'I am.', '...', "It's okay. I'll be normal again in a second.", "Just \u2014 don't make it harder."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Stop.', '...', "Stop being good at this. It's annoying.", '...', "Don't stop."], emotionIcon: EmotionIconType.Hesitation }, [ActionId.Reel]: { affectionDelta: 3, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', 'You said that to me on the first day.', 'I almost left.', '...', "I'm glad I didn't."], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.callback_first_day'] } }, seen: false },
-    { beatId: 'kasha_t4_c9_b2', fishLines: ['Here is a fact.', 'When I came here.', 'I came here because somewhere else, I was second.', '...', 'I was second to a memory.', "Of someone who wasn't there anymore.", "And I couldn't compete with a memory because memories don't have flaws.", "I could only ever be a worse version of someone who wasn't there.", '...', 'So I left.', 'I came here. And I made up a championship I could win.', 'Because here, there was nobody to be second to.', '...', 'Until you showed up.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 5, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', 'Yeah.', "I knew you wouldn't say anything.", "That's why I told you."], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['secret.kasha.told_the_truth'] }, [ActionId.Twitch]: { affectionDelta: 1, resultExpression: ExpressionState.Neutral, responseLines: ['Pff.', 'Yeah.', 'I know.', '...', "Don't make me say more.", "I'm done for today."], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', 'I know.', '...', 'I knew before you said it.', 'But \u2014 yeah.', "It's still nice to hear.", '...', 'Thank you, baka.'], emotionIcon: EmotionIconType.Hesitation, flagsToSet: ['mood.kasha.thanked_softly'] }, [ActionId.Reel]: { affectionDelta: 1, resultExpression: ExpressionState.Neutral, responseLines: ['...', "Don't say 'here' like that.", "Like there's a 'here' and an 'elsewhere.'", '...', "Just say I'm not second.", 'Say it without the qualifier.'], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['mood.kasha.no_qualifier'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', 'I want to tell you my real name.', 'Not tonight. Tomorrow.', 'Be on time.', 'Baka.'], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.5.approaching', 'secret.kasha.real_name_intent'] }, [DriftState.Opened]: { dialogue: ['...', 'Tomorrow.', 'I have one more thing I want to say.'], icon: EmotionIconType.Hesitation }, [DriftState.Neutral]: { dialogue: ['Mm.', 'Tomorrow. Maybe.'], icon: EmotionIconType.None }, [DriftState.Wary]: { dialogue: ['...', 'I told you too much.', 'Again.', 'I keep doing that with you.'], icon: EmotionIconType.Hesitation }, [DriftState.Scared]: { dialogue: ['...', "I think I'm going to leave.", 'Not tomorrow. Soon.', '...', "I told someone the truth and they didn't know what to do with it."], icon: EmotionIconType.Shock } } },
-];
-
-// ============================================================
-// TIER 5: The Name (Cast 10) + Catch Sequence + Endings
-// ============================================================
-
-const KASHA_TIER5_CASTS: CastData[] = [
-  // === Cast 10: The Name ===
-  { id: 'kasha_t5_c10', tier: AffectionTier.Bonded, name: 'The Name', beats: [
-    { beatId: 'kasha_t5_c10_b1', fishLines: ['Okay.', "I've been thinking about this all day.", "Don't comment on that.", "I'm going to say a thing. And then another thing. And then a third thing.", "Don't interrupt me. Please.", "...Yeah, I said please. We are past that, you and I."], actionEffects: { [ActionId.Wait]: { affectionDelta: 5, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Good.', 'Thank you.', '...', 'First thing.', 'My name is not Kasha.', '...', 'Kasha is a thing I called myself when I came here.', "It means 'fire-cart.' I thought it sounded fierce.", "It does sound fierce. But it isn't my name.", '...', 'My name is Aki.', "It just means 'autumn.'", 'I have always thought it was too soft.', '...', 'I am telling it to you anyway.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['secret.kasha.real_name_given'] }, [ActionId.Twitch]: { affectionDelta: -2, resultExpression: ExpressionState.Neutral, responseLines: ['...', '...', "Don't do that to me. Not today.", '...', 'Fine. Skipping.', "I'm Aki.", "That's the first thing."], emotionIcon: EmotionIconType.Curiosity, flagsToSet: ['mood.kasha.real_name_rushed'] }, [ActionId.Drift]: { affectionDelta: 5, resultExpression: ExpressionState.Warm, responseLines: ['...', 'I will.', 'Thank you.', '...', 'First thing.', 'My name is Aki.', 'Kasha is a thing I called myself.', 'Aki is what I was first.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['secret.kasha.real_name_given'] }, [ActionId.Reel]: { affectionDelta: 5, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Aki.', "That's my name.", '...', "Don't say it back yet.", "Wait till I'm done."], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['secret.kasha.real_name_given'] } }, seen: false },
-    { beatId: 'kasha_t5_c10_b2', fishLines: ['Second thing.', "I've been calling you 'baka' since the first day.", 'I never picked a real name for you.', '...', "I'm going to.", '...', "I'm going to call you Hikaru.", "It means 'light.'", "Don't say anything yet.", "I picked it because the first time I ever caught myself smiling about you, you weren't there.", 'It was morning.', 'Light through the leaves.', 'I thought of you.', '...', 'That is the most embarrassing thing I have ever said.', 'We are not going to talk about it.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Thank you for not saying anything.', '...', 'Hikaru.', "I'm going to use that now.", 'Get used to it.'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['mood.kasha.named_him'] }, [ActionId.Twitch]: { affectionDelta: 0, resultExpression: ExpressionState.Neutral, responseLines: ['...', "DON'T.", "Don't make fun of it.", "I picked it. It's mine. It's yours. Don't make it weird.", '...', "Ugh. Now I'm second-guessing it.", 'Too late. Decision made. You are Hikaru.'], emotionIcon: EmotionIconType.Curiosity }, [ActionId.Drift]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', '...', "Don't say my name back yet.", 'Just \u2014 Hikaru. Yes. That.', 'Good.'], emotionIcon: EmotionIconType.Warmth }, [ActionId.Reel]: { affectionDelta: 4, resultExpression: ExpressionState.Warm, responseLines: ['...', 'Yes.', '...', 'Yes you will.'], emotionIcon: EmotionIconType.Warmth } }, seen: false },
-    { beatId: 'kasha_t5_c10_b3', fishLines: ['Third thing.', '...', 'I never wanted to be the champion of this corner.', "I wanted to be somebody's favourite person.", '...', 'I am yours.', "Aren't I.", '...', "Don't answer.", 'I know.'], actionEffects: { [ActionId.Wait]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['kasha.catch_available'] }, [ActionId.Twitch]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['kasha.catch_available'] }, [ActionId.Drift]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['kasha.catch_available'] }, [ActionId.Reel]: { affectionDelta: 2, resultExpression: ExpressionState.Warm, responseLines: ['...'], emotionIcon: EmotionIconType.Warmth, flagsToSet: ['kasha.catch_available'] } }, seen: false },
-  ], departures: { [DriftState.Charmed]: { dialogue: ['...'], icon: EmotionIconType.Warmth }, [DriftState.Warm]: { dialogue: ['...'], icon: EmotionIconType.Hesitation } } },
-];
 
 const KASHA_CATCH_SEQUENCE_DATA: CatchSequenceData = {
   silenceDialogue: ['...', 'Whatever you choose.', 'I picked you.', "Don't forget that.", 'Hikaru.'],
@@ -113,26 +123,29 @@ const KASHA_CATCH_SEQUENCE_DATA: CatchSequenceData = {
   releaseChoiceLabel: 'Aki',
 };
 
-const KASHA_DRIFT_AWAY_JOURNAL_TEXT = 'The corner is empty.\n\nOther voices, briefly, mention that she talked about you a lot.\n\nThey are surprised that you are not surprised.';
+const KASHA_DRIFT_AWAY_JOURNAL_TEXT =
+  'The corner is empty.\n\nOther voices, briefly, mention that she talked about you a lot.\n\nThey are surprised that you are not surprised.';
 
 // ============================================================
-// CAST LOOKUP
+// Cast lookup — built lazily by tier on demand
 // ============================================================
 
-const KASHA_CASTS_BY_TIER: Record<AffectionTier, CastData[]> = {
-  [AffectionTier.Unaware]: KASHA_TIER1_CASTS,
-  [AffectionTier.Curious]: KASHA_TIER2_CASTS,
-  [AffectionTier.Familiar]: KASHA_TIER3_CASTS,
-  [AffectionTier.Trusting]: KASHA_TIER4_CASTS,
-  [AffectionTier.Bonded]: KASHA_TIER5_CASTS,
-};
+function castsForTier(tier: AffectionTier): CastData[] {
+  return KASHA_CAST_DEFS
+    .filter(d => d.tier === tier)
+    .map(d => {
+      const castId = d.start.replace(/_b\d+$/, '');
+      const departures = KASHA_DEPARTURES[castId] ?? {};
+      return inkCast(CHARACTER_ID, d.start, d.name, d.tier, departures);
+    });
+}
 
 // ============================================================
-// CHARACTER CONFIGURATION (exported)
+// Character configuration (exported)
 // ============================================================
 
 export const KASHA_CHARACTER: CharacterConfig = {
-  id: 'kasha',
+  id: CHARACTER_ID,
   name: 'Kasha',
   species: 'Siamese Fighting Fish (Betta)',
   accentColor: '#D33A2C',
@@ -154,19 +167,17 @@ export const KASHA_CHARACTER: CharacterConfig = {
 
   questName: 'The Championship',
   questHints: [
-    { tier: AffectionTier.Unaware, text: 'She likes being noticed. Things that move and shine catch her eye. Try something bold.' },
-    { tier: AffectionTier.Curious, text: "She tests everyone. Pass the test by staying when she tells you to leave. Don't be afraid to push back." },
-    { tier: AffectionTier.Familiar, text: "She's trying to tell you something. Listen when she goes quiet \u2014 that's when it matters most." },
-    { tier: AffectionTier.Trusting, text: "She offered herself as a prize. She wants you to see her as a person instead. Don't take what she offers \u2014 see what she means." },
-    { tier: AffectionTier.Bonded, text: "She gave you her name. She gave you a name. The championship was never real. You were." },
+    { tier: AffectionTier.Unaware,  text: 'She likes being noticed. Things that move and shine catch her eye. Try something bold.' },
+    { tier: AffectionTier.Curious,  text: "She tests everyone. Pass the test by staying when she tells you to leave. Don't be afraid to push back." },
+    { tier: AffectionTier.Familiar, text: "She's trying to tell you something. Listen when she goes quiet — that's when it matters most." },
+    { tier: AffectionTier.Trusting, text: "She offered herself as a prize. She wants you to see her as a person instead. Don't take what she offers — see what she means." },
+    { tier: AffectionTier.Bonded,   text: "She gave you her name. She gave you a name. The championship was never real. You were." },
   ],
 
-  getCastsForTier: (tier: AffectionTier): CastData[] => {
-    return KASHA_CASTS_BY_TIER[tier] || KASHA_TIER1_CASTS;
-  },
+  getCastsForTier: castsForTier,
 
   initialState: (): FishCharacter => ({
-    id: 'kasha',
+    id: CHARACTER_ID,
     name: 'Kasha',
     species: 'Siamese Fighting Fish (Betta)',
     accentColor: '#D4833A',
