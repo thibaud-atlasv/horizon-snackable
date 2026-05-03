@@ -299,6 +299,15 @@ export interface CharacterConfig {
   staticFacts: string[];
 }
 
+// === CG (Computer Graphics) Gallery ===
+export interface CGData {
+  id: string;
+  characterId: string;
+  name: string;
+  description: string;
+  unlockCondition: string;
+}
+
 // === Save Data ===
 export interface SaveData {
   fish: Record<string, FishSaveData>;
@@ -306,11 +315,11 @@ export interface SaveData {
   seenBeats: string[];
   castCount: number;
   castIndexWithinTier: number;
-  driftScaredCount: number;
   lures?: LureSaveData;
   journal?: JournalSaveData;
   quests?: QuestSaveData;
   perFishCastIndex?: Record<string, number>;
+  cgUnlocks?: string[];
 }
 
 export interface LureSaveData {

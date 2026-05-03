@@ -1,18 +1,27 @@
 /**
- * SYS-10-SAVE: AUTO_ONLY save model.
- * Saves after every Beat resolution within 1 second.
- * Uses simple JSON serialization to local state (in-memory for now,
- * PlayerVariablesService can be added later for persistence).
+ * SYS-10-SAVE: AUTO_ONLY save model with persistent storage.
+ * Saves after every Beat resolution within 0.5 seconds.
+ * In-memory storage backed by PlayerVariablesService for cross-session persistence.
+ * The PersistentSaveManager component handles the actual PVar read/write.
  */
 
 import type { SaveData } from './Types';
 
 const SAVE_KEY = 'floater_save_v1';
 
+/** Callback invoked when a save is written (for persistent storage integration) */
+export type OnSaveCallback = (json: string) => void;
+
 export class SaveSystem {
   private pendingSave: boolean = false;
   private saveTimer: number = 0;
   private readonly SAVE_DELAY = 0.5; // seconds after Beat resolution
+  private onSaveCallback: OnSaveCallback | null = null;
+
+  /** Register callback that fires every time save data is written */
+  setOnSaveCallback(cb: OnSaveCallback): void {
+    this.onSaveCallback = cb;
+  }
 
   /** Mark that a save is needed (call after Beat resolution) */
   requestSave(): void {
@@ -39,9 +48,12 @@ export class SaveSystem {
   private writeSave(data: SaveData): void {
     try {
       const json = JSON.stringify(data);
-      // Store in module-level variable (persisted via hot-reload hooks)
       _savedState = json;
       console.log('[SaveSystem] Save complete');
+      // Notify persistent storage layer
+      if (this.onSaveCallback) {
+        this.onSaveCallback(json);
+      }
     } catch (e) {
       console.log('[SaveSystem] ERROR: Failed to save');
     }
@@ -59,6 +71,22 @@ export class SaveSystem {
       console.log('[SaveSystem] ERROR: Failed to load');
     }
     return null;
+  }
+
+  /** Set persistent data received from server (PlayerVariablesService).
+   *  Call this when OnSaveDataLoaded arrives from server. */
+  setPersistentData(json: string): void {
+    if (json && json.length > 0) {
+      _savedState = json;
+      console.log(`[SaveSystem] Persistent data set: ${json.length} chars`);
+    } else {
+      console.log('[SaveSystem] No persistent data (new player or empty)');
+    }
+  }
+
+  /** Get current save data as JSON string (for sending to server) */
+  getPersistentData(): string {
+    return _savedState ?? '';
   }
 
   /** Clear save data */

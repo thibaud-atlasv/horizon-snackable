@@ -320,31 +320,170 @@
         </Border>
       </Grid>
 
-      <!-- Layer 5: Action Menu (2x2 Grid: Wait, Twitch, Drift, Reel) -->
-      <Grid VerticalAlignment="Bottom" Margin="40,0,40,48"
-            Visibility="{Binding actionMenuVisible, Converter={StaticResource BoolToVis}}">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+      <!-- Layer 5: Action Menu (Single Row: 4 Round Fishing Buttons) -->
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                  Margin="0,0,0,48"
+                  Visibility="{Binding actionMenuVisible, Converter={StaticResource BoolToVis}}">
+        <!-- WAIT Button -->
+        <Button Width="100" Height="100" Margin="4,0"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="wait">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="OuterBorder" BorderBrush="#779B7FCC" BorderThickness="3" CornerRadius="50" Padding="0">
+                <Border x:Name="InnerBorder" CornerRadius="47" Padding="0">
+                  <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                      <GradientStop Color="#2A4A6C" Offset="0" />
+                      <GradientStop Color="#1A3A5C" Offset="0.5" />
+                      <GradientStop Color="#0D1E35" Offset="1" />
+                    </LinearGradientBrush>
+                  </Border.Background>
+                  <Border.RenderTransform>
+                    <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                  </Border.RenderTransform>
+                  <Border.RenderTransformOrigin>
+                    <Point X="0.5" Y="0.5" />
+                  </Border.RenderTransformOrigin>
+                  <Grid>
+                    <!-- Background Icon -->
+                    <Image Source="sprites/action_bg_wait.png" Width="70" Height="70" Stretch="Uniform" Opacity="0.4" />
+                    <!-- Action Text -->
+                    <TextBlock Text="WAIT" FontSize="16" FontWeight="Bold" Foreground="#E8EAD8"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="PressScale" Property="ScaleX" Value="0.90" />
+                  <Setter TargetName="PressScale" Property="ScaleY" Value="0.90" />
+                  <Setter TargetName="OuterBorder" Property="BorderBrush" Value="#AA9B7FCC" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+        </Button>
 
-        <Button Grid.Row="0" Grid.Column="0" Content="WAIT" Margin="4"
-                Style="{StaticResource ActionButtonStyle}"
-                Command="{Binding events.onFloaterActionSelected}" CommandParameter="wait" />
-        <Button Grid.Row="0" Grid.Column="1" Content="TWITCH" Margin="4"
-                Style="{StaticResource ActionButtonStyle}"
-                Command="{Binding events.onFloaterActionSelected}" CommandParameter="twitch" />
-        <Button Grid.Row="1" Grid.Column="0" Content="DRIFT" Margin="4"
-                Style="{StaticResource ActionButtonStyle}"
-                Command="{Binding events.onFloaterActionSelected}" CommandParameter="drift" />
-        <Button Grid.Row="1" Grid.Column="1" Content="REEL" Margin="4"
-                Style="{StaticResource ActionButtonStyle}"
-                Command="{Binding events.onFloaterActionSelected}" CommandParameter="reel" />
-      </Grid>
+        <!-- TWITCH Button -->
+        <Button Width="100" Height="100" Margin="4,0"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="twitch">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="OuterBorder" BorderBrush="#779B7FCC" BorderThickness="3" CornerRadius="50" Padding="0">
+                <Border x:Name="InnerBorder" CornerRadius="47" Padding="0">
+                  <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                      <GradientStop Color="#2A4A6C" Offset="0" />
+                      <GradientStop Color="#1A3A5C" Offset="0.5" />
+                      <GradientStop Color="#0D1E35" Offset="1" />
+                    </LinearGradientBrush>
+                  </Border.Background>
+                  <Border.RenderTransform>
+                    <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                  </Border.RenderTransform>
+                  <Border.RenderTransformOrigin>
+                    <Point X="0.5" Y="0.5" />
+                  </Border.RenderTransformOrigin>
+                  <Grid>
+                    <!-- Background Icon -->
+                    <Image Source="sprites/action_bg_twitch.png" Width="70" Height="70" Stretch="Uniform" Opacity="0.4" />
+                    <!-- Action Text -->
+                    <TextBlock Text="TWITCH" FontSize="15" FontWeight="Bold" Foreground="#E8EAD8"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="PressScale" Property="ScaleX" Value="0.90" />
+                  <Setter TargetName="PressScale" Property="ScaleY" Value="0.90" />
+                  <Setter TargetName="OuterBorder" Property="BorderBrush" Value="#AA9B7FCC" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+        </Button>
+
+        <!-- DRIFT Button -->
+        <Button Width="100" Height="100" Margin="4,0"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="drift">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="OuterBorder" BorderBrush="#779B7FCC" BorderThickness="3" CornerRadius="50" Padding="0">
+                <Border x:Name="InnerBorder" CornerRadius="47" Padding="0">
+                  <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                      <GradientStop Color="#2A4A6C" Offset="0" />
+                      <GradientStop Color="#1A3A5C" Offset="0.5" />
+                      <GradientStop Color="#0D1E35" Offset="1" />
+                    </LinearGradientBrush>
+                  </Border.Background>
+                  <Border.RenderTransform>
+                    <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                  </Border.RenderTransform>
+                  <Border.RenderTransformOrigin>
+                    <Point X="0.5" Y="0.5" />
+                  </Border.RenderTransformOrigin>
+                  <Grid>
+                    <!-- Background Icon -->
+                    <Image Source="sprites/action_bg_drift.png" Width="70" Height="70" Stretch="Uniform" Opacity="0.4" />
+                    <!-- Action Text -->
+                    <TextBlock Text="DRIFT" FontSize="16" FontWeight="Bold" Foreground="#E8EAD8"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="PressScale" Property="ScaleX" Value="0.90" />
+                  <Setter TargetName="PressScale" Property="ScaleY" Value="0.90" />
+                  <Setter TargetName="OuterBorder" Property="BorderBrush" Value="#AA9B7FCC" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+        </Button>
+
+        <!-- REEL Button -->
+        <Button Width="100" Height="100" Margin="4,0"
+                Command="{Binding events.onFloaterActionSelected}" CommandParameter="reel">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="OuterBorder" BorderBrush="#779B7FCC" BorderThickness="3" CornerRadius="50" Padding="0">
+                <Border x:Name="InnerBorder" CornerRadius="47" Padding="0">
+                  <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                      <GradientStop Color="#2A4A6C" Offset="0" />
+                      <GradientStop Color="#1A3A5C" Offset="0.5" />
+                      <GradientStop Color="#0D1E35" Offset="1" />
+                    </LinearGradientBrush>
+                  </Border.Background>
+                  <Border.RenderTransform>
+                    <ScaleTransform x:Name="PressScale" ScaleX="1" ScaleY="1" />
+                  </Border.RenderTransform>
+                  <Border.RenderTransformOrigin>
+                    <Point X="0.5" Y="0.5" />
+                  </Border.RenderTransformOrigin>
+                  <Grid>
+                    <!-- Background Icon -->
+                    <Image Source="sprites/action_bg_reel.png" Width="70" Height="70" Stretch="Uniform" Opacity="0.4" />
+                    <!-- Action Text -->
+                    <TextBlock Text="REEL" FontSize="16" FontWeight="Bold" Foreground="#E8EAD8"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="PressScale" Property="ScaleX" Value="0.90" />
+                  <Setter TargetName="PressScale" Property="ScaleY" Value="0.90" />
+                  <Setter TargetName="OuterBorder" Property="BorderBrush" Value="#AA9B7FCC" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+        </Button>
+      </StackPanel>
 
       <!-- Layer 5b: Cast Button + Equipped Lure Indicator (LakeIdle state) -->
       <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,80"
@@ -556,14 +695,17 @@
 
           <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
                       Margin="0,0,0,12">
-            <Button Content="Pond Notes" Width="130" Height="34" Margin="4,0"
+            <Button Content="Notes" Width="95" Height="34" Margin="3,0"
                     Command="{Binding events.onJournalTabSwitch}" CommandParameter="0"
                     Style="{StaticResource MenuButtonStyle}" />
-            <Button Content="Lure Box" Width="110" Height="34" Margin="4,0"
+            <Button Content="Lures" Width="85" Height="34" Margin="3,0"
                     Command="{Binding events.onJournalTabSwitch}" CommandParameter="1"
                     Style="{StaticResource MenuButtonStyle}" />
-            <Button Content="Keepsakes" Width="110" Height="34" Margin="4,0"
+            <Button Content="Keepsakes" Width="95" Height="34" Margin="3,0"
                     Command="{Binding events.onJournalTabSwitch}" CommandParameter="2"
+                    Style="{StaticResource MenuButtonStyle}" />
+            <Button Content="Gallery" Width="85" Height="34" Margin="3,0"
+                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="3"
                     Style="{StaticResource MenuButtonStyle}" />
           </StackPanel>
 
@@ -581,13 +723,60 @@
                          Visibility="{Binding journalTab3Visible, Converter={StaticResource BoolToVis}}"
                          Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
                          TextWrapping="Wrap" LineHeight="18" />
+              <TextBlock Text="{Binding journalCollectionText}"
+                         Visibility="{Binding journalTab4Visible, Converter={StaticResource BoolToVis}}"
+                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
+                         TextWrapping="Wrap" LineHeight="18" />
             </Grid>
           </ScrollViewer>
 
           <Button Grid.Row="3" Content="Close" Width="140" Height="40"
                   Command="{Binding events.onJournalClose}" Margin="0,12,0,0"
                   Style="{StaticResource MenuButtonStyle}" />
+
+          <!-- Reset Save Button (below Close) -->
+          <Button Grid.Row="3" Content="Reset Save" Width="120" Height="32"
+                  Command="{Binding events.onResetSavePressed}" Margin="0,60,0,0"
+                  HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                  Background="#44661111" Foreground="#CC9999" FontSize="11"
+                  BorderThickness="1" BorderBrush="#663333" />
         </Grid>
+      </Grid>
+
+      <!-- Layer 10b: Reset Save Confirmation Overlay -->
+      <Grid Visibility="{Binding resetConfirmVisible, Converter={StaticResource BoolToVis}}"
+            Background="#DD080D14">
+        <Border Background="#FF1A1020" BorderBrush="#9B7FCC" BorderThickness="2"
+                CornerRadius="12" Padding="24,20"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                MaxWidth="320">
+          <StackPanel HorizontalAlignment="Center">
+            <TextBlock Text="Reset Save Data?" FontSize="20" FontWeight="Bold"
+                       Foreground="#E8EAD8" HorizontalAlignment="Center" Margin="0,0,0,12" />
+            <TextBlock Text="This will permanently erase all progress, affection, journal entries, and unlocks. This cannot be undone."
+                       FontSize="13" Foreground="#AA9999" TextWrapping="Wrap"
+                       HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,20" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+              <Button Content="Cancel" Width="110" Height="38" Margin="0,0,12,0"
+                      Command="{Binding events.onResetSaveCancel}"
+                      Background="#333344" Foreground="#E8EAD8" FontSize="14" BorderThickness="0" />
+              <Button Content="Reset" Width="110" Height="38"
+                      Command="{Binding events.onResetSaveConfirm}"
+                      Background="#661111" Foreground="#FF6666" FontSize="14" FontWeight="Bold" BorderThickness="0" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </Grid>
+      <Grid Visibility="{Binding cgViewerVisible, Converter={StaticResource BoolToVis}}"
+            Background="#FF080D14">
+        <Image Source="sprites/nereia_love_end.png" Stretch="Uniform"
+               HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Border Background="Transparent">
+          <Button Width="480" Height="800" Opacity="0"
+                  Command="{Binding events.onCGViewerDismiss}" />
+        </Border>
+        <TextBlock Text="Tap anywhere to close" FontSize="12" Foreground="#88C8D8E8"
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,24" />
       </Grid>
 
     </Grid>

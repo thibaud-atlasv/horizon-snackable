@@ -346,6 +346,18 @@
                         "data": {}
                     },
                     "dataType": "horizon::DataDefinitionAsset"
+                },
+                {
+                    "data": {
+                        "class": "PersistentSaveManager",
+                        "definitionAsset": {
+                            "packageOrRemoteId": "27580731851530177",
+                            "ingestionId": "6410029299658676791",
+                            "targetId": "4237980480"
+                        },
+                        "data": {}
+                    },
+                    "dataType": "horizon::DataDefinitionAsset"
                 }
             ],
             "attributes": []

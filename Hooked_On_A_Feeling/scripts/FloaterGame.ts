@@ -26,6 +26,8 @@ import {
   OnFocusedInteractionInputStartedEvent,
   OnFocusedInteractionInputEventPayload,
   NetworkingService,
+  EventService,
+  ExecuteOn,
   Vec2,
 } from 'meta/worlds';
 import { CameraModeProvisionalService } from 'meta/worlds_provisional';
@@ -45,6 +47,11 @@ import {
   onInventoryOpen,
   onInventoryClose,
   onInventoryEquip,
+  onCGViewerDismiss,
+  onCGItemTapped,
+  onResetSavePressed,
+  onResetSaveConfirm,
+  onResetSaveCancel,
   FloaterActionSelectedPayload,
   FloaterTabSelectedPayload,
   FloaterLureSelectedPayload,
@@ -58,12 +65,22 @@ import { createNereia, getBeatsForTier, getCastForTier, getCastCountForTier } fr
 import { characterRegistry } from './CharacterRegistry';
 import { QuestSystem } from './QuestSystem';
 import { EncounterSystem } from './EncounterSystem';
+import { CGGallerySystem } from './CGGallerySystem';
+import { nereiaNeutralTexture, kashaNeutralTexture } from './Assets';
+import {
+  OnSaveDataLoaded,
+  OnSaveDataRequested,
+  OnResetSaveRequested,
+  OnResetComplete,
+  SaveDataLoadedPayload,
+  ResetCompletePayload,
+} from './SaveEvents';
 import {
   CANVAS_WIDTH, CANVAS_HEIGHT, GAME_ASPECT_RATIO,
   AFFECTION_TIER_1_MAX, AFFECTION_TIER_2_MAX, AFFECTION_TIER_3_MAX, AFFECTION_TIER_4_MAX,
   APPROACH_DURATION, DEPARTURE_DURATION,
   TEXT_DISPLAY_SPEED, BEAT_PAUSE_DURATION,
-  GAUGE_CYCLE_TIME, AFFECTION_MAX,
+  GAUGE_CYCLE_TIME, AFFECTION_MAX, AFFECTION_DRIFT_AWAY_THRESHOLD,
   CAST_START_X, CAST_START_Y, CAST_TARGET_X, CAST_TARGET_Y,
   CAST_FLIGHT_TIME, CAST_MIN_ARC_HEIGHT, CAST_MAX_ARC_HEIGHT,
   SPLASH_RIPPLE_COUNT, SPLASH_RIPPLE_DELAY,
@@ -111,6 +128,7 @@ export class FloaterGame extends Component {
   private affectionSystem: AffectionSystem = new AffectionSystem();
   private questSystem: QuestSystem = new QuestSystem();
   private encounterSystem: EncounterSystem = new EncounterSystem();
+  private cgGallerySystem: CGGallerySystem = new CGGallerySystem();
 
   // Affection data
   private fishAffection: FishAffection = this.affectionSystem.createAffection('nereia'); // Re-initialized in loadGame()
@@ -124,7 +142,6 @@ export class FloaterGame extends Component {
   private seenBeats: Set<string> = new Set();
   private castCount: number = 0;
   private castIndexWithinTier: number = 0;
-  private driftScaredCount: number = 0;
   private equippedLureId: string | null = null;
   private perFishCastIndex: Record<string, number> = {};
 
@@ -239,6 +256,14 @@ export class FloaterGame extends Component {
     this.renderer = new FloaterRenderer(this.builder);
     const customUi = this.entity.getComponent(CustomUiComponent);
     if (customUi != null) { customUi.dataContext = floaterVM; }
+
+    // Wire up persistent save: whenever local save writes, also push to server
+    this.saveSystem.setOnSaveCallback((json: string) => {
+      if (!NetworkingService.get().isServerContext()) {
+        EventService.sendGlobally(OnSaveDataRequested, { data: json });
+      }
+    });
+
     this.loadGame();
     this.render();
     console.log('[FloaterGame] Created');
@@ -334,7 +359,27 @@ export class FloaterGame extends Component {
   @subscribe(onJournalTabSwitch)
   onJournalTabSwitchEvent(payload: FloaterTabSelectedPayload): void {
     const idx = parseInt(payload.parameter, 10);
-    if (idx >= 0 && idx <= 2) floaterVM.setJournalTab(idx);
+    if (idx >= 0 && idx <= 3) {
+      floaterVM.setJournalTab(idx);
+      if (idx === 3) {
+        floaterVM.journalCollectionText = this.cgGallerySystem.getCollectionText();
+      }
+    }
+  }
+
+  @subscribe(onCGViewerDismiss)
+  onCGViewerDismissEvent(): void {
+    this.cgGallerySystem.closeViewer();
+    floaterVM.cgViewerVisible = false;
+  }
+
+  @subscribe(onCGItemTapped)
+  onCGItemTappedEvent(payload: FloaterTabSelectedPayload): void {
+    const cgId = payload.parameter;
+    if (this.cgGallerySystem.isCGUnlocked(cgId)) {
+      this.cgGallerySystem.openViewer(cgId);
+      floaterVM.cgViewerVisible = true;
+    }
   }
 
   @subscribe(onInventoryOpen)
@@ -353,6 +398,94 @@ export class FloaterGame extends Component {
     this.equippedLureId = lureId && lureId !== 'None' ? lureId : null;
     floaterVM.equippedLureName = payload.parameter;
     this.saveSystem.requestSave();
+  }
+
+  // === Persistent Save Events ===
+  @subscribe(OnSaveDataLoaded, { execution: ExecuteOn.Everywhere })
+  onSaveDataLoaded(payload: SaveDataLoadedPayload): void {
+    if (NetworkingService.get().isServerContext()) return; // Client-only
+    console.log(`[FloaterGame] Received persistent save data: ${payload.data.length} chars`);
+    if (payload.data && payload.data.length > 0) {
+      this.saveSystem.setPersistentData(payload.data);
+      this.loadGame();
+      this.syncViewModelFromState();
+      this.render();
+    }
+  }
+
+  @subscribe(OnResetComplete, { execution: ExecuteOn.Everywhere })
+  onResetComplete(payload: ResetCompletePayload): void {
+    if (NetworkingService.get().isServerContext()) return; // Client-only
+    if (!payload.success) {
+      console.log('[FloaterGame] Reset failed on server');
+      return;
+    }
+    console.log('[FloaterGame] Reset complete — restarting to title');
+    this.resetAllGameState();
+  }
+
+  @subscribe(onResetSavePressed)
+  onResetSavePressedEvent(): void {
+    floaterVM.resetConfirmVisible = true;
+  }
+
+  @subscribe(onResetSaveConfirm)
+  onResetSaveConfirmEvent(): void {
+    floaterVM.resetConfirmVisible = false;
+    floaterVM.journalVisible = false;
+    // Send reset request to server
+    EventService.sendGlobally(OnResetSaveRequested, { confirm: true });
+    // Also clear local state immediately
+    this.resetAllGameState();
+  }
+
+  @subscribe(onResetSaveCancel)
+  onResetSaveCancelEvent(): void {
+    floaterVM.resetConfirmVisible = false;
+  }
+
+  private resetAllGameState(): void {
+    // Clear local save
+    this.saveSystem.clearSave();
+
+    // Reset all game state to initial
+    this.phase = GamePhase.Title;
+    this.fish = createNereia();
+    this.fishAffection = this.affectionSystem.createAffection('nereia');
+    this.beats = [];
+    this.currentBeatIndex = 0;
+    this.seenBeats = new Set();
+    this.castCount = 0;
+    this.castIndexWithinTier = 0;
+    this.equippedLureId = null;
+    this.perFishCastIndex = {};
+    this.flagSystem = new FlagSystem();
+    this.questSystem = new QuestSystem();
+    this.cgGallerySystem = new CGGallerySystem();
+    this.currentLines = [];
+    this.displayedText = '';
+    this.isTextComplete = false;
+    this.floatingIcons = [];
+
+    // Reset ViewModel
+    floaterVM.titleVisible = true;
+    floaterVM.hudVisible = false;
+    floaterVM.actionMenuVisible = false;
+    floaterVM.departureVisible = false;
+    floaterVM.idleVisible = false;
+    floaterVM.castButtonVisible = false;
+    floaterVM.endingVisible = false;
+    floaterVM.dialogueVisible = false;
+    floaterVM.catchChoiceVisible = false;
+    floaterVM.inventoryVisible = false;
+    floaterVM.journalVisible = false;
+    floaterVM.inventoryButtonVisible = false;
+    floaterVM.journalButtonVisible = false;
+    floaterVM.cgViewerVisible = false;
+    floaterVM.resetConfirmVisible = false;
+
+    console.log('[FloaterGame] All state reset to initial');
+    this.render();
   }
 
   // === Touch Input ===
@@ -586,7 +719,7 @@ export class FloaterGame extends Component {
     this.castIndexWithinTier = this.perFishCastIndex[this.fish.id] ?? 0;
 
     // Auto-promote: if all casts in current tier are exhausted, force tier advancement
-    const totalCastsInTier = getCastCountForTier(this.fish.tier);
+    const totalCastsInTier = getCastCountForTier(this.fish.tier, this.fish.id);
     if (this.castIndexWithinTier >= totalCastsInTier && this.fish.tier < AffectionTier.Bonded) {
       const nextTier = (this.fish.tier + 1) as AffectionTier;
       const tierThreshold = this.getTierThresholdValue(nextTier);
@@ -607,10 +740,10 @@ export class FloaterGame extends Component {
       this.saveSystem.requestSave();
     }
 
-    const currentCast = getCastForTier(this.fish.tier, this.castIndexWithinTier);
-    const totalCastsNow = getCastCountForTier(this.fish.tier);
+    const currentCast = getCastForTier(this.fish.tier, this.castIndexWithinTier, this.fish.id);
+    const totalCastsNow = getCastCountForTier(this.fish.tier, this.fish.id);
     console.log(`[FloaterGame] startCast: castCount=${this.castCount}, tier=${TIER_NAMES[this.fish.tier]}, castIndexWithinTier=${this.castIndexWithinTier}/${totalCastsNow}, castName="${currentCast.name}", castId="${currentCast.id}"`);
-    this.beats = getBeatsForTier(this.fish.tier, this.castIndexWithinTier);
+    this.beats = getBeatsForTier(this.fish.tier, this.castIndexWithinTier, this.fish.id);
     console.log(`[FloaterGame] Loaded ${this.beats.length} beats for cast "${currentCast.name}"`);
 
     this.phase = GamePhase.Approach;
@@ -834,7 +967,7 @@ export class FloaterGame extends Component {
     floaterVM.skipButtonVisible = false;
 
     // Get departure data from cast
-    const cast = getCastForTier(this.fish.tier, this.castIndexWithinTier);
+    const cast = getCastForTier(this.fish.tier, this.castIndexWithinTier, this.fish.id);
     const departureData = cast.departures[effectiveDrift] || cast.departures[DriftState.Warm];
 
     // Use tap-to-advance dialogue system for departure lines
@@ -856,15 +989,11 @@ export class FloaterGame extends Component {
     // Don't show old departure overlay — use dialogue panel instead
     floaterVM.departureVisible = false;
 
-    // Track drift scared count
-    if (drift === DriftState.Scared) {
-      this.driftScaredCount++;
-      if (this.driftScaredCount >= 3) {
-        this.triggerEnding(EndingType.DriftAway);
-        return;
-      }
-    } else if (drift === DriftState.Charmed || drift === DriftState.Warm) {
-      this.driftScaredCount = 0; // Reset on positive drift
+    // Check affection threshold for Drift-Away ending
+    if (this.fishAffection.value <= AFFECTION_DRIFT_AWAY_THRESHOLD) {
+      console.log(`[FloaterGame] Affection ${this.fishAffection.value} <= ${AFFECTION_DRIFT_AWAY_THRESHOLD}, triggering Drift-Away`);
+      this.triggerEnding(EndingType.DriftAway);
+      return;
     }
 
     console.log(`[FloaterGame] Departure: ${drift}`);
@@ -943,13 +1072,30 @@ export class FloaterGame extends Component {
     switch (type) {
       case EndingType.Reel:
         floaterVM.endingText = endingCatchData?.reelEpitaph ?? 'End.';
+        // Unlock the CG for this character's Reel ending
+        const cgId = `${this.fish.id}_love_end`;
+        const newlyUnlocked = this.cgGallerySystem.unlockCG(cgId);
+        if (newlyUnlocked) {
+          // Show fullscreen CG viewer with fade-in
+          this.cgGallerySystem.openViewer(cgId);
+          floaterVM.cgViewerVisible = true;
+          console.log(`[FloaterGame] CG unlocked and displayed: ${cgId}`);
+        }
         break;
       case EndingType.Release:
         floaterVM.endingText = endingCatchData?.releaseEpitaph ?? 'Released.';
         this.flagSystem.set(`cross.${this.fish.id}.released`, true);
         break;
       case EndingType.DriftAway:
-        floaterVM.endingText = 'She was not there.\n\nThe file was closed.\n\n7:14. The surface was empty.';
+        const driftCgId = `${this.fish.id}_drift_away`;
+        const driftCgUnlocked = this.cgGallerySystem.unlockCG(driftCgId);
+        if (driftCgUnlocked) {
+          this.cgGallerySystem.openViewer(driftCgId);
+          floaterVM.cgViewerVisible = true;
+          console.log(`[FloaterGame] Drift-Away CG unlocked and displayed: ${driftCgId}`);
+        }
+        floaterVM.endingText = characterRegistry.getCharacter(this.fish.id)?.driftAwayJournalText
+          ?? 'She was not there.\n\nThe file was closed.\n\n7:14. The surface was empty.';
         break;
     }
 
@@ -961,9 +1107,11 @@ export class FloaterGame extends Component {
 
     // Mark catch as used
     this.flagSystem.set(`${this.fish.id}.catch_available`, false);
+    // Mark character ending as complete — permanently removes from encounter pool
+    this.flagSystem.set(`${this.fish.id}.ending_complete`, true);
     this.saveSystem.requestSave();
 
-    console.log(`[FloaterGame] Ending triggered: ${type}`);
+    console.log(`[FloaterGame] Ending triggered: ${type}, ${this.fish.id}.ending_complete set`);
   }
 
   // === Emotion Icons ===
@@ -1163,6 +1311,15 @@ export class FloaterGame extends Component {
   }
 
   // === Affection Display ===
+  /** Get the correct portrait texture for the current fish character */
+  private getPortraitTexture(): typeof nereiaNeutralTexture {
+    switch (this.fish.id) {
+      case 'kasha': return kashaNeutralTexture;
+      case 'nereia':
+      default: return nereiaNeutralTexture;
+    }
+  }
+
   private syncAffectionDisplay(): void {
     const percent = Math.min(100, (this.fishAffection.value / AFFECTION_MAX) * 100);
     floaterVM.affectionBarWidth = (percent / 100) * 200; // 200px max width
@@ -1710,9 +1867,9 @@ export class FloaterGame extends Component {
       seenBeats: Array.from(this.seenBeats),
       castCount: this.castCount,
       castIndexWithinTier: this.castIndexWithinTier,
-      driftScaredCount: this.driftScaredCount,
       quests: this.questSystem.serialize(),
       perFishCastIndex: { ...this.perFishCastIndex },
+      cgUnlocks: this.cgGallerySystem.serialize(),
     };
   }
 
@@ -1737,12 +1894,14 @@ export class FloaterGame extends Component {
       this.seenBeats = new Set(data.seenBeats);
       this.castCount = data.castCount;
       this.castIndexWithinTier = data.castIndexWithinTier ?? 0;
-      this.driftScaredCount = data.driftScaredCount ?? 0;
       if (data.quests) {
         this.questSystem.deserialize(data.quests);
       }
       if (data.perFishCastIndex) {
         this.perFishCastIndex = { ...data.perFishCastIndex };
+      }
+      if (data.cgUnlocks) {
+        this.cgGallerySystem.deserialize(data.cgUnlocks);
       }
       console.log(`[FloaterGame] Loaded save: castCount=${this.castCount}, castIndexWithinTier=${this.castIndexWithinTier}, tier=${TIER_NAMES[this.fish.tier]}`);
     } else {
@@ -1804,7 +1963,7 @@ export class FloaterGame extends Component {
       this.renderer.drawSplashRipples(this.splashRipples);
     }
     if (this.phase === GamePhase.CastCharging) this.renderer.drawPowerGauge(this.powerGaugeValue);
-    if (this.fishAlpha > 0) this.renderer.drawFishPortrait(this.fishAlpha, this.portraitOffsetX, this.portraitOffsetY);
+    if (this.fishAlpha > 0) this.renderer.drawFishPortrait(this.fishAlpha, this.portraitOffsetX, this.portraitOffsetY, this.getPortraitTexture());
 
 
     // Draw floating emotion icons

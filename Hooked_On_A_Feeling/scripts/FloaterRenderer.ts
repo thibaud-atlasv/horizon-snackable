@@ -85,7 +85,7 @@ export class FloaterRenderer {
     this.builder.drawRect(this.bgBrush, null, { x: 0, y: 0, width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
   }
 
-  drawFishPortrait(alpha: number, offsetX: number = 0, offsetY: number = 0): void {
+  drawFishPortrait(alpha: number, offsetX: number = 0, offsetY: number = 0, portraitTexture: TextureAsset = nereiaNeutralTexture): void {
     if (alpha <= 0) return;
     const size = FISH_PORTRAIT_SIZE;
     const x = FISH_PORTRAIT_X + offsetX;
@@ -102,8 +102,8 @@ export class FloaterRenderer {
     const drawX = centerX - scaledSize / 2;
     const drawY = centerY - scaledSize / 2;
 
-    // Always render neutral expression; mood conveyed via emotion icons + portrait animations
-    const fishBrush = new ImageBrush(nereiaNeutralTexture);
+    // Render the provided portrait texture (character-specific)
+    const fishBrush = new ImageBrush(portraitTexture);
     this.builder.drawRect(fishBrush, null,
       { x: drawX, y: drawY, width: scaledSize, height: scaledSize });
   }

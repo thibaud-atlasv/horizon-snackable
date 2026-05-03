@@ -245,6 +245,16 @@ tasks:
       - scripts/FloaterGame.ts
       - scripts/CharacterRegistry.ts
 
+  - name: Action Button Redesign
+    status: done
+    summary: Redesigned 4 action buttons as large round fishing buttons (100x100px) with action verbs and fishing float background icons
+    files:
+      - xaml/floater.xaml
+      - sprites/action_bg_wait.png
+      - sprites/action_bg_twitch.png
+      - sprites/action_bg_drift.png
+      - sprites/action_bg_reel.png
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding:

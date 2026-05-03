@@ -47,11 +47,19 @@ export class EncounterSystem {
 
     console.log(`[EncounterSystem] Selecting character: power=${castPower.toFixed(1)}, zone=${zone}, lure=${equippedLureId ?? 'none'}`);
 
+    // Step 0: Filter out characters whose ending has been triggered
+    const notEnded = allCharacters.filter(c =>
+      !flagSystem.check(`${c.id}.ending_complete`)
+    );
+    console.log(`[EncounterSystem] After ending filter: ${notEnded.length}/${allCharacters.length}`);
+
+    if (notEnded.length === 0) return null;
+
     // Step 1: Filter out characters with incomplete quests
-    const questEligible = allCharacters.filter(c =>
+    const questEligible = notEnded.filter(c =>
       questSystem.isQuestComplete(c.id, c.questRequirement, flagSystem)
     );
-    console.log(`[EncounterSystem] After quest filter: ${questEligible.length}/${allCharacters.length}`);
+    console.log(`[EncounterSystem] After quest filter: ${questEligible.length}/${notEnded.length}`);
 
     if (questEligible.length === 0) return null;
 
@@ -132,6 +140,7 @@ export class EncounterSystem {
     const zone = getZoneFromPower(castPower);
 
     return allCharacters.filter(c =>
+      !flagSystem.check(`${c.id}.ending_complete`) &&
       questSystem.isQuestComplete(c.id, c.questRequirement, flagSystem) &&
       c.lakeZones.includes(zone)
     );

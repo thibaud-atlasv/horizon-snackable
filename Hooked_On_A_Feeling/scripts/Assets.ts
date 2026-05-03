@@ -36,4 +36,8 @@ export const taglineTextTexture: TextureAsset = new TextureAsset("@sprites/tagli
 export const logoHorizonTexture: TextureAsset = new TextureAsset("@sprites/logo_horizon.png");
 export const iconJournalTexture: TextureAsset = new TextureAsset("@sprites/icon_journal.png");
 export const iconTackleboxTexture: TextureAsset = new TextureAsset("@sprites/icon_tacklebox.png");
+export const iconPadlockTexture: TextureAsset = new TextureAsset("@sprites/icon_padlock.png");
+
+// === CG Gallery ===
+export const cgNereiaLoveEndTexture: TextureAsset = new TextureAsset("@sprites/nereia_love_end.png");
 

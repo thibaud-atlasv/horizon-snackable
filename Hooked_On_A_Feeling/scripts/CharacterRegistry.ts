@@ -8,7 +8,7 @@
  * 2. Import and register here with characterRegistry.register(YOUR_CHARACTER)
  */
 
-import type { CharacterConfig, CastData, Beat, CatchSequenceData } from './Types';
+import type { CharacterConfig, CastData, Beat, CatchSequenceData, LakeZone } from './Types';
 import { AffectionTier } from './Types';
 import { NEREIA_CHARACTER } from './CharacterData_Nereia';
 import { KASHA_CHARACTER } from './CharacterData_Kasha';
@@ -53,6 +53,32 @@ class CharacterRegistry {
       }
       return true;
     });
+  }
+
+  /** Get characters that prefer a given lure */
+  getCharactersByLure(lureId: string): CharacterConfig[] {
+    return this.getAllCharacters().filter(c =>
+      c.preferredLures.includes(lureId) && !c.dislikedLures.includes(lureId),
+    );
+  }
+
+  /** Get characters that dislike a given lure */
+  getCharactersDislikingLure(lureId: string): CharacterConfig[] {
+    return this.getAllCharacters().filter(c => c.dislikedLures.includes(lureId));
+  }
+
+  /** Get characters that appear in a given lake zone */
+  getCharactersByZone(zone: LakeZone): CharacterConfig[] {
+    return this.getAllCharacters().filter(c => c.lakeZones.includes(zone));
+  }
+
+  /** Get characters that match both a zone and lure preference */
+  getCharactersForZoneAndLure(zone: LakeZone, lureId: string): CharacterConfig[] {
+    return this.getAllCharacters().filter(c =>
+      c.lakeZones.includes(zone) &&
+      c.preferredLures.includes(lureId) &&
+      !c.dislikedLures.includes(lureId),
+    );
   }
 
   /** Get cast data for a character's tier and index */

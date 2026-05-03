@@ -121,9 +121,10 @@ The game uses a **modular character system** where each fish is a self-contained
 
 ### Future Characters (Not Yet Implemented)
 The architecture supports up to 6 fish characters (3 primary arcs, 2 secondary, 1 hidden). Additional characters can be added by:
-1. Creating a `CharacterData_<Name>.ts` with all content
+1. Creating a single `CharacterData_<Name>.ts` file containing ALL content (metadata, dialogue for all tiers, lure preferences, quest hints, catch sequence, endings)
 2. Registering in `CharacterRegistry.ts`
-3. Adding tier-specific dialogue files (`CastDataTier<N>_<Name>.ts`)
+
+Each character is fully self-contained in ONE file — no separate tier files needed.
 
 ---
 
@@ -151,7 +152,7 @@ Lures are the primary strategic layer. Player equips one lure before each Cast.
 
 ## Journal System (SYS-05-JOURNAL, MUSEUM variant)
 
-Accessible freely at any time. Three tabs:
+Accessible freely at any time. Four tabs:
 
 ### Tab 1 — Pond Notes
 - One entry per fish (locked fish shown as dark silhouette)
@@ -172,6 +173,14 @@ Accessible freely at any time. Three tabs:
 - Each item has two descriptions:
   - **Fish's perspective** — intended meaning, poetic
   - **Fisherman's perspective** — dry, practical, often absurdist
+
+### Tab 4 — Gallery (CG Collection)
+- Grid display of CG images organized by character
+- Unlocked CGs show name, description, and "[Tap to view]" prompt
+- Locked CGs appear as greyed-out "???" with padlock icon
+- Tapping an unlocked CG opens fullscreen viewer overlay
+- Tap anywhere in viewer to dismiss and return to journal
+- First CG: "The Last Morning" (Nereia's Reel ending)
 
 ---
 
@@ -331,6 +340,20 @@ Relationship progression systems implemented:
 - **Tier Transition UI** — Centered notification overlay auto-dismisses after 2.5s on tier promotion; mood icon updates in HUD
 - **Nereia Tier 2 Content** — 2 new Beats (3 & 4) with "Curious" arc voice shift (occasional contractions, more openness)
 - **Save Persistence** — Extended save data includes peakValue, floor, lastChangeDelta, lastChangeSessionId with backward-compatible loading
+
+### Milestone 4 — Catch Sequence & Endings (COMPLETE)
+Catch sequence and endings systems implemented:
+- **Catch Sequence** — When fish reaches max affection tier (Bonded) and all beats played, two-choice moment appears: "Reel" or "[Fish's name]"
+- **Reel Ending** — Choosing Reel displays epitaph text, unlocks CG, marks catch as used
+- **Release Ending** — Choosing fish's name displays release epitaph, sets cross-fish flag
+- **Drift-Away Ending** — Triggered automatically when DRIFT_SCARED occurs 3× without recovery
+- **SYS-24-GALLERY (CG Collection)** — New Journal tab "Gallery" showing unlocked/locked CGs per character
+  - Unlocked CGs show name and description with "[Tap to view]" prompt
+  - Locked CGs show padlock icon and "???" placeholder
+  - Fullscreen CG viewer overlay with tap-to-dismiss
+  - CGs unlock automatically on Reel ending (first CG: Nereia's "The Last Morning")
+  - Unlock state persists in save data
+- **Nereia Full Arc Content** — Tiers 1–5 complete (10 Casts total) with catch sequence dialogue
 
 ### Awaiting Playtest
 - Full Cast loop should be testable in Preview

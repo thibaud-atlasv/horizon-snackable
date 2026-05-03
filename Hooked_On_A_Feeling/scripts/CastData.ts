@@ -4,16 +4,9 @@
  * New code should use characterRegistry directly.
  */
 
-import type { Beat, FishCharacter, CastData, CatchSequenceData } from './Types';
+import type { Beat, FishCharacter, CastData } from './Types';
 import { AffectionTier } from './Types';
 import { characterRegistry } from './CharacterRegistry';
-
-// Re-export tier casts for any code that imports them directly
-export { NEREIA_TIER1_CASTS } from './CastDataTier1';
-export { NEREIA_TIER2_CASTS } from './CastDataTier2';
-export { NEREIA_TIER3_CASTS } from './CastDataTier3';
-export { NEREIA_TIER4_CASTS } from './CastDataTier4';
-export { NEREIA_TIER5_CASTS, CATCH_SEQUENCE_DATA, DRIFT_AWAY_JOURNAL_TEXT } from './CastDataTier5';
 
 // === Nereia Default Character (backward compat) ===
 export function createNereia(): FishCharacter {

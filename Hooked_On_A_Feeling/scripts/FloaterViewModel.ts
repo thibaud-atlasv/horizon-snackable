@@ -35,11 +35,18 @@ export const onFloaterCatchChoice = new UiEvent('onFloaterCatchChoice', FloaterC
 export const onJournalOpen = new UiEvent('onJournalOpen');
 export const onJournalClose = new UiEvent('onJournalClose');
 export const onJournalTabSwitch = new UiEvent('onJournalTabSwitch', FloaterTabSelectedPayload);
+export const onCGViewerDismiss = new UiEvent('onCGViewerDismiss');
+export const onCGItemTapped = new UiEvent('onCGItemTapped', FloaterTabSelectedPayload);
 
 // Inventory events
 export const onInventoryOpen = new UiEvent('onInventoryOpen');
 export const onInventoryClose = new UiEvent('onInventoryClose');
 export const onInventoryEquip = new UiEvent('onInventoryEquip', FloaterLureSelectedPayload);
+
+// Reset save events
+export const onResetSavePressed = new UiEvent('onResetSavePressed');
+export const onResetSaveConfirm = new UiEvent('onResetSaveConfirm');
+export const onResetSaveCancel = new UiEvent('onResetSaveCancel');
 
 // === ViewModel ===
 @uiViewModel()
@@ -107,6 +114,11 @@ export class FloaterViewModel extends UiViewModel {
     onInventoryOpen,
     onInventoryClose,
     onInventoryEquip,
+    onCGViewerDismiss,
+    onCGItemTapped,
+    onResetSavePressed,
+    onResetSaveConfirm,
+    onResetSaveCancel,
   };
 
   // === Journal State ===
@@ -114,9 +126,17 @@ export class FloaterViewModel extends UiViewModel {
   journalTab1Visible: boolean = true;
   journalTab2Visible: boolean = false;
   journalTab3Visible: boolean = false;
+  journalTab4Visible: boolean = false;
   journalPondNotesText: string = '';
   journalLureBoxText: string = '';
   journalKeepsakesText: string = '';
+  journalCollectionText: string = '';
+
+  // === Reset Save Confirmation ===
+  resetConfirmVisible: boolean = false;
+
+  // === CG Viewer State ===
+  cgViewerVisible: boolean = false;
 
   // === Inventory (Tackle Box) State ===
   inventoryVisible: boolean = false;
@@ -139,11 +159,12 @@ export class FloaterViewModel extends UiViewModel {
   // === Journal Button ===
   journalButtonVisible: boolean = false;
 
-  /** Switch journal tab by index (0-2). */
+  /** Switch journal tab by index (0-3). */
   setJournalTab(tabIndex: number): void {
     this.journalTab1Visible = tabIndex === 0;
     this.journalTab2Visible = tabIndex === 1;
     this.journalTab3Visible = tabIndex === 2;
+    this.journalTab4Visible = tabIndex === 3;
   }
 
   /** Update equipped lure indicators from display list */
