@@ -1,0 +1,27 @@
+{
+    "id": "27580731851530177",
+    "author": "thibaudalbyonsteam",
+    "name": "Hooked_On_A_Feeling",
+    "dependencies": [
+        {
+            "name": "meta/worlds_sdk",
+            "version": "development"
+        },
+        {
+            "name": "meta/editor_starter_kit",
+            "version": "1.12.1"
+        },
+        {
+            "name": "meta/assistant",
+            "version": "*"
+        },
+        {
+            "name": "meta/worlds_sdk_experimental",
+            "version": "development"
+        },
+        {
+            "name": "meta/worlds_sdk_provisional",
+            "version": "development"
+        }
+    ]
+}

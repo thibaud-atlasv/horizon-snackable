@@ -1,0 +1,292 @@
+tasks:
+  - name: Milestone 1 — Foundation
+    status: done
+    summary: Core systems implemented, Cast loop working, Nereia Tier 1 playable, UI polished, dialogue system converted to XAML
+
+  - name: Milestone 2 — Affection & Relationship Layer
+    status: done
+    summary: Affection system implemented, tier progression working, Nereia Tier 2 content complete, mood icons as sprites, fishing cast mechanics added
+    files:
+      - scripts/AffectionSystem.ts
+      - scripts/MoodIcons.ts
+      - scripts/Types.ts
+      - scripts/CastData.ts
+      - scripts/FloaterViewModel.ts
+      - scripts/FloaterGame.ts
+      - scripts/FloaterRenderer.ts
+      - scripts/Constants.ts
+      - xaml/floater.xaml
+      - sprites/mood_icon_unaware.png
+      - sprites/mood_icon_curious.png
+      - sprites/mood_icon_familiar.png
+      - sprites/mood_icon_trusting.png
+      - sprites/mood_icon_bonded.png
+    subtasks:
+      - name: SYS-01-AFFECTION Implementation
+        status: done
+      - name: SYS-04-TIERS Implementation
+        status: done
+      - name: Action → Affection Delta
+        status: done
+      - name: Drift → Affection Modifier
+        status: done
+      - name: Tier Transition UI
+        status: done
+      - name: Nereia Tier 2 Content
+        status: done
+      - name: Save/Load Integration
+        status: done
+      - name: Mood Icon Sprites (Unicode replacement)
+        status: done
+      - name: Fishing Cast Mechanics
+        status: done
+        subtasks:
+          - name: Title screen "Play" button
+            status: done
+          - name: LakeIdle state (pond + Cast button, no character)
+            status: done
+          - name: CastCharging state (power gauge ping-pong)
+            status: done
+          - name: CastFlying state (arc physics)
+            status: done
+          - name: FloatLanded state (splash VFX)
+            status: done
+          - name: Character appears after float lands
+            status: done
+
+  - name: Milestone 3 — Journal & Hints
+    status: done
+    summary: Journal system (3 tabs), Lure system with inventory-based equipment, Personal Quest hints, emotion icons generated, Complete Nereia arc (10 Casts, 5 Tiers), 4-action system, visible affection bar, floating emotion icons, float animations for all 4 actions
+    files:
+      - scripts/LureData.ts
+      - scripts/QuestHintData.ts
+      - scripts/JournalSystem.ts
+      - scripts/LureSystem.ts
+      - scripts/FloaterViewModel.ts
+      - scripts/FloaterGame.ts
+      - scripts/FloaterRenderer.ts
+      - scripts/Constants.ts
+      - scripts/Types.ts
+      - scripts/CastDataTier1.ts
+      - scripts/CastDataTier2.ts
+      - scripts/CastDataTier3.ts
+      - scripts/CastDataTier4.ts
+      - scripts/CastDataTier5.ts
+      - xaml/floater.xaml
+      - sprites/emotion_icon_curiosity.png
+      - sprites/emotion_icon_surprise.png
+      - sprites/emotion_icon_warmth.png
+      - sprites/emotion_icon_shock.png
+      - sprites/emotion_icon_hesitation.png
+      - sprites/emotion_icon_contentment.png
+      - sprites/emotion_icon_sadness.png
+      - sprites/emotion_icon_boredom.png
+      - sprites/emotion_icon_delight.png
+    subtasks:
+      - name: SYS-05-JOURNAL Implementation (MUSEUM variant)
+        status: done
+      - name: Personal Quest Hint System
+        status: done
+      - name: SYS-23-GIFTS (Lures) Implementation
+        status: done
+      - name: Lure Selection UI
+        status: done
+      - name: Lure → Fish Attraction Logic
+        status: done
+      - name: Lure → Initial DRIFT Modifier
+        status: done
+      - name: Journal UI (3 tabs)
+        status: done
+      - name: Emotion Icon Sprites (9 icons)
+        status: done
+      - name: 4-Action System (WAIT, TWITCH, DRIFT, REEL)
+        status: done
+      - name: Visible Affection Bar + Emotion Name
+        status: done
+      - name: Floating Emotion Icons with Animation
+        status: done
+      - name: Complete Nereia Arc (10 Casts, 5 Tiers)
+        status: done
+      - name: Catch Sequence (2-choice system)
+        status: done
+      - name: Endings System (REEL, RELEASE, DRIFT-AWAY)
+        status: done
+      - name: Tier Unlock System (Moment Clefs)
+        status: done
+      - name: Float Animations (WAIT, REEL, DRIFT, TWITCH)
+        status: done
+
+  - name: Character System Restructure
+    status: done
+    summary: Modular character system - easy to add new fish. Only Nereia implemented. Docs cleaned. All Nereia content consolidated in CharacterData_Nereia.ts.
+    files:
+      - scripts/CharacterData_Nereia.ts
+      - scripts/CharacterRegistry.ts
+      - scripts/Types.ts
+      - scripts/CastData.ts
+      - scripts/FloaterGame.ts
+      - scripts/LureData.ts
+      - scripts/QuestHintData.ts
+      - scripts/JournalSystem.ts
+      - Docs/PROJECT_SUMMARY.md
+      - Docs/ART_DIRECTION.md
+      - sprites/nereia_neutral.png
+
+  - name: Exclamation Duration Fix
+    status: done
+    summary: Reduced "!" emoji duration to 0.25s so it disappears before portrait appears (t=0.3s). Creates clean visual transition.
+    files:
+      - scripts/Constants.ts
+      - scripts/FloaterGame.ts
+
+  - name: Exclamation Timing Fix
+    status: done
+    summary: Fixed "!" emoji to appear at the START of bobbing animation instead of after. Corrected compile errors (missing import, property naming).
+    files:
+      - scripts/FloaterGame.ts
+
+  - name: Fish Appearance Sequence
+    status: done
+    summary: Created cinematic sequence - "!" appears (t=0), portrait scales in (t=0.3s), emotion emoji spawns (t=0.8s). Adjusted "!" height closer to float.
+    files:
+      - scripts/FloaterGame.ts
+      - scripts/FloaterRenderer.ts
+
+  - name: Emoji Position Fix
+    status: done
+    summary: Moved "!" emoji to appear above float instead of portrait. Adjusted to 50% size and positioned higher. Prevents 2 emojis above portrait simultaneously.
+    files:
+      - scripts/Types.ts
+      - scripts/FloaterGame.ts
+      - scripts/FloaterRenderer.ts
+
+  - name: Nothing Bites Visual Fix
+    status: done
+    summary: Fixed exclamation emoji and portrait bobbing appearing during "nothing bites". Now only shows scenery message.
+    files:
+      - scripts/FloaterGame.ts
+
+  - name: Nothing Bites Mechanic + Nereia Arc v2.2
+    status: done
+    summary: Added "nothing bites" when no fish in zone. Rewrote Nereia Tiers 1-2 with Nagato Yuki voice, counter system, Cast 4 variants, Four Minutes silent beat timer.
+    files:
+      - scripts/CharacterData_Nereia.ts
+      - scripts/EncounterSystem.ts
+      - scripts/Types.ts
+      - scripts/Constants.ts
+      - scripts/FloaterGame.ts
+      - scripts/CastDataTier1.ts
+      - scripts/CastDataTier2.ts
+      - scripts/FloaterViewModel.ts
+      - Docs/FLOATER_NEREIA_ARC_v2_2.md
+    subtasks:
+      - name: Nothing Bites Mechanic
+        status: done
+      - name: Nereia Zones (near/mid only)
+        status: done
+      - name: Nereia Tier 1 Rewrite (2 Casts)
+        status: done
+      - name: Nereia Tier 2 Rewrite (2 Casts + variant)
+        status: done
+      - name: Counter System (T-XXXX)
+        status: done
+      - name: Four Minutes Silent Beat Timer
+        status: done
+
+  - name: Kasha Character Implementation
+    status: done
+    summary: Added 2nd character Kasha with 5 tiers (10 Casts), dynamic catch sequence, cross-references to Nereia. Voice opposite of Nereia (fast, loud, contractions).
+    files:
+      - scripts/CastDataTier1_Kasha.ts
+      - scripts/CastDataTier2_Kasha.ts
+      - scripts/CastDataTier3_Kasha.ts
+      - scripts/CastDataTier4_Kasha.ts
+      - scripts/CastDataTier5_Kasha.ts
+      - scripts/CharacterData_Kasha.ts
+      - scripts/Types.ts
+      - scripts/Assets.ts
+      - scripts/CastDataTier5.ts
+      - scripts/CharacterRegistry.ts
+      - scripts/FloaterGame.ts
+      - scripts/FloaterViewModel.ts
+      - xaml/floater.xaml
+      - sprites/char_veiltail_neutral.png
+      - Docs/PROJECT_SUMMARY.md
+      - Docs/FLOATER_KASHA_ARC_v1_0.md
+
+  - name: Quest & Encounter Systems
+    status: done
+    summary: Quest system with 5 quest types, lake zones (near/mid/far), encounter priority algorithm, multi-character support ready
+    files:
+      - scripts/QuestSystem.ts
+      - scripts/EncounterSystem.ts
+      - scripts/Types.ts
+      - scripts/CharacterData_Nereia.ts
+      - scripts/FloaterGame.ts
+      - scripts/JournalSystem.ts
+    subtasks:
+      - name: Quest System Implementation
+        status: done
+      - name: Lake Zones (Near/Mid/Far)
+        status: done
+      - name: Encounter Priority Algorithm
+        status: done
+      - name: CharacterConfig Updates
+        status: done
+      - name: Save Data Integration
+        status: done
+      - name: Journal Quest Display
+        status: done
+
+  - name: Cast Progression Bug Fix
+    status: done
+    summary: Fixed dialogue not progressing past tier exhaustion. Added auto-promotion when all casts in a tier are completed.
+    files:
+      - scripts/FloaterGame.ts
+      - scripts/CharacterRegistry.ts
+
+  - name: Action Button Redesign
+    status: done
+    summary: Redesigned 4 action buttons as large round fishing buttons (100x100px) with action verbs and fishing float background icons
+    files:
+      - xaml/floater.xaml
+      - sprites/action_bg_wait.png
+      - sprites/action_bg_twitch.png
+      - sprites/action_bg_drift.png
+      - sprites/action_bg_reel.png
+
+chopping_block:
+  disabled_systems: []
+  temp_scaffolding:
+    - drawDialogueBubble() method in FloaterRenderer.ts (no longer called, can be removed)
+  failed_attempts: []
+
+notes:
+  - Project initialized with comprehensive design documentation
+  - All systems reference VN_SYSTEMS_BIBLE_v2.0.md by SYS-NN-NAME
+  - Build order follows 7 milestones defined in PROJECT_SUMMARY.md
+  - Art direction established for nocturnal pond illustration style
+  - Milestone 1 complete — foundation systems working, Nereia Tier 1 playable
+  - Milestone 2 complete — affection system working, tier progression functional, Nereia Tier 2 playable
+  - Game renamed from "FLOATER" to "Hooked on a Feeling"
+  - Fishing cast mechanics added: LakeIdle → CastCharging (power gauge) → CastFlying (arc physics) → FloatLanded (splash VFX) → Approach
+  - Cast loop: Title → LakeIdle → CastCharging → CastFlying → FloatLanded → Approach → Exchange → Departure → Idle
+  - Power gauge: vertical bar, ping-pong indicator, tap to lock power
+  - Float physics: parabolic arc trajectory, 1.2s flight, power-based height
+  - Splash VFX: 3 staggered ripple circles, 0.5s pause before character appears
+  - DRIFT system tracks departure state for next Cast and applies affection modifiers
+  - Affection system: hidden meter (0-100), TIER_ONLY visibility, floor mechanic, ±30 cap per action
+  - Tier progression: 5 tiers with thresholds at 0, 15, 35, 60, 85
+  - Mood icons implemented as sprites (no Unicode) - 5 icons for 5 tiers
+  - All dialogue follows pacing rules (≤80 chars, 1 line per bubble)
+  - Layout: Central portrait (170px, DrawingSurface), dialogue panel (XAML Custom UI, editable in editor), action menu (XAML)
+  - Background uses UniformToFill stretch to fill 100% height and crop left/right as needed
+  - Design documents (FLOATER_GDD_v1.0.md, FLOATER_VISUAL_BIBLE_v1.0.md, VN_SYSTEMS_BIBLE_v2.0.md) kept with original names as reference
+  - Character system restructured: modular CharacterRegistry allows easy addition of new fish
+  - Only Nereia implemented currently - other fish removed from docs
+  - To add new character: create CharacterData_NewFish.ts, register in CharacterRegistry.ts
+  - All Nereia content consolidated in CharacterData_Nereia.ts (metadata, portraits, lures, quest hints, dialogues, endings)
+  - Quest system: 5 quest types (use_lure, talk_to_fish, talk_to_x_fish, make_fish_leave, custom)
+  - Lake zones: Near (0-33%), Mid (34-66%), Far (67-100%) based on cast power
+  - Encounter priority: quest incomplete = never appears, quest complete = prioritized, lure preference = 2x weight
+  - Multi-character support ready: per-fish cast indices, quest tracking, zone-based spawning
