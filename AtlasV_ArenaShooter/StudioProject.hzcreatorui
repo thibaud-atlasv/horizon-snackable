@@ -1,0 +1,3 @@
+<Project>
+  <StartupDocument>xaml/game.xaml</StartupDocument>
+</Project>
