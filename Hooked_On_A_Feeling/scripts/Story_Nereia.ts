@@ -23,9 +23,25 @@
  *   -> END                 end of cast (departure phase begins)
  *   -> DONE                end of game (final ending sequence)
  *
- * Scope of this file: BEATS only. Departures, the cast 4-bis variant entry
- * point, the catch sequence, and tier/quest metadata are not included
- * here yet — they remain to migrate in a follow-up pass.
+ * Delta calibration (scale -10 / +50):
+ *   +5  rupture émotionnelle, aveu
+ *   +4  vraie ouverture, moment fort
+ *   +3  positif sincère, intérêt marqué
+ *   +2  légèrement positif
+ *   +1  neutre-positif
+ *    0  deflection pure
+ *   -1  légère résistance (rare pour Nereia)
+ *
+ * Nereia ne va pas en dessous de 0 par design : son arc se termine par
+ * un Release (elle part selon la directive) ou un Reel (affection max).
+ * Le drift-away n'est pas dans son arc narratif.
+ *
+ * Cumulative (worst / best play):
+ *   Cast 1: -2 / +7   Cast 2: 0 / +6   Cast 3: +2 / +6
+ *   Cast 4: +1 / +11  Cast 5: 0 / +5   Cast 6: -1 / +6
+ *   Cast 7: +1 / +5   Cast 8: +1 / +6  Cast 9: +2 / +6
+ *   Cast 10: 0 / +6
+ *   → Catch (+50) reachable at C8 with best choices
  */
 
 export const NEREIA_STORY: string = `
@@ -83,7 +99,7 @@ It is the name I give.
 Nereia.
 Use that one.
 
-* [WAIT] #delta:2 #expr:curious #icon:hesitation #flag:mood.nereia.fourth_person
+* [WAIT] #delta:3 #expr:curious #icon:hesitation #flag:mood.nereia.fourth_person
     ...
     You pronounced it correctly.
     ...
@@ -237,7 +253,7 @@ This one is titled with a question mark.
 ...
 It is your fault.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:mood.nereia.first_crack
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.first_crack
     No.
     ...
     It is the right answer regardless.
@@ -249,7 +265,7 @@ It is your fault.
     I am keeping it.
     -> END
 
-* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:mood.nereia.first_crack #flag:secret.nereia.november_14_seed
+* [TWITCH] #delta:3 #expr:curious #icon:curiosity #flag:mood.nereia.first_crack #flag:secret.nereia.november_14_seed
     You.
     ...
     Also: the morning of November 14th, 1923.
@@ -326,7 +342,7 @@ Out of generosity to the file.
     It has one entry.
     -> nereia_t2_c3_b2
 
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation #flag:secret.nereia.deviation #flag:mood.nereia.no_schedule
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:secret.nereia.deviation #flag:mood.nereia.no_schedule
     The file predicted your presence.
     Not mine.
     ...
@@ -371,7 +387,7 @@ Three days ago.
 I have not been asked why.
 Yet.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:secret.nereia.deviation_active #flag:mood.nereia.trouble_suits
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:secret.nereia.deviation_active #flag:mood.nereia.trouble_suits
     Yes.
     ...
     I am continuing.
@@ -385,7 +401,7 @@ Yet.
     It suits me.
     -> END
 
-* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:secret.nereia.deviation_active #flag:mood.nereia.unnecessary_speech
+* [TWITCH] #delta:3 #expr:curious #icon:curiosity #flag:secret.nereia.deviation_active #flag:mood.nereia.unnecessary_speech
     Because it is your fault.
     ...
     And because I wanted you to know.
@@ -399,7 +415,7 @@ Yet.
     Today is for that.
     -> END
 
-* [DRIFT] #delta:2 #expr:warm #icon:curiosity #flag:mood.nereia.prefers_noticing
+* [DRIFT] #delta:3 #expr:warm #icon:curiosity #flag:mood.nereia.prefers_noticing
     No.
     ...
     You are already helping.
@@ -516,7 +532,7 @@ I have not found the conclusion.
 ...
 I have stopped looking.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:mood.nereia.uncategorized #flag:mood.nereia.deliberate_unknowing
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.uncategorized #flag:mood.nereia.deliberate_unknowing
     Yes.
     ...
     I am 340 years old.
@@ -549,7 +565,7 @@ I have stopped looking.
     Out loud.
     -> nereia_t2_c4_b3
 
-* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.parallel_keeping #flag:secret.nereia.both_know
+* [DRIFT] #delta:4 #expr:warm #icon:hesitation #flag:mood.nereia.parallel_keeping #flag:secret.nereia.both_know
     ...
     Do not say it.
     ...
@@ -683,7 +699,7 @@ It concerns your presence.
 ...
 I did not follow it.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:secret.nereia.directive_refused
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:secret.nereia.directive_refused
     To leave.
     ...
     I am here.
@@ -736,7 +752,7 @@ It was long.
     Six minutes can be very long.
     -> nereia_t3_c6_b2
 
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation #flag:mood.nereia.thought_of_you
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.thought_of_you
     You.
     ...
     This is the first time I have said it aloud.
@@ -770,7 +786,7 @@ It was the rule.
     But not for the same reasons.
     -> END
 
-* [TWITCH] #delta:2 #expr:warm #icon:curiosity #flag:mood.nereia.gave_name
+* [TWITCH] #delta:3 #expr:warm #icon:curiosity #flag:mood.nereia.gave_name
     You had one before.
     ...
     You have a name now.
@@ -779,7 +795,7 @@ It was the rule.
     None of the others had a name.
     -> END
 
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation #flag:mood.nereia.changed
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.changed
     It is not you that is different.
     ...
     It is me.
@@ -830,7 +846,7 @@ I am leaving soon.
 You already know.
 I am confirming.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation
+* [WAIT] #delta:3 #expr:warm #icon:hesitation
     Not today.
     ...
     Not tomorrow.
@@ -844,7 +860,7 @@ I am confirming.
     It is the only thing I can do.
     -> END
 
-* [DRIFT] #delta:2 #expr:warm #icon:curiosity #flag:secret.nereia.cannot_go_with
+* [DRIFT] #delta:3 #expr:warm #icon:curiosity #flag:secret.nereia.cannot_go_with
     No.
     ...
     Where I am going you cannot go.
@@ -884,7 +900,7 @@ I am 30.
     That would be acceptable.
     -> nereia_t4_c8_b2
 
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation #flag:mood.nereia.first_admitted
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.first_admitted
     I know.
     ...
     So am I.
@@ -910,7 +926,7 @@ As if the lake were breathing.
 I have observed it 340 times.
 You will be the only one to know why.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:secret.nereia.november_14
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:secret.nereia.november_14
     The lake remembers.
     ...
     It will remember me.
@@ -921,14 +937,14 @@ You will be the only one to know why.
     It will continue to breathe after I leave.
     -> END
 
-* [TWITCH] #delta:2 #expr:warm #icon:curiosity #flag:secret.nereia.november_14 #flag:secret.nereia.legacy
+* [TWITCH] #delta:3 #expr:warm #icon:curiosity #flag:secret.nereia.november_14 #flag:secret.nereia.legacy
     So that someone will know.
     ...
     When I am gone no one will know.
     Except you.
     -> END
 
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation #flag:secret.nereia.november_14 #flag:secret.nereia.legacy
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:secret.nereia.november_14 #flag:secret.nereia.legacy
     I know.
     ...
     The file confirms it.
@@ -999,7 +1015,7 @@ Until now.
 That is the data.
 That is what I am giving you.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:secret.nereia.final_approach #flag:mood.nereia.last_silence
+* [WAIT] #delta:4 #expr:warm #icon:hesitation #flag:secret.nereia.final_approach #flag:mood.nereia.last_silence
     You said nothing.
     ...
     It is the only correct response.
@@ -1017,7 +1033,7 @@ That is what I am giving you.
     Always.
     -> END
 
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation #flag:secret.nereia.final_approach
+* [DRIFT] #delta:4 #expr:warm #icon:hesitation #flag:secret.nereia.final_approach
     ...
     I know.
     ...
@@ -1045,21 +1061,21 @@ First contact.
 ...
 Today is the last entry in the file.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:nereia.release_ready
     Yes.
     ...
     I told you it would be early.
     I am keeping my word.
     -> nereia_t5_c10_b2
 
-* [TWITCH] #delta:1 #expr:curious #icon:curiosity
+* [TWITCH] #delta:1 #expr:curious #icon:curiosity #flag:nereia.release_ready
     I said tomorrow.
     ...
     It is now tomorrow.
     I was honest.
     -> nereia_t5_c10_b2
 
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:nereia.release_ready
     I know.
     ...
     I gave you all the time I had.
@@ -1067,7 +1083,7 @@ Today is the last entry in the file.
     It will have to be enough.
     -> nereia_t5_c10_b2
 
-* [REEL] #delta:0 #expr:warm #icon:surprise
+* [REEL] #delta:0 #expr:warm #icon:surprise #flag:nereia.release_ready
     ...
     I know.
     ...
@@ -1091,20 +1107,6 @@ I no longer have a word for what you are.
 ...
 I do not need one.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:nereia.catch_available
-    ...
-    -> END
-
-* [TWITCH] #delta:1 #expr:warm #icon:curiosity #flag:nereia.catch_available
-    ...
-    -> END
-
-* [DRIFT] #delta:2 #expr:warm #icon:hesitation #flag:nereia.catch_available
-    ...
-    -> END
-
-* [REEL] #delta:0 #expr:warm #icon:surprise #flag:nereia.catch_available
-    ...
-    -> END
+-> END
 
 `;

@@ -154,19 +154,7 @@ export interface FishCharacter {
   portrait?: TextureAsset;
 }
 
-// === Cast State ===
-export interface CastState {
-  fishId: string;
-  currentBeatIndex: number;
-  totalBeats: number;
-  phase: GamePhase;
-  currentDialogueLines: string[];
-  currentDialogueIndex: number;
-  displayedText: string;
-  textProgress: number;
-  isTextComplete: boolean;
-  phaseTimer: number;
-}
+
 
 // === Fish Affection (SYS-01-AFFECTION) ===
 export interface FishAffection {

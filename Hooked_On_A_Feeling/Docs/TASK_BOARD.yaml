@@ -288,10 +288,39 @@ tasks:
       - name: Auto-Update After Each Cast
         status: done
 
+  - name: Code Review & Cleanup
+    status: done
+    summary: Comprehensive code review - removed 3 dead files (~350 lines), cleaned dead code from 6 files, removed unused constants and methods. All scripts compile cleanly.
+    files:
+      - scripts/Constants.ts
+      - scripts/Types.ts
+      - scripts/FloaterViewModel.ts
+      - scripts/FloaterRenderer.ts
+      - scripts/FloaterGame.ts
+      - scripts/CGGallerySystem.ts
+    subtasks:
+      - name: Delete ActionButtonRenderer.ts (dead file)
+        status: done
+      - name: Delete LureSystem.ts (dead file)
+        status: done
+      - name: Delete QuestHintData.ts (dead file)
+        status: done
+      - name: Remove 24 legacy VN_* constants from Constants.ts
+        status: done
+      - name: Remove CastState interface from Types.ts
+        status: done
+      - name: Remove actionMenuScale from FloaterViewModel.ts
+        status: done
+      - name: Remove drawProgressDots() from FloaterRenderer.ts
+        status: done
+      - name: Remove enterIdle() and resetActionButtonsToVisible() from FloaterGame.ts
+        status: done
+      - name: Remove CG_IMAGE_MAP from CGGallerySystem.ts
+        status: done
+
 chopping_block:
   disabled_systems: []
-  temp_scaffolding:
-    - drawDialogueBubble() method in FloaterRenderer.ts (no longer called, can be removed)
+  temp_scaffolding: []
   failed_attempts: []
 
 notes:

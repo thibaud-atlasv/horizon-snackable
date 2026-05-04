@@ -7,7 +7,7 @@
 
 import type { CGData, CGGalleryCard } from './Types';
 import type { TextureAsset } from 'meta/worlds';
-import { nereiaNeutralTexture, kashaNeutralTexture, cgNereiaLoveEndTexture } from './Assets';
+import { nereiaNeutralTexture, kashaNeutralTexture, cgNereiaLoveEndTexture, cgNereiaReleaseEndTexture } from './Assets';
 
 // === CG Registry: All CGs in the game ===
 const CG_REGISTRY: CGData[] = [
@@ -37,6 +37,14 @@ const CG_REGISTRY: CGData[] = [
     unlockCondition: 'Choose "Reel" in Nereia\'s catch sequence',
     thumbnailPath: 'sprites/nereia_love_end.png',
   },
+  {
+    id: 'ending_nereia_release',
+    characterId: 'nereia',
+    name: 'The File Is Closed',
+    description: 'The lake remembers. You will remember. It is more than enough.',
+    unlockCondition: 'Choose Nereia\'s name in the catch sequence',
+    thumbnailPath: 'sprites/nereia_release_end.png',
+  },
 ];
 
 // Map from old CG IDs to new IDs (backward compat)
@@ -44,18 +52,12 @@ const CG_ID_MIGRATION: Record<string, string> = {
   'nereia_love_end': 'ending_nereia_reel',
 };
 
-// Map from CG ID to image paths for fullscreen viewer (legacy, kept for backward compat)
-export const CG_IMAGE_MAP: Record<string, string> = {
-  'portrait_nereia': 'sprites/nereia_neutral.png',
-  'portrait_kasha': 'sprites/char_veiltail_neutral.png',
-  'ending_nereia_reel': 'sprites/nereia_love_end.png',
-};
-
 // Map from CG ID to TextureAsset for XAML image binding
 export const CG_TEXTURE_MAP: Record<string, TextureAsset> = {
   'portrait_nereia': nereiaNeutralTexture,
   'portrait_kasha': kashaNeutralTexture,
   'ending_nereia_reel': cgNereiaLoveEndTexture,
+  'ending_nereia_release': cgNereiaReleaseEndTexture,
 };
 
 export class CGGallerySystem {

@@ -23,9 +23,24 @@
  *   -> END                end of cast (departure phase begins)
  *   -> DONE               end of game (final ending sequence)
  *
- * Scope of this file: BEATS only (the interactive 4-choice exchanges).
- * Departures, catch sequence, and tier/quest metadata are not included
- * here yet — they remain to migrate in a follow-up pass.
+ * Delta calibration (scale -10 / +50):
+ *   +5  breakthrough moment, aveu, silence partagé profond
+ *   +4  réaction très chaude, vraie ouverture
+ *   +3  positif sincère, intérêt marqué
+ *   +2  légèrement positif, toléré avec plaisir
+ *   +1  neutre-positif, accepté
+ *    0  deflection pure, ni chaud ni froid
+ *   -1  légère gêne, mise mal à l'aise
+ *   -2  blessée, froissée
+ *   -3  rejet marqué, heurte quelque chose de profond
+ *
+ * Cumulative (worst / best play):
+ *   Cast 1: -2 / +6   Cast 2: -2 / +7   Cast 3: -4 / +7
+ *   Cast 4: +2 / +8   Cast 5: -2 / +7   Cast 6: -2 / +8
+ *   Cast 7: +3 / +7   Cast 8: -1 / +7   Cast 9: +1 / +10
+ *   Cast 10: -2 / +12
+ *   → Drift-away (−10) reachable at C6 with worst choices
+ *   → Catch (+50) reachable at C7 with best choices
  */
 
 export const KASHA_STORY: string = `
@@ -47,7 +62,7 @@ This one is taken.
     Not like I care.
     -> kasha_t1_c1_b2
 
-* [TWITCH] #delta:2 #expr:curious #icon:surprise #flag:kasha.first_nickname
+* [TWITCH] #delta:3 #expr:curious #icon:surprise #flag:kasha.first_nickname
     Hah—
     Oh, you've got a mouth. Good.
     I was getting bored.
@@ -61,7 +76,7 @@ This one is taken.
     ...Tch. Forget it. Stay.
     -> kasha_t1_c1_b2
 
-* [REEL] #delta:2 #expr:warm #icon:warmth #flag:kasha.first_test_passed
+* [REEL] #delta:3 #expr:warm #icon:warmth #flag:kasha.first_test_passed
     ...
     Heh.
     You're either brave or you're stupid.
@@ -84,7 +99,7 @@ Pff. As if that's interesting.
     ...She'll answer you. She doesn't answer me.
     -> END
 
-* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:mood.kasha.third_person_slip
+* [TWITCH] #delta:3 #expr:curious #icon:curiosity #flag:mood.kasha.third_person_slip
     HAH—
     Of who. The walking statue?
     Please.
@@ -93,7 +108,7 @@ Pff. As if that's interesting.
     Forget that.
     -> END
 
-* [DRIFT] #delta:-1 #expr:alarmed #icon:surprise #flag:mood.kasha.fissure_first
+* [DRIFT] #delta:-2 #expr:alarmed #icon:surprise #flag:mood.kasha.fissure_first
     —
     ...
     What is that supposed to mean.
@@ -101,7 +116,7 @@ Pff. As if that's interesting.
     Tch.
     -> END
 
-* [REEL] #delta:1 #expr:curious #icon:curiosity
+* [REEL] #delta:2 #expr:curious #icon:curiosity
     Wow. Direct.
     I like that.
     ...Wait, no. Bad. Boring question.
@@ -123,7 +138,7 @@ I told you I wasn't done.
     Stop looking at me like that. I'm thinking.
     -> kasha_t1_c2_b2
 
-* [TWITCH] #delta:2 #expr:curious #icon:surprise
+* [TWITCH] #delta:3 #expr:curious #icon:surprise
     I MISSED— no.
     I observed your continued absence. That's different.
     Pff. 'Missed me.' Listen to yourself.
@@ -139,7 +154,7 @@ I told you I wasn't done.
     Stop trying to read me.
     -> kasha_t1_c2_b2
 
-* [REEL] #delta:2 #expr:warm #icon:warmth #flag:mood.kasha.told_him_stay
+* [REEL] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.told_him_stay
     ...
     You're really pushing it today.
     ...
@@ -158,7 +173,7 @@ Rule four: if you do try, do it well, because if you embarrass yourself I'll hav
 ...
 Why are you smiling.
 
-* [WAIT] #delta:2 #expr:curious #icon:hesitation
+* [WAIT] #delta:1 #expr:curious #icon:hesitation
     That's the wrong answer.
     ...
     But fine.
@@ -173,7 +188,7 @@ Why are you smiling.
     ...There's a list. There is.
     -> END
 
-* [DRIFT] #delta:0 #expr:neutral #icon:curiosity #flag:secret.kasha.never_challenged
+* [DRIFT] #delta:-2 #expr:neutral #icon:curiosity #flag:secret.kasha.never_challenged
     ...
     What kind of question is that.
     Of course they have. People challenge me constantly.
@@ -181,7 +196,7 @@ Why are you smiling.
     Next question.
     -> END
 
-* [REEL] #delta:2 #expr:warm #icon:warmth #flag:mood.kasha.challenge_accepted
+* [REEL] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.challenge_accepted
     ...
     To what.
     Don't say something stupid. Be specific.
@@ -208,7 +223,7 @@ Don't look at me like that. This is good for you.
     ...Don't laugh. I am being serious.
     -> kasha_t2_c3_b2
 
-* [TWITCH] #delta:2 #expr:curious #icon:surprise
+* [TWITCH] #delta:3 #expr:curious #icon:surprise
     Hah—!
     That's the right energy.
     Wrong attitude, but right energy.
@@ -217,14 +232,14 @@ Don't look at me like that. This is good for you.
     ...You're enjoying this. Aren't you.
     -> kasha_t2_c3_b2
 
-* [DRIFT] #delta:0 #expr:neutral #icon:curiosity #flag:mood.kasha.fissure_widen
+* [DRIFT] #delta:-1 #expr:neutral #icon:curiosity #flag:mood.kasha.fissure_widen
     Yes I do.
     ...
     Yes I do, baka.
     You wouldn't understand.
     -> kasha_t2_c3_b2
 
-* [REEL] #delta:2 #expr:warm #icon:warmth #flag:mood.kasha.prize_admitted
+* [REEL] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.prize_admitted
     ...
     Why would you ask that.
     What — what kind of question is that.
@@ -238,7 +253,7 @@ Don't look at me like that. This is good for you.
 Question one: who is the most important person around here.
 Answer carefully.
 
-* [WAIT] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.unmasked_briefly
+* [WAIT] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.unmasked_briefly
     ...
     Don't say it like that.
     Say it like you're joking. Say it like a joke.
@@ -247,14 +262,14 @@ Answer carefully.
     Pass. You pass.
     -> END
 
-* [TWITCH] #delta:1 #expr:curious #icon:surprise
+* [TWITCH] #delta:2 #expr:curious #icon:surprise
     Pff.
     Correct answer. Acceptable delivery.
     B+.
     I'm a hard grader.
     -> END
 
-* [DRIFT] #delta:0 #expr:neutral #icon:hesitation
+* [DRIFT] #delta:-1 #expr:neutral #icon:hesitation
     ...
     Yes.
     ...
@@ -262,7 +277,7 @@ Answer carefully.
     I don't know. Move on. Next question.
     -> END
 
-* [REEL] #delta:-2 #expr:alarmed #icon:surprise #flag:mood.kasha.wounded_pride
+* [REEL] #delta:-3 #expr:alarmed #icon:surprise #flag:mood.kasha.wounded_pride
     ...
     Wow.
     Get out.
@@ -304,7 +319,7 @@ You're lucky I'm patient.
     Sit down.
     -> kasha_t2_c4_b2
 
-* [REEL] #delta:2 #expr:warm #icon:warmth
+* [REEL] #delta:4 #expr:warm #icon:warmth
     Hah—
     Listen to him.
     'Stay where I can find you.' Bossy.
@@ -347,7 +362,7 @@ Slight.
     It's nice. But it's annoying.
     -> END
 
-* [REEL] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.first_real_challenge
+* [REEL] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.first_real_challenge
     ...
     You said that already.
     Last time.
@@ -415,14 +430,14 @@ It wasn't a fair fight.
 It wasn't a fight at all, actually.
 I just lost. Without playing.
 
-* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:mood.kasha.silence_understood
+* [WAIT] #delta:4 #expr:warm #icon:hesitation #flag:mood.kasha.silence_understood
     ...
     Yeah.
     ...
     That's how I felt about it too.
     -> END
 
-* [TWITCH] #delta:-2 #expr:alarmed #icon:surprise #flag:mood.kasha.shut_down
+* [TWITCH] #delta:-3 #expr:alarmed #icon:surprise #flag:mood.kasha.shut_down
     ...
     Wow.
     Tell me how it works, then.
@@ -431,7 +446,7 @@ I just lost. Without playing.
     Tch. Forget it. I shouldn't have said anything.
     -> END
 
-* [DRIFT] #delta:2 #expr:curious #icon:hesitation #flag:mood.kasha.acknowledged_hurt
+* [DRIFT] #delta:3 #expr:curious #icon:hesitation #flag:mood.kasha.acknowledged_hurt
     ...
     Yeah.
     ...
@@ -439,7 +454,7 @@ I just lost. Without playing.
     Don't make me say more about it.
     -> END
 
-* [REEL] #delta:-1 #expr:alarmed #icon:surprise #flag:mood.kasha.do_not_measure
+* [REEL] #delta:-2 #expr:alarmed #icon:surprise #flag:mood.kasha.do_not_measure
     ...
     Don't.
     Don't do that.
@@ -457,7 +472,7 @@ About yesterday.
 I'm pretending I didn't say it.
 Help me pretend.
 
-* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:mood.kasha.thank_you_recurring
+* [WAIT] #delta:4 #expr:warm #icon:hesitation #flag:mood.kasha.thank_you_recurring
     ...
     Thank you.
     ...
@@ -498,7 +513,7 @@ If you had to pick one of the three idiots around the corner — not me, three o
 Don't say a name. Describe them.
 I want to test your judgment.
 
-* [WAIT] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.melted_briefly
+* [WAIT] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.melted_briefly
     ...
     That is the worst answer.
     That is the best worst answer.
@@ -515,7 +530,7 @@ I want to test your judgment.
     Actually, don't try again. That answer is fine. I was being dramatic.
     -> END
 
-* [DRIFT] #delta:-1 #expr:alarmed #icon:surprise #flag:mood.kasha.nereia_jealousy
+* [DRIFT] #delta:-2 #expr:alarmed #icon:surprise #flag:mood.kasha.nereia_jealousy
     ...
     You're really committed to making me jealous of her, huh.
     ...
@@ -524,7 +539,7 @@ I want to test your judgment.
     ...I do. A little. Stop.
     -> END
 
-* [REEL] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.demanded_repeat
+* [REEL] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.demanded_repeat
     ...
     ...
     You can't just say things like that.
@@ -577,7 +592,7 @@ It's not a small question.
 ...
 Tell me why you're here.
 
-* [WAIT] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.alive_compliment_received
+* [WAIT] #delta:5 #expr:warm #icon:warmth #flag:mood.kasha.alive_compliment_received
     ...
     ...
     That is.
@@ -599,7 +614,7 @@ Tell me why you're here.
     Did I just— forget that. Forget I said that.
     -> END
 
-* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:secret.kasha.first_let
+* [DRIFT] #delta:4 #expr:warm #icon:hesitation #flag:secret.kasha.first_let
     ...
     ...
     That's not.
@@ -611,7 +626,7 @@ Tell me why you're here.
     I've never let anyone before.
     -> END
 
-* [REEL] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.want_word
+* [REEL] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.want_word
     ...
     Want is a strong word.
     ...
@@ -679,7 +694,7 @@ I'm telling you that you could.
 I'm — I'm saying.
 I would let you.
 
-* [WAIT] #delta:4 #expr:warm #icon:hesitation #flag:mood.kasha.offer_understood
+* [WAIT] #delta:5 #expr:warm #icon:hesitation #flag:mood.kasha.offer_understood
     ...
     I knew you'd do that.
     Just sit there. Quietly. Like she would.
@@ -689,7 +704,7 @@ I would let you.
     Thank you.
     -> END
 
-* [TWITCH] #delta:-1 #expr:neutral #icon:curiosity #flag:mood.kasha.framing_failed
+* [TWITCH] #delta:-2 #expr:neutral #icon:curiosity #flag:mood.kasha.framing_failed
     ...
     Wow.
     Wow, baka.
@@ -699,7 +714,7 @@ I would let you.
     Move on. We're moving on.
     -> END
 
-* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.kasha.first_gift
+* [DRIFT] #delta:4 #expr:warm #icon:hesitation #flag:mood.kasha.first_gift
     ...
     I know.
     ...
@@ -709,7 +724,7 @@ I would let you.
     Don't make me explain it more than that.
     -> END
 
-* [REEL] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.want_you_received
+* [REEL] #delta:5 #expr:warm #icon:warmth #flag:mood.kasha.want_you_received
     ...
     ...
     Oh.
@@ -729,7 +744,7 @@ I'm going to be quiet.
 Just for a minute.
 Don't panic. I'll be loud again. I just want to try it.
 
-* [WAIT] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.shared_silence
+* [WAIT] #delta:5 #expr:warm #icon:warmth #flag:mood.kasha.shared_silence
     ...
     Thank you.
     ...
@@ -746,7 +761,7 @@ Don't panic. I'll be loud again. I just want to try it.
     Just — don't make it harder.
     -> kasha_t4_c9_b2
 
-* [DRIFT] #delta:3 #expr:warm #icon:hesitation
+* [DRIFT] #delta:4 #expr:warm #icon:hesitation
     ...
     Stop.
     ...
@@ -755,7 +770,7 @@ Don't panic. I'll be loud again. I just want to try it.
     Don't stop.
     -> kasha_t4_c9_b2
 
-* [REEL] #delta:3 #expr:warm #icon:warmth #flag:mood.kasha.callback_first_day
+* [REEL] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.callback_first_day
     ...
     ...
     You said that to me on the first day.
@@ -850,7 +865,7 @@ Don't interrupt me. Please.
     I am telling it to you anyway.
     -> kasha_t5_c10_b2
 
-* [TWITCH] #delta:-2 #expr:neutral #icon:curiosity #flag:mood.kasha.real_name_rushed
+* [TWITCH] #delta:-3 #expr:neutral #icon:curiosity #flag:mood.kasha.real_name_rushed
     ...
     ...
     Don't do that to me. Not today.
@@ -899,7 +914,7 @@ I thought of you.
 That is the most embarrassing thing I have ever said.
 We are not going to talk about it.
 
-* [WAIT] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.named_him
+* [WAIT] #delta:4 #expr:warm #icon:warmth #flag:mood.kasha.named_him #flag:kasha.release_ready
     ...
     Thank you for not saying anything.
     ...
@@ -908,7 +923,7 @@ We are not going to talk about it.
     Get used to it.
     -> kasha_t5_c10_b3
 
-* [TWITCH] #delta:0 #expr:neutral #icon:curiosity
+* [TWITCH] #delta:-2 #expr:neutral #icon:curiosity #flag:kasha.release_ready
     ...
     DON'T.
     Don't make fun of it.
@@ -918,7 +933,7 @@ We are not going to talk about it.
     Too late. Decision made. You are Hikaru.
     -> kasha_t5_c10_b3
 
-* [DRIFT] #delta:4 #expr:warm #icon:warmth
+* [DRIFT] #delta:4 #expr:warm #icon:warmth #flag:kasha.release_ready
     ...
     ...
     Don't say my name back yet.
@@ -926,7 +941,7 @@ We are not going to talk about it.
     Good.
     -> kasha_t5_c10_b3
 
-* [REEL] #delta:4 #expr:warm #icon:warmth
+* [REEL] #delta:4 #expr:warm #icon:warmth #flag:kasha.release_ready
     ...
     Yes.
     ...
@@ -946,20 +961,6 @@ Aren't I.
 Don't answer.
 I know.
 
-* [WAIT] #delta:2 #expr:warm #icon:warmth #flag:kasha.catch_available
-    ...
-    -> END
-
-* [TWITCH] #delta:2 #expr:warm #icon:warmth #flag:kasha.catch_available
-    ...
-    -> END
-
-* [DRIFT] #delta:2 #expr:warm #icon:warmth #flag:kasha.catch_available
-    ...
-    -> END
-
-* [REEL] #delta:2 #expr:warm #icon:warmth #flag:kasha.catch_available
-    ...
-    -> END
+-> END
 
 `;

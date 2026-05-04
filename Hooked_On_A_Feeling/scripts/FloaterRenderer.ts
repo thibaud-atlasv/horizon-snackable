@@ -27,7 +27,6 @@ import {
   LINE_START_X, LINE_START_Y,
   POV_LINE_START_X, POV_LINE_START_Y,
   FISH_PORTRAIT_X, FISH_PORTRAIT_Y, FISH_PORTRAIT_SIZE,
-  COLOR_UI_TEXT_PRIMARY, COLOR_NEREIA_ACCENT, COLOR_UI_SEPARATOR,
   GAUGE_X, GAUGE_Y, GAUGE_WIDTH, GAUGE_HEIGHT,
   GAUGE_BORDER_RADIUS, GAUGE_INDICATOR_HEIGHT,
   COLOR_GAUGE_BG, COLOR_GAUGE_FILL, COLOR_GAUGE_INDICATOR, COLOR_GAUGE_BORDER,
@@ -405,37 +404,7 @@ export class FloaterRenderer {
     this.builder.drawPath(null, this.linePen, pathData);
   }
 
-  /**
-   * Draw progress dots as vector circles on the DrawingSurface.
-   * Replaces the XAML TextBlock that used ● and ○ Unicode characters
-   * which don't render in Meta Horizon Studio.
-   * @param totalDots Total number of dots to draw
-   * @param filledDots Number of filled (completed) dots
-   * @param x Starting X position
-   * @param y Center Y position
-   */
-  drawProgressDots(totalDots: number, filledDots: number, x: number, y: number): void {
-    if (totalDots <= 0) return;
 
-    const dotRadius = 5;
-    const dotSpacing = 14;
-    const filledBrush = new SolidBrush(Color.fromHex(COLOR_NEREIA_ACCENT));
-    const emptyBrush = new SolidBrush(new Color(0.61, 0.5, 0.8, 0.3)); // Dim purple
-    const emptyPenBrush = new SolidBrush(Color.fromHex(COLOR_NEREIA_ACCENT));
-    const emptyPen = new Pen(emptyPenBrush, 1.2);
-
-    for (let i = 0; i < totalDots; i++) {
-      const cx = x + i * dotSpacing + dotRadius;
-      const cy = y;
-      if (i < filledDots) {
-        // Filled dot
-        this.builder.drawEllipse(filledBrush, null, { x: cx, y: cy }, { x: dotRadius, y: dotRadius });
-      } else {
-        // Empty dot (outline only)
-        this.builder.drawEllipse(emptyBrush, emptyPen, { x: cx, y: cy }, { x: dotRadius, y: dotRadius });
-      }
-    }
-  }
 
   /**
    * Draw floating emotion icons with dynamic bounce-in and fade-out animation.

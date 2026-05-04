@@ -48,6 +48,7 @@ import {
   onInventoryOpen,
   onInventoryClose,
   onInventoryEquip,
+
   onCGViewerDismiss,
   onCGItemTapped,
   onResetSavePressed,
@@ -69,7 +70,8 @@ import { createNereia, getBeats, getCast, getCastCount } from './CastData';
 import { characterRegistry } from './CharacterRegistry';
 import { QuestSystem } from './QuestSystem';
 import { EncounterSystem } from './EncounterSystem';
-import { CGGallerySystem, CG_IMAGE_MAP, CG_TEXTURE_MAP } from './CGGallerySystem';
+import { ALL_LURES } from './LureData';
+import { CGGallerySystem, CG_TEXTURE_MAP } from './CGGallerySystem';
 import { JournalSystem } from './JournalSystem';
 import { GlobalStatsSystem } from './GlobalStatsSystem';
 import { nereiaNeutralTexture, kashaNeutralTexture } from './Assets';
@@ -145,6 +147,7 @@ export class FloaterGame extends Component {
   // Affection data
   private fishAffection: FishAffection = this.affectionSystem.createAffection('nereia'); // Re-initialized in loadGame()
   private sessionId: string = `session_${Date.now()}`;
+  private displayedAffectionLabel: string = 'Indifferent'; // Updated at cast boundaries only
 
   // Game state
   private phase: GamePhase = GamePhase.Title;
@@ -552,6 +555,10 @@ export class FloaterGame extends Component {
         floaterVM.cgEndingNereiaReelUnlocked = cgCard.isUnlocked;
         floaterVM.cgEndingNereiaReelLocked = !cgCard.isUnlocked;
         floaterVM.cgEndingNereiaReelName = cgCard.isUnlocked ? cgCard.name : '???';
+      } else if (cgCard.id === 'ending_nereia_release') {
+        floaterVM.cgEndingNereiaReleaseUnlocked = cgCard.isUnlocked;
+        floaterVM.cgEndingNereiaReleaseLocked = !cgCard.isUnlocked;
+        floaterVM.cgEndingNereiaReleaseName = cgCard.isUnlocked ? cgCard.name : '???';
       }
     }
     floaterVM.cgCollectionProgress = this.cgGallerySystem.getCollectionText();
@@ -590,10 +597,19 @@ export class FloaterGame extends Component {
 
   @subscribe(onInventoryEquip)
   onInventoryEquipEvent(payload: FloaterLureSelectedPayload): void {
-    // Simplified - accept any lure equip
     const lureId = payload.parameter;
-    this.equippedLureId = lureId && lureId !== 'None' ? lureId : null;
-    floaterVM.equippedLureName = payload.parameter;
+    if (!lureId) return;
+
+    if (lureId === 'none') {
+      this.equippedLureId = null;
+      floaterVM.setEquippedLure('none', 'None', 'No lure equipped. Fish will still bite, but lures can improve your chances.');
+    } else {
+      this.equippedLureId = lureId;
+      const lure = ALL_LURES[lureId];
+      const name = lure ? lure.name : lureId;
+      const desc = lure ? lure.description : '';
+      floaterVM.setEquippedLure(lureId, name, desc);
+    }
     this.saveSystem.requestSave();
   }
 
@@ -1051,6 +1067,7 @@ export class FloaterGame extends Component {
         this.fishAffection = this.affectionSystem.createAffection(selectedCharacter.id);
         console.log(`[FloaterGame] No saved data for ${selectedCharacter.id}, starting fresh`);
       }
+      this.displayedAffectionLabel = this.affectionSystem.getAffectionLabel(this.fishAffection.value);
     }
 
     // Get per-fish cast index, clamped to the last available cast.
@@ -1083,7 +1100,9 @@ export class FloaterGame extends Component {
 
   private startNextBeat(): void {
     if (this.currentBeatIndex >= this.beats.length) {
-      if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
+      if (this.flagSystem.check(`${this.fish.id}.release_ready`)) {
+        this.triggerEnding(EndingType.Release);
+      } else if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
         this.enterCatchSequence();
       } else {
         this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
@@ -1141,7 +1160,9 @@ export class FloaterGame extends Component {
         this.saveSystem.requestSave();
 
         if (this.currentBeatIndex >= this.beats.length) {
-          if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
+          if (this.flagSystem.check(`${this.fish.id}.release_ready`)) {
+            this.triggerEnding(EndingType.Release);
+          } else if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
             this.enterCatchSequence();
           } else {
             this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
@@ -1161,6 +1182,28 @@ export class FloaterGame extends Component {
 
     this.currentLineIndex++;
     if (this.currentLineIndex >= this.currentLines.length) {
+      // No-choice beat (monologue): auto-advance without showing action buttons
+      const currentBeat = this.beats[this.currentBeatIndex];
+      if (currentBeat && Object.keys(currentBeat.actionEffects).length === 0) {
+        this.seenBeats.add(currentBeat.beatId);
+        this.saveSystem.requestSave();
+        this.currentBeatIndex++;
+        if (this.currentBeatIndex >= this.beats.length) {
+          if (this.flagSystem.check(`${this.fish.id}.release_ready`)) {
+            this.triggerEnding(EndingType.Release);
+          } else if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
+            this.enterCatchSequence();
+          } else {
+            this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
+          }
+        } else {
+          this.beatPauseTimer = BEAT_PAUSE_DURATION;
+          this.phase = GamePhase.Exchange;
+          this.isTextComplete = false;
+        }
+        return;
+      }
+
       // If this is a silent beat, enter ActionSelect with restricted buttons
       if (this.silentBeatActive && !this.silentBeatUnlocked) {
         this.phase = GamePhase.ActionSelect;
@@ -1191,6 +1234,12 @@ export class FloaterGame extends Component {
   }
 
   private handleAction(actionId: ActionId): void {
+    // REEL at max affection → trigger catch sequence regardless of beat effects
+    if (actionId === ActionId.Reel && this.affectionSystem.isCatchReady(this.fishAffection)) {
+      this.enterCatchSequence();
+      return;
+    }
+
     const beat = this.beats[this.currentBeatIndex];
     const effect = beat.actionEffects[actionId];
     if (!effect) return;
@@ -1322,6 +1371,9 @@ export class FloaterGame extends Component {
       this.cgGallerySystem.unlockPortraitCG(this.fish.id);
       this.globalStatsSystem.recordCast(this.journalSystem.getAllFishEntries());
 
+      // Update affection label at cast boundary (not mid-cast)
+      this.displayedAffectionLabel = this.affectionSystem.getAffectionLabel(this.fishAffection.value);
+
       this.saveSystem.requestSave();
       this.enterLakeIdle();
     } else {
@@ -1329,15 +1381,7 @@ export class FloaterGame extends Component {
     }
   }
 
-  private enterIdle(): void {
-    this.phase = GamePhase.Idle;
-    floaterVM.departureVisible = false;
-    floaterVM.hudVisible = false;
-    floaterVM.idleVisible = true;
-    this.hideIdleBar();
-    this.fishAlpha = 0;
-    this.saveSystem.requestSave();
-  }
+
 
   // === Catch Sequence ===
   private enterCatchSequence(): void {
@@ -1394,6 +1438,16 @@ export class FloaterGame extends Component {
       case EndingType.Release:
         floaterVM.endingText = endingCatchData?.releaseEpitaph ?? 'Released.';
         this.flagSystem.set(`cross.${this.fish.id}.released`, true);
+        // Unlock the CG for this character's Release ending
+        const releaseCgId = `ending_${this.fish.id}_release`;
+        const releaseNewlyUnlocked = this.cgGallerySystem.unlockCG(releaseCgId);
+        if (releaseNewlyUnlocked) {
+          // Show fullscreen CG viewer with fade-in
+          this.cgGallerySystem.openViewer(releaseCgId);
+          floaterVM.cgViewerVisible = true;
+          floaterVM.cgViewerImage = CG_TEXTURE_MAP[releaseCgId] ?? nereiaNeutralTexture;
+          console.log(`[FloaterGame] Release CG unlocked and displayed: ${releaseCgId}`);
+        }
         break;
       case EndingType.DriftAway:
         const driftCgId = `${this.fish.id}_drift_away`;
@@ -1746,30 +1800,7 @@ export class FloaterGame extends Component {
     this.selectedActionId = null;
   }
 
-  /** Reset action buttons to visible idle state (no selection highlight, not interactive) */
-  private resetActionButtonsToVisible(): void {
-    this.actionMenuAnimState = 'visible';
-    this.selectedActionId = null;
-    floaterVM.actionMenuOpacity = 1;
-    floaterVM.actionMenuTranslateY = 0;
-    floaterVM.actionWaitBtnOpacity = 1;
-    floaterVM.actionTwitchBtnOpacity = 1;
-    floaterVM.actionDriftBtnOpacity = 1;
-    floaterVM.actionReelBtnOpacity = 1;
-    floaterVM.actionWaitBtnScale = 1;
-    floaterVM.actionTwitchBtnScale = 1;
-    floaterVM.actionDriftBtnScale = 1;
-    floaterVM.actionReelBtnScale = 1;
-    floaterVM.actionWaitBtnTranslateY = 0;
-    floaterVM.actionTwitchBtnTranslateY = 0;
-    floaterVM.actionDriftBtnTranslateY = 0;
-    floaterVM.actionReelBtnTranslateY = 0;
-    // Keep buttons disabled during exchange dialogue
-    floaterVM.actionWaitEnabled = false;
-    floaterVM.actionTwitchEnabled = false;
-    floaterVM.actionDriftEnabled = false;
-    floaterVM.actionReelEnabled = false;
-  }
+
 
   // === Idle Button Bar Animation ===
   private updateIdleBarAnimation(dt: number): void {
@@ -1877,6 +1908,7 @@ export class FloaterGame extends Component {
     const normalized = (this.fishAffection.value - AFFECTION_DRIFT_AWAY_THRESHOLD) / range;
     const percent = Math.max(0, Math.min(1, normalized)) * 100;
     floaterVM.affectionBarWidth = (percent / 100) * 200; // 200px max width
+    floaterVM.updateGaugeMarker(this.fishAffection.value);
 
     // HUD: portrait, name, no mood/tier text anymore
     floaterVM.hudShowNereia = this.fish.id === 'nereia';
@@ -1884,11 +1916,11 @@ export class FloaterGame extends Component {
     floaterVM.hudPortrait = this.fish.portrait;
     floaterVM.hudNameColor = this.fish.accentColor;
     floaterVM.hudNameText = this.fish.name;
-    floaterVM.hudMoodText = '';
+    floaterVM.hudMoodText = this.displayedAffectionLabel;
     floaterVM.hudMoodColor = this.fish.accentColor;
     floaterVM.hudNameMoodText = this.fish.name;
     floaterVM.emotionName = '';
-    floaterVM.tierText = '';
+    floaterVM.tierText = this.displayedAffectionLabel;
 
     // Progress dots: linear cast progression for this character.
     const totalCasts = characterRegistry.getCastCount(this.fish.id);
@@ -2459,6 +2491,7 @@ export class FloaterGame extends Component {
           lastChangeSessionId: fishData.lastChangeSessionId ?? '',
           lastChangeDelta: fishData.lastChangeDelta ?? 0,
         });
+        this.displayedAffectionLabel = this.affectionSystem.getAffectionLabel(this.fishAffection.value);
       }
       this.flagSystem.deserialize(data.flags);
       this.seenBeats = new Set(data.seenBeats);
@@ -2581,6 +2614,12 @@ export class FloaterGame extends Component {
       || this.phase === GamePhase.NothingBites;
     const showDialogue = isDialoguePhase && !this.catchDialogueShown;
     floaterVM.dialogueVisible = showDialogue;
+    // Affection gauge visible when dialogue is active (not during NothingBites or Departure)
+    const showGauge = (this.phase === GamePhase.Exchange
+      || this.phase === GamePhase.FishReaction
+      || this.phase === GamePhase.ActionSelect
+      || this.phase === GamePhase.CatchSequence) && !this.catchDialogueShown;
+    floaterVM.gaugeVisible = showGauge;
 
     // Scenery/narration mode: triggered by asterisk prefix in dialogue text
     const isScenery = this.displayedText.startsWith('*');
@@ -2711,6 +2750,12 @@ export class FloaterGame extends Component {
       || this.phase === GamePhase.NothingBites;
     const showDialogueSync = isDialoguePhaseSync && !this.catchDialogueShown;
     floaterVM.dialogueVisible = showDialogueSync;
+    // Gauge visible during exchange/reaction/action/catch phases
+    const showGaugeSync = (this.phase === GamePhase.Exchange
+      || this.phase === GamePhase.FishReaction
+      || this.phase === GamePhase.ActionSelect
+      || this.phase === GamePhase.CatchSequence) && !this.catchDialogueShown;
+    floaterVM.gaugeVisible = showGaugeSync;
 
     const isScenerySync = this.displayedText.startsWith('*');
     floaterVM.speakerNameVisible = !isScenerySync;

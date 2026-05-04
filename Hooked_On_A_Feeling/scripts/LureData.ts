@@ -13,6 +13,18 @@
 import { DriftState } from './Types';
 import type { LureDefinition } from './Types';
 
+// === No-Lure Option ===
+
+export const LURE_NONE: LureDefinition = {
+  id: 'none',
+  name: 'No Lure',
+  description: 'Fish without bait. Any fish may come — or none at all.',
+  attractedFish: ['nereia'], // All fish can still appear
+  initialDrift: DriftState.None,
+  driftModifiers: {},
+  isGifted: false,
+};
+
 // === Starting Lures ===
 
 export const LURE_RED_SPINNER: LureDefinition = {
@@ -87,6 +99,7 @@ export const LURE_BARE_HOOK: LureDefinition = {
 // === All Lures Registry ===
 
 export const ALL_LURES: Record<string, LureDefinition> = {
+  none: LURE_NONE,
   red_spinner: LURE_RED_SPINNER,
   gold_teardrop: LURE_GOLD_TEARDROP,
   feather_fly: LURE_FEATHER_FLY,

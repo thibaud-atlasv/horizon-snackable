@@ -48,6 +48,19 @@ export const tackleboxIconTexture: TextureAsset = new TextureAsset("@sprites/act
 export const castIconTexture: TextureAsset = new TextureAsset("@sprites/action_icon_cast.png");
 export const journalIconTexture: TextureAsset = new TextureAsset("@sprites/action_icon_journal.png");
 
+// === Action Background Sprites (Idle Bar & Back buttons) ===
+export const actionBgBaitTexture: TextureAsset = new TextureAsset("@sprites/action_bg_bait.png");
+export const actionBgCastTexture: TextureAsset = new TextureAsset("@sprites/action_bg_cast.png");
+export const actionBgJournalTexture: TextureAsset = new TextureAsset("@sprites/action_bg_journal.png");
+export const actionBgBackTexture: TextureAsset = new TextureAsset("@sprites/action_bg_back.png");
+
+// === Lure Icons ===
+export const lureNoneTexture: TextureAsset = new TextureAsset("@sprites/lure_none.png");
+export const lureRedSpinnerTexture: TextureAsset = new TextureAsset("@sprites/lure_red_spinner.png");
+export const lureGoldTeardropTexture: TextureAsset = new TextureAsset("@sprites/lure_gold_teardrop.png");
+export const lureFeatherFlyTexture: TextureAsset = new TextureAsset("@sprites/lure_feather_fly.png");
+
 // === CG Gallery ===
 export const cgNereiaLoveEndTexture: TextureAsset = new TextureAsset("@sprites/nereia_love_end.png");
+export const cgNereiaReleaseEndTexture: TextureAsset = new TextureAsset("@sprites/nereia_release_end.png");
 

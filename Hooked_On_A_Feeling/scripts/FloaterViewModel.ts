@@ -43,6 +43,7 @@ export const onCGItemTapped = new UiEvent('onCGItemTapped', FloaterTabSelectedPa
 export const onInventoryOpen = new UiEvent('onInventoryOpen');
 export const onInventoryClose = new UiEvent('onInventoryClose');
 export const onInventoryEquip = new UiEvent('onInventoryEquip', FloaterLureSelectedPayload);
+export const onInventorySelect = new UiEvent('onInventorySelect', FloaterLureSelectedPayload);
 
 // Character detail events
 export const onCharacterDetailOpen = new UiEvent('onCharacterDetailOpen', FloaterTabSelectedPayload);
@@ -115,6 +116,11 @@ export class FloaterViewModel extends UiViewModel {
   affectionBarWidth: number = 0; // 0-200 pixels (mapped from 0-100%)
   emotionName: string = 'Unaware';
 
+  // Vertical affection gauge (right-side during dialogue)
+  gaugeVisible: boolean = false;
+  gaugeMarkerTranslateY: number = 0; // 0 = bottom (Low), -180 = top (High). Negative moves marker up.
+  gaugeFillHeight: number = 0; // Height in px of the gradient-filled portion (0-196)
+
   // Redesigned HUD: portrait icon + name/mood + progress dots
   hudPortrait?: TextureAsset;
   hudShowNereia: boolean = true;
@@ -172,6 +178,7 @@ export class FloaterViewModel extends UiViewModel {
     onInventoryOpen,
     onInventoryClose,
     onInventoryEquip,
+    onInventorySelect,
     onCGViewerDismiss,
     onCGItemTapped,
     onResetSavePressed,
@@ -256,17 +263,26 @@ export class FloaterViewModel extends UiViewModel {
   cgEndingNereiaReelUnlocked: boolean = false;
   cgEndingNereiaReelLocked: boolean = true;
   cgEndingNereiaReelName: string = '???';
+  cgEndingNereiaReleaseUnlocked: boolean = false;
+  cgEndingNereiaReleaseLocked: boolean = true;
+  cgEndingNereiaReleaseName: string = '???';
   // Collection progress text
-  cgCollectionProgress: string = 'Collection (0/3)';
+  cgCollectionProgress: string = 'Collection (0/4)';
 
   // === Inventory (Tackle Box) State ===
   inventoryVisible: boolean = false;
   inventoryButtonVisible: boolean = false;
   equippedLureName: string = 'None';
-  equippedLureDesc: string = '';
+  equippedLureDesc: string = 'No lure equipped. Fish will still bite, but lures can improve your chances.';
   lure1Equipped: boolean = false;
   lure2Equipped: boolean = false;
   lure3Equipped: boolean = false;
+
+  // Per-lure equipped state (for border treatment - only equipped lure shows border)
+  lureNoneEquipped: boolean = true;
+  lureRedSpinnerEquipped: boolean = false;
+  lureGoldTeardropEquipped: boolean = false;
+  lureFeatherFlyEquipped: boolean = false;
 
   // No-lure warning overlay
   noLureWarningVisible: boolean = false;
@@ -279,7 +295,6 @@ export class FloaterViewModel extends UiViewModel {
 
   // Action button animation state (driven from game loop)
   actionMenuOpacity: number = 0;
-  actionMenuScale: number = 0.8;
   actionMenuTranslateY: number = 30;
   actionWaitBtnOpacity: number = 1;
   actionTwitchBtnOpacity: number = 1;
@@ -312,6 +327,26 @@ export class FloaterViewModel extends UiViewModel {
 
   // === Journal Button (legacy, kept for backward compat) ===
   journalButtonVisible: boolean = false;
+
+  /** Update gauge marker position from affection value (-10 to 50). */
+  updateGaugeMarker(affectionValue: number): void {
+    // Clamp to display range [-10, 50]
+    const GAUGE_MIN = -10;
+    const GAUGE_MAX = 50;
+    const clamped = Math.max(GAUGE_MIN, Math.min(GAUGE_MAX, affectionValue));
+    // Normalize: 0 = bottom (Low), 1 = top (High)
+    const normalized = (clamped - GAUGE_MIN) / (GAUGE_MAX - GAUGE_MIN);
+    // Gauge inner height (210px border - 2*1px border thickness = 208px),
+    // capped to 196px to respect corner radius padding.
+    const GAUGE_TRACK = 196;
+    // Fill height: gradient portion from bottom, 0-196px
+    this.gaugeFillHeight = normalized * GAUGE_TRACK;
+    // Cursor translateY: aligns cursor center with fill top edge.
+    // Cursor (10px tall) at VerticalAlignment=Bottom, Margin bottom=12 → center at y=203 from top.
+    // Inner gauge bottom at y=219 from top. Fill top = 219 - gaugeFillHeight.
+    // To match: 203 + translateY = 219 - gaugeFillHeight → translateY = 16 - gaugeFillHeight.
+    this.gaugeMarkerTranslateY = 16 - this.gaugeFillHeight;
+  }
 
   /** Update structured stat items for Tab 3 */
   setStatItems(items: Array<{icon: string; label: string; value: string; valueColor?: string}>): void {
@@ -375,6 +410,16 @@ export class FloaterViewModel extends UiViewModel {
     this.lure1Equipped = lures[0]?.isEquipped ?? false;
     this.lure2Equipped = lures[1]?.isEquipped ?? false;
     this.lure3Equipped = lures[2]?.isEquipped ?? false;
+  }
+
+  /** Update per-lure equipped border state and display name/description */
+  setEquippedLure(lureId: string, name: string, description: string): void {
+    this.lureNoneEquipped = lureId === 'none';
+    this.lureRedSpinnerEquipped = lureId === 'red_spinner';
+    this.lureGoldTeardropEquipped = lureId === 'gold_teardrop';
+    this.lureFeatherFlyEquipped = lureId === 'feather_fly';
+    this.equippedLureName = name;
+    this.equippedLureDesc = description;
   }
 }
 

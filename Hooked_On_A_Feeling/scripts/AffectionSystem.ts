@@ -74,6 +74,26 @@ export class AffectionSystem {
     return affection.value <= AFFECTION_DRIFT_AWAY_THRESHOLD;
   }
 
+  /** True when affection is at max and REEL can trigger catch sequence. */
+  isCatchReady(affection: FishAffection): boolean {
+    return affection.value >= AFFECTION_MAX;
+  }
+
+  /**
+   * Adjective label representing the current affection level.
+   * Updates at cast boundaries to avoid mid-cast toggling.
+   */
+  getAffectionLabel(value: number): string {
+    if (value < -5)  return 'Estranged';
+    if (value < 0)   return 'Wary';
+    if (value === 0) return 'Indifferent';
+    if (value <= 12) return 'Curious';
+    if (value <= 25) return 'Interested';
+    if (value <= 37) return 'Fond';
+    if (value <= 46) return 'Devoted';
+    return 'Bonded';
+  }
+
   /** Create a fresh FishAffection record for a new character. */
   createAffection(characterId: string): FishAffection {
     return {

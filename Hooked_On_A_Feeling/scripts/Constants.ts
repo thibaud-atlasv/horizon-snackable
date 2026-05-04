@@ -50,32 +50,7 @@ export const DIALOGUE_TEXT_WIDTH = DIALOGUE_BUBBLE_WIDTH - DIALOGUE_BUBBLE_PADDI
 export const DIALOGUE_TEXT_HEIGHT = DIALOGUE_BUBBLE_HEIGHT - DIALOGUE_BUBBLE_PADDING * 2;
 export const DIALOGUE_NAME_HEIGHT = 14;
 
-// Legacy constants (kept for backward compat)
-export const VN_PANEL_MARGIN = DIALOGUE_BUBBLE_MARGIN;
-export const VN_PANEL_X = DIALOGUE_BUBBLE_X;
-export const VN_PANEL_Y = DIALOGUE_BUBBLE_Y;
-export const VN_PANEL_WIDTH = DIALOGUE_BUBBLE_WIDTH;
-export const VN_PANEL_HEIGHT = DIALOGUE_BUBBLE_HEIGHT;
-export const VN_PANEL_RADIUS = DIALOGUE_BUBBLE_RADIUS;
-export const VN_PANEL_PADDING = DIALOGUE_BUBBLE_PADDING;
-export const VN_PANEL_BG_OPACITY = DIALOGUE_BUBBLE_BG_OPACITY;
-export const VN_PORTRAIT_SIZE = 90;
-export const VN_PORTRAIT_MARGIN = 10;
-export const VN_PORTRAIT_RADIUS = 8;
-export const VN_PORTRAIT_X = VN_PANEL_X + VN_PANEL_PADDING;
-export const VN_PORTRAIT_Y = VN_PANEL_Y + (VN_PANEL_HEIGHT - VN_PORTRAIT_SIZE) / 2;
-export const VN_TEXT_X = DIALOGUE_TEXT_X;
-export const VN_TEXT_Y = DIALOGUE_TEXT_Y;
-export const VN_TEXT_WIDTH = DIALOGUE_TEXT_WIDTH;
-export const VN_TEXT_HEIGHT = DIALOGUE_TEXT_HEIGHT;
-export const VN_NAME_HEIGHT = DIALOGUE_NAME_HEIGHT;
 
-export const DIALOGUE_X = DIALOGUE_BUBBLE_X;
-export const DIALOGUE_Y = DIALOGUE_BUBBLE_Y;
-export const DIALOGUE_WIDTH = DIALOGUE_BUBBLE_WIDTH;
-export const DIALOGUE_HEIGHT = DIALOGUE_BUBBLE_HEIGHT;
-export const DIALOGUE_PADDING = DIALOGUE_BUBBLE_PADDING;
-export const DIALOGUE_MAX_CHARS = 100;
 
 // === Action Menu (Zone 4: below dialogue) ===
 export const ACTION_MENU_Y = CANVAS_HEIGHT * 0.80;
@@ -207,7 +182,7 @@ export const BEAT_PAUSE_DURATION = 0.5;
 
 // === Affection Thresholds ===
 export const AFFECTION_DRIFT_AWAY_THRESHOLD = -10; // Triggers Drift-Away ending when affection drops this low
-export const AFFECTION_MAX = 100;
+export const AFFECTION_MAX = 50;
 
 // === Action Definitions (4 actions) ===
 export enum ActionId {

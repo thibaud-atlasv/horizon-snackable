@@ -1,18 +1,22 @@
 ---
 name: xaml_image_binding
-summary: binding image source in noesis xaml
+summary: Noesis XAML image binding, Custom UI dynamic images, TextureAsset binding, xaml UI image source, NoesisGUI image data binding
 include: always
 agents: [global]
 ---
 
-Noesis does not support {Binding} markup extensions on Image.Source — always use the explicit element binding syntax instead.
+## Dynamic Image Binding in Noesis XAML (Custom UI)
 
-for image binding use the syntax : 
+When binding an image dynamically in Noesis XAML, you must expose a `TextureAsset` 
+from your TypeScript ViewModel — NOT a string path. Noesis does not support 
+`{Binding}` markup extensions on `Image.Source`.
+
+**TypeScript ViewModel (expose a TextureAsset, not a string):**
 
 ```xml
 <Image>
     <Image.Source>
-        <Binding Path="spriteTexture"/>
+        <Binding Path="view_model_textureasset_variable"/>
     </Image.Source>
 </Image>
 ```
@@ -21,7 +25,5 @@ for image binding use the syntax :
 do NOT use : 
 
 ```xml
-<Image Source="{Binding spriteTexture}" />
+<Image Source="{Binding string_variable}" />
 ```
-
-Then bind a TextureAsset in view model and it should work
