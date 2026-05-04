@@ -120,16 +120,16 @@ This pillar is as load-bearing as the gameplay itself. The game's life beyond la
 
 The core playable loop is fully implemented and playable with visual polish:
 
-- **Rendering**: Portrait 480×800 canvas using DrawingSurface for game graphics with XAML UI overlays for HUD and menus. All 11 tiers use generated sprite images of cute gummy blob creatures rendered via ImageBrush with rotation, squash/stretch, and idle motion support
-- **Theme**: Cute gummy blob creatures that evolve through 11 tiers (Bloblet → Blob Royale), replacing the original fruit theme
-- **Background**: Generated candy confectionery sprite background with warm peach-to-lavender tones and decorative candy elements
+- **Rendering**: Portrait 480×800 canvas using DrawingSurface for game graphics with XAML UI overlays for HUD and menus. All 11 tiers use generated sprite images of chibi Naruto anime characters rendered via ImageBrush with rotation, squash/stretch, and idle motion support
+- **Theme**: Chibi Naruto anime characters ranked by power, evolving through 11 tiers (Konohamaru → Madara), replacing the original blob creature theme
+- **Background**: Generated Naruto-themed Hidden Leaf Village background at golden hour with warm amber tones and Hokage mountain
 - **Container**: Dark candy jar interior with subtle programmatic glass effects — layered semi-transparent glow strips along walls, bottom edge highlights, and thin wall outlines suggesting glass containment without an opaque frame overlay
 - **Merge ladder**: 11 tiers defined in a data-driven tier system with sizes (15% larger than base for better visibility), colors, and score values
-- **Physics**: Custom 2D circle-based physics with gravity, circle-to-circle collision response with angular velocity transfer, wall collision with spin, velocity damping, angular damping, and configurable bounciness — items bounce, spin, and tumble naturally
+- **Physics**: Custom 2D circle-based physics with gravity, circle-to-circle collision response with angular velocity transfer, wall collision with spin, velocity damping, angular damping, configurable bounciness, and anti-stacking nudge (subtle random horizontal impulse on collision to prevent perfect vertical stacks) — items bounce, spin, and tumble naturally
 - **Drop mechanic**: Touch-based horizontal drag to aim, release to drop; items fall under gravity into the container
 - **Spawning**: Weighted random tier selection (tiers 0–4 are spawnable) with a next-up preview indicator
 - **Merging**: Same-tier collision triggers a cinematic multi-phase merge animation — items compress toward each other, a bright flash appears at the merge point, and the new item pops in with spring-based overshoot before settling. Score and floating tags appear immediately for responsive feel
-- **Visual juice**: Six visual effect systems — merge particles (color-keyed, chain-escalating), screen shake (on chain depth ≥3), spring-based squash-and-stretch on landing, merge, and collision (with overshoot bounce-back), danger zone shimmer overlay, idle scale breathing for settled items, chain merge tracking with time-based window
+- **Visual juice**: Six visual effect systems — merge particles (color-keyed, chain-escalating), screen shake (on chain depth ≥3), spring-based squash-and-stretch on landing, merge, and collision (with overshoot bounce-back), danger zone shimmer overlay, idle scale breathing for settled items, chain merge tracking with time-based window. Danger line and shimmer fade in/out based on item proximity to the danger zone
 - **Game over**: Detected when items rest above the danger line for 2 seconds; game-over screen with score display and instant restart
 - **Score tracking**: Points awarded on each merge, displayed via XAML HUD with smooth count-up animation and pulse effect
 - **Floating score tags**: "+points" text tags appear at merge locations and float upward while fading

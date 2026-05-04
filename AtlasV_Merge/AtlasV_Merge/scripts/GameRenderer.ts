@@ -15,6 +15,7 @@ import {
   FontWeight,
   FontStyle,
   FontStretch,
+  Stretch,
 } from 'meta/custom_ui_experimental';
 import { Color, Vec2 } from 'meta/platform_api';
 
@@ -40,20 +41,21 @@ import {
   getShakeOffset,
   drawDangerShimmer,
   getIdleScale,
+  getDangerAmount,
 } from './VisualEffects';
 
 // === Pre-created reusable resources ===
 
 // Background sprite brush (full canvas)
-const bgBrush = new ImageBrush(backgroundTexture);
+const bgBrush = new ImageBrush(backgroundTexture, { stretch: Stretch.UniformToFill });
 
 // Container styling — glass jar look
-const jarInteriorBrush = new SolidBrush(Color.fromHex('#2A1B3D'));
+const jarInteriorBrush = new SolidBrush(new Color(0.165, 0.106, 0.239, 0.5));
 
 // Depth gradient layers (simulated gradient: lighter top, darker bottom)
-const jarDepthTop = new SolidBrush(new Color(0.23, 0.15, 0.33, 0.25));
-const jarDepthMid = new SolidBrush(new Color(0.15, 0.08, 0.24, 0.45));
-const jarDepthBottom = new SolidBrush(new Color(0.10, 0.05, 0.16, 0.65));
+const jarDepthTop = new SolidBrush(new Color(0.23, 0.15, 0.33, 0.12));
+const jarDepthMid = new SolidBrush(new Color(0.15, 0.08, 0.24, 0.22));
+const jarDepthBottom = new SolidBrush(new Color(0.10, 0.05, 0.16, 0.32));
 
 // Outer glass border (white, semi-transparent, thick)
 const glassOuterBrush = new SolidBrush(new Color(1, 1, 1, 0.35));
@@ -131,8 +133,11 @@ export function drawContainerInterior(builder: DrawingCommandsBuilder): void {
 
 /**
  * Draw animated danger line with soft coral/pink layered glow and slow pulse (~0.7Hz).
+ * Fades in/out based on dangerAmount (0 = invisible, 1 = fully visible).
  */
-export function drawDangerLine(builder: DrawingCommandsBuilder, frameCount: number): void {
+export function drawDangerLine(builder: DrawingCommandsBuilder, frameCount: number, dangerAmount: number): void {
+  if (dangerAmount <= 0) return;
+
   // Slow sine pulse ~0.7Hz: 0.044 * 72fps ≈ 3.17 rad/s ≈ 0.5Hz
   const pulse = Math.sin(frameCount * 0.044);
   // Coral/pink base color: #FF8A80 ≈ (1.0, 0.54, 0.50)
@@ -144,19 +149,19 @@ export function drawDangerLine(builder: DrawingCommandsBuilder, frameCount: numb
   const x2 = CONTAINER_RIGHT - 10;
 
   // Layer 1: Wide background glow (8px, very faint)
-  const outerAlpha = 0.08 + 0.032 * pulse;
+  const outerAlpha = (0.08 + 0.032 * pulse) * dangerAmount;
   const outerBrush = new SolidBrush(new Color(cr, cg, cb, outerAlpha));
   const outerPen = new Pen(outerBrush, 8);
   builder.drawLine(outerPen, new Vec2(x1, DANGER_LINE_Y), new Vec2(x2, DANGER_LINE_Y));
 
   // Layer 2: Medium glow (4px, moderate)
-  const midAlpha = 0.15 + 0.06 * pulse;
+  const midAlpha = (0.15 + 0.06 * pulse) * dangerAmount;
   const midBrush = new SolidBrush(new Color(cr, cg, cb, midAlpha));
   const midPen = new Pen(midBrush, 4);
   builder.drawLine(midPen, new Vec2(x1, DANGER_LINE_Y), new Vec2(x2, DANGER_LINE_Y));
 
   // Layer 3: Thin core line (1.5px, brighter)
-  const coreAlpha = 0.30 + 0.10 * pulse;
+  const coreAlpha = (0.30 + 0.10 * pulse) * dangerAmount;
   const coreBrush = new SolidBrush(new Color(cr, cg, cb, coreAlpha));
   const corePen = new Pen(coreBrush, 1.5);
   builder.drawLine(corePen, new Vec2(x1, DANGER_LINE_Y), new Vec2(x2, DANGER_LINE_Y));
@@ -377,8 +382,9 @@ export function renderFullScene(
   // 2. Container interior (dark play area behind items)
   drawContainerInterior(builder);
 
-  // 3. Danger line
-  drawDangerLine(builder, frameCount);
+  // 3. Danger line (fades based on proximity to danger zone)
+  const dangerAmount = getDangerAmount();
+  drawDangerLine(builder, frameCount, dangerAmount);
 
   // 4. Apply screen shake to game area content
   const shake = getShakeOffset();

@@ -253,6 +253,14 @@ export function drawDangerShimmer(
 }
 
 /**
+ * Get the current danger amount (0–1).
+ * 0 = no items near danger line, 1 = items in danger zone.
+ */
+export function getDangerAmount(): number {
+  return dangerAmount;
+}
+
+/**
  * Reset danger shimmer (on restart).
  */
 export function resetDangerShimmer(): void {
