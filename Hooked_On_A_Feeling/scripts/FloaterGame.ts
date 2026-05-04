@@ -69,7 +69,7 @@ import { createNereia, getBeats, getCast, getCastCount } from './CastData';
 import { characterRegistry } from './CharacterRegistry';
 import { QuestSystem } from './QuestSystem';
 import { EncounterSystem } from './EncounterSystem';
-import { CGGallerySystem, CG_IMAGE_MAP } from './CGGallerySystem';
+import { CGGallerySystem, CG_IMAGE_MAP, CG_TEXTURE_MAP } from './CGGallerySystem';
 import { JournalSystem } from './JournalSystem';
 import { GlobalStatsSystem } from './GlobalStatsSystem';
 import { nereiaNeutralTexture, kashaNeutralTexture } from './Assets';
@@ -424,12 +424,14 @@ export class FloaterGame extends Component {
     const idx = parseInt(payload.parameter, 10);
     if (idx >= 0 && idx <= 4) {
       floaterVM.setJournalTab(idx);
-      if (idx === 3) {
+      if (idx === 1 || idx === 3) {
         floaterVM.journalCollectionText = this.cgGallerySystem.getCollectionText();
       }
-      if (idx === 4) {
+      if (idx === 2 || idx === 4) {
         floaterVM.journalStatsText = this.globalStatsSystem.getStatsText();
         floaterVM.journalBadgesText = this.globalStatsSystem.getBadgesText();
+        floaterVM.setStatItems(this.globalStatsSystem.getStructuredStats());
+        floaterVM.setBadgeItems(this.globalStatsSystem.getStructuredBadges());
       }
     }
   }
@@ -443,10 +445,12 @@ export class FloaterGame extends Component {
   @subscribe(onCGItemTapped)
   onCGItemTappedEvent(payload: FloaterTabSelectedPayload): void {
     const cgId = payload.parameter;
+    console.log(`[FloaterGame] CG item tapped: ${cgId}, unlocked=${this.cgGallerySystem.isCGUnlocked(cgId)}`);
     if (this.cgGallerySystem.isCGUnlocked(cgId)) {
       this.cgGallerySystem.openViewer(cgId);
       floaterVM.cgViewerVisible = true;
-      floaterVM.cgViewerImagePath = CG_IMAGE_MAP[cgId] ?? 'sprites/nereia_neutral.png';
+      floaterVM.cgViewerImage = CG_TEXTURE_MAP[cgId] ?? nereiaNeutralTexture;
+      console.log(`[FloaterGame] CG viewer opened: ${cgId}`);
     }
   }
 
@@ -510,6 +514,8 @@ export class FloaterGame extends Component {
     // Stats & Badges
     floaterVM.journalStatsText = this.globalStatsSystem.getStatsText();
     floaterVM.journalBadgesText = this.globalStatsSystem.getBadgesText();
+    floaterVM.setStatItems(this.globalStatsSystem.getStructuredStats());
+    floaterVM.setBadgeItems(this.globalStatsSystem.getStructuredBadges());
     // Met counter
     floaterVM.journalMetCounter = this.journalSystem.getMetCounterText();
 
@@ -536,12 +542,15 @@ export class FloaterGame extends Component {
     for (const cgCard of cgCards) {
       if (cgCard.id === 'portrait_nereia') {
         floaterVM.cgPortraitNereiaUnlocked = cgCard.isUnlocked;
+        floaterVM.cgPortraitNereiaLocked = !cgCard.isUnlocked;
         floaterVM.cgPortraitNereiaName = cgCard.isUnlocked ? cgCard.name : '???';
       } else if (cgCard.id === 'portrait_kasha') {
         floaterVM.cgPortraitKashaUnlocked = cgCard.isUnlocked;
+        floaterVM.cgPortraitKashaLocked = !cgCard.isUnlocked;
         floaterVM.cgPortraitKashaName = cgCard.isUnlocked ? cgCard.name : '???';
       } else if (cgCard.id === 'ending_nereia_reel') {
         floaterVM.cgEndingNereiaReelUnlocked = cgCard.isUnlocked;
+        floaterVM.cgEndingNereiaReelLocked = !cgCard.isUnlocked;
         floaterVM.cgEndingNereiaReelName = cgCard.isUnlocked ? cgCard.name : '???';
       }
     }
@@ -1378,7 +1387,7 @@ export class FloaterGame extends Component {
           // Show fullscreen CG viewer with fade-in
           this.cgGallerySystem.openViewer(cgId);
           floaterVM.cgViewerVisible = true;
-          floaterVM.cgViewerImagePath = CG_IMAGE_MAP[cgId] ?? 'sprites/nereia_neutral.png';
+          floaterVM.cgViewerImage = CG_TEXTURE_MAP[cgId] ?? nereiaNeutralTexture;
           console.log(`[FloaterGame] CG unlocked and displayed: ${cgId}`);
         }
         break;
@@ -1392,6 +1401,7 @@ export class FloaterGame extends Component {
         if (driftCgUnlocked) {
           this.cgGallerySystem.openViewer(driftCgId);
           floaterVM.cgViewerVisible = true;
+          floaterVM.cgViewerImage = CG_TEXTURE_MAP[driftCgId] ?? nereiaNeutralTexture;
           console.log(`[FloaterGame] Drift-Away CG unlocked and displayed: ${driftCgId}`);
         }
         floaterVM.endingText = characterRegistry.getCharacter(this.fish.id)?.driftAwayJournalText

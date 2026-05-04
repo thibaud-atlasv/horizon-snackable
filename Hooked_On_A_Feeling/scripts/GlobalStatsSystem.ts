@@ -136,6 +136,27 @@ export class GlobalStatsSystem {
 
   // === Display Text Generation ===
 
+  /** Get structured stat items for polished Tab 3 UI */
+  getStructuredStats(): Array<{icon: string; label: string; value: string; valueColor?: string}> {
+    const totalChars = characterRegistry.getAllCharacterIds().length;
+    return [
+      { icon: '\ud83c\udfa3', label: 'Total Casts', value: String(this.stats.totalCasts), valueColor: '#E8A84C' },
+      { icon: '\ud83d\udc1f', label: 'Characters Met', value: `${this.stats.totalCharactersMet}/${totalChars}`, valueColor: '#9B7FCC' },
+      { icon: '\ud83d\udcd6', label: 'Facts Discovered', value: String(this.stats.totalFactsDiscovered), valueColor: '#48C8B0' },
+      { icon: '\ud83c\udf19', label: 'Play Sessions', value: String(this.stats.totalPlaySessions), valueColor: '#C8D8E8' },
+    ];
+  }
+
+  /** Get structured badge items for polished Tab 3 UI */
+  getStructuredBadges(): Array<{icon: string; name: string; description: string; unlocked: boolean}> {
+    return BADGE_DEFINITIONS.map(badge => ({
+      icon: badge.icon,
+      name: badge.name,
+      description: badge.description,
+      unlocked: this.stats.unlockedBadges.includes(badge.id),
+    }));
+  }
+
   /** Get formatted stats text for journal display */
   getStatsText(): string {
     const totalChars = characterRegistry.getAllCharacterIds().length;

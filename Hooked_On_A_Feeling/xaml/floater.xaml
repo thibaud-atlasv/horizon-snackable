@@ -273,7 +273,11 @@
               <Grid.Clip>
                 <EllipseGeometry Center="30,30" RadiusY="27" RadiusX="27"/>
               </Grid.Clip>
-              <Image Stretch="UniformToFill" Margin="0,10,0,0" Width="60" Height="60" Source="{Binding Path=hudPortrait}"/>
+              <Image Stretch="UniformToFill" Margin="0,10,0,0" Width="60" Height="60">
+                <Image.Source>
+                  <Binding Path="hudPortrait"/>
+                </Image.Source>
+              </Image>
             </Grid>
           </Border>
           <StackPanel Margin="10,10,10,10">
@@ -854,14 +858,17 @@
           <!-- Tab bar (3 tabs: Fish, Collection, Stats) -->
           <Border Grid.Row="1" Background="#0D1520" CornerRadius="10" Padding="4,4" Margin="0,0,0,8">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-              <Button Content="Fish" Width="110" Height="32" Margin="4,0"
+              <Button Content="Fishes" Width="110" Height="32" Margin="4,0"
                       Command="{Binding events.onJournalTabSwitch}" CommandParameter="0"
+                      Foreground="{Binding journalTab1Color}"
                       Style="{StaticResource MenuButtonStyle}" FontSize="13" />
               <Button Content="Collection" Width="110" Height="32" Margin="4,0"
                       Command="{Binding events.onJournalTabSwitch}" CommandParameter="1"
+                      Foreground="{Binding journalTab2Color}"
                       Style="{StaticResource MenuButtonStyle}" FontSize="13" />
               <Button Content="Stats" Width="110" Height="32" Margin="4,0"
                       Command="{Binding events.onJournalTabSwitch}" CommandParameter="2"
+                      Foreground="{Binding journalTab3Color}"
                       Style="{StaticResource MenuButtonStyle}" FontSize="13" />
             </StackPanel>
           </Border>
@@ -880,103 +887,89 @@
           <!-- Tab content area -->
           <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
             <Grid>
-              <!-- Tab 1: Characters (Fish) — Portrait Cards Grid -->
+              <!-- Tab 1: Fishes — Portrait Grid (3 columns, circular, clickable) -->
               <StackPanel Visibility="{Binding journalTab1Visible, Converter={StaticResource BoolToVis}}">
-                <!-- Nereia Card -->
-                <Border Background="#D90D1520" BorderBrush="{Binding charDetailAccentColor}"
-                        BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,0,0,10">
+                <Border Background="#D90D1520" BorderBrush="#2A4060" BorderThickness="1"
+                        CornerRadius="12" Padding="10,14">
                   <Grid>
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="70" />
                       <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <!-- Circular Portrait -->
-                    <Border Grid.Column="0" Width="60" Height="60" CornerRadius="30"
-                            BorderBrush="#9B7FCC" BorderThickness="2" ClipToBounds="True">
-                      <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Color="#1A3A5C" Offset="0" />
-                          <GradientStop Color="#0D1E35" Offset="1" />
-                        </LinearGradientBrush>
-                      </Border.Background>
-                      <Grid Margin="-2,-2,-2,-2">
-                        <Grid.Clip>
-                          <EllipseGeometry Center="30,30" RadiusX="28" RadiusY="28" />
-                        </Grid.Clip>
-                        <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <Image Source="sprites/nereia_neutral.png" Stretch="UniformToFill"
-                               Width="60" Height="60" Margin="0,8,0,0"
-                               Visibility="{Binding nereiaCardUnlocked, Converter={StaticResource BoolToVis}}" />
-                      </Grid>
-                    </Border>
-                    <!-- Info -->
-                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                      <TextBlock Text="{Binding nereiaCardName}" FontSize="15" FontWeight="Bold"
-                                 Foreground="#C8D8E8" />
-                      <TextBlock Text="{Binding nereiaCardSpecies}" FontSize="11"
-                                 Foreground="#8A9AB0" Margin="0,2,0,0" />
-                      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="&#x2661;" FontSize="11" Foreground="#9B7FCC" Margin="0,0,4,0" />
-                        <TextBlock Text="{Binding nereiaCardTier}" FontSize="11" Foreground="#9B7FCC" />
-                        <TextBlock Text=" casts" FontSize="11" Foreground="#8A9AB0" />
-                      </StackPanel>
-                    </StackPanel>
-                    <!-- View Details Button -->
-                    <Button Grid.Column="2" Content="Details" Width="60" Height="28" FontSize="10"
-                            Command="{Binding events.onCharacterDetailOpen}" CommandParameter="nereia"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Visibility="{Binding nereiaCardUnlocked, Converter={StaticResource BoolToVis}}" />
-                  </Grid>
-                </Border>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <!-- Kasha Card -->
-                <Border Background="#D90D1520" BorderBrush="#2A4060"
-                        BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,0,0,10">
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="70" />
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <!-- Circular Portrait -->
-                    <Border Grid.Column="0" Width="60" Height="60" CornerRadius="30"
-                            BorderBrush="#D33A2C" BorderThickness="2" ClipToBounds="True">
-                      <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Color="#1A3A5C" Offset="0" />
-                          <GradientStop Color="#0D1E35" Offset="1" />
-                        </LinearGradientBrush>
-                      </Border.Background>
-                      <Grid Margin="-2,-2,-2,-2">
-                        <Grid.Clip>
-                          <EllipseGeometry Center="30,30" RadiusX="28" RadiusY="28" />
-                        </Grid.Clip>
-                        <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <Image Source="sprites/char_veiltail_neutral.png" Stretch="UniformToFill"
-                               Width="60" Height="60" Margin="0,8,0,0"
-                               Visibility="{Binding kashaCardUnlocked, Converter={StaticResource BoolToVis}}" />
-                      </Grid>
-                    </Border>
-                    <!-- Info -->
-                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                      <TextBlock Text="{Binding kashaCardName}" FontSize="15" FontWeight="Bold"
-                                 Foreground="#C8D8E8" />
-                      <TextBlock Text="{Binding kashaCardSpecies}" FontSize="11"
-                                 Foreground="#8A9AB0" Margin="0,2,0,0" />
-                      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="&#x2661;" FontSize="11" Foreground="#D33A2C" Margin="0,0,4,0" />
-                        <TextBlock Text="{Binding kashaCardTier}" FontSize="11" Foreground="#D33A2C" />
-                        <TextBlock Text=" casts" FontSize="11" Foreground="#8A9AB0" />
-                      </StackPanel>
-                    </StackPanel>
-                    <!-- View Details Button -->
-                    <Button Grid.Column="2" Content="Details" Width="60" Height="28" FontSize="10"
+                    <!-- Nereia -->
+                    <Button Grid.Column="0" Margin="4,4"
+                            Command="{Binding events.onCharacterDetailOpen}" CommandParameter="nereia"
+                            IsEnabled="{Binding nereiaCardUnlocked}">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <StackPanel HorizontalAlignment="Center">
+                            <Border Width="70" Height="70" CornerRadius="35"
+                                    BorderBrush="#9B7FCC" BorderThickness="2" ClipToBounds="True"
+                                    HorizontalAlignment="Center">
+                              <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                  <GradientStop Color="#1A3A5C" Offset="0" />
+                                  <GradientStop Color="#0D1E35" Offset="1" />
+                                </LinearGradientBrush>
+                              </Border.Background>
+                              <Grid Margin="-2,-2,-2,-2">
+                                <Grid.Clip>
+                                  <EllipseGeometry Center="35,35" RadiusX="33" RadiusY="33" />
+                                </Grid.Clip>
+                                <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image Stretch="UniformToFill"
+                                       Width="70" Height="70" Margin="0,8,0,0"
+                                       Source="sprites/nereia_neutral.png"
+                                       Visibility="{Binding nereiaCardUnlocked, Converter={StaticResource BoolToVis}}" />
+                              </Grid>
+                            </Border>
+                            <TextBlock Text="{Binding nereiaCardName}" FontSize="13" FontWeight="Bold"
+                                       Foreground="#C8D8E8" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                          </StackPanel>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+
+                    <!-- Kasha -->
+                    <Button Grid.Column="1" Margin="4,4"
                             Command="{Binding events.onCharacterDetailOpen}" CommandParameter="kasha"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Visibility="{Binding kashaCardUnlocked, Converter={StaticResource BoolToVis}}" />
+                            IsEnabled="{Binding kashaCardUnlocked}">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <StackPanel HorizontalAlignment="Center">
+                            <Border Width="70" Height="70" CornerRadius="35"
+                                    BorderBrush="#D33A2C" BorderThickness="2" ClipToBounds="True"
+                                    HorizontalAlignment="Center">
+                              <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                  <GradientStop Color="#1A3A5C" Offset="0" />
+                                  <GradientStop Color="#0D1E35" Offset="1" />
+                                </LinearGradientBrush>
+                              </Border.Background>
+                              <Grid Margin="-2,-2,-2,-2">
+                                <Grid.Clip>
+                                  <EllipseGeometry Center="35,35" RadiusX="33" RadiusY="33" />
+                                </Grid.Clip>
+                                <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image Stretch="UniformToFill"
+                                       Width="70" Height="70" Margin="0,8,0,0"
+                                       Source="sprites/char_veiltail_neutral.png"
+                                       Visibility="{Binding kashaCardUnlocked, Converter={StaticResource BoolToVis}}" />
+                              </Grid>
+                            </Border>
+                            <TextBlock Text="{Binding kashaCardName}" FontSize="13" FontWeight="Bold"
+                                       Foreground="#C8D8E8" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                          </StackPanel>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
                   </Grid>
                 </Border>
               </StackPanel>
@@ -1004,23 +997,25 @@
                     <Button.Template>
                       <ControlTemplate TargetType="Button">
                         <Border CornerRadius="10" ClipToBounds="True"
-                                BorderBrush="#2A4060" BorderThickness="1">
+                                Background="#0D1520" BorderBrush="#2A4060" BorderThickness="1">
                           <Grid>
                             <Grid.RowDefinitions>
                               <RowDefinition Height="*" />
                               <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <!-- Square image area -->
-                            <Border Grid.Row="0" Height="120" Background="#0D1520">
-                              <Grid>
-                                <Image Source="sprites/nereia_neutral.png" Stretch="UniformToFill"
-                                       Visibility="{Binding cgPortraitNereiaUnlocked, Converter={StaticResource BoolToVis}}" />
+                            <!-- Square image area with padding -->
+                            <Border Grid.Row="0" Height="120" Background="#0D1520" CornerRadius="9,9,0,0" ClipToBounds="True">
+                              <Grid Margin="8,8,8,4">
+                                <!-- "?" placeholder BELOW image (image covers it when visible) -->
                                 <TextBlock Text="?" FontSize="32" FontWeight="Bold" Foreground="#3A4A5A"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image Stretch="UniformToFill"
+                                       Source="sprites/nereia_neutral.png"
+                                       Visibility="{Binding cgPortraitNereiaUnlocked, Converter={StaticResource BoolToVis}}" />
                               </Grid>
                             </Border>
                             <!-- Name label -->
-                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6">
+                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6" CornerRadius="0,0,9,9">
                               <TextBlock Text="{Binding cgPortraitNereiaName}" FontSize="13" FontWeight="SemiBold"
                                          Foreground="#C8D8E8" HorizontalAlignment="Center"
                                          TextTrimming="CharacterEllipsis" />
@@ -1038,21 +1033,22 @@
                     <Button.Template>
                       <ControlTemplate TargetType="Button">
                         <Border CornerRadius="10" ClipToBounds="True"
-                                BorderBrush="#2A4060" BorderThickness="1">
+                                Background="#0D1520" BorderBrush="#2A4060" BorderThickness="1">
                           <Grid>
                             <Grid.RowDefinitions>
                               <RowDefinition Height="*" />
                               <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" Height="120" Background="#0D1520">
-                              <Grid>
-                                <Image Source="sprites/char_veiltail_neutral.png" Stretch="UniformToFill"
-                                       Visibility="{Binding cgPortraitKashaUnlocked, Converter={StaticResource BoolToVis}}" />
+                            <Border Grid.Row="0" Height="120" Background="#0D1520" CornerRadius="9,9,0,0" ClipToBounds="True">
+                              <Grid Margin="8,8,8,4">
                                 <TextBlock Text="?" FontSize="32" FontWeight="Bold" Foreground="#3A4A5A"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image Stretch="UniformToFill"
+                                       Source="sprites/char_veiltail_neutral.png"
+                                       Visibility="{Binding cgPortraitKashaUnlocked, Converter={StaticResource BoolToVis}}" />
                               </Grid>
                             </Border>
-                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6">
+                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6" CornerRadius="0,0,9,9">
                               <TextBlock Text="{Binding cgPortraitKashaName}" FontSize="13" FontWeight="SemiBold"
                                          Foreground="#C8D8E8" HorizontalAlignment="Center"
                                          TextTrimming="CharacterEllipsis" />
@@ -1070,21 +1066,22 @@
                     <Button.Template>
                       <ControlTemplate TargetType="Button">
                         <Border CornerRadius="10" ClipToBounds="True"
-                                BorderBrush="#2A4060" BorderThickness="1">
+                                Background="#0D1520" BorderBrush="#2A4060" BorderThickness="1">
                           <Grid>
                             <Grid.RowDefinitions>
                               <RowDefinition Height="*" />
                               <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" Height="120" Background="#0D1520">
-                              <Grid>
-                                <Image Source="sprites/nereia_love_end.png" Stretch="UniformToFill"
-                                       Visibility="{Binding cgEndingNereiaReelUnlocked, Converter={StaticResource BoolToVis}}" />
+                            <Border Grid.Row="0" Height="120" Background="#0D1520" CornerRadius="9,9,0,0" ClipToBounds="True">
+                              <Grid Margin="8,8,8,4">
                                 <TextBlock Text="?" FontSize="32" FontWeight="Bold" Foreground="#3A4A5A"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image Stretch="UniformToFill"
+                                       Source="sprites/nereia_love_end.png"
+                                       Visibility="{Binding cgEndingNereiaReelUnlocked, Converter={StaticResource BoolToVis}}" />
                               </Grid>
                             </Border>
-                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6">
+                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6" CornerRadius="0,0,9,9">
                               <TextBlock Text="{Binding cgEndingNereiaReelName}" FontSize="13" FontWeight="SemiBold"
                                          Foreground="#C8D8E8" HorizontalAlignment="Center"
                                          TextTrimming="CharacterEllipsis" />
@@ -1097,26 +1094,83 @@
                 </Grid>
               </StackPanel>
 
-              <!-- Tab 3: Stats & Badges -->
+              <!-- Tab 3: Stats & Badges (Polished) -->
               <StackPanel Visibility="{Binding journalTab3Visible, Converter={StaticResource BoolToVis}}">
+                <!-- === Statistics Section === -->
                 <Border Background="#D90D1520" BorderBrush="#2A4060" BorderThickness="1"
-                        CornerRadius="12" Padding="14,12" Margin="0,0,0,10">
+                        CornerRadius="12" Padding="14,12" Margin="0,0,0,12">
                   <StackPanel>
-                    <TextBlock Text="Statistics" FontSize="14" FontWeight="Bold"
-                               Foreground="#E8A84C" Margin="0,0,0,8" />
-                    <TextBlock Text="{Binding journalStatsText}"
-                               Foreground="#C8D8E8" FontSize="12" FontFamily="Roboto"
-                               TextWrapping="Wrap" LineHeight="20" />
+                    <TextBlock Text="&#x1F4CA; Statistics" FontSize="15" FontWeight="Bold"
+                               Foreground="#E8A84C" Margin="0,0,0,10" />
+                    <!-- Stat rows via ItemsControl -->
+                    <ItemsControl ItemsSource="{Binding statItems}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Background="#110D1E35" CornerRadius="8" Padding="10,8" Margin="0,3">
+                            <Grid>
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                              </Grid.ColumnDefinitions>
+                              <TextBlock Grid.Column="0" Text="{Binding icon}" FontSize="16"
+                                         VerticalAlignment="Center" HorizontalAlignment="Center" />
+                              <TextBlock Grid.Column="1" Text="{Binding label}" FontSize="13"
+                                         Foreground="#C8D8E8" VerticalAlignment="Center" Margin="6,0,0,0" />
+                              <TextBlock Grid.Column="2" Text="{Binding value}" FontSize="14" FontWeight="Bold"
+                                         Foreground="{Binding valueColor}" VerticalAlignment="Center" />
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                   </StackPanel>
                 </Border>
+
+                <!-- === Badges Section === -->
                 <Border Background="#D90D1520" BorderBrush="#2A4060" BorderThickness="1"
                         CornerRadius="12" Padding="14,12">
                   <StackPanel>
-                    <TextBlock Text="Badges" FontSize="14" FontWeight="Bold"
-                               Foreground="#E8A84C" Margin="0,0,0,8" />
-                    <TextBlock Text="{Binding journalBadgesText}"
-                               Foreground="#C8D8E8" FontSize="12" FontFamily="Roboto"
-                               TextWrapping="Wrap" LineHeight="20" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                      <TextBlock Text="&#x1F3C6; Badges" FontSize="15" FontWeight="Bold"
+                                 Foreground="#E8A84C" />
+                      <TextBlock Text="{Binding badgeProgressText}" FontSize="11"
+                                 Foreground="#8A9AB0" VerticalAlignment="Center" Margin="10,2,0,0" />
+                    </StackPanel>
+                    <!-- Badge cards via ItemsControl (wrapping 2-col grid) -->
+                    <ItemsControl ItemsSource="{Binding badgeItems}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Width="195" Margin="4,4"
+                                  Background="{Binding bgColor}"
+                                  BorderBrush="{Binding borderColor}" BorderThickness="1.5"
+                                  CornerRadius="10" Padding="10,8">
+                            <Grid>
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                              </Grid.ColumnDefinitions>
+                              <TextBlock Grid.Column="0" Text="{Binding icon}" FontSize="18"
+                                         VerticalAlignment="Center" HorizontalAlignment="Center" />
+                              <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding name}" FontSize="12" FontWeight="Bold"
+                                           Foreground="{Binding nameColor}" />
+                                <TextBlock Text="{Binding description}" FontSize="9.5"
+                                           Foreground="#6A7A8A" TextTrimming="CharacterEllipsis" />
+                              </StackPanel>
+                              <TextBlock Grid.Column="2" Text="{Binding statusIcon}" FontSize="13"
+                                         VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                   </StackPanel>
                 </Border>
               </StackPanel>
@@ -1161,11 +1215,13 @@
                 <Grid.Clip>
                   <EllipseGeometry Center="45,45" RadiusX="42" RadiusY="42" />
                 </Grid.Clip>
-                <Image Source="sprites/nereia_neutral.png" Stretch="UniformToFill"
+                <Image Stretch="UniformToFill"
                        Width="90" Height="90" Margin="0,12,0,0"
+                       Source="sprites/nereia_neutral.png"
                        Visibility="{Binding charDetailShowNereia, Converter={StaticResource BoolToVis}}" />
-                <Image Source="sprites/char_veiltail_neutral.png" Stretch="UniformToFill"
+                <Image Stretch="UniformToFill"
                        Width="90" Height="90" Margin="0,12,0,0"
+                       Source="sprites/char_veiltail_neutral.png"
                        Visibility="{Binding charDetailShowKasha, Converter={StaticResource BoolToVis}}" />
               </Grid>
             </Border>
@@ -1251,16 +1307,20 @@
         <!-- Tap outside to close -->
         <Button Width="480" Height="800" Opacity="0"
                 Command="{Binding events.onCGViewerDismiss}" />
-        <!-- Centered image at full width -->
-        <Image Source="{Binding cgViewerImagePath}" Stretch="Uniform"
+        <!-- Single image with dynamic Source binding -->
+        <Image Stretch="Uniform"
                HorizontalAlignment="Center" VerticalAlignment="Center"
-               Width="440" Margin="20,60,20,80" />
-        <!-- Close button at bottom -->
-        <Button Content="✕ Close" Width="140" Height="40"
+               Width="440" Margin="20,60,20,80">
+          <Image.Source>
+            <Binding Path="cgViewerImage"/>
+          </Image.Source>
+        </Image>
+        <!-- Close button - matches character detail back button style -->
+        <Button Content="← Back" Width="120" Height="36"
                 Command="{Binding events.onCGViewerDismiss}"
                 HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                Margin="0,0,0,30" Background="#333344" Foreground="#E8EAD8"
-                FontSize="14" BorderThickness="0" />
+                Margin="0,0,0,30"
+                Style="{StaticResource MenuButtonStyle}" />
       </Grid>
 
     </Grid>

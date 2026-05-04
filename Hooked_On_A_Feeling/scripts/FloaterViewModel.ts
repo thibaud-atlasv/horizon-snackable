@@ -1,7 +1,7 @@
 import { uiViewModel, UiViewModel, UiEvent } from 'meta/custom_ui';
 import { DrawingCommandData } from 'meta/custom_ui';
 import { serializable } from 'meta/platform_api';
-import type { TextureAsset } from 'meta/worlds';
+import { TextureAsset } from 'meta/worlds';
 
 // === Event Payloads ===
 @serializable()
@@ -57,6 +57,26 @@ export const onResetSaveCancel = new UiEvent('onResetSaveCancel');
 @uiViewModel()
 export class DotViewModel extends UiViewModel {
   color: string = ""
+}
+
+@uiViewModel()
+export class StatItemViewModel extends UiViewModel {
+  icon: string = '';
+  label: string = '';
+  value: string = '';
+  valueColor: string = '#E8EAD8';
+}
+
+@uiViewModel()
+export class BadgeItemViewModel extends UiViewModel {
+  icon: string = '';
+  name: string = '';
+  description: string = '';
+  unlocked: boolean = false;
+  borderColor: string = '#3A4A5A';
+  bgColor: string = '#0D1520';
+  statusIcon: string = '\ud83d\udd12';
+  nameColor: string = '#5A6A7A';
 }
 
 // === ViewModel ===
@@ -161,6 +181,11 @@ export class FloaterViewModel extends UiViewModel {
     onCharacterDetailClose,
   };
 
+  // === Journal Tab Colors (active = gold, inactive = grey) ===
+  journalTab1Color: string = '#E8A84C';
+  journalTab2Color: string = '#8A9AB0';
+  journalTab3Color: string = '#8A9AB0';
+
   // === Journal State ===
   journalVisible: boolean = false;
   journalTab1Visible: boolean = true;
@@ -177,12 +202,17 @@ export class FloaterViewModel extends UiViewModel {
   journalBadgesText: string = '';
   journalMetCounter: string = '';
 
+  // Structured stats & badges for polished Tab 3
+  statItems: readonly StatItemViewModel[] = [];
+  badgeItems: readonly BadgeItemViewModel[] = [];
+  badgeProgressText: string = '0/0 earned';
+
   // === Reset Save Confirmation ===
   resetConfirmVisible: boolean = false;
 
   // === CG Viewer State ===
   cgViewerVisible: boolean = false;
-  cgViewerImagePath: string = 'sprites/nereia_love_end.png';
+  cgViewerImage: TextureAsset | null = null;
 
   // === Character Detail Overlay ===
   charDetailVisible: boolean = false;
@@ -217,11 +247,14 @@ export class FloaterViewModel extends UiViewModel {
   // === CG Gallery Cards (Collection tab grid) ===
   // Portrait CGs
   cgPortraitNereiaUnlocked: boolean = false;
+  cgPortraitNereiaLocked: boolean = true;
   cgPortraitNereiaName: string = '???';
   cgPortraitKashaUnlocked: boolean = false;
+  cgPortraitKashaLocked: boolean = true;
   cgPortraitKashaName: string = '???';
   // Ending CGs
   cgEndingNereiaReelUnlocked: boolean = false;
+  cgEndingNereiaReelLocked: boolean = true;
   cgEndingNereiaReelName: string = '???';
   // Collection progress text
   cgCollectionProgress: string = 'Collection (0/3)';
@@ -280,6 +313,48 @@ export class FloaterViewModel extends UiViewModel {
   // === Journal Button (legacy, kept for backward compat) ===
   journalButtonVisible: boolean = false;
 
+  /** Update structured stat items for Tab 3 */
+  setStatItems(items: Array<{icon: string; label: string; value: string; valueColor?: string}>): void {
+    const vms: StatItemViewModel[] = [];
+    for (const item of items) {
+      const vm = new StatItemViewModel();
+      vm.icon = item.icon;
+      vm.label = item.label;
+      vm.value = item.value;
+      vm.valueColor = item.valueColor ?? '#E8EAD8';
+      vms.push(vm);
+    }
+    this.statItems = vms;
+  }
+
+  /** Update structured badge items for Tab 3 */
+  setBadgeItems(items: Array<{icon: string; name: string; description: string; unlocked: boolean}>): void {
+    const vms: BadgeItemViewModel[] = [];
+    let earned = 0;
+    for (const item of items) {
+      const vm = new BadgeItemViewModel();
+      vm.icon = item.icon;
+      vm.name = item.name;
+      vm.description = item.description;
+      vm.unlocked = item.unlocked;
+      if (item.unlocked) {
+        earned++;
+        vm.borderColor = '#E8A84C';
+        vm.bgColor = '#1A2A1A';
+        vm.statusIcon = '\u2713';
+        vm.nameColor = '#E8EAD8';
+      } else {
+        vm.borderColor = '#2A3A4A';
+        vm.bgColor = '#0D1520';
+        vm.statusIcon = '\ud83d\udd12';
+        vm.nameColor = '#5A6A7A';
+      }
+      vms.push(vm);
+    }
+    this.badgeItems = vms;
+    this.badgeProgressText = `${earned}/${items.length} earned`;
+  }
+
   /** Switch journal tab by index (0-4). */
   setJournalTab(tabIndex: number): void {
     this.journalTab1Visible = tabIndex === 0;
@@ -287,6 +362,12 @@ export class FloaterViewModel extends UiViewModel {
     this.journalTab3Visible = tabIndex === 2;
     this.journalTab4Visible = tabIndex === 3;
     this.journalTab5Visible = tabIndex === 4;
+    // Update tab button colors (active = gold, inactive = grey)
+    const active = '#E8A84C';
+    const inactive = '#8A9AB0';
+    this.journalTab1Color = tabIndex === 0 ? active : inactive;
+    this.journalTab2Color = tabIndex === 1 ? active : inactive;
+    this.journalTab3Color = tabIndex === 2 ? active : inactive;
   }
 
   /** Update equipped lure indicators from display list */

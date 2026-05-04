@@ -6,6 +6,8 @@
  */
 
 import type { CGData, CGGalleryCard } from './Types';
+import type { TextureAsset } from 'meta/worlds';
+import { nereiaNeutralTexture, kashaNeutralTexture, cgNereiaLoveEndTexture } from './Assets';
 
 // === CG Registry: All CGs in the game ===
 const CG_REGISTRY: CGData[] = [
@@ -42,11 +44,18 @@ const CG_ID_MIGRATION: Record<string, string> = {
   'nereia_love_end': 'ending_nereia_reel',
 };
 
-// Map from CG ID to image paths for fullscreen viewer
+// Map from CG ID to image paths for fullscreen viewer (legacy, kept for backward compat)
 export const CG_IMAGE_MAP: Record<string, string> = {
   'portrait_nereia': 'sprites/nereia_neutral.png',
   'portrait_kasha': 'sprites/char_veiltail_neutral.png',
   'ending_nereia_reel': 'sprites/nereia_love_end.png',
+};
+
+// Map from CG ID to TextureAsset for XAML image binding
+export const CG_TEXTURE_MAP: Record<string, TextureAsset> = {
+  'portrait_nereia': nereiaNeutralTexture,
+  'portrait_kasha': kashaNeutralTexture,
+  'ending_nereia_reel': cgNereiaLoveEndTexture,
 };
 
 export class CGGallerySystem {
