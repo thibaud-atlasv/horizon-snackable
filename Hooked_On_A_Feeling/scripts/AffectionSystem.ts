@@ -1,24 +1,22 @@
 /**
  * SYS-01-AFFECTION: Per-fish hidden affection meter.
- * Manages affection values, tier thresholds, floor/ceiling enforcement,
- * drift modifiers, and tier transition detection.
+ *
+ * Single linear meter per character — no tiers, no floor locks.
+ * Two thresholds matter:
+ *   - Catch trigger: usually set via flag (`<id>.catch_available`) by the
+ *     dialogue itself, then resolved by the catch sequence flow.
+ *   - Drift-away threshold: when affection drops to or below this value,
+ *     the character is treated as having abandoned the player and the
+ *     drift-away ending fires.
  *
  * Rules:
- * - Floor enforced: once floor > 0, value cannot drop below it
- * - Max +30 per action (single action cap)
- * - TIER_ONLY visibility (never expose raw numbers)
- * - Trigger unique feedback at each tier transition
+ *   - Single action delta capped to ±30
+ *   - Value clamped to [0, ceiling] (default ceiling = AFFECTION_MAX)
  */
 
-import {
-  AFFECTION_TIER_1_MAX,
-  AFFECTION_TIER_2_MAX,
-  AFFECTION_TIER_3_MAX,
-  AFFECTION_TIER_4_MAX,
-  AFFECTION_MAX,
-} from './Constants';
-import { AffectionTier, DriftState, TIER_NAMES } from './Types';
-import type { FishAffection, TierTransitionInfo } from './Types';
+import { AFFECTION_MAX, AFFECTION_DRIFT_AWAY_THRESHOLD } from './Constants';
+import { DriftState } from './Types';
+import type { FishAffection } from './Types';
 
 // === Drift → Affection Modifier Table ===
 const DRIFT_AFFECTION_MODIFIERS: Partial<Record<DriftState, number>> = {
@@ -30,37 +28,30 @@ const DRIFT_AFFECTION_MODIFIERS: Partial<Record<DriftState, number>> = {
   // Scared: fish doesn't appear, no modifier
 };
 
-// === Mood Icons (legacy string references removed — now using sprite textures) ===
-
 // === Max affection delta per single action ===
 const MAX_DELTA_PER_ACTION = 30;
 
 export class AffectionSystem {
   /**
    * Apply an affection delta to a FishAffection record.
-   * Enforces: ±30 cap, floor, ceiling. Returns the clamped delta applied.
+   * Enforces: ±30 cap, ceiling, absolute minimum 0.
+   * Returns the actual delta applied.
    */
   applyDelta(affection: FishAffection, rawDelta: number, sessionId: string): number {
-    // Cap the delta to ±30
     const cappedDelta = Math.max(-MAX_DELTA_PER_ACTION, Math.min(MAX_DELTA_PER_ACTION, rawDelta));
 
     const oldValue = affection.value;
     let newValue = oldValue + cappedDelta;
 
-    // Enforce ceiling
+    // Clamp to [drift-away threshold, ceiling]. Affection can go negative but
+    // bottoms out at the threshold, where shouldDriftAway() will fire.
     newValue = Math.min(affection.ceiling, newValue);
-
-    // Enforce floor
-    newValue = Math.max(affection.floor, newValue);
-
-    // Enforce absolute minimum of 0
-    newValue = Math.max(0, newValue);
+    newValue = Math.max(AFFECTION_DRIFT_AWAY_THRESHOLD, newValue);
 
     affection.value = newValue;
     affection.lastChangeDelta = newValue - oldValue;
     affection.lastChangeSessionId = sessionId;
 
-    // Update peak
     if (newValue > affection.peakValue) {
       affection.peakValue = newValue;
     }
@@ -78,100 +69,30 @@ export class AffectionSystem {
     return this.applyDelta(affection, modifier, sessionId);
   }
 
-  /**
-   * Determine the tier for a given affection value.
-   */
-  getTierForValue(value: number): AffectionTier {
-    if (value > AFFECTION_TIER_4_MAX) return AffectionTier.Bonded;
-    if (value > AFFECTION_TIER_3_MAX) return AffectionTier.Trusting;
-    if (value > AFFECTION_TIER_2_MAX) return AffectionTier.Familiar;
-    if (value > AFFECTION_TIER_1_MAX) return AffectionTier.Curious;
-    return AffectionTier.Unaware;
+  /** True when affection has dropped to the drift-away threshold (character leaves). */
+  shouldDriftAway(affection: FishAffection): boolean {
+    return affection.value <= AFFECTION_DRIFT_AWAY_THRESHOLD;
   }
 
-  /**
-   * Check if a tier transition occurred and return info if so.
-   * Also updates the affection record's tier and floor.
-   */
-  checkTierTransition(affection: FishAffection): TierTransitionInfo | null {
-    const newTier = this.getTierForValue(affection.value);
-    if (newTier === affection.tier) return null;
-
-    const oldTier = affection.tier;
-    affection.tier = newTier;
-
-    // When tier increases, set floor to the threshold of the new tier
-    // so affection can never drop back below the tier boundary
-    if (newTier > oldTier) {
-      const newFloor = this.getFloorForTier(newTier);
-      affection.floor = Math.max(affection.floor, newFloor);
-    }
-
-    return {
-      characterId: affection.characterId,
-      oldTier,
-      newTier,
-      oldTierName: TIER_NAMES[oldTier],
-      newTierName: TIER_NAMES[newTier],
-      isPromotion: newTier > oldTier,
-    };
-  }
-
-  /**
-   * Get visible state for TIER_ONLY display.
-   * Never exposes raw numbers.
-   */
-  getVisibleState(affection: FishAffection): { tierName: string } {
-    return {
-      tierName: TIER_NAMES[affection.tier],
-    };
-  }
-
-  /**
-   * Get the mood tier number (1-5). Use getMoodIconTexture() from MoodIcons.ts for sprites.
-   */
-  getMoodTier(tier: AffectionTier): number {
-    return tier;
-  }
-
-  /**
-   * Create a fresh FishAffection record for a new character.
-   */
+  /** Create a fresh FishAffection record for a new character. */
   createAffection(characterId: string): FishAffection {
     return {
       characterId,
       value: 0,
-      tier: AffectionTier.Unaware,
-      floor: 0,
       ceiling: AFFECTION_MAX,
       lastChangeSessionId: '',
       lastChangeDelta: 0,
       peakValue: 0,
-      visibilityMode: 'TIER_ONLY',
     };
   }
 
-  /**
-   * Restore a FishAffection record from save data, filling in defaults for missing fields.
-   */
+  /** Restore a FishAffection record from save data, filling in defaults for missing fields. */
   restoreFromSave(characterId: string, saved: Partial<FishAffection>): FishAffection {
     const fresh = this.createAffection(characterId);
     return {
       ...fresh,
       ...saved,
-      characterId, // Always use the key, not saved value
+      characterId, // always use the key, not saved value
     };
-  }
-
-  // === Private Helpers ===
-
-  private getFloorForTier(tier: AffectionTier): number {
-    switch (tier) {
-      case AffectionTier.Curious: return AFFECTION_TIER_1_MAX + 1; // 15
-      case AffectionTier.Familiar: return AFFECTION_TIER_2_MAX + 1; // 35
-      case AffectionTier.Trusting: return AFFECTION_TIER_3_MAX + 1; // 60
-      case AffectionTier.Bonded: return AFFECTION_TIER_4_MAX + 1; // 85
-      default: return 0;
-    }
   }
 }

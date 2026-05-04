@@ -5,44 +5,33 @@
  */
 
 import type { Beat, FishCharacter, CastData } from './Types';
-import { AffectionTier } from './Types';
 import { characterRegistry } from './CharacterRegistry';
 
-// === Nereia Default Character (backward compat) ===
+/** Default Nereia FishCharacter factory (legacy, kept for backward compat). */
 export function createNereia(): FishCharacter {
   const nereia = characterRegistry.getCharacter('nereia');
   if (!nereia) throw new Error('[CastData] Nereia not registered in CharacterRegistry');
   return nereia.initialState();
 }
 
-/**
- * Get the cast data for a given tier and cast index within that tier.
- * Defaults to 'nereia' for backward compatibility.
- */
-export function getCastForTier(tier: AffectionTier, castIndexWithinTier: number, characterId: string = 'nereia'): CastData {
-  const cast = characterRegistry.getCastForTier(characterId, tier, castIndexWithinTier);
-  if (!cast) throw new Error(`[CastData] No cast found for ${characterId} tier ${tier} index ${castIndexWithinTier}`);
+/** Get the cast at a given index for a character. Defaults to 'nereia'. */
+export function getCast(castIndex: number, characterId: string = 'nereia'): CastData {
+  const cast = characterRegistry.getCast(characterId, castIndex);
+  if (!cast) throw new Error(`[CastData] No cast found for ${characterId} at index ${castIndex}`);
   return cast;
 }
 
-/**
- * Returns fresh beat copies for a given tier and cast index.
- * Each beat's `seen` is reset to false.
- */
-export function getBeatsForTier(tier: AffectionTier, castIndexWithinTier: number = 0, characterId: string = 'nereia'): Beat[] {
-  return characterRegistry.getBeatsForTier(characterId, tier, castIndexWithinTier);
+/** Returns fresh beat copies (seen = false) for the cast at the given index. */
+export function getBeats(castIndex: number = 0, characterId: string = 'nereia'): Beat[] {
+  return characterRegistry.getBeats(characterId, castIndex);
 }
 
-/**
- * Get the number of casts available in a tier.
- */
-export function getCastCountForTier(tier: AffectionTier, characterId: string = 'nereia'): number {
-  return characterRegistry.getCastCountForTier(characterId, tier);
+/** Total cast count for a character. */
+export function getCastCount(characterId: string = 'nereia'): number {
+  return characterRegistry.getCastCount(characterId);
 }
 
-/**
- * Check if the player has exhausted all casts in the current tier.
- */
-export function isTierExhausted(tier: AffectionTier, castIndexWithinTier: number, characterId: string = 'nereia'): boolean {
-  return characterRegistry.isTierExhausted(characterId, tier, castIndexWithinTier);
+/** Whether the player has progressed past the last cast. */
+export function isArcExhausted(castIndex: number, characterId: string = 'nereia'): boolean {
+  return characterRegistry.isArcExhausted(characterId, castIndex);
 }

@@ -5,18 +5,49 @@
  * CGs are defined per-character in CharacterData files and registered here.
  */
 
-import type { CGData } from './Types';
+import type { CGData, CGGalleryCard } from './Types';
 
 // === CG Registry: All CGs in the game ===
 const CG_REGISTRY: CGData[] = [
+  // Portrait CGs (unlocked on first encounter)
   {
-    id: 'nereia_love_end',
+    id: 'portrait_nereia',
+    characterId: 'nereia',
+    name: 'Nereia',
+    description: 'First encounter with the midnight koi.',
+    unlockCondition: 'Meet Nereia for the first time',
+    thumbnailPath: 'sprites/nereia_neutral.png',
+  },
+  {
+    id: 'portrait_kasha',
+    characterId: 'kasha',
+    name: 'Kasha',
+    description: 'First encounter with the crimson veiltail.',
+    unlockCondition: 'Meet Kasha for the first time',
+    thumbnailPath: 'sprites/char_veiltail_neutral.png',
+  },
+  // Ending CGs (unlocked via catch sequences)
+  {
+    id: 'ending_nereia_reel',
     characterId: 'nereia',
     name: 'The Last Morning',
     description: 'The data ends here. The lake remembers.',
     unlockCondition: 'Choose "Reel" in Nereia\'s catch sequence',
+    thumbnailPath: 'sprites/nereia_love_end.png',
   },
 ];
+
+// Map from old CG IDs to new IDs (backward compat)
+const CG_ID_MIGRATION: Record<string, string> = {
+  'nereia_love_end': 'ending_nereia_reel',
+};
+
+// Map from CG ID to image paths for fullscreen viewer
+export const CG_IMAGE_MAP: Record<string, string> = {
+  'portrait_nereia': 'sprites/nereia_neutral.png',
+  'portrait_kasha': 'sprites/char_veiltail_neutral.png',
+  'ending_nereia_reel': 'sprites/nereia_love_end.png',
+};
 
 export class CGGallerySystem {
   private unlockedCGs: Set<string> = new Set();
@@ -32,6 +63,12 @@ export class CGGallerySystem {
     this.unlockedCGs.add(cgId);
     console.log(`[CGGallerySystem] CG unlocked: ${cgId}`);
     return true;
+  }
+
+  /** Unlock a portrait CG for a fish (called on first encounter). */
+  unlockPortraitCG(fishId: string): boolean {
+    const portraitId = `portrait_${fishId}`;
+    return this.unlockCG(portraitId);
   }
 
   /** Check if a CG is unlocked */
@@ -55,6 +92,17 @@ export class CGGallerySystem {
       total: CG_REGISTRY.length,
       unlocked: this.unlockedCGs.size,
     };
+  }
+
+  /** Get gallery cards for XAML grid display */
+  getGalleryCards(): CGGalleryCard[] {
+    return CG_REGISTRY.map(cg => ({
+      id: cg.id,
+      name: cg.name,
+      characterId: cg.characterId,
+      isUnlocked: this.unlockedCGs.has(cg.id),
+      thumbnailPath: cg.thumbnailPath,
+    }));
   }
 
   // === CG Viewer State ===
@@ -87,45 +135,12 @@ export class CGGallerySystem {
   getCurrentCGId(): string | null { return this.currentViewingCG; }
   getViewerAlpha(): number { return this.viewerFadeAlpha; }
 
-  // === Gallery Text for Journal Display ===
+  // === Gallery Text for Journal Display (fallback) ===
 
   /** Get formatted collection text for the journal Collection tab */
   getCollectionText(): string {
     const progress = this.getProgress();
-    const lines: string[] = [];
-    lines.push(`— CG Collection (${progress.unlocked}/${progress.total}) —`);
-    lines.push('');
-
-    // Group by character
-    const characterGroups = new Map<string, CGData[]>();
-    for (const cg of CG_REGISTRY) {
-      const group = characterGroups.get(cg.characterId) || [];
-      group.push(cg);
-      characterGroups.set(cg.characterId, group);
-    }
-
-    for (const [characterId, cgs] of characterGroups) {
-      const charName = characterId.charAt(0).toUpperCase() + characterId.slice(1);
-      lines.push(`◆ ${charName}`);
-      for (const cg of cgs) {
-        if (this.unlockedCGs.has(cg.id)) {
-          lines.push(`  ✦ ${cg.name}`);
-          lines.push(`    "${cg.description}"`);
-          lines.push(`    [Tap to view]`);
-        } else {
-          lines.push(`  🔒 ???`);
-          lines.push(`    (Locked)`);
-        }
-      }
-      lines.push('');
-    }
-
-    if (progress.unlocked === 0) {
-      lines.push('No CGs unlocked yet.');
-      lines.push('Continue your journey to discover special moments.');
-    }
-
-    return lines.join('\n');
+    return `Collection (${progress.unlocked}/${progress.total})`;
   }
 
   // === Save/Load ===
@@ -135,7 +150,13 @@ export class CGGallerySystem {
   }
 
   deserialize(data: string[]): void {
-    this.unlockedCGs = new Set(data || []);
+    this.unlockedCGs = new Set();
+    if (!data) return;
+    for (const id of data) {
+      // Migrate old IDs to new IDs
+      const migratedId = CG_ID_MIGRATION[id] ?? id;
+      this.unlockedCGs.add(migratedId);
+    }
     console.log(`[CGGallerySystem] Loaded ${this.unlockedCGs.size} unlocked CGs`);
   }
 }

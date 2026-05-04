@@ -207,10 +207,6 @@ export const BEAT_PAUSE_DURATION = 0.5;
 
 // === Affection Thresholds ===
 export const AFFECTION_DRIFT_AWAY_THRESHOLD = -10; // Triggers Drift-Away ending when affection drops this low
-export const AFFECTION_TIER_1_MAX = 14;
-export const AFFECTION_TIER_2_MAX = 34;
-export const AFFECTION_TIER_3_MAX = 59;
-export const AFFECTION_TIER_4_MAX = 84;
 export const AFFECTION_MAX = 100;
 
 // === Action Definitions (4 actions) ===

@@ -1,23 +1,35 @@
 /**
- * SYS-05-JOURNAL: MUSEUM variant — Journal Data Management
+ * SYS-05-JOURNAL: Journal Data Management
  * Manages: fish entry unlocking, observation recording, keepsake tracking.
- * Three tabs: Pond Notes, Lure Box, Keepsakes
  *
  * Now uses CharacterRegistry for fish data instead of hardcoded arrays.
  */
 
-import { ExpressionState, AffectionTier } from './Types';
-import type { JournalFishEntry, Keepsake, JournalSaveData, LureReaction, QuestRequirement } from './Types';
+import { ExpressionState } from './Types';
+import type { JournalFishEntry, JournalSaveData, LureReaction } from './Types';
 import { characterRegistry } from './CharacterRegistry';
 import { QuestSystem } from './QuestSystem';
 import { FlagSystem } from './FlagSystem';
 
+// === Character Card Data (for journal teasing display) ===
+export interface CharacterCardData {
+  id: string;
+  name: string;
+  species: string;
+  accentColor: string;
+  unlocked: boolean;
+  castsMade: number;
+  observationCount: number;
+  questHint: string;
+  questName: string;
+  tierName: string;
+  teaserHint: string; // Hint shown for locked characters
+}
+
 export class JournalSystem {
   private fishEntries: Map<string, JournalFishEntry> = new Map();
-  private keepsakes: Keepsake[] = [];
 
   constructor() {
-    // Initialize entries for all registered characters
     const allIds = characterRegistry.getAllCharacterIds();
     for (const fishId of allIds) {
       const character = characterRegistry.getCharacter(fishId);
@@ -28,25 +40,19 @@ export class JournalSystem {
         knownFacts: [],
         expressionsSeen: [],
         castsMade: 0,
-        currentQuestHintTier: 1,
       });
     }
   }
 
   // === Recording Observations ===
 
-  /**
-   * Record a Cast completion for a fish.
-   * Call after each Cast with the fish's ID and current tier.
-   */
-  recordCast(fishId: string, tier: AffectionTier, expressionsSeen: ExpressionState[]): void {
+  /** Record a Cast completion for a fish. */
+  recordCast(fishId: string, expressionsSeen: ExpressionState[]): void {
     const entry = this.fishEntries.get(fishId);
     if (!entry) return;
 
-    // Unlock on first meeting
     if (!entry.unlocked) {
       entry.unlocked = true;
-      // Add base facts on first discovery from character config
       const character = characterRegistry.getCharacter(fishId);
       if (character) {
         entry.knownFacts = [...character.staticFacts];
@@ -55,9 +61,7 @@ export class JournalSystem {
     }
 
     entry.castsMade++;
-    entry.currentQuestHintTier = tier;
 
-    // Record new expressions
     for (const expr of expressionsSeen) {
       if (!entry.expressionsSeen.includes(expr)) {
         entry.expressionsSeen.push(expr);
@@ -65,9 +69,6 @@ export class JournalSystem {
     }
   }
 
-  /**
-   * Add a discovery fact to a fish entry.
-   */
   addFact(fishId: string, fact: string): void {
     const entry = this.fishEntries.get(fishId);
     if (!entry) return;
@@ -77,55 +78,35 @@ export class JournalSystem {
     }
   }
 
-  /**
-   * Add a keepsake to the collection.
-   */
-  addKeepsake(keepsake: Keepsake): void {
-    if (!this.keepsakes.find(k => k.id === keepsake.id)) {
-      this.keepsakes.push(keepsake);
-      console.log(`[JournalSystem] New keepsake: ${keepsake.name}`);
-    }
-  }
+
 
   // === Querying for Display ===
 
-  /** Get all fish entries (including locked ones for silhouette display) */
   getAllFishEntries(): JournalFishEntry[] {
     return Array.from(this.fishEntries.values());
   }
 
-  /** Get a specific fish entry */
   getFishEntry(fishId: string): JournalFishEntry | undefined {
     return this.fishEntries.get(fishId);
   }
 
-  /** Get quest hint for a fish at their current tier */
   getQuestHintForFish(fishId: string): string {
     const entry = this.fishEntries.get(fishId);
     if (!entry || !entry.unlocked) return '???';
-    return characterRegistry.getQuestHint(fishId, entry.currentQuestHintTier as AffectionTier);
+    return characterRegistry.getQuestHint(fishId);
   }
 
-  /** Get quest name for a fish */
   getQuestNameForFish(fishId: string): string {
     return characterRegistry.getQuestName(fishId);
   }
 
-  /** Get all keepsakes */
-  getKeepsakes(): Keepsake[] {
-    return this.keepsakes;
-  }
 
-  /** Check if a fish is unlocked */
   isFishUnlocked(fishId: string): boolean {
     return this.fishEntries.get(fishId)?.unlocked ?? false;
   }
 
   // === Formatted Display Text (for ViewModel binding) ===
 
-  /**
-   * Get formatted Pond Notes text for a specific fish.
-   */
   getPondNotesText(fishId: string): string {
     const entry = this.fishEntries.get(fishId);
     if (!entry || !entry.unlocked) {
@@ -137,24 +118,18 @@ export class JournalSystem {
     lines.push(`Casts: ${entry.castsMade}`);
     lines.push('');
 
-    // Known facts
     lines.push('— Observations —');
     for (const fact of entry.knownFacts) {
       lines.push(`• ${fact}`);
     }
     lines.push('');
 
-    // Quest hint
     lines.push(`— Personal Quest: ${this.getQuestNameForFish(fishId)} —`);
     lines.push(this.getQuestHintForFish(fishId));
 
     return lines.join('\n');
   }
 
-  /**
-   * Get formatted quest status text for all characters with quests.
-   * Shows active quests with their progress.
-   */
   getQuestStatusText(questSystem: QuestSystem, flagSystem: FlagSystem): string {
     const allCharacters = characterRegistry.getAllCharacters();
     const lines: string[] = [];
@@ -179,7 +154,6 @@ export class JournalSystem {
       lines.push('');
     }
 
-    // Show completed quests
     const completedLines: string[] = [];
     for (const char of allCharacters) {
       if (!char.questRequirement) continue;
@@ -199,9 +173,6 @@ export class JournalSystem {
     return lines.join('\n');
   }
 
-  /**
-   * Get formatted Pond Notes for ALL fish (scrollable list).
-   */
   getAllPondNotesText(): string {
     const allIds = characterRegistry.getAllCharacterIds();
     const sections: string[] = [];
@@ -211,9 +182,6 @@ export class JournalSystem {
     return sections.join('\n\n━━━━━━━━━━━━━━━\n\n');
   }
 
-  /**
-   * Get formatted Lure Box text.
-   */
   getLureBoxText(ownedLureIds: string[], reactions: LureReaction[]): string {
     if (ownedLureIds.length === 0) {
       return 'No lures in inventory.';
@@ -250,21 +218,84 @@ export class JournalSystem {
     return lines.join('\n');
   }
 
-  /**
-   * Get formatted Keepsakes text.
-   */
-  getKeepsakesText(): string {
-    if (this.keepsakes.length === 0) {
-      return 'No keepsakes yet.\n\nFish sometimes attach gifts to your hook.\nKeep visiting — and keep listening.';
+
+  // === Character Teasing System ===
+  
+  getTierName(fishId: string) : string {
+    return "unaware";
+  }
+
+  getCharacterCardsData(): CharacterCardData[] {
+    const allCharacters = characterRegistry.getAllCharacters();
+    const cards: CharacterCardData[] = [];
+
+    for (const char of allCharacters) {
+      const entry = this.fishEntries.get(char.id);
+      const unlocked = entry?.unlocked ?? false;
+
+      cards.push({
+        id: char.id,
+        name: unlocked ? char.name : '???',
+        species: unlocked ? char.species : 'Unknown',
+        accentColor: unlocked ? char.accentColor : '#3A4A5A',
+        unlocked,
+        castsMade: entry?.castsMade ?? 0,
+        observationCount: entry?.knownFacts.length ?? 0,
+        questHint: unlocked ? this.getQuestHintForFish(char.id) : '???',
+        questName: unlocked ? this.getQuestNameForFish(char.id) : '???',
+        teaserHint: this.getTeaserHint(char),
+        tierName: unlocked ? this.getTierName(char.id) : '???',
+      });
     }
 
+    return cards;
+  }
+
+  private getTeaserHint(char: { id: string; species: string; lakeZones: string[] }): string {
+    const zoneHints: Record<string, string> = {
+      near: 'Likes shallow waters...',
+      mid: 'Dwells in the middle depths...',
+      far: 'Hides in the deep...',
+    };
+    const zone = char.lakeZones[0] ?? 'mid';
+    return zoneHints[zone] ?? 'A mysterious presence beneath the surface...';
+  }
+
+  getMetCounterText(): string {
+    const total = characterRegistry.getAllCharacterIds().length;
+    let met = 0;
+    for (const entry of this.fishEntries.values()) {
+      if (entry.unlocked) met++;
+    }
+    return `${met}/${total} characters met`;
+  }
+
+  getMetCount(): number {
+    let met = 0;
+    for (const entry of this.fishEntries.values()) {
+      if (entry.unlocked) met++;
+    }
+    return met;
+  }
+
+  getCharacterListText(): string {
+    const cards = this.getCharacterCardsData();
     const lines: string[] = [];
-    for (const k of this.keepsakes) {
-      const giverName = k.giftedBy.charAt(0).toUpperCase() + k.giftedBy.slice(1);
-      lines.push(`✦ ${k.name}`);
-      lines.push(`  From: ${giverName}`);
-      lines.push(`  "${k.fishPerspective}"`);
-      lines.push(`  (You see: ${k.fishermanPerspective})`);
+
+    lines.push(`— ${this.getMetCounterText()} —`);
+    lines.push('');
+
+    for (const card of cards) {
+      if (card.unlocked) {
+        const nameCapitalized = card.name.charAt(0).toUpperCase() + card.name.slice(1);
+        lines.push(`◈ ${nameCapitalized} — ${card.species}`);
+        lines.push(`  ${card.castsMade} casts · ${card.observationCount} observations`);
+        lines.push(`  Quest: ${card.questName}`);
+        lines.push(`  ↳ ${card.questHint}`);
+      } else {
+        lines.push('🔒 ??? — Unknown');
+        lines.push(`  ${card.teaserHint}`);
+      }
       lines.push('');
     }
 
@@ -280,7 +311,6 @@ export class JournalSystem {
     }
     return {
       fishEntries,
-      keepsakes: [...this.keepsakes],
     };
   }
 
@@ -290,8 +320,6 @@ export class JournalSystem {
         this.fishEntries.set(id, { ...entry });
       }
     }
-    if (data.keepsakes) {
-      this.keepsakes = [...data.keepsakes];
-    }
+    // Old saves may have data.keepsakes — ignored (deprecated)
   }
 }

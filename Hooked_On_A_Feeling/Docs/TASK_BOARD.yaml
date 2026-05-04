@@ -56,11 +56,12 @@ tasks:
 
   - name: Milestone 3 — Journal & Hints
     status: done
-    summary: Journal system (3 tabs), Lure system with inventory-based equipment, Personal Quest hints, emotion icons generated, Complete Nereia arc (10 Casts, 5 Tiers), 4-action system, visible affection bar, floating emotion icons, float animations for all 4 actions
+    summary: Journal system (5 tabs), Lure system with inventory-based equipment, Personal Quest hints, emotion icons generated, Complete Nereia arc (10 Casts, 5 Tiers), 4-action system, visible affection bar, floating emotion icons, float animations for all 4 actions, character teasing system, global stats and badges
     files:
       - scripts/LureData.ts
       - scripts/QuestHintData.ts
       - scripts/JournalSystem.ts
+      - scripts/GlobalStatsSystem.ts
       - scripts/LureSystem.ts
       - scripts/FloaterViewModel.ts
       - scripts/FloaterGame.ts
@@ -95,7 +96,7 @@ tasks:
         status: done
       - name: Lure → Initial DRIFT Modifier
         status: done
-      - name: Journal UI (3 tabs)
+      - name: Journal UI (5 tabs)
         status: done
       - name: Emotion Icon Sprites (9 icons)
         status: done
@@ -114,6 +115,10 @@ tasks:
       - name: Tier Unlock System (Moment Clefs)
         status: done
       - name: Float Animations (WAIT, REEL, DRIFT, TWITCH)
+        status: done
+      - name: Character Teasing System
+        status: done
+      - name: Global Stats & Badges
         status: done
 
   - name: Character System Restructure
@@ -255,6 +260,34 @@ tasks:
       - sprites/action_bg_drift.png
       - sprites/action_bg_reel.png
 
+  - name: Enhanced Journal System
+    status: done
+    summary: Implemented comprehensive journal enhancements based on VN Systems Bible - character teasing with locked silhouettes, global stats tracking, 10-badge achievement system, 5-tab redesigned UI, met counter, optimized save/load
+    files:
+      - scripts/JournalSystem.ts
+      - scripts/GlobalStatsSystem.ts
+      - scripts/FloaterViewModel.ts
+      - scripts/FloaterGame.ts
+      - scripts/Types.ts
+      - xaml/floater.xaml
+    subtasks:
+      - name: Character Teasing System
+        status: done
+      - name: Locked Character Silhouettes
+        status: done
+      - name: Met Counter (X/Y characters)
+        status: done
+      - name: Global Stats Tracking
+        status: done
+      - name: Badge/Achievement System (10 badges)
+        status: done
+      - name: 5-Tab Journal UI Redesign
+        status: done
+      - name: Optimized Save/Load
+        status: done
+      - name: Auto-Update After Each Cast
+        status: done
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding:
@@ -268,6 +301,7 @@ notes:
   - Art direction established for nocturnal pond illustration style
   - Milestone 1 complete — foundation systems working, Nereia Tier 1 playable
   - Milestone 2 complete — affection system working, tier progression functional, Nereia Tier 2 playable
+  - Milestone 3 complete — journal with 5 tabs, character teasing, global stats, badges, optimized save/load
   - Game renamed from "FLOATER" to "Hooked on a Feeling"
   - Fishing cast mechanics added: LakeIdle → CastCharging (power gauge) → CastFlying (arc physics) → FloatLanded (splash VFX) → Approach
   - Cast loop: Title → LakeIdle → CastCharging → CastFlying → FloatLanded → Approach → Exchange → Departure → Idle
@@ -283,10 +317,13 @@ notes:
   - Background uses UniformToFill stretch to fill 100% height and crop left/right as needed
   - Design documents (FLOATER_GDD_v1.0.md, FLOATER_VISUAL_BIBLE_v1.0.md, VN_SYSTEMS_BIBLE_v2.0.md) kept with original names as reference
   - Character system restructured: modular CharacterRegistry allows easy addition of new fish
-  - Only Nereia implemented currently - other fish removed from docs
+  - Currently 2 characters implemented: Nereia (koi) and Kasha (betta)
   - To add new character: create CharacterData_NewFish.ts, register in CharacterRegistry.ts
-  - All Nereia content consolidated in CharacterData_Nereia.ts (metadata, portraits, lures, quest hints, dialogues, endings)
+  - All character content consolidated in single CharacterData_X.ts files (metadata, portraits, lures, quest hints, dialogues, endings)
   - Quest system: 5 quest types (use_lure, talk_to_fish, talk_to_x_fish, make_fish_leave, custom)
   - Lake zones: Near (0-33%), Mid (34-66%), Far (67-100%) based on cast power
   - Encounter priority: quest incomplete = never appears, quest complete = prioritized, lure preference = 2x weight
   - Multi-character support ready: per-fish cast indices, quest tracking, zone-based spawning
+  - Journal system: 5 tabs (Pond, Fish, Lures, Gifts, Stats), character teasing with locked silhouettes, met counter, global stats, 10 achievement badges
+  - Badge system: First Line, First Ripple, Patient Angler, Dedicated Fisher, Full Pond, Growing Trust, Soulbound, Treasured Gift, Deep Listener, Night Owl
+  - Save system: AUTO_ONLY after each Cast, backward-compatible, includes journal + globalStats data

@@ -9,7 +9,6 @@
  */
 
 import type { CharacterConfig, CastData, Beat, CatchSequenceData, LakeZone } from './Types';
-import { AffectionTier } from './Types';
 import { NEREIA_CHARACTER } from './CharacterData_Nereia';
 import { KASHA_CHARACTER } from './CharacterData_Kasha';
 
@@ -47,7 +46,6 @@ class CharacterRegistry {
     return this.getAllCharacters().filter(c => {
       if (!c.unlockCondition(flags)) return false;
       if (equippedLureId) {
-        // Character responds to this lure (preferred or not disliked)
         return c.preferredLures.includes(equippedLureId) ||
                !c.dislikedLures.includes(equippedLureId);
       }
@@ -81,63 +79,33 @@ class CharacterRegistry {
     );
   }
 
-  /** Get cast data for a character's tier and index */
-  getCastForTier(characterId: string, tier: AffectionTier, castIndex: number): CastData | undefined {
+  /** Get a cast by index for a character (clamped to valid range). */
+  getCast(characterId: string, castIndex: number): CastData | undefined {
     const character = this.characters.get(characterId);
     if (!character) return undefined;
-    const casts = character.getCastsForTier(tier);
-    const idx = Math.min(castIndex, casts.length - 1);
+    const casts = character.getCasts();
+    if (casts.length === 0) return undefined;
+    const idx = Math.min(Math.max(castIndex, 0), casts.length - 1);
     return casts[idx];
   }
 
-  /** Get beat data for a character's tier and cast index */
-  getBeatsForTier(characterId: string, tier: AffectionTier, castIndex: number = 0): Beat[] {
-    const cast = this.getCastForTier(characterId, tier, castIndex);
+  /** Get the beats of the cast at the given index for a character. */
+  getBeats(characterId: string, castIndex: number = 0): Beat[] {
+    const cast = this.getCast(characterId, castIndex);
     if (!cast) return [];
     return cast.beats.map(b => ({ ...b, seen: false }));
   }
 
-  /** Get number of casts available for a character in a tier */
-  getCastCountForTier(characterId: string, tier: AffectionTier): number {
+  /** Total number of casts in this character's arc. */
+  getCastCount(characterId: string): number {
     const character = this.characters.get(characterId);
     if (!character) return 0;
-    return character.getCastsForTier(tier).length;
+    return character.getCasts().length;
   }
 
-  /** Get total number of casts across ALL tiers for a character */
-  getTotalCastCount(characterId: string): number {
-    const character = this.characters.get(characterId);
-    if (!character) return 0;
-    let total = 0;
-    const tiers = [AffectionTier.Unaware, AffectionTier.Curious, AffectionTier.Familiar, AffectionTier.Trusting, AffectionTier.Bonded];
-    for (const tier of tiers) {
-      total += character.getCastsForTier(tier).length;
-    }
-    return total;
-  }
-
-  /** Get the cumulative cast index (across all tiers) given current tier and within-tier index */
-  getCumulativeCastIndex(characterId: string, currentTier: AffectionTier, withinTierIndex: number): number {
-    const character = this.characters.get(characterId);
-    if (!character) return 0;
-    let cumulative = 0;
-    const tiers = [AffectionTier.Unaware, AffectionTier.Curious, AffectionTier.Familiar, AffectionTier.Trusting, AffectionTier.Bonded];
-    for (const tier of tiers) {
-      if (tier < currentTier) {
-        cumulative += character.getCastsForTier(tier).length;
-      } else if (tier === currentTier) {
-        cumulative += withinTierIndex;
-        break;
-      }
-    }
-    return cumulative;
-  }
-
-  /** Check if all casts in a tier are exhausted */
-  isTierExhausted(characterId: string, tier: AffectionTier, castIndex: number): boolean {
-    const character = this.characters.get(characterId);
-    if (!character) return true;
-    return castIndex >= character.getCastsForTier(tier).length;
+  /** Whether the player has progressed past the last available cast. */
+  isArcExhausted(characterId: string, castIndex: number): boolean {
+    return castIndex >= this.getCastCount(characterId);
   }
 
   /** Get catch sequence data for a character */
@@ -145,15 +113,9 @@ class CharacterRegistry {
     return this.characters.get(characterId)?.catchSequenceData;
   }
 
-  /** Get quest hint for a character at a given tier */
-  getQuestHint(characterId: string, currentTier: AffectionTier): string {
-    const character = this.characters.get(characterId);
-    if (!character) return 'No quest data available.';
-    let bestHint = character.questHints[0];
-    for (const hint of character.questHints) {
-      if (hint.tier <= currentTier) bestHint = hint;
-    }
-    return bestHint?.text ?? 'A mystery remains...';
+  /** Get the (single) quest hint string for a character. */
+  getQuestHint(characterId: string): string {
+    return this.characters.get(characterId)?.questHint ?? 'A mystery remains...';
   }
 
   /** Get quest name for a character */

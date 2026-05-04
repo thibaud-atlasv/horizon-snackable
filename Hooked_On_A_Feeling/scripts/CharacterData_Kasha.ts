@@ -1,39 +1,40 @@
 /**
  * CharacterData_Kasha — Kasha's character configuration.
  *
- * Phase A: dialogue content lives in Story_Kasha.ts (Ink format) and is
- * compiled into Beat[] on demand by InkBeatAdapter. This file holds only
- * the metadata, departures, catch sequence, and character config.
+ * Dialogue content lives in Story_Kasha.ts (Ink format) and is compiled
+ * into Beat[] on demand by InkBeatAdapter. This file holds only the
+ * metadata, departures, catch sequence, and character config.
+ *
+ * Casts progress in the order declared in KASHA_CAST_DEFS — no tiers.
  */
 
 import type { CharacterConfig, CastData, FishCharacter, CatchSequenceData } from './Types';
-import { AffectionTier, DriftState, EmotionIconType, ExpressionState } from './Types';
+import { DriftState, EmotionIconType, ExpressionState } from './Types';
 import { inkCast } from './InkBeatAdapter';
 import { kashaNeutralTexture } from './Assets';
 
 const CHARACTER_ID = 'kasha';
 
 // ============================================================
-// Cast definitions (id, name, tier) — dialogue pulled from Ink
+// Cast definitions (start node + display name) — dialogue from Ink
 // ============================================================
 
 interface CastDef {
   start: string;
   name: string;
-  tier: AffectionTier;
 }
 
 const KASHA_CAST_DEFS: CastDef[] = [
-  { start: 'kasha_t1_c1_b1',  name: 'The Champion',          tier: AffectionTier.Unaware },
-  { start: 'kasha_t1_c2_b1',  name: 'The Audience',          tier: AffectionTier.Unaware },
-  { start: 'kasha_t2_c3_b1',  name: 'The Test',              tier: AffectionTier.Curious },
-  { start: 'kasha_t2_c4_b1',  name: 'The Lie She Told',      tier: AffectionTier.Curious },
-  { start: 'kasha_t3_c5_b1',  name: 'The Thing About Before', tier: AffectionTier.Familiar },
-  { start: 'kasha_t3_c6_b1',  name: 'The Day After',         tier: AffectionTier.Familiar },
-  { start: 'kasha_t3_c7_b1',  name: 'The Question She Asks', tier: AffectionTier.Familiar },
-  { start: 'kasha_t4_c8_b1',  name: 'The Offer',             tier: AffectionTier.Trusting },
-  { start: 'kasha_t4_c9_b1',  name: 'The Trophy Refused',    tier: AffectionTier.Trusting },
-  { start: 'kasha_t5_c10_b1', name: 'The Name',              tier: AffectionTier.Bonded },
+  { start: 'kasha_t1_c1_b1',  name: 'The Champion'           },
+  { start: 'kasha_t1_c2_b1',  name: 'The Audience'           },
+  { start: 'kasha_t2_c3_b1',  name: 'The Test'               },
+  { start: 'kasha_t2_c4_b1',  name: 'The Lie She Told'       },
+  { start: 'kasha_t3_c5_b1',  name: 'The Thing About Before' },
+  { start: 'kasha_t3_c6_b1',  name: 'The Day After'          },
+  { start: 'kasha_t3_c7_b1',  name: 'The Question She Asks'  },
+  { start: 'kasha_t4_c8_b1',  name: 'The Offer'              },
+  { start: 'kasha_t4_c9_b1',  name: 'The Trophy Refused'     },
+  { start: 'kasha_t5_c10_b1', name: 'The Name'               },
 ];
 
 // ============================================================
@@ -49,7 +50,7 @@ const KASHA_DEPARTURES: Record<string, CastData['departures']> = {
     [DriftState.Scared]:  { dialogue: ['...', "Don't come back tomorrow."], icon: EmotionIconType.Shock },
   },
   kasha_t1_c2: {
-    [DriftState.Charmed]: { dialogue: ['Tomorrow.', 'Same corner.', "Don't bring anyone else.", '...Just you.', 'Baka.'], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.2.approaching'] },
+    [DriftState.Charmed]: { dialogue: ['Tomorrow.', 'Same corner.', "Don't bring anyone else.", '...Just you.', 'Baka.'], icon: EmotionIconType.Warmth },
     [DriftState.Warm]:    { dialogue: ['Maybe tomorrow.', "I haven't decided.", "...I've decided. Tomorrow."], icon: EmotionIconType.Hesitation },
     [DriftState.Neutral]: { dialogue: ["Whatever. I'll be here.", 'If you come, you come.'], icon: EmotionIconType.None },
     [DriftState.Wary]:    { dialogue: ['...', 'Maybe think about whether you actually want to come back.', "I'm not begging."], icon: EmotionIconType.Hesitation },
@@ -84,7 +85,7 @@ const KASHA_DEPARTURES: Record<string, CastData['departures']> = {
     [DriftState.Scared]:  { dialogue: ['...'], icon: EmotionIconType.Shock },
   },
   kasha_t3_c7: {
-    [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', 'Bring whatever you want. Or nothing.', 'Just come.', "Don't be late, baka."], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.4.approaching'] },
+    [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', 'Bring whatever you want. Or nothing.', 'Just come.', "Don't be late, baka."], icon: EmotionIconType.Warmth },
     [DriftState.Warm]:    { dialogue: ['Tomorrow.', '...', "I won't keep asking why you come.", '...For now.'], icon: EmotionIconType.Hesitation },
     [DriftState.Neutral]: { dialogue: ['Whatever.', 'Tomorrow.'], icon: EmotionIconType.None },
     [DriftState.Wary]:    { dialogue: ['...', "Maybe don't come tomorrow.", 'Give me a day.'], icon: EmotionIconType.Hesitation },
@@ -98,7 +99,7 @@ const KASHA_DEPARTURES: Record<string, CastData['departures']> = {
     [DriftState.Scared]:  { dialogue: ['...', 'I made a mistake.', "Don't come back tomorrow."], icon: EmotionIconType.Shock, flagsToSet: ['mood.kasha.shame_deep'] },
   },
   kasha_t4_c9: {
-    [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', 'I want to tell you my real name.', 'Not tonight. Tomorrow.', 'Be on time.', 'Baka.'], icon: EmotionIconType.Warmth, flagsToSet: ['tier.kasha.5.approaching', 'secret.kasha.real_name_intent'] },
+    [DriftState.Charmed]: { dialogue: ['...', 'Tomorrow.', 'I want to tell you my real name.', 'Not tonight. Tomorrow.', 'Be on time.', 'Baka.'], icon: EmotionIconType.Warmth, flagsToSet: ['secret.kasha.real_name_intent'] },
     [DriftState.Opened]:  { dialogue: ['...', 'Tomorrow.', 'I have one more thing I want to say.'], icon: EmotionIconType.Hesitation },
     [DriftState.Neutral]: { dialogue: ['Mm.', 'Tomorrow. Maybe.'], icon: EmotionIconType.None },
     [DriftState.Wary]:    { dialogue: ['...', 'I told you too much.', 'Again.', 'I keep doing that with you.'], icon: EmotionIconType.Hesitation },
@@ -127,17 +128,15 @@ const KASHA_DRIFT_AWAY_JOURNAL_TEXT =
   'The corner is empty.\n\nOther voices, briefly, mention that she talked about you a lot.\n\nThey are surprised that you are not surprised.';
 
 // ============================================================
-// Cast lookup — built lazily by tier on demand
+// Cast lookup — built lazily on demand (adapter caches internally)
 // ============================================================
 
-function castsForTier(tier: AffectionTier): CastData[] {
-  return KASHA_CAST_DEFS
-    .filter(d => d.tier === tier)
-    .map(d => {
-      const castId = d.start.replace(/_b\d+$/, '');
-      const departures = KASHA_DEPARTURES[castId] ?? {};
-      return inkCast(CHARACTER_ID, d.start, d.name, d.tier, departures);
-    });
+function getCasts(): CastData[] {
+  return KASHA_CAST_DEFS.map(d => {
+    const castId = d.start.replace(/_b\d+$/, '');
+    const departures = KASHA_DEPARTURES[castId] ?? {};
+    return inkCast(CHARACTER_ID, d.start, d.name, departures);
+  });
 }
 
 // ============================================================
@@ -163,18 +162,10 @@ export const KASHA_CHARACTER: CharacterConfig = {
 
   encounterRate: 1.0,
 
-  arcTiers: 5,
-
   questName: 'The Championship',
-  questHints: [
-    { tier: AffectionTier.Unaware,  text: 'She likes being noticed. Things that move and shine catch her eye. Try something bold.' },
-    { tier: AffectionTier.Curious,  text: "She tests everyone. Pass the test by staying when she tells you to leave. Don't be afraid to push back." },
-    { tier: AffectionTier.Familiar, text: "She's trying to tell you something. Listen when she goes quiet — that's when it matters most." },
-    { tier: AffectionTier.Trusting, text: "She offered herself as a prize. She wants you to see her as a person instead. Don't take what she offers — see what she means." },
-    { tier: AffectionTier.Bonded,   text: "She gave you her name. She gave you a name. The championship was never real. You were." },
-  ],
+  questHint: "She tests everyone. Stay when she tells you to leave. Push back without being cruel. Listen when she goes quiet.",
 
-  getCastsForTier: castsForTier,
+  getCasts,
 
   initialState: (): FishCharacter => ({
     id: CHARACTER_ID,
@@ -183,9 +174,7 @@ export const KASHA_CHARACTER: CharacterConfig = {
     accentColor: '#D4833A',
     currentExpression: ExpressionState.Neutral,
     affection: 0,
-    tier: AffectionTier.Unaware,
     currentDrift: DriftState.None,
-    tierFloor: 0,
     portrait: kashaNeutralTexture,
   }),
 

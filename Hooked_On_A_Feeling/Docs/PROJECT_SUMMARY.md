@@ -163,24 +163,32 @@ Accessible freely at any time. Four tabs:
   - **Tier 3:** Precise, names conditions directly
   - **Tier 4+:** Tactical, tells what moment to watch for
 
-### Tab 2 — Lure Box
+### Tab 2 — Fish (Character Teasing)
+- Shows ALL characters (unlocked + locked) in a structured list
+- Unlocked characters: name, species, bond tier, cast count, observations, quest hint
+- Locked characters: "???" with mysterious silhouette hint (e.g., "Dwells in the middle depths...")
+- Character met counter at top: "X/Y characters met"
+- Encourages exploration and curiosity about unmet characters
+
+### Tab 3 — Lure Box
 - All lures player owns
 - Notes on which fish each has been used with and observed reactions
 - Functions as preference-learning record
 
-### Tab 3 — Keepsakes
-- Items gifted by fish
-- Each item has two descriptions:
-  - **Fish's perspective** — intended meaning, poetic
-  - **Fisherman's perspective** — dry, practical, often absurdist
+### Tab 4 — Collection (CG Gallery)
+- 2-column grid of unlockable CG cards
+- CG types: Fish portraits (unlocked on first encounter), Ending CGs (Reel/Release)
+- Unlocked CGs show thumbnail and title, tappable to view fullscreen
+- Locked CGs show lock icon with "???" placeholder
+- Fullscreen viewer: semi-transparent background, centered image, close button at bottom
+- CG IDs: "portrait_[fishId]" and "ending_[fishId]_[type]"
+- Unlock state persists in save data (cgUnlocks array)
 
-### Tab 4 — Gallery (CG Collection)
-- Grid display of CG images organized by character
-- Unlocked CGs show name, description, and "[Tap to view]" prompt
-- Locked CGs appear as greyed-out "???" with padlock icon
-- Tapping an unlocked CG opens fullscreen viewer overlay
-- Tap anywhere in viewer to dismiss and return to journal
-- First CG: "The Last Morning" (Nereia's Reel ending)
+### Tab 5 — Stats & Achievements
+- **Angler Statistics:** Total casts, characters met, facts discovered, keepsakes collected, highest bond tier, play sessions
+- **Achievements/Badges:** 10 unlockable badges with conditions (First Cast, First Meeting, Patient Angler, Full Pond, Growing Trust, Soulbound, etc.)
+- Progress indicator: "X/10 earned"
+- All stats and badge unlock state persist in save data with backward compatibility
 
 ---
 

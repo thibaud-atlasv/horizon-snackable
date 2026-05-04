@@ -830,68 +830,394 @@
         </Grid>
       </Grid>
 
-      <!-- Layer 10: Journal Overlay -->
+      <!-- Layer 10: Journal Overlay (Redesigned - 3 tabs: Fish, Collection, Stats) -->
       <Grid Visibility="{Binding journalVisible, Converter={StaticResource BoolToVis}}"
             Background="#F5080D14">
-        <Grid Margin="16,40,16,40">
+        <Grid Margin="12,36,12,36">
           <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
 
-          <TextBlock Grid.Row="0" Text="Journal" FontSize="26" FontWeight="Bold"
-                     Foreground="#E8A84C" FontFamily="Teko" HorizontalAlignment="Center"
-                     Margin="0,0,0,8" />
-
-          <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                      Margin="0,0,0,12">
-            <Button Content="Notes" Width="95" Height="34" Margin="3,0"
-                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="0"
-                    Style="{StaticResource MenuButtonStyle}" />
-            <Button Content="Lures" Width="85" Height="34" Margin="3,0"
-                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="1"
-                    Style="{StaticResource MenuButtonStyle}" />
-            <Button Content="Keepsakes" Width="95" Height="34" Margin="3,0"
-                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="2"
-                    Style="{StaticResource MenuButtonStyle}" />
-            <Button Content="Gallery" Width="85" Height="34" Margin="3,0"
-                    Command="{Binding events.onJournalTabSwitch}" CommandParameter="3"
-                    Style="{StaticResource MenuButtonStyle}" />
+          <!-- Journal title + met counter -->
+          <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,6">
+            <TextBlock Text="Journal" FontSize="28" FontWeight="Bold"
+                       Foreground="#E8A84C" FontFamily="Teko" HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding journalMetCounter}" FontSize="11"
+                       Foreground="#8A9AB0" FontFamily="Roboto" HorizontalAlignment="Center"
+                       Margin="0,2,0,0" />
           </StackPanel>
 
-          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+          <!-- Tab bar (3 tabs: Fish, Collection, Stats) -->
+          <Border Grid.Row="1" Background="#0D1520" CornerRadius="10" Padding="4,4" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+              <Button Content="Fish" Width="110" Height="32" Margin="4,0"
+                      Command="{Binding events.onJournalTabSwitch}" CommandParameter="0"
+                      Style="{StaticResource MenuButtonStyle}" FontSize="13" />
+              <Button Content="Collection" Width="110" Height="32" Margin="4,0"
+                      Command="{Binding events.onJournalTabSwitch}" CommandParameter="1"
+                      Style="{StaticResource MenuButtonStyle}" FontSize="13" />
+              <Button Content="Stats" Width="110" Height="32" Margin="4,0"
+                      Command="{Binding events.onJournalTabSwitch}" CommandParameter="2"
+                      Style="{StaticResource MenuButtonStyle}" FontSize="13" />
+            </StackPanel>
+          </Border>
+
+          <!-- Gold separator -->
+          <Border Grid.Row="2" Height="1" Margin="20,0,20,8">
+            <Border.Background>
+              <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#00E8A84C" Offset="0" />
+                <GradientStop Color="#AAE8A84C" Offset="0.5" />
+                <GradientStop Color="#00E8A84C" Offset="1" />
+              </LinearGradientBrush>
+            </Border.Background>
+          </Border>
+
+          <!-- Tab content area -->
+          <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
             <Grid>
-              <TextBlock Text="{Binding journalPondNotesText}"
-                         Visibility="{Binding journalTab1Visible, Converter={StaticResource BoolToVis}}"
-                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
-                         TextWrapping="Wrap" LineHeight="18" />
-              <TextBlock Text="{Binding journalLureBoxText}"
-                         Visibility="{Binding journalTab2Visible, Converter={StaticResource BoolToVis}}"
-                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
-                         TextWrapping="Wrap" LineHeight="18" />
-              <TextBlock Text="{Binding journalKeepsakesText}"
-                         Visibility="{Binding journalTab3Visible, Converter={StaticResource BoolToVis}}"
-                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
-                         TextWrapping="Wrap" LineHeight="18" />
-              <TextBlock Text="{Binding journalCollectionText}"
-                         Visibility="{Binding journalTab4Visible, Converter={StaticResource BoolToVis}}"
-                         Foreground="#E8EAD8" FontSize="12" FontFamily="Roboto"
-                         TextWrapping="Wrap" LineHeight="18" />
+              <!-- Tab 1: Characters (Fish) — Portrait Cards Grid -->
+              <StackPanel Visibility="{Binding journalTab1Visible, Converter={StaticResource BoolToVis}}">
+                <!-- Nereia Card -->
+                <Border Background="#D90D1520" BorderBrush="{Binding charDetailAccentColor}"
+                        BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,0,0,10">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="70" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!-- Circular Portrait -->
+                    <Border Grid.Column="0" Width="60" Height="60" CornerRadius="30"
+                            BorderBrush="#9B7FCC" BorderThickness="2" ClipToBounds="True">
+                      <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                          <GradientStop Color="#1A3A5C" Offset="0" />
+                          <GradientStop Color="#0D1E35" Offset="1" />
+                        </LinearGradientBrush>
+                      </Border.Background>
+                      <Grid Margin="-2,-2,-2,-2">
+                        <Grid.Clip>
+                          <EllipseGeometry Center="30,30" RadiusX="28" RadiusY="28" />
+                        </Grid.Clip>
+                        <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Image Source="sprites/nereia_neutral.png" Stretch="UniformToFill"
+                               Width="60" Height="60" Margin="0,8,0,0"
+                               Visibility="{Binding nereiaCardUnlocked, Converter={StaticResource BoolToVis}}" />
+                      </Grid>
+                    </Border>
+                    <!-- Info -->
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding nereiaCardName}" FontSize="15" FontWeight="Bold"
+                                 Foreground="#C8D8E8" />
+                      <TextBlock Text="{Binding nereiaCardSpecies}" FontSize="11"
+                                 Foreground="#8A9AB0" Margin="0,2,0,0" />
+                      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Text="&#x2661;" FontSize="11" Foreground="#9B7FCC" Margin="0,0,4,0" />
+                        <TextBlock Text="{Binding nereiaCardTier}" FontSize="11" Foreground="#9B7FCC" />
+                        <TextBlock Text=" casts" FontSize="11" Foreground="#8A9AB0" />
+                      </StackPanel>
+                    </StackPanel>
+                    <!-- View Details Button -->
+                    <Button Grid.Column="2" Content="Details" Width="60" Height="28" FontSize="10"
+                            Command="{Binding events.onCharacterDetailOpen}" CommandParameter="nereia"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Visibility="{Binding nereiaCardUnlocked, Converter={StaticResource BoolToVis}}" />
+                  </Grid>
+                </Border>
+
+                <!-- Kasha Card -->
+                <Border Background="#D90D1520" BorderBrush="#2A4060"
+                        BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,0,0,10">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="70" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!-- Circular Portrait -->
+                    <Border Grid.Column="0" Width="60" Height="60" CornerRadius="30"
+                            BorderBrush="#D33A2C" BorderThickness="2" ClipToBounds="True">
+                      <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                          <GradientStop Color="#1A3A5C" Offset="0" />
+                          <GradientStop Color="#0D1E35" Offset="1" />
+                        </LinearGradientBrush>
+                      </Border.Background>
+                      <Grid Margin="-2,-2,-2,-2">
+                        <Grid.Clip>
+                          <EllipseGeometry Center="30,30" RadiusX="28" RadiusY="28" />
+                        </Grid.Clip>
+                        <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Image Source="sprites/char_veiltail_neutral.png" Stretch="UniformToFill"
+                               Width="60" Height="60" Margin="0,8,0,0"
+                               Visibility="{Binding kashaCardUnlocked, Converter={StaticResource BoolToVis}}" />
+                      </Grid>
+                    </Border>
+                    <!-- Info -->
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding kashaCardName}" FontSize="15" FontWeight="Bold"
+                                 Foreground="#C8D8E8" />
+                      <TextBlock Text="{Binding kashaCardSpecies}" FontSize="11"
+                                 Foreground="#8A9AB0" Margin="0,2,0,0" />
+                      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Text="&#x2661;" FontSize="11" Foreground="#D33A2C" Margin="0,0,4,0" />
+                        <TextBlock Text="{Binding kashaCardTier}" FontSize="11" Foreground="#D33A2C" />
+                        <TextBlock Text=" casts" FontSize="11" Foreground="#8A9AB0" />
+                      </StackPanel>
+                    </StackPanel>
+                    <!-- View Details Button -->
+                    <Button Grid.Column="2" Content="Details" Width="60" Height="28" FontSize="10"
+                            Command="{Binding events.onCharacterDetailOpen}" CommandParameter="kasha"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Visibility="{Binding kashaCardUnlocked, Converter={StaticResource BoolToVis}}" />
+                  </Grid>
+                </Border>
+              </StackPanel>
+
+              <!-- Tab 2: Collection (CG Gallery - 3-Column Grid, clean cards) -->
+              <StackPanel Visibility="{Binding journalTab2Visible, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding cgCollectionProgress}" FontSize="14" FontWeight="Bold"
+                           Foreground="#E8A84C" Margin="0,0,0,10" />
+
+                <!-- 3-Column CG Grid -->
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <!-- Card: Portrait Nereia -->
+                  <Button Grid.Column="0" Margin="4,4"
+                          Command="{Binding events.onCGItemTapped}" CommandParameter="portrait_nereia"
+                          IsEnabled="{Binding cgPortraitNereiaUnlocked}">
+                    <Button.Template>
+                      <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10" ClipToBounds="True"
+                                BorderBrush="#2A4060" BorderThickness="1">
+                          <Grid>
+                            <Grid.RowDefinitions>
+                              <RowDefinition Height="*" />
+                              <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <!-- Square image area -->
+                            <Border Grid.Row="0" Height="120" Background="#0D1520">
+                              <Grid>
+                                <Image Source="sprites/nereia_neutral.png" Stretch="UniformToFill"
+                                       Visibility="{Binding cgPortraitNereiaUnlocked, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="?" FontSize="32" FontWeight="Bold" Foreground="#3A4A5A"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                              </Grid>
+                            </Border>
+                            <!-- Name label -->
+                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6">
+                              <TextBlock Text="{Binding cgPortraitNereiaName}" FontSize="13" FontWeight="SemiBold"
+                                         Foreground="#C8D8E8" HorizontalAlignment="Center"
+                                         TextTrimming="CharacterEllipsis" />
+                            </Border>
+                          </Grid>
+                        </Border>
+                      </ControlTemplate>
+                    </Button.Template>
+                  </Button>
+
+                  <!-- Card: Portrait Kasha -->
+                  <Button Grid.Column="1" Margin="4,4"
+                          Command="{Binding events.onCGItemTapped}" CommandParameter="portrait_kasha"
+                          IsEnabled="{Binding cgPortraitKashaUnlocked}">
+                    <Button.Template>
+                      <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10" ClipToBounds="True"
+                                BorderBrush="#2A4060" BorderThickness="1">
+                          <Grid>
+                            <Grid.RowDefinitions>
+                              <RowDefinition Height="*" />
+                              <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0" Height="120" Background="#0D1520">
+                              <Grid>
+                                <Image Source="sprites/char_veiltail_neutral.png" Stretch="UniformToFill"
+                                       Visibility="{Binding cgPortraitKashaUnlocked, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="?" FontSize="32" FontWeight="Bold" Foreground="#3A4A5A"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                              </Grid>
+                            </Border>
+                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6">
+                              <TextBlock Text="{Binding cgPortraitKashaName}" FontSize="13" FontWeight="SemiBold"
+                                         Foreground="#C8D8E8" HorizontalAlignment="Center"
+                                         TextTrimming="CharacterEllipsis" />
+                            </Border>
+                          </Grid>
+                        </Border>
+                      </ControlTemplate>
+                    </Button.Template>
+                  </Button>
+
+                  <!-- Card: Ending Nereia Reel -->
+                  <Button Grid.Column="2" Margin="4,4"
+                          Command="{Binding events.onCGItemTapped}" CommandParameter="ending_nereia_reel"
+                          IsEnabled="{Binding cgEndingNereiaReelUnlocked}">
+                    <Button.Template>
+                      <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10" ClipToBounds="True"
+                                BorderBrush="#2A4060" BorderThickness="1">
+                          <Grid>
+                            <Grid.RowDefinitions>
+                              <RowDefinition Height="*" />
+                              <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0" Height="120" Background="#0D1520">
+                              <Grid>
+                                <Image Source="sprites/nereia_love_end.png" Stretch="UniformToFill"
+                                       Visibility="{Binding cgEndingNereiaReelUnlocked, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="?" FontSize="32" FontWeight="Bold" Foreground="#3A4A5A"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                              </Grid>
+                            </Border>
+                            <Border Grid.Row="1" Background="#0D1520" Padding="4,6">
+                              <TextBlock Text="{Binding cgEndingNereiaReelName}" FontSize="13" FontWeight="SemiBold"
+                                         Foreground="#C8D8E8" HorizontalAlignment="Center"
+                                         TextTrimming="CharacterEllipsis" />
+                            </Border>
+                          </Grid>
+                        </Border>
+                      </ControlTemplate>
+                    </Button.Template>
+                  </Button>
+                </Grid>
+              </StackPanel>
+
+              <!-- Tab 3: Stats & Badges -->
+              <StackPanel Visibility="{Binding journalTab3Visible, Converter={StaticResource BoolToVis}}">
+                <Border Background="#D90D1520" BorderBrush="#2A4060" BorderThickness="1"
+                        CornerRadius="12" Padding="14,12" Margin="0,0,0,10">
+                  <StackPanel>
+                    <TextBlock Text="Statistics" FontSize="14" FontWeight="Bold"
+                               Foreground="#E8A84C" Margin="0,0,0,8" />
+                    <TextBlock Text="{Binding journalStatsText}"
+                               Foreground="#C8D8E8" FontSize="12" FontFamily="Roboto"
+                               TextWrapping="Wrap" LineHeight="20" />
+                  </StackPanel>
+                </Border>
+                <Border Background="#D90D1520" BorderBrush="#2A4060" BorderThickness="1"
+                        CornerRadius="12" Padding="14,12">
+                  <StackPanel>
+                    <TextBlock Text="Badges" FontSize="14" FontWeight="Bold"
+                               Foreground="#E8A84C" Margin="0,0,0,8" />
+                    <TextBlock Text="{Binding journalBadgesText}"
+                               Foreground="#C8D8E8" FontSize="12" FontFamily="Roboto"
+                               TextWrapping="Wrap" LineHeight="20" />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
             </Grid>
           </ScrollViewer>
 
-          <Button Grid.Row="3" Content="Close" Width="140" Height="40"
-                  Command="{Binding events.onJournalClose}" Margin="0,12,0,0"
-                  Style="{StaticResource MenuButtonStyle}" />
+          <StackPanel Grid.Row="4" Margin="0,10,0,0" HorizontalAlignment="Center">
+            <Button Content="Close" Width="140" Height="38"
+                    Command="{Binding events.onJournalClose}"
+                    Style="{StaticResource MenuButtonStyle}" />
+            <Button Content="Reset Save" Width="110" Height="28"
+                    Command="{Binding events.onResetSavePressed}" Margin="0,6,0,0"
+                    Background="#44661111" Foreground="#CC9999" FontSize="10"
+                    BorderThickness="1" BorderBrush="#663333" />
+          </StackPanel>
+        </Grid>
+      </Grid>
 
-          <!-- Reset Save Button (below Close) -->
-          <Button Grid.Row="3" Content="Reset Save" Width="120" Height="32"
-                  Command="{Binding events.onResetSavePressed}" Margin="0,60,0,0"
-                  HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                  Background="#44661111" Foreground="#CC9999" FontSize="11"
-                  BorderThickness="1" BorderBrush="#663333" />
+      <!-- Layer 10a: Character Detail Overlay -->
+      <Grid Visibility="{Binding charDetailVisible, Converter={StaticResource BoolToVis}}"
+            Background="#F5080D14">
+        <Grid Margin="20,50,20,50">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <!-- Header: Large portrait + name/species -->
+          <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,14">
+            <!-- Large circular portrait -->
+            <Border Width="90" Height="90" CornerRadius="45"
+                    BorderBrush="{Binding charDetailAccentColor}" BorderThickness="3"
+                    HorizontalAlignment="Center" ClipToBounds="True">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                  <GradientStop Color="#1A3A5C" Offset="0" />
+                  <GradientStop Color="#0D1E35" Offset="1" />
+                </LinearGradientBrush>
+              </Border.Background>
+              <Grid Margin="-3,-3,-3,-3">
+                <Grid.Clip>
+                  <EllipseGeometry Center="45,45" RadiusX="42" RadiusY="42" />
+                </Grid.Clip>
+                <Image Source="sprites/nereia_neutral.png" Stretch="UniformToFill"
+                       Width="90" Height="90" Margin="0,12,0,0"
+                       Visibility="{Binding charDetailShowNereia, Converter={StaticResource BoolToVis}}" />
+                <Image Source="sprites/char_veiltail_neutral.png" Stretch="UniformToFill"
+                       Width="90" Height="90" Margin="0,12,0,0"
+                       Visibility="{Binding charDetailShowKasha, Converter={StaticResource BoolToVis}}" />
+              </Grid>
+            </Border>
+            <TextBlock Text="{Binding charDetailName}" FontSize="22" FontWeight="Bold"
+                       Foreground="#C8D8E8" HorizontalAlignment="Center" Margin="0,8,0,0" />
+            <TextBlock Text="{Binding charDetailSpecies}" FontSize="13"
+                       Foreground="#8A9AB0" HorizontalAlignment="Center" Margin="0,2,0,0" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
+              <TextBlock Text="♡ " FontSize="12" Foreground="{Binding charDetailAccentColor}" />
+              <TextBlock Text="{Binding charDetailTierName}" FontSize="12"
+                         Foreground="{Binding charDetailAccentColor}" FontWeight="SemiBold" />
+              <TextBlock Text="  ·  " FontSize="12" Foreground="#5A6A7A" />
+              <TextBlock Text="{Binding charDetailCasts}" FontSize="12" Foreground="#8A9AB0" />
+              <TextBlock Text=" casts" FontSize="12" Foreground="#8A9AB0" />
+            </StackPanel>
+          </StackPanel>
+
+          <!-- Scrollable content -->
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+              <!-- Observations -->
+              <Border Background="#D90D1520" BorderBrush="#2A4060" BorderThickness="1"
+                      CornerRadius="12" Padding="14,10" Margin="0,0,0,10">
+                <StackPanel>
+                  <TextBlock Text="🔍 Observations" FontSize="13" FontWeight="Bold"
+                             Foreground="#E8A84C" Margin="0,0,0,6" />
+                  <TextBlock Text="{Binding charDetailObservations}"
+                             Foreground="#C8D8E8" FontSize="12" FontFamily="Roboto"
+                             TextWrapping="Wrap" LineHeight="18" />
+                </StackPanel>
+              </Border>
+              <!-- Quest -->
+              <Border Background="#D90D1520" BorderBrush="#2A4060" BorderThickness="1"
+                      CornerRadius="12" Padding="14,10">
+                <StackPanel>
+                  <TextBlock Text="📜 Personal Quest" FontSize="13" FontWeight="Bold"
+                             Foreground="#E8A84C" Margin="0,0,0,4" />
+                  <TextBlock Text="{Binding charDetailQuestName}" FontSize="12"
+                             Foreground="#C8D8E8" FontWeight="SemiBold" Margin="0,0,0,4" />
+                  <TextBlock Text="{Binding charDetailQuestHint}"
+                             Foreground="#8A9AB0" FontSize="11" FontFamily="Roboto"
+                             TextWrapping="Wrap" FontStyle="Italic" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
+          </ScrollViewer>
+
+          <!-- Back button -->
+          <Button Grid.Row="2" Content="← Back" Width="120" Height="36"
+                  Command="{Binding events.onCharacterDetailClose}"
+                  HorizontalAlignment="Center" Margin="0,10,0,0"
+                  Style="{StaticResource MenuButtonStyle}" />
         </Grid>
       </Grid>
 
@@ -919,16 +1245,22 @@
           </StackPanel>
         </Border>
       </Grid>
+      <!-- Layer 11: CG Fullscreen Viewer -->
       <Grid Visibility="{Binding cgViewerVisible, Converter={StaticResource BoolToVis}}"
-            Background="#FF080D14">
-        <Image Source="sprites/nereia_love_end.png" Stretch="Uniform"
-               HorizontalAlignment="Center" VerticalAlignment="Center" />
-        <Border Background="Transparent">
-          <Button Width="480" Height="800" Opacity="0"
-                  Command="{Binding events.onCGViewerDismiss}" />
-        </Border>
-        <TextBlock Text="Tap anywhere to close" FontSize="12" Foreground="#88C8D8E8"
-                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,24" />
+            Background="#EE000000">
+        <!-- Tap outside to close -->
+        <Button Width="480" Height="800" Opacity="0"
+                Command="{Binding events.onCGViewerDismiss}" />
+        <!-- Centered image at full width -->
+        <Image Source="{Binding cgViewerImagePath}" Stretch="Uniform"
+               HorizontalAlignment="Center" VerticalAlignment="Center"
+               Width="440" Margin="20,60,20,80" />
+        <!-- Close button at bottom -->
+        <Button Content="✕ Close" Width="140" Height="40"
+                Command="{Binding events.onCGViewerDismiss}"
+                HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                Margin="0,0,0,30" Background="#333344" Foreground="#E8EAD8"
+                FontSize="14" BorderThickness="0" />
       </Grid>
 
     </Grid>

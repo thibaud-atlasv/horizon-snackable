@@ -44,6 +44,10 @@ export const onInventoryOpen = new UiEvent('onInventoryOpen');
 export const onInventoryClose = new UiEvent('onInventoryClose');
 export const onInventoryEquip = new UiEvent('onInventoryEquip', FloaterLureSelectedPayload);
 
+// Character detail events
+export const onCharacterDetailOpen = new UiEvent('onCharacterDetailOpen', FloaterTabSelectedPayload);
+export const onCharacterDetailClose = new UiEvent('onCharacterDetailClose');
+
 // Reset save events
 export const onResetSavePressed = new UiEvent('onResetSavePressed');
 export const onResetSaveConfirm = new UiEvent('onResetSaveConfirm');
@@ -153,6 +157,8 @@ export class FloaterViewModel extends UiViewModel {
     onResetSavePressed,
     onResetSaveConfirm,
     onResetSaveCancel,
+    onCharacterDetailOpen,
+    onCharacterDetailClose,
   };
 
   // === Journal State ===
@@ -161,16 +167,64 @@ export class FloaterViewModel extends UiViewModel {
   journalTab2Visible: boolean = false;
   journalTab3Visible: boolean = false;
   journalTab4Visible: boolean = false;
+  journalTab5Visible: boolean = false;
   journalPondNotesText: string = '';
   journalLureBoxText: string = '';
   journalKeepsakesText: string = '';
   journalCollectionText: string = '';
+  journalCharactersText: string = '';
+  journalStatsText: string = '';
+  journalBadgesText: string = '';
+  journalMetCounter: string = '';
 
   // === Reset Save Confirmation ===
   resetConfirmVisible: boolean = false;
 
   // === CG Viewer State ===
   cgViewerVisible: boolean = false;
+  cgViewerImagePath: string = 'sprites/nereia_love_end.png';
+
+  // === Character Detail Overlay ===
+  charDetailVisible: boolean = false;
+  charDetailName: string = '';
+  charDetailSpecies: string = '';
+  charDetailTierName: string = '';
+  charDetailCasts: string = '0';
+  charDetailObservations: string = '';
+  charDetailQuestName: string = '';
+  charDetailQuestHint: string = '';
+  charDetailAccentColor: string = '#9B7FCC';
+  charDetailPortrait: string = 'sprites/nereia_neutral.png';
+  charDetailShowNereia: boolean = false;
+  charDetailShowKasha: boolean = false;
+
+  // === Character Cards (Fish tab) ===
+  // Nereia card
+  nereiaCardVisible: boolean = false;
+  nereiaCardName: string = '???';
+  nereiaCardSpecies: string = 'Unknown';
+  nereiaCardTier: string = '';
+  nereiaCardCasts: string = '0';
+  nereiaCardUnlocked: boolean = false;
+  // Kasha card
+  kashaCardVisible: boolean = true;
+  kashaCardName: string = '???';
+  kashaCardSpecies: string = 'Unknown';
+  kashaCardTier: string = '';
+  kashaCardCasts: string = '0';
+  kashaCardUnlocked: boolean = false;
+
+  // === CG Gallery Cards (Collection tab grid) ===
+  // Portrait CGs
+  cgPortraitNereiaUnlocked: boolean = false;
+  cgPortraitNereiaName: string = '???';
+  cgPortraitKashaUnlocked: boolean = false;
+  cgPortraitKashaName: string = '???';
+  // Ending CGs
+  cgEndingNereiaReelUnlocked: boolean = false;
+  cgEndingNereiaReelName: string = '???';
+  // Collection progress text
+  cgCollectionProgress: string = 'Collection (0/3)';
 
   // === Inventory (Tackle Box) State ===
   inventoryVisible: boolean = false;
@@ -226,12 +280,13 @@ export class FloaterViewModel extends UiViewModel {
   // === Journal Button (legacy, kept for backward compat) ===
   journalButtonVisible: boolean = false;
 
-  /** Switch journal tab by index (0-3). */
+  /** Switch journal tab by index (0-4). */
   setJournalTab(tabIndex: number): void {
     this.journalTab1Visible = tabIndex === 0;
     this.journalTab2Visible = tabIndex === 1;
     this.journalTab3Visible = tabIndex === 2;
     this.journalTab4Visible = tabIndex === 3;
+    this.journalTab5Visible = tabIndex === 4;
   }
 
   /** Update equipped lure indicators from display list */

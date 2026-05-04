@@ -53,6 +53,8 @@ import {
   onResetSavePressed,
   onResetSaveConfirm,
   onResetSaveCancel,
+  onCharacterDetailOpen,
+  onCharacterDetailClose,
   FloaterActionSelectedPayload,
   FloaterTabSelectedPayload,
   FloaterLureSelectedPayload,
@@ -63,11 +65,13 @@ import { FloaterRenderer } from './FloaterRenderer';
 import { FlagSystem } from './FlagSystem';
 import { SaveSystem } from './SaveSystem';
 import { AffectionSystem } from './AffectionSystem';
-import { createNereia, getBeatsForTier, getCastForTier, getCastCountForTier } from './CastData';
+import { createNereia, getBeats, getCast, getCastCount } from './CastData';
 import { characterRegistry } from './CharacterRegistry';
 import { QuestSystem } from './QuestSystem';
 import { EncounterSystem } from './EncounterSystem';
-import { CGGallerySystem } from './CGGallerySystem';
+import { CGGallerySystem, CG_IMAGE_MAP } from './CGGallerySystem';
+import { JournalSystem } from './JournalSystem';
+import { GlobalStatsSystem } from './GlobalStatsSystem';
 import { nereiaNeutralTexture, kashaNeutralTexture } from './Assets';
 import {
   OnSaveDataLoaded,
@@ -79,7 +83,6 @@ import {
 } from './SaveEvents';
 import {
   CANVAS_WIDTH, CANVAS_HEIGHT, GAME_ASPECT_RATIO,
-  AFFECTION_TIER_1_MAX, AFFECTION_TIER_2_MAX, AFFECTION_TIER_3_MAX, AFFECTION_TIER_4_MAX,
   APPROACH_DURATION, DEPARTURE_DURATION,
   TEXT_DISPLAY_SPEED, BEAT_PAUSE_DURATION,
   GAUGE_CYCLE_TIME, AFFECTION_MAX, AFFECTION_DRIFT_AWAY_THRESHOLD,
@@ -120,9 +123,9 @@ import {
 import { Vec3D } from './Vec3D';
 import {
   GamePhase, DriftState, ExpressionState,
-  AffectionTier, TIER_NAMES, EmotionIconType, CatchChoice, EndingType,
+  EmotionIconType, CatchChoice, EndingType,
 } from './Types';
-import type { Beat, ActionEffect, FishCharacter, FishAffection, SaveData, SplashRipple, FloatingEmotionIcon, EmotionIconAnchor, CharacterConfig, FishSaveData } from './Types';
+import type { Beat, ActionEffect, FishCharacter, FishAffection, SaveData, SplashRipple, FloatingEmotionIcon, EmotionIconAnchor, CharacterConfig, FishSaveData, LureReaction } from './Types';
 
 @component()
 export class FloaterGame extends Component {
@@ -136,6 +139,8 @@ export class FloaterGame extends Component {
   private questSystem: QuestSystem = new QuestSystem();
   private encounterSystem: EncounterSystem = new EncounterSystem();
   private cgGallerySystem: CGGallerySystem = new CGGallerySystem();
+  private journalSystem: JournalSystem = new JournalSystem();
+  private globalStatsSystem: GlobalStatsSystem = new GlobalStatsSystem();
 
   // Affection data
   private fishAffection: FishAffection = this.affectionSystem.createAffection('nereia'); // Re-initialized in loadGame()
@@ -148,7 +153,7 @@ export class FloaterGame extends Component {
   private currentBeatIndex: number = 0;
   private seenBeats: Set<string> = new Set();
   private castCount: number = 0;
-  private castIndexWithinTier: number = 0;
+  private currentCastIndex: number = 0;
   private equippedLureId: string | null = null;
   private perFishCastIndex: Record<string, number> = {};
 
@@ -165,7 +170,6 @@ export class FloaterGame extends Component {
   private lastTime: number = 0;
   private phaseTimer: number = 0;
   private beatPauseTimer: number = 0;
-  private tierNotifyTimer: number = 0;
   private noLureWarningTimer: number = 0;
   private nothingBitesTimer: number = 0;
   private departureFadeTimer: number = 0;
@@ -403,6 +407,7 @@ export class FloaterGame extends Component {
     this.setIdleBarResponding('journal');
     floaterVM.journalVisible = true;
     floaterVM.setJournalTab(0);
+    this.refreshJournalData();
   }
 
   @subscribe(onJournalClose)
@@ -417,10 +422,14 @@ export class FloaterGame extends Component {
   @subscribe(onJournalTabSwitch)
   onJournalTabSwitchEvent(payload: FloaterTabSelectedPayload): void {
     const idx = parseInt(payload.parameter, 10);
-    if (idx >= 0 && idx <= 3) {
+    if (idx >= 0 && idx <= 4) {
       floaterVM.setJournalTab(idx);
       if (idx === 3) {
         floaterVM.journalCollectionText = this.cgGallerySystem.getCollectionText();
+      }
+      if (idx === 4) {
+        floaterVM.journalStatsText = this.globalStatsSystem.getStatsText();
+        floaterVM.journalBadgesText = this.globalStatsSystem.getBadgesText();
       }
     }
   }
@@ -437,7 +446,121 @@ export class FloaterGame extends Component {
     if (this.cgGallerySystem.isCGUnlocked(cgId)) {
       this.cgGallerySystem.openViewer(cgId);
       floaterVM.cgViewerVisible = true;
+      floaterVM.cgViewerImagePath = CG_IMAGE_MAP[cgId] ?? 'sprites/nereia_neutral.png';
     }
+  }
+
+  @subscribe(onCharacterDetailOpen)
+  onCharacterDetailOpenEvent(payload: FloaterTabSelectedPayload): void {
+    const charId = payload.parameter;
+    const cards = this.journalSystem.getCharacterCardsData();
+    const card = cards.find(c => c.id === charId);
+    if (!card || !card.unlocked) return;
+
+    const portraitMap: Record<string, string> = {
+      'nereia': 'sprites/nereia_neutral.png',
+      'kasha': 'sprites/char_veiltail_neutral.png',
+    };
+    const accentMap: Record<string, string> = {
+      'nereia': '#9B7FCC',
+      'kasha': '#D33A2C',
+    };
+
+    floaterVM.charDetailName = card.name;
+    floaterVM.charDetailSpecies = card.species;
+    floaterVM.charDetailTierName = card.tierName;
+    floaterVM.charDetailCasts = String(card.castsMade);
+    floaterVM.charDetailAccentColor = accentMap[charId] ?? card.accentColor;
+    floaterVM.charDetailPortrait = portraitMap[charId] ?? 'sprites/nereia_neutral.png';
+    floaterVM.charDetailShowNereia = charId === 'nereia';
+    floaterVM.charDetailShowKasha = charId === 'kasha';
+    floaterVM.charDetailQuestName = card.questName;
+    floaterVM.charDetailQuestHint = card.questHint;
+
+    // Get observations text
+    const entry = this.journalSystem.getFishEntry(charId);
+    if (entry && entry.knownFacts.length > 0) {
+      floaterVM.charDetailObservations = entry.knownFacts.map(f => `• ${f}`).join('\n');
+    } else {
+      floaterVM.charDetailObservations = 'No observations yet.';
+    }
+
+    floaterVM.charDetailVisible = true;
+    console.log(`[FloaterGame] Character detail opened: ${charId}`);
+  }
+
+  @subscribe(onCharacterDetailClose)
+  onCharacterDetailCloseEvent(): void {
+    floaterVM.charDetailVisible = false;
+  }
+
+  /** Refresh all journal data from current game state */
+  private refreshJournalData(): void {
+    // Pond Notes (observations per fish)
+    floaterVM.journalPondNotesText = this.journalSystem.getAllPondNotesText();
+    // Characters tab (teasing list)
+    floaterVM.journalCharactersText = this.journalSystem.getCharacterListText();
+    // Lure Box
+    floaterVM.journalLureBoxText = this.journalSystem.getLureBoxText(
+      this.getOwnedLures(), this.getLureReactions()
+    );
+    // Keepsakes (removed)
+    // Gallery
+    floaterVM.journalCollectionText = this.cgGallerySystem.getCollectionText();
+    // Stats & Badges
+    floaterVM.journalStatsText = this.globalStatsSystem.getStatsText();
+    floaterVM.journalBadgesText = this.globalStatsSystem.getBadgesText();
+    // Met counter
+    floaterVM.journalMetCounter = this.journalSystem.getMetCounterText();
+
+    // Character cards data
+    const cards = this.journalSystem.getCharacterCardsData();
+    for (const card of cards) {
+      if (card.id === 'nereia') {
+        floaterVM.nereiaCardUnlocked = card.unlocked;
+        floaterVM.nereiaCardName = card.name;
+        floaterVM.nereiaCardSpecies = card.species;
+        floaterVM.nereiaCardTier = card.tierName;
+        floaterVM.nereiaCardCasts = String(card.castsMade);
+      } else if (card.id === 'kasha') {
+        floaterVM.kashaCardUnlocked = card.unlocked;
+        floaterVM.kashaCardName = card.name;
+        floaterVM.kashaCardSpecies = card.species;
+        floaterVM.kashaCardTier = card.tierName;
+        floaterVM.kashaCardCasts = String(card.castsMade);
+      }
+    }
+
+    // CG Gallery unlock states (Collection tab)
+    const cgCards = this.cgGallerySystem.getGalleryCards();
+    for (const cgCard of cgCards) {
+      if (cgCard.id === 'portrait_nereia') {
+        floaterVM.cgPortraitNereiaUnlocked = cgCard.isUnlocked;
+        floaterVM.cgPortraitNereiaName = cgCard.isUnlocked ? cgCard.name : '???';
+      } else if (cgCard.id === 'portrait_kasha') {
+        floaterVM.cgPortraitKashaUnlocked = cgCard.isUnlocked;
+        floaterVM.cgPortraitKashaName = cgCard.isUnlocked ? cgCard.name : '???';
+      } else if (cgCard.id === 'ending_nereia_reel') {
+        floaterVM.cgEndingNereiaReelUnlocked = cgCard.isUnlocked;
+        floaterVM.cgEndingNereiaReelName = cgCard.isUnlocked ? cgCard.name : '???';
+      }
+    }
+    floaterVM.cgCollectionProgress = this.cgGallerySystem.getCollectionText();
+  }
+
+  /** Get owned lure IDs for journal display */
+  private getOwnedLures(): string[] {
+    // Return at least 'bare_hook' as default + any equipped
+    const lures: string[] = ['bare_hook'];
+    if (this.equippedLureId && !lures.includes(this.equippedLureId)) {
+      lures.push(this.equippedLureId);
+    }
+    return lures;
+  }
+
+  /** Get lure reactions (placeholder - returns empty for now) */
+  private getLureReactions(): LureReaction[] {
+    return [];
   }
 
   @subscribe(onInventoryOpen)
@@ -521,13 +644,15 @@ export class FloaterGame extends Component {
     this.currentBeatIndex = 0;
     this.seenBeats = new Set();
     this.castCount = 0;
-    this.castIndexWithinTier = 0;
+    this.currentCastIndex = 0;
     this.equippedLureId = null;
     this.perFishCastIndex = {};
     this.savedFishRecords = {};
     this.flagSystem = new FlagSystem();
     this.questSystem = new QuestSystem();
     this.cgGallerySystem = new CGGallerySystem();
+    this.journalSystem = new JournalSystem();
+    this.globalStatsSystem = new GlobalStatsSystem();
     this.currentLines = [];
     this.displayedText = '';
     this.isTextComplete = false;
@@ -719,10 +844,6 @@ export class FloaterGame extends Component {
         }
       }
     }
-    if (this.tierNotifyTimer > 0) {
-      this.tierNotifyTimer -= dt;
-      if (this.tierNotifyTimer <= 0) { this.tierNotifyTimer = 0; floaterVM.tierTransitionVisible = false; }
-    }
     if (this.noLureWarningTimer > 0) {
       this.noLureWarningTimer -= dt;
       if (this.noLureWarningTimer <= 0) { this.noLureWarningTimer = 0; floaterVM.noLureWarningVisible = false; }
@@ -898,13 +1019,10 @@ export class FloaterGame extends Component {
       // Save current fish's live state into savedFishRecords before switching
       this.savedFishRecords[this.fish.id] = {
         affection: this.fishAffection.value,
-        tier: this.fishAffection.tier,
         drift: this.fish.currentDrift,
-        tierFloor: this.fishAffection.floor,
         peakValue: this.fishAffection.peakValue,
         lastChangeSessionId: this.fishAffection.lastChangeSessionId,
         lastChangeDelta: this.fishAffection.lastChangeDelta,
-        floor: this.fishAffection.floor,
       };
 
       this.fish = selectedCharacter.initialState();
@@ -912,54 +1030,27 @@ export class FloaterGame extends Component {
       const savedFishData = this.savedFishRecords[selectedCharacter.id];
       if (savedFishData) {
         this.fish.affection = savedFishData.affection;
-        this.fish.tier = savedFishData.tier;
         this.fish.currentDrift = savedFishData.drift;
-        this.fish.tierFloor = savedFishData.tierFloor;
         this.fishAffection = this.affectionSystem.restoreFromSave(selectedCharacter.id, {
           value: savedFishData.affection,
-          tier: savedFishData.tier,
-          floor: savedFishData.floor ?? savedFishData.tierFloor,
           peakValue: savedFishData.peakValue ?? savedFishData.affection,
           lastChangeSessionId: savedFishData.lastChangeSessionId ?? '',
           lastChangeDelta: savedFishData.lastChangeDelta ?? 0,
         });
-        console.log(`[FloaterGame] Restored ${selectedCharacter.id} from saved records: affection=${savedFishData.affection}, tier=${savedFishData.tier}`);
+        console.log(`[FloaterGame] Restored ${selectedCharacter.id} from saved records: affection=${savedFishData.affection}`);
       } else {
         this.fishAffection = this.affectionSystem.createAffection(selectedCharacter.id);
         console.log(`[FloaterGame] No saved data for ${selectedCharacter.id}, starting fresh`);
       }
     }
 
-    // Get per-fish cast index
-    this.castIndexWithinTier = this.perFishCastIndex[this.fish.id] ?? 0;
+    // Get per-fish cast index, clamped to the last available cast.
+    const totalCasts = getCastCount(this.fish.id);
+    this.currentCastIndex = Math.min(this.perFishCastIndex[this.fish.id] ?? 0, Math.max(0, totalCasts - 1));
 
-    // Auto-promote: if all casts in current tier are exhausted, force tier advancement
-    const totalCastsInTier = getCastCountForTier(this.fish.tier, this.fish.id);
-    if (this.castIndexWithinTier >= totalCastsInTier && this.fish.tier < AffectionTier.Bonded) {
-      const nextTier = (this.fish.tier + 1) as AffectionTier;
-      const tierThreshold = this.getTierThresholdValue(nextTier);
-      console.log(`[FloaterGame] Auto-promoting: all ${totalCastsInTier} casts in ${TIER_NAMES[this.fish.tier]} exhausted. Advancing to ${TIER_NAMES[nextTier]} (affection ${this.fishAffection.value} → ${tierThreshold})`);
-
-      // Force affection to the tier threshold so checkTierTransition fires
-      this.fishAffection.value = Math.max(this.fishAffection.value, tierThreshold);
-      const transition = this.affectionSystem.checkTierTransition(this.fishAffection);
-      if (transition) {
-        this.fish.tier = this.fishAffection.tier;
-        this.fish.tierFloor = this.fishAffection.floor;
-        this.fish.affection = this.fishAffection.value;
-        if (transition.isPromotion) {
-          this.showTierTransition(transition.newTierName);
-        }
-      }
-      this.castIndexWithinTier = 0;
-      this.perFishCastIndex[this.fish.id] = 0; // CRITICAL: sync perFishCastIndex after tier reset
-      this.saveSystem.requestSave();
-    }
-
-    const currentCast = getCastForTier(this.fish.tier, this.castIndexWithinTier, this.fish.id);
-    const totalCastsNow = getCastCountForTier(this.fish.tier, this.fish.id);
-    console.log(`[FloaterGame] startCast: castCount=${this.castCount}, tier=${TIER_NAMES[this.fish.tier]}, castIndexWithinTier=${this.castIndexWithinTier}/${totalCastsNow}, castName="${currentCast.name}", castId="${currentCast.id}"`);
-    this.beats = getBeatsForTier(this.fish.tier, this.castIndexWithinTier, this.fish.id);
+    const currentCast = getCast(this.currentCastIndex, this.fish.id);
+    console.log(`[FloaterGame] startCast: castCount=${this.castCount}, currentCastIndex=${this.currentCastIndex}/${totalCasts}, castName="${currentCast.name}", castId="${currentCast.id}"`);
+    this.beats = getBeats(this.currentCastIndex, this.fish.id);
     console.log(`[FloaterGame] Loaded ${this.beats.length} beats for cast "${currentCast.name}"`);
 
     this.phase = GamePhase.Approach;
@@ -973,7 +1064,7 @@ export class FloaterGame extends Component {
     floaterVM.fishNameText = this.fish.name;
     this.syncAffectionDisplay();
 
-    console.log(`[FloaterGame] Cast #${this.castCount}, tier ${TIER_NAMES[this.fish.tier]}, castIdx ${this.castIndexWithinTier}`);
+    console.log(`[FloaterGame] Cast #${this.castCount}, castIdx ${this.currentCastIndex}`);
   }
 
   private enterExchange(): void {
@@ -983,8 +1074,7 @@ export class FloaterGame extends Component {
 
   private startNextBeat(): void {
     if (this.currentBeatIndex >= this.beats.length) {
-      // Check if this is Cast 10 Beat 2 complete + catch available
-      if (this.flagSystem.check(`${this.fish.id}.catch_available`) && this.fish.tier === AffectionTier.Bonded) {
+      if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
         this.enterCatchSequence();
       } else {
         this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
@@ -1042,7 +1132,7 @@ export class FloaterGame extends Component {
         this.saveSystem.requestSave();
 
         if (this.currentBeatIndex >= this.beats.length) {
-          if (this.flagSystem.check(`${this.fish.id}.catch_available`) && this.fish.tier === AffectionTier.Bonded) {
+          if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
             this.enterCatchSequence();
           } else {
             this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
@@ -1109,23 +1199,6 @@ export class FloaterGame extends Component {
     this.affectionSystem.applyDelta(this.fishAffection, effect.affectionDelta, this.sessionId);
     this.fish.affection = this.fishAffection.value;
 
-    // Check tier transition
-    const transition = this.affectionSystem.checkTierTransition(this.fishAffection);
-    if (transition) {
-      const oldTier = this.fish.tier;
-      this.fish.tier = this.fishAffection.tier;
-      this.fish.tierFloor = this.fishAffection.floor;
-      if (transition.isPromotion) {
-        this.showTierTransition(transition.newTierName);
-        // Reset cast index for new tier
-        if (this.fish.tier !== oldTier) {
-          console.log(`[FloaterGame] Tier promotion! ${TIER_NAMES[oldTier]} → ${TIER_NAMES[this.fish.tier]}, resetting castIndexWithinTier from ${this.castIndexWithinTier} to 0`);
-          this.castIndexWithinTier = 0;
-          this.perFishCastIndex[this.fish.id] = 0; // CRITICAL: sync perFishCastIndex after tier reset
-        }
-      }
-    }
-
     // Apply expression and drift
     this.fish.currentExpression = effect.resultExpression;
     if (effect.resultDrift) this.fish.currentDrift = effect.resultDrift;
@@ -1187,7 +1260,7 @@ export class FloaterGame extends Component {
     this.fishAlpha = 1;
 
     // Get departure data from cast
-    const cast = getCastForTier(this.fish.tier, this.castIndexWithinTier, this.fish.id);
+    const cast = getCast(this.currentCastIndex, this.fish.id);
     const departureData = cast.departures[effectiveDrift] || cast.departures[DriftState.Warm];
 
     // Use tap-to-advance dialogue system for departure lines
@@ -1218,18 +1291,27 @@ export class FloaterGame extends Component {
   }
 
   private advanceDepartureDialogue(): void {
-    console.log(`[FloaterGame] advanceDepartureDialogue: lineIdx=${this.currentLineIndex}, totalLines=${this.currentLines.length}, castIndexWithinTier=${this.castIndexWithinTier}`);
+    console.log(`[FloaterGame] advanceDepartureDialogue: lineIdx=${this.currentLineIndex}, totalLines=${this.currentLines.length}, currentCastIndex=${this.currentCastIndex}`);
     this.currentLineIndex++;
     if (this.currentLineIndex >= this.currentLines.length) {
       // All departure lines shown — increment cast index and go to LakeIdle
-      const oldIdx = this.castIndexWithinTier;
-      this.castIndexWithinTier++;
-      this.perFishCastIndex[this.fish.id] = this.castIndexWithinTier;
-      console.log(`[FloaterGame] Departure complete, castIndexWithinTier: ${oldIdx} → ${this.castIndexWithinTier}`);
+      const oldIdx = this.currentCastIndex;
+      this.currentCastIndex++;
+      this.perFishCastIndex[this.fish.id] = this.currentCastIndex;
+      console.log(`[FloaterGame] Departure complete, currentCastIndex: ${oldIdx} → ${this.currentCastIndex}`);
 
       // Track quest events: talked to fish and fish left
       this.questSystem.recordTalkedToFish(this.fish.id);
       this.questSystem.recordFishLeft(this.fish.id);
+
+      // Track journal and stats for this Cast
+      this.journalSystem.recordCast(
+        this.fish.id,
+        [this.fish.currentExpression]
+      );
+      // Unlock portrait CG on first encounter (silently)
+      this.cgGallerySystem.unlockPortraitCG(this.fish.id);
+      this.globalStatsSystem.recordCast(this.journalSystem.getAllFishEntries());
 
       this.saveSystem.requestSave();
       this.enterLakeIdle();
@@ -1290,12 +1372,13 @@ export class FloaterGame extends Component {
       case EndingType.Reel:
         floaterVM.endingText = endingCatchData?.reelEpitaph ?? 'End.';
         // Unlock the CG for this character's Reel ending
-        const cgId = `${this.fish.id}_love_end`;
+        const cgId = `ending_${this.fish.id}_reel`;
         const newlyUnlocked = this.cgGallerySystem.unlockCG(cgId);
         if (newlyUnlocked) {
           // Show fullscreen CG viewer with fade-in
           this.cgGallerySystem.openViewer(cgId);
           floaterVM.cgViewerVisible = true;
+          floaterVM.cgViewerImagePath = CG_IMAGE_MAP[cgId] ?? 'sprites/nereia_neutral.png';
           console.log(`[FloaterGame] CG unlocked and displayed: ${cgId}`);
         }
         break;
@@ -1780,60 +1863,28 @@ export class FloaterGame extends Component {
   }
 
   private syncAffectionDisplay(): void {
-    const percent = Math.min(100, (this.fishAffection.value / AFFECTION_MAX) * 100);
+    const range = AFFECTION_MAX - AFFECTION_DRIFT_AWAY_THRESHOLD;
+    const normalized = (this.fishAffection.value - AFFECTION_DRIFT_AWAY_THRESHOLD) / range;
+    const percent = Math.max(0, Math.min(1, normalized)) * 100;
     floaterVM.affectionBarWidth = (percent / 100) * 200; // 200px max width
-    floaterVM.emotionName = TIER_NAMES[this.fishAffection.tier];
-    floaterVM.tierText = TIER_NAMES[this.fishAffection.tier];
 
-    // New HUD: portrait visibility toggles, name+mood (split), progress dots
+    // HUD: portrait, name, no mood/tier text anymore
     floaterVM.hudShowNereia = this.fish.id === 'nereia';
     floaterVM.hudShowKasha = this.fish.id === 'kasha';
     floaterVM.hudPortrait = this.fish.portrait;
     floaterVM.hudNameColor = this.fish.accentColor;
     floaterVM.hudNameText = this.fish.name;
-    floaterVM.hudMoodText = `(${TIER_NAMES[this.fishAffection.tier]})`;
-    floaterVM.hudMoodColor = this.getMoodColor(this.fishAffection.tier);
-    // Keep legacy field for backward compat
-    floaterVM.hudNameMoodText = `${this.fish.name} (${TIER_NAMES[this.fishAffection.tier]})`;
+    floaterVM.hudMoodText = '';
+    floaterVM.hudMoodColor = this.fish.accentColor;
+    floaterVM.hudNameMoodText = this.fish.name;
+    floaterVM.emotionName = '';
+    floaterVM.tierText = '';
 
-    // Progress dots: show TOTAL casts for this character (all tiers combined)
-    // Filled = cumulative casts completed so far (past tiers + current tier progress)
-    const totalCastsAllTiers = characterRegistry.getTotalCastCount(this.fish.id);
-    const cumulativeCompleted = characterRegistry.getCumulativeCastIndex(this.fish.id, this.fish.tier, this.castIndexWithinTier);
-    this.progressDotsTotal = totalCastsAllTiers;
-    this.progressDotsFilled = Math.min(cumulativeCompleted, totalCastsAllTiers);
-    // Update XAML dot properties
+    // Progress dots: linear cast progression for this character.
+    const totalCasts = characterRegistry.getCastCount(this.fish.id);
+    this.progressDotsTotal = totalCasts;
+    this.progressDotsFilled = Math.min(this.currentCastIndex, totalCasts);
     floaterVM.setProgressDots(this.progressDotsTotal, this.progressDotsFilled);
-    console.log(`[FloaterGame] syncAffectionDisplay: dots total=${this.progressDotsTotal}, filled=${this.progressDotsFilled}, tier=${TIER_NAMES[this.fish.tier]}, castIdx=${this.castIndexWithinTier}, fishId=${this.fish.id}`);
-  }
-
-  /** Get the minimum affection value needed to be in a tier */
-  private getTierThresholdValue(tier: AffectionTier): number {
-    switch (tier) {
-      case AffectionTier.Curious: return AFFECTION_TIER_1_MAX + 1;
-      case AffectionTier.Familiar: return AFFECTION_TIER_2_MAX + 1;
-      case AffectionTier.Trusting: return AFFECTION_TIER_3_MAX + 1;
-      case AffectionTier.Bonded: return AFFECTION_TIER_4_MAX + 1;
-      default: return 0;
-    }
-  }
-
-  /** Get a color representing the current mood/tier */
-  private getMoodColor(tier: AffectionTier): string {
-    switch (tier) {
-      case AffectionTier.Unaware: return '#8A9AB0';   // Muted blue-grey
-      case AffectionTier.Curious: return '#9BB8CC';   // Light teal
-      case AffectionTier.Familiar: return '#A8CC9B';  // Soft green
-      case AffectionTier.Trusting: return '#E8A84C';  // Warm gold
-      case AffectionTier.Bonded: return '#CC7FCC';    // Warm purple/pink
-      default: return '#8A9AB0';
-    }
-  }
-
-  private showTierTransition(newTierName: string): void {
-    floaterVM.tierTransitionVisible = true;
-    floaterVM.tierTransitionText = `${this.fish.name} feels closer.\nRelationship: ${newTierName}`;
-    this.tierNotifyTimer = 2.5;
   }
 
   // === Cast Mechanics ===
@@ -2358,13 +2409,10 @@ export class FloaterGame extends Component {
     // Always write current fish's live state (most up-to-date)
     allFish[this.fish.id] = {
       affection: this.fishAffection.value,
-      tier: this.fishAffection.tier,
       drift: this.fish.currentDrift,
-      tierFloor: this.fishAffection.floor,
       peakValue: this.fishAffection.peakValue,
       lastChangeSessionId: this.fishAffection.lastChangeSessionId,
       lastChangeDelta: this.fishAffection.lastChangeDelta,
-      floor: this.fishAffection.floor,
     };
 
     return {
@@ -2372,10 +2420,12 @@ export class FloaterGame extends Component {
       flags: this.flagSystem.serialize(),
       seenBeats: Array.from(this.seenBeats),
       castCount: this.castCount,
-      castIndexWithinTier: this.castIndexWithinTier,
+      currentCastIndex: this.currentCastIndex,
       quests: this.questSystem.serialize(),
       perFishCastIndex: { ...this.perFishCastIndex },
       cgUnlocks: this.cgGallerySystem.serialize(),
+      journal: this.journalSystem.serialize(),
+      globalStats: this.globalStatsSystem.serialize(),
     };
   }
 
@@ -2392,12 +2442,9 @@ export class FloaterGame extends Component {
       const fishData = data.fish[this.fish.id];
       if (fishData) {
         this.fish.affection = fishData.affection;
-        this.fish.tier = fishData.tier;
         this.fish.currentDrift = fishData.drift;
-        this.fish.tierFloor = fishData.tierFloor;
         this.fishAffection = this.affectionSystem.restoreFromSave(this.fish.id, {
-          value: fishData.affection, tier: fishData.tier,
-          floor: fishData.floor ?? fishData.tierFloor,
+          value: fishData.affection,
           peakValue: fishData.peakValue ?? fishData.affection,
           lastChangeSessionId: fishData.lastChangeSessionId ?? '',
           lastChangeDelta: fishData.lastChangeDelta ?? 0,
@@ -2406,7 +2453,7 @@ export class FloaterGame extends Component {
       this.flagSystem.deserialize(data.flags);
       this.seenBeats = new Set(data.seenBeats);
       this.castCount = data.castCount;
-      this.castIndexWithinTier = data.castIndexWithinTier ?? 0;
+      this.currentCastIndex = data.currentCastIndex ?? 0;
       if (data.quests) {
         this.questSystem.deserialize(data.quests);
       }
@@ -2416,7 +2463,13 @@ export class FloaterGame extends Component {
       if (data.cgUnlocks) {
         this.cgGallerySystem.deserialize(data.cgUnlocks);
       }
-      console.log(`[FloaterGame] Loaded save: castCount=${this.castCount}, castIndexWithinTier=${this.castIndexWithinTier}, tier=${TIER_NAMES[this.fish.tier]}`);
+      if (data.journal) {
+        this.journalSystem.deserialize(data.journal);
+      }
+      if (data.globalStats) {
+        this.globalStatsSystem.deserialize(data.globalStats);
+      }
+      console.log(`[FloaterGame] Loaded save: castCount=${this.castCount}, currentCastIndex=${this.currentCastIndex}`);
     } else {
       console.log('[FloaterGame] No save data found, starting fresh');
       this.savedFishRecords = {};
@@ -2640,7 +2693,7 @@ export class FloaterGame extends Component {
       floaterVM.idleBarOpacity = 0;
       floaterVM.idleBarTranslateY = 40;
     }
-    floaterVM.tierTransitionVisible = this.tierNotifyTimer > 0;
+    floaterVM.tierTransitionVisible = false;
     this.syncAffectionDisplay();
 
     const isDialoguePhaseSync = this.phase === GamePhase.Exchange || this.phase === GamePhase.FishReaction

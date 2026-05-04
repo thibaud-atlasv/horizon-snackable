@@ -97,23 +97,6 @@ export enum ExpressionState {
   Alarmed = 'EXPR_ALARMED',
 }
 
-// === Affection Tiers ===
-export enum AffectionTier {
-  Unaware = 1,
-  Curious = 2,
-  Familiar = 3,
-  Trusting = 4,
-  Bonded = 5,
-}
-
-export const TIER_NAMES: Record<AffectionTier, string> = {
-  [AffectionTier.Unaware]: 'Unaware',
-  [AffectionTier.Curious]: 'Curious',
-  [AffectionTier.Familiar]: 'Familiar',
-  [AffectionTier.Trusting]: 'Trusting',
-  [AffectionTier.Bonded]: 'Bonded',
-};
-
 // === Action Effect ===
 export interface ActionEffect {
   affectionDelta: number;
@@ -144,7 +127,6 @@ export interface DepartureData {
 // === Cast ===
 export interface CastData {
   id: string;
-  tier: AffectionTier;
   name: string;
   beats: Beat[];
   departures: Partial<Record<DriftState, DepartureData>>;
@@ -168,9 +150,7 @@ export interface FishCharacter {
   accentColor: string;
   currentExpression: ExpressionState;
   affection: number;
-  tier: AffectionTier;
   currentDrift: DriftState;
-  tierFloor: number;
   portrait?: TextureAsset;
 }
 
@@ -192,23 +172,10 @@ export interface CastState {
 export interface FishAffection {
   characterId: string;
   value: number;
-  tier: AffectionTier;
-  floor: number;
   ceiling: number;
   lastChangeSessionId: string;
   lastChangeDelta: number;
   peakValue: number;
-  visibilityMode: string;
-}
-
-// === Tier Transition Info ===
-export interface TierTransitionInfo {
-  characterId: string;
-  oldTier: AffectionTier;
-  newTier: AffectionTier;
-  oldTierName: string;
-  newTierName: string;
-  isPromotion: boolean;
 }
 
 // === Lure Types (SYS-23-GIFTS) ===
@@ -240,17 +207,9 @@ export interface JournalFishEntry {
   knownFacts: string[];
   expressionsSeen: ExpressionState[];
   castsMade: number;
-  currentQuestHintTier: number;
 }
 
-export interface Keepsake {
-  id: string;
-  name: string;
-  giftedBy: string;
-  fishPerspective: string;
-  fishermanPerspective: string;
-  obtainedOnCast: number;
-}
+// Keepsake interface removed (deprecated feature)
 
 // === Lake Zones ===
 export type LakeZone = 'near' | 'mid' | 'far';
@@ -291,10 +250,9 @@ export interface CharacterConfig {
   questRequirement?: QuestRequirement;
   unlockCondition: (flags: Record<string, boolean | number>) => boolean;
   encounterRate: number;
-  arcTiers: number;
   questName: string;
-  questHints: { tier: AffectionTier; text: string }[];
-  getCastsForTier: (tier: AffectionTier) => CastData[];
+  questHint: string;
+  getCasts: () => CastData[];
   initialState: () => FishCharacter;
   catchSequenceData?: CatchSequenceData;
   driftAwayJournalText?: string;
@@ -308,6 +266,16 @@ export interface CGData {
   name: string;
   description: string;
   unlockCondition: string;
+  thumbnailPath: string;
+}
+
+// === CG Gallery Card (for XAML grid display) ===
+export interface CGGalleryCard {
+  id: string;
+  name: string;
+  characterId: string;
+  isUnlocked: boolean;
+  thumbnailPath: string;
 }
 
 // === Save Data ===
@@ -316,12 +284,22 @@ export interface SaveData {
   flags: Record<string, boolean | number>;
   seenBeats: string[];
   castCount: number;
-  castIndexWithinTier: number;
+  currentCastIndex: number;
   lures?: LureSaveData;
   journal?: JournalSaveData;
   quests?: QuestSaveData;
   perFishCastIndex?: Record<string, number>;
   cgUnlocks?: string[];
+  globalStats?: GlobalStatsSaveData;
+}
+
+// Forward declaration for GlobalStats (actual interface in GlobalStatsSystem.ts)
+export interface GlobalStatsSaveData {
+  totalCasts: number;
+  totalCharactersMet: number;
+  totalFactsDiscovered: number;
+  totalPlaySessions: number;
+  unlockedBadges: string[];
 }
 
 export interface LureSaveData {
@@ -333,16 +311,13 @@ export interface LureSaveData {
 
 export interface JournalSaveData {
   fishEntries: Record<string, JournalFishEntry>;
-  keepsakes: Keepsake[];
+  // keepsakes removed (deprecated); backward compat handled in deserialize
 }
 
 export interface FishSaveData {
   affection: number;
-  tier: AffectionTier;
   drift: DriftState;
-  tierFloor: number;
   peakValue: number;
   lastChangeSessionId: string;
   lastChangeDelta: number;
-  floor: number;
 }
