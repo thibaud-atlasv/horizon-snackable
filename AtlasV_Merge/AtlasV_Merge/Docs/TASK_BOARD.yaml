@@ -146,21 +146,43 @@ tasks:
             status: done
           - name: "Next piece — frame always visible, sprite pops in with satisfying animation on change"
             status: done
-      - name: "Milestone: Visual Identity"
-        status: not_started
+      - name: "Fix — Objects rotating in place when stationary"
+        status: done
+        summary: "Smooth angular damping blend — rest threshold raised to 50px/s, rest damping 25.0, smooth interpolation between normal and rest damping based on linear speed"
+        files: [scripts/Physics.ts]
+      - name: "Naruto Theme Reskin"
+        status: in_progress
         subtasks:
-          - name: "Step 20 — Centralized palette"
+          - name: "Generate 11 Naruto chibi face sprites and replace tier art"
+            status: done
+            summary: "Generated 11 chibi face-only sprites (Tonton→Kurama), processed backgrounds, replaced all tier sprites, deleted old fruit sprites"
+            files: [sprites/tier_00.png, sprites/tier_01.png, sprites/tier_02.png, sprites/tier_03.png, sprites/tier_04.png, sprites/tier_05.png, sprites/tier_06.png, sprites/tier_07.png, sprites/tier_08.png, sprites/tier_09.png, sprites/tier_10.png]
+          - name: "Sprite roster rework — all ninjas, power-sorted, fix Sasuke outline"
+            status: done
+            summary: "Replaced Tonton→Iruka & Kurama→Madara, regenerated Sasuke without outline, re-sorted all 11 tiers by power: Konohamaru→Iruka→Rock Lee→Hinata→Sakura→Kakashi→Sasuke→Jiraiya→Itachi→Naruto→Madara"
+            files: [sprites/tier_00.png, sprites/tier_01.png, sprites/tier_02.png, sprites/tier_03.png, sprites/tier_04.png, sprites/tier_05.png, sprites/tier_06.png, sprites/tier_07.png, sprites/tier_08.png, sprites/tier_09.png, sprites/tier_10.png, data/MergeLadder.ts]
+          - name: "Generate Naruto-themed background"
+            status: done
+            summary: "Generated Hidden Leaf Village at golden hour background, replaced sprites/background.png"
+            files: [sprites/background.png]
+          - name: "Physics tweak — prevent perfect stacking"
+            status: done
+            summary: "Added ±3 px/s random horizontal nudge on collision to break perfect vertical stacking"
+            files: [scripts/Physics.ts]
+          - name: "Danger line — only show when player is near danger"
+            status: done
+            summary: "Danger line alpha now driven by dangerAmount — invisible during safe play, fades in smoothly as items approach danger zone"
+            files: [scripts/GameRenderer.ts, scripts/VisualEffects.ts]
+          - name: "Background fill uniform + lower jar opacity for background visibility"
+            status: done
+            summary: "Background uses Stretch.Uniform to fill canvas, jar interior alpha reduced to 0.5, gradient bands halved in opacity for translucent glass effect"
+            files: [scripts/GameRenderer.ts]
+          - name: "Update UI colors and typography to match Naruto theme"
             status: not_started
-          - name: "Step 21 — Item art for the full ladder"
-            status: not_started
-          - name: "Step 22 — Container styling"
-            status: not_started
-          - name: "Step 23 — Background"
-            status: not_started
-          - name: "Step 24 — UI styling"
-            status: not_started
-          - name: "Step 25 — App icon and splash"
-            status: not_started
+          - name: "Fix background not filling screen — switch to UniformToFill"
+            status: done
+            summary: "Changed background ImageBrush stretch from Uniform to UniformToFill so it fills the full canvas, cropping sides if needed"
+            files: [scripts/GameRenderer.ts]
       - name: "Milestone: Shipping Prep"
         status: not_started
         subtasks:

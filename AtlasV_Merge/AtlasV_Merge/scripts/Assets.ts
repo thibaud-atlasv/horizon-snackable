@@ -4,7 +4,7 @@
  */
 import { TextureAsset } from 'meta/worlds';
 
-// === Gummy blob creature tier sprites (indexed 0–10) ===
+// === Chibi Naruto character tier sprites (indexed 0–10) ===
 export const tier00Texture: TextureAsset = new TextureAsset("@sprites/tier_00.png");
 export const tier01Texture: TextureAsset = new TextureAsset("@sprites/tier_01.png");
 export const tier02Texture: TextureAsset = new TextureAsset("@sprites/tier_02.png");

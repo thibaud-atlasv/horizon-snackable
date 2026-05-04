@@ -54,32 +54,30 @@ export function integratePositions(items: GameItem[], dt: number): void {
 }
 
 // Rest-state angular damping thresholds
-const REST_LINEAR_SPEED_SQ = 20 * 20;       // Below 20 px/s linear speed → item is "at rest"
-const REST_ANGULAR_DAMPING = 12.0;           // Angular damping when at rest (reduced for freer spin)
+const REST_LINEAR_SPEED_SQ = 50 * 50;       // Below 50 px/s linear speed → blend toward rest damping
+const REST_ANGULAR_DAMPING = 25.0;           // Aggressive angular damping for fully at-rest items
 const ANGULAR_SNAP_THRESHOLD = 0.03;         // Snap angular velocity to zero below this
 
 /**
  * Apply velocity damping (exponential decay) and angular damping.
- * When items are nearly at rest (low linear speed), applies aggressive
- * angular damping so items stop spinning quickly after settling.
+ * Uses smooth interpolation between normal and rest angular damping based
+ * on linear speed — the slower an item moves, the faster its spin decays.
+ * This prevents items in stacks from freely spinning due to micro-oscillations.
  */
 export function applyDamping(items: GameItem[], dt: number): void {
   const linearFactor = Math.exp(-FRICTION_DAMPING * dt);
-  const angularFactor = Math.exp(-ANGULAR_FRICTION_DAMPING * dt);
-  const restAngularFactor = Math.exp(-REST_ANGULAR_DAMPING * dt);
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     item.vx *= linearFactor;
     item.vy *= linearFactor;
 
-    // Use aggressive angular damping when item is nearly at rest
+    // Smooth angular damping: blend between normal and rest damping
+    // restFactor is 1.0 when perfectly still, 0.0 when at/above threshold
     const speedSq = item.vx * item.vx + item.vy * item.vy;
-    if (speedSq < REST_LINEAR_SPEED_SQ) {
-      item.angularVelocity *= restAngularFactor;
-    } else {
-      item.angularVelocity *= angularFactor;
-    }
+    const restFactor = 1.0 - Math.min(Math.max(speedSq / REST_LINEAR_SPEED_SQ, 0), 1);
+    const effectiveDamping = ANGULAR_FRICTION_DAMPING + restFactor * (REST_ANGULAR_DAMPING - ANGULAR_FRICTION_DAMPING);
+    item.angularVelocity *= Math.exp(-effectiveDamping * dt);
 
     // Snap to zero when angular velocity is negligible
     if (Math.abs(item.angularVelocity) < ANGULAR_SNAP_THRESHOLD) {
@@ -229,6 +227,11 @@ export function resolveCircleCollisions(items: GameItem[]): { mergePairs: Array<
             impacts.push({ itemIndex: j, intensity });
           }
         }
+
+        // Anti-stacking nudge: subtle random horizontal push to prevent perfect vertical stacks
+        const nudge = (Math.random() - 0.5) * 6; // ±3 px/s average
+        a.vx += nudge;
+        b.vx -= nudge;
 
         // Track same-tier pairs for merge
         if (a.tier === b.tier && a.mergeCooldown <= 0 && b.mergeCooldown <= 0) {
