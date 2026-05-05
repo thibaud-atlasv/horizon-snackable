@@ -376,6 +376,31 @@ tasks:
       - name: Optimize save data - remove knownFacts array
         status: done
 
+  - name: Silver Trout Portraits (x5)
+    status: done
+    summary: 5 silver trout chibi portraits generated (neutral, curious, shy, happy, serious) with locked fish-portraits template, saved to trout/ folder with premultiply alpha
+    files:
+      - trout/silver_trout_neutral.png
+      - trout/silver_trout_curious.png
+      - trout/silver_trout_shy.png
+      - trout/silver_trout_happy.png
+      - trout/silver_trout_serious.png
+      - characters.md
+
+  - name: Rainbow Trout Portrait (rosée, charmeuse)
+    status: done
+    summary: Pink rainbow trout chibi portrait with charming expression, saved to trout/trout_charming.png
+    files:
+      - trout/trout_charming.png
+      - characters.md
+
+  - name: Save Race Condition Fix
+    status: done
+    summary: Added ready gate to SaveSystem - saves blocked until OnSaveDataLoaded fires. Prevents empty default state from overwriting real save data when user acts quickly after load.
+    files:
+      - scripts/SaveSystem.ts
+      - scripts/FloaterGame.ts
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []

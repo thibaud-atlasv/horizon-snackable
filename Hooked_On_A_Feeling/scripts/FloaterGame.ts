@@ -626,6 +626,9 @@ export class FloaterGame extends Component {
   onSaveDataLoaded(payload: SaveDataLoadedPayload): void {
     if (NetworkingService.get().isServerContext()) return; // Client-only
     console.log(`[FloaterGame] Received persistent save data: ${payload.data.length} chars`);
+    // Mark save system ready — even if data is empty (new player).
+    // This prevents requestSave() from overwriting real data before load completes.
+    this.saveSystem.setReady();
     if (payload.data && payload.data.length > 0) {
       this.saveSystem.setPersistentData(payload.data);
       this.loadGame();

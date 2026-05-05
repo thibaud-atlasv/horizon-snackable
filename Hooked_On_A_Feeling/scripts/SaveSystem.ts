@@ -17,6 +17,19 @@ export class SaveSystem {
   private saveTimer: number = 0;
   private readonly SAVE_DELAY = 0.5; // seconds after Beat resolution
   private onSaveCallback: OnSaveCallback | null = null;
+  private ready: boolean = false;
+
+  /** Mark save system as ready — saves are blocked until this is called.
+   *  Call after persistent data load completes (even if data is empty). */
+  setReady(): void {
+    this.ready = true;
+    console.log('[SaveSystem] Ready — saves unlocked');
+  }
+
+  /** Check if the save system is ready to accept saves. */
+  isReady(): boolean {
+    return this.ready;
+  }
 
   /** Register callback that fires every time save data is written */
   setOnSaveCallback(cb: OnSaveCallback): void {
@@ -25,6 +38,10 @@ export class SaveSystem {
 
   /** Mark that a save is needed (call after Beat resolution) */
   requestSave(): void {
+    if (!this.ready) {
+      console.log('[SaveSystem] Save requested but system not ready — blocked (waiting for persistent data load)');
+      return;
+    }
     this.pendingSave = true;
     this.saveTimer = this.SAVE_DELAY;
     console.log('[SaveSystem] Save requested');
@@ -35,6 +52,10 @@ export class SaveSystem {
    * Use at critical moments (departure, ending) to prevent data loss on reload.
    */
   flushImmediate(getData: () => SaveData): void {
+    if (!this.ready) {
+      console.log('[SaveSystem] Flush requested but system not ready — blocked (waiting for persistent data load)');
+      return;
+    }
     this.pendingSave = false;
     this.saveTimer = 0;
     const data = getData();
@@ -44,6 +65,7 @@ export class SaveSystem {
 
   /** Update timer, execute save when ready. Returns true if save was executed. */
   update(dt: number, getData: () => SaveData): boolean {
+    if (!this.ready) return false;
     if (!this.pendingSave) return false;
 
     this.saveTimer -= dt;

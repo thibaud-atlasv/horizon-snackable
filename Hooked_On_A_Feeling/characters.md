@@ -31,11 +31,41 @@ Reference character: `sprites/nereia_neutral.png`
 - **Expression:** Calm, mysterious
 - **Description:** A round dumpling-shaped chibi fish-person inspired by the catfish, with a chubby dark teal and brown body, four soft little whisker-like barbels around the mouth, calm mysterious expression with an experienced knowing look, huge round glossy deep amber eyes
 
-## Trout
+## Trout (Rainbow)
 - **Species:** Trout (Truite)
 - **File:** `sprites/trout_neutral.png`
 - **Expression:** Lively, curious
 - **Description:** A small round chibi fish-person inspired by the trout, with a chubby silvery-pink body with dark speckled spots and an iridescent rainbow stripe along the side, small puffy fins, lively curious expression with bright attentive mature gaze, huge round glossy golden eyes
+
+## Silver Trout (Truite Argentée)
+- **Species:** Silver Trout (Truite Argentée)
+- **Color Palette:** Bright silver body, cool metallic sheen, dark speckled spots, subtle blue-silver tones
+- **Eyes:** Silver-blue
+
+### Silver Trout — Neutral
+- **File:** `trout/silver_trout_neutral.png`
+- **Expression:** Calm, composed
+- **Description:** A small round chibi fish-person inspired by the trout, with a chubby bright silver body with a cool metallic sheen and dark speckled spots, subtle blue-silver tones along the back, small puffy fins, calm composed neutral expression with a steady mature gaze, huge round glossy silver-blue eyes
+
+### Silver Trout — Curious
+- **File:** `trout/silver_trout_curious.png`
+- **Expression:** Lively, curious
+- **Description:** A small round chibi fish-person inspired by the trout, with a chubby bright silver body with a cool metallic sheen and dark speckled spots, subtle blue-silver tones along the back, small puffy fins, lively curious expression with bright attentive eyes tilted slightly forward, huge round glossy silver-blue eyes
+
+### Silver Trout — Shy
+- **File:** `trout/silver_trout_shy.png`
+- **Expression:** Shy, reserved
+- **Description:** A small round chibi fish-person inspired by the trout, with a chubby bright silver body with a cool metallic sheen and dark speckled spots, subtle blue-silver tones along the back, small puffy fins, shy expression with eyes glancing away and mouth tightly closed, huge round glossy silver-blue eyes
+
+### Silver Trout — Happy
+- **File:** `trout/silver_trout_happy.png`
+- **Expression:** Warm, cheerful
+- **Description:** A small round chibi fish-person inspired by the trout, with a chubby bright silver body with a cool metallic sheen and dark speckled spots, subtle blue-silver tones along the back, small puffy fins, warm cheerful expression with a soft smile and eyes brightened, huge round glossy silver-blue eyes
+
+### Silver Trout — Serious
+- **File:** `trout/silver_trout_serious.png`
+- **Expression:** Serious, focused
+- **Description:** A small round chibi fish-person inspired by the trout, with a chubby bright silver body with a cool metallic sheen and dark speckled spots, subtle blue-silver tones along the back, small puffy fins, serious focused expression with a firm set mouth and intense concentrated stare, huge round glossy silver-blue eyes
 
 ## Bass
 - **Species:** Bass (Bar)
@@ -66,3 +96,13 @@ Reference character: `sprites/nereia_neutral.png`
 - **File:** `sprites/zander_neutral.png`
 - **Expression:** Cold, distant
 - **Description:** A small round chibi fish-person inspired by the zander, with a chubby grey-green and silver body with faint dark vertical bars, a slightly pointed puffy snout, cold distant expression with an intense calculating stare, huge round glossy pale icy-blue eyes
+
+## Pink Rainbow Trout (Truite Arc-en-Ciel Rosée)
+- **Species:** Rainbow Trout (Truite Arc-en-Ciel)
+- **Color Palette:** Soft pink body, rosy iridescent rainbow stripe, rose-pink and silver scales, pinkish fin tips
+- **Eyes:** Glossy (pink-tinted)
+
+### Pink Rainbow Trout — Charming
+- **File:** `trout/trout_charming.png`
+- **Expression:** Charming, flirtatious
+- **Description:** A small round chibi fish-person inspired by the rainbow trout, with a chubby soft pink body and a rosy iridescent rainbow stripe along the side, delicate rose-pink and silver scales, tiny rounded fins with pinkish tips, slightly narrowed confident eyes with a coy playful smile suggesting flirtation, huge round glossy eyes

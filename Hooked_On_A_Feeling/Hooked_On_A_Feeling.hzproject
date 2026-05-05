@@ -47,7 +47,7 @@
         "avatarMax": 1,
         "screenOrientation": "Portrait"
     },
-    "editorVersion": "80.0.1.0.438",
+    "editorVersion": "79.0.0.15.107",
     "starterWorldType": "BPBlank2DGame",
     "remotePackageId": "27580731851530177"
 }
