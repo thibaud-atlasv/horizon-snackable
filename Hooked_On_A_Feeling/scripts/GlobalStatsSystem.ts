@@ -9,13 +9,22 @@
 import { characterRegistry } from './CharacterRegistry';
 import type { JournalFishEntry, GlobalStatsSaveData } from './Types';
 
+/** Internal runtime stats — always has all fields populated (derived stats reconstructed on load) */
+interface RuntimeStats {
+  totalCasts: number;
+  totalCharactersMet: number;
+  totalFactsDiscovered: number;
+  totalPlaySessions: number;
+  unlockedBadges: string[];
+}
+
 // === Badge Definitions ===
 export interface BadgeDefinition {
   id: string;
   name: string;
   description: string;
   icon: string; // emoji icon for display
-  condition: (stats: GlobalStatsSaveData, entries: JournalFishEntry[]) => boolean;
+  condition: (stats: RuntimeStats, entries: JournalFishEntry[]) => boolean;
 }
 
 const BADGE_DEFINITIONS: BadgeDefinition[] = [
@@ -81,7 +90,7 @@ const BADGE_DEFINITIONS: BadgeDefinition[] = [
 ];
 
 export class GlobalStatsSystem {
-  private stats: GlobalStatsSaveData = {
+  private stats: RuntimeStats = {
     totalCasts: 0,
     totalCharactersMet: 0,
     totalFactsDiscovered: 0,
@@ -215,23 +224,52 @@ export class GlobalStatsSystem {
   }
 
   /** Get raw stats data */
-  getStats(): GlobalStatsSaveData {
+  getStats(): RuntimeStats {
     return { ...this.stats };
   }
 
   // === Save/Load ===
 
   serialize(): GlobalStatsSaveData {
-    return { ...this.stats };
+    return {
+      totalCasts: this.stats.totalCasts,
+      totalPlaySessions: this.stats.totalPlaySessions,
+      unlockedBadges: [...this.stats.unlockedBadges],
+    };
   }
 
-  deserialize(data: GlobalStatsSaveData): void {
+  deserialize(data: GlobalStatsSaveData, fishEntries?: JournalFishEntry[], flags?: Record<string, boolean | number>): void {
     this.stats = {
       totalCasts: data.totalCasts ?? 0,
-      totalCharactersMet: data.totalCharactersMet ?? 0,
-      totalFactsDiscovered: data.totalFactsDiscovered ?? 0,
+      totalCharactersMet: 0, // will be reconstructed below
+      totalFactsDiscovered: 0, // will be reconstructed below
       totalPlaySessions: data.totalPlaySessions ?? 0,
       unlockedBadges: data.unlockedBadges ?? [],
     };
+    // Reconstruct derived stats from source data
+    this.reconstructDerivedStats(fishEntries, flags);
+  }
+
+  /** Reconstruct totalCharactersMet and totalFactsDiscovered from source data */
+  reconstructDerivedStats(fishEntries?: JournalFishEntry[], flags?: Record<string, boolean | number>): void {
+    if (fishEntries) {
+      let met = 0;
+      let facts = 0;
+      for (const entry of fishEntries) {
+        if (entry.unlocked) {
+          met++;
+          if (flags) {
+            const character = characterRegistry.getCharacter(entry.fishId);
+            if (character?.facts) {
+              for (const factDef of character.facts) {
+                if (flags[factDef.flagKey]) facts++;
+              }
+            }
+          }
+        }
+      }
+      this.stats.totalCharactersMet = met;
+      this.stats.totalFactsDiscovered = facts;
+    }
   }
 }

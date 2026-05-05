@@ -1150,6 +1150,7 @@
                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
                                       <Image Stretch="UniformToFill"
                                              Width="70" Height="70" Margin="0,8,0,0"
+                                             Opacity="{Binding portraitOpacity}"
                                              Visibility="{Binding unlocked, Converter={StaticResource BoolToVis}}">
                                         <Image.Source>
                                           <Binding Path="texture" />
@@ -1157,16 +1158,17 @@
                                       </Image>
                                     </Grid>
                                   </Border>
-                                  <!-- Diagonal "Complete" banner overlaid on portrait -->
+                                  <!-- Diagonal "Gone" banner spanning full portrait -->
                                   <Border HorizontalAlignment="Center" VerticalAlignment="Center"
-                                          Background="#CC000000" CornerRadius="3" Padding="6,2"
+                                          Background="#CC000000" CornerRadius="3"
+                                          Width="100" Height="18"
                                           Visibility="{Binding completed, Converter={StaticResource BoolToVis}}"
                                           RenderTransformOrigin="0.5,0.5">
                                     <Border.RenderTransform>
                                       <RotateTransform Angle="-30" />
                                     </Border.RenderTransform>
-                                    <TextBlock Text="★ Complete" FontSize="9" FontWeight="Bold"
-                                               Foreground="#E8A84C" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Gone" FontSize="9" FontWeight="Bold"
+                                               Foreground="#E8A84C" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                   </Border>
                                 </Grid>
                                 <TextBlock Text="{Binding name}" FontSize="13" FontWeight="Bold"

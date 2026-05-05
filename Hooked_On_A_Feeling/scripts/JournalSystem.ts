@@ -341,10 +341,12 @@ export class JournalSystem {
   serialize(): JournalSaveData {
     const fishEntries: Record<string, JournalFishEntry> = {};
     for (const [id, entry] of this.fishEntries) {
+      // Only save dynamic fields — fishId (= key) and species (static from
+      // CharacterRegistry) are NOT persisted to reduce save size.
       fishEntries[id] = {
-        fishId: entry.fishId,
+        fishId: '', // not persisted — rebuilt from key on deserialize
         unlocked: entry.unlocked,
-        species: entry.species,
+        species: '', // not persisted — rebuilt from CharacterRegistry on deserialize
         expressionsSeen: [...entry.expressionsSeen],
         castsMade: entry.castsMade,
       };
@@ -357,11 +359,14 @@ export class JournalSystem {
   deserialize(data: JournalSaveData): void {
     if (data.fishEntries) {
       for (const [id, entry] of Object.entries(data.fishEntries)) {
+        // Reconstruct static fields from CharacterRegistry instead of reading
+        // from save data — species/fishId are redundant (key = fishId, species
+        // is defined in CharacterConfig and never changes at runtime).
+        const character = characterRegistry.getCharacter(id);
         this.fishEntries.set(id, {
-          fishId: entry.fishId,
+          fishId: id,
           unlocked: entry.unlocked,
-          species: entry.species,
-          // knownFacts removed - old saves may have it, ignore it
+          species: character?.species ?? entry.species ?? 'Unknown',
           expressionsSeen: entry.expressionsSeen ?? [],
           castsMade: entry.castsMade ?? 0,
         });

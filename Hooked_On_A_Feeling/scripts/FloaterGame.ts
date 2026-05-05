@@ -784,7 +784,8 @@ export class FloaterGame extends Component {
       // Increment cast index for the character whose ending just completed
       this.currentCastIndex++;
       this.perFishCastIndex[this.fish.id] = this.currentCastIndex;
-      this.saveSystem.requestSave();
+      // CRITICAL: Flush immediately (cast index advancement is critical state)
+      this.saveSystem.flushImmediate(() => this.buildSaveData());
       this.enterLakeIdle();
       return;
     }
@@ -1119,9 +1120,6 @@ export class FloaterGame extends Component {
       this.savedFishRecords[this.fish.id] = {
         affection: this.fishAffection.value,
         drift: this.fish.currentDrift,
-        peakValue: this.fishAffection.peakValue,
-        lastChangeSessionId: this.fishAffection.lastChangeSessionId,
-        lastChangeDelta: this.fishAffection.lastChangeDelta,
       };
 
       this.fish = selectedCharacter.initialState();
@@ -1456,7 +1454,9 @@ export class FloaterGame extends Component {
       // Update affection label at cast boundary (not mid-cast)
       this.displayedAffectionLabel = this.affectionSystem.getAffectionLabel(this.fishAffection.value);
 
-      this.saveSystem.requestSave();
+      // CRITICAL: Flush save immediately at departure (no 0.5s delay)
+      // to prevent data loss if a reload happens before the timer fires.
+      this.saveSystem.flushImmediate(() => this.buildSaveData());
       this.enterLakeIdle();
     } else {
       this.startNewLine();
@@ -1512,7 +1512,8 @@ export class FloaterGame extends Component {
     // Bookkeeping always runs — the ending logically happened.
     this.flagSystem.set(`${this.fish.id}.catch_available`, false);
     this.flagSystem.set(`${this.fish.id}.ending_complete`, true);
-    this.saveSystem.requestSave();
+    // CRITICAL: Flush immediately at ending (journal/stats/flags just updated)
+    this.saveSystem.flushImmediate(() => this.buildSaveData());
 
     // Optional fullscreen CG — shown only if the character declares one
     // for this ending (and only on first unlock, preserving prior behavior).
@@ -1551,7 +1552,8 @@ export class FloaterGame extends Component {
       console.log(`[FloaterGame] No ending visuals for ${this.fish.id}/${type} — skipping ending phase`);
       this.currentCastIndex++;
       this.perFishCastIndex[this.fish.id] = this.currentCastIndex;
-      this.saveSystem.requestSave();
+      // CRITICAL: Flush immediately (cast index advancement is critical state)
+      this.saveSystem.flushImmediate(() => this.buildSaveData());
       this.enterLakeIdle();
       return;
     }
@@ -2536,17 +2538,14 @@ export class FloaterGame extends Component {
     allFish[this.fish.id] = {
       affection: this.fishAffection.value,
       drift: this.fish.currentDrift,
-      peakValue: this.fishAffection.peakValue,
-      lastChangeSessionId: this.fishAffection.lastChangeSessionId,
-      lastChangeDelta: this.fishAffection.lastChangeDelta,
     };
 
     return {
       fish: allFish,
       flags: this.flagSystem.serialize(),
       seenBeats: Array.from(this.seenBeats),
-      castCount: this.castCount,
-      currentCastIndex: this.currentCastIndex,
+      // castCount and currentCastIndex no longer persisted —
+      // derived from globalStats.totalCasts and perFishCastIndex on load
       quests: this.questSystem.serialize(),
       perFishCastIndex: { ...this.perFishCastIndex },
       cgUnlocks: this.cgGallerySystem.serialize(),
@@ -2579,14 +2578,7 @@ export class FloaterGame extends Component {
       }
       this.flagSystem.deserialize(data.flags);
       this.seenBeats = new Set(data.seenBeats);
-      this.castCount = data.castCount;
-      this.currentCastIndex = data.currentCastIndex ?? 0;
-      if (data.quests) {
-        this.questSystem.deserialize(data.quests);
-      }
-      if (data.perFishCastIndex) {
-        this.perFishCastIndex = { ...data.perFishCastIndex };
-      }
+
       if (data.cgUnlocks) {
         this.cgGallerySystem.deserialize(data.cgUnlocks);
       }
@@ -2594,7 +2586,34 @@ export class FloaterGame extends Component {
         this.journalSystem.deserialize(data.journal);
       }
       if (data.globalStats) {
-        this.globalStatsSystem.deserialize(data.globalStats);
+        // Pass journal entries and flags to reconstruct derived stats
+        this.globalStatsSystem.deserialize(
+          data.globalStats,
+          this.journalSystem.getAllFishEntries(),
+          this.flagSystem.serialize(),
+        );
+      }
+
+      // Reconstruct castCount from globalStats.totalCasts (or legacy field)
+      this.castCount = this.globalStatsSystem.getStats().totalCasts || data.castCount || 0;
+
+      // Reconstruct currentCastIndex from perFishCastIndex (or legacy field)
+      if (data.perFishCastIndex) {
+        this.perFishCastIndex = { ...data.perFishCastIndex };
+        this.currentCastIndex = this.perFishCastIndex[this.fish.id] ?? data.currentCastIndex ?? 0;
+      } else {
+        this.currentCastIndex = data.currentCastIndex ?? 0;
+        this.perFishCastIndex = {};
+        if (this.currentCastIndex > 0) {
+          this.perFishCastIndex[this.fish.id] = this.currentCastIndex;
+        }
+      }
+
+      if (data.quests) {
+        this.questSystem.deserialize(data.quests);
+        // Reconstruct completedQuests from current conditions + flags
+        const allChars = characterRegistry.getAllCharacters().map(c => ({ id: c.id, questRequirement: c.questRequirement }));
+        this.questSystem.reconstructCompletedQuests(allChars, this.flagSystem);
       }
       console.log(`[FloaterGame] Loaded save: castCount=${this.castCount}, currentCastIndex=${this.currentCastIndex}`);
     } else {

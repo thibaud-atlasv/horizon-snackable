@@ -67,6 +67,7 @@ export class CharacterCardViewModel extends UiViewModel {
   /** TextureAsset variant for sprite-source bindings; falls back to spritePath. */
   texture?: TextureAsset;
   accentColor: string = '#3A4A5A';
+  portraitOpacity: number = 1.0;
 }
 
 @uiViewModel()
@@ -418,6 +419,7 @@ export class FloaterViewModel extends UiViewModel {
       vm.casts = c.casts;
       vm.unlocked = c.unlocked;
       vm.completed = c.completed;
+      vm.portraitOpacity = c.completed ? 0.5 : 1.0;
       vm.spritePath = c.spritePath;
       vm.texture = c.texture;
       vm.accentColor = c.accentColor;

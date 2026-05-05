@@ -168,7 +168,7 @@ export class QuestSystem {
 
   serialize(): QuestSaveData {
     return {
-      completedQuests: Array.from(this.completedQuests),
+      // completedQuests not saved — re-derived from conditions on load
       fishTalkedTo: Array.from(this.fishTalkedTo),
       fishMadeLeave: Array.from(this.fishMadeLeave),
       luresUsed: Array.from(this.luresUsed),
@@ -181,6 +181,18 @@ export class QuestSystem {
     this.fishMadeLeave = new Set(data.fishMadeLeave ?? []);
     this.luresUsed = new Set(data.luresUsed ?? []);
     console.log(`[QuestSystem] Loaded: ${this.completedQuests.size} completed, ${this.fishTalkedTo.size} talked, ${this.fishMadeLeave.size} left, ${this.luresUsed.size} lures`);
+  }
+
+  /** Reconstruct completedQuests from current conditions. Call after deserialize + flags loaded. */
+  reconstructCompletedQuests(characters: { id: string; questRequirement?: QuestRequirement }[], flagSystem: FlagSystem): void {
+    for (const char of characters) {
+      if (!char.questRequirement) continue;
+      if (this.completedQuests.has(char.id)) continue;
+      if (this.checkRequirement(char.questRequirement, flagSystem)) {
+        this.completedQuests.add(char.id);
+      }
+    }
+    console.log(`[QuestSystem] Reconstructed ${this.completedQuests.size} completed quests`);
   }
 
   /** Reset all quest progress */

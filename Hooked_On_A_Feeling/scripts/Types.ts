@@ -182,9 +182,9 @@ export interface LureReaction {
 
 // === Journal Types (SYS-05-JOURNAL) ===
 export interface JournalFishEntry {
-  fishId: string;
+  fishId: string; // kept in runtime for convenience, but NOT persisted (it's the map key)
   unlocked: boolean;
-  species: string;
+  species: string; // NOT persisted — rebuilt from CharacterRegistry
   expressionsSeen: ExpressionState[];
   castsMade: number;
 }
@@ -204,10 +204,12 @@ export type QuestRequirement =
 
 // === Quest Save Data ===
 export interface QuestSaveData {
-  completedQuests: string[];   // character IDs with completed quests
+  // completedQuests removed — derived from fishTalkedTo/fishMadeLeave/luresUsed + flags on load
   fishTalkedTo: string[];      // fish IDs the player has talked to
   fishMadeLeave: string[];     // fish IDs that have departed
   luresUsed: string[];         // lure IDs that have been used in a cast
+  // Legacy field (read for backward compat, never written)
+  completedQuests?: string[];
 }
 
 // === Fact Definitions (Flag-based journal observations) ===
@@ -283,23 +285,27 @@ export interface SaveData {
   fish: Record<string, FishSaveData>;
   flags: Record<string, boolean | number>;
   seenBeats: string[];
-  castCount: number;
-  currentCastIndex: number;
   lures?: LureSaveData;
   journal?: JournalSaveData;
   quests?: QuestSaveData;
   perFishCastIndex?: Record<string, number>;
   cgUnlocks?: string[];
   globalStats?: GlobalStatsSaveData;
+  // Legacy fields (read for backward compat, never written)
+  castCount?: number;
+  currentCastIndex?: number;
 }
 
 // Forward declaration for GlobalStats (actual interface in GlobalStatsSystem.ts)
 export interface GlobalStatsSaveData {
   totalCasts: number;
-  totalCharactersMet: number;
-  totalFactsDiscovered: number;
+  // totalCharactersMet removed — derived from journal.fishEntries on load
+  // totalFactsDiscovered removed — derived from flags + CharacterRegistry on load
   totalPlaySessions: number;
   unlockedBadges: string[];
+  // Legacy fields (read for backward compat, never written)
+  totalCharactersMet?: number;
+  totalFactsDiscovered?: number;
 }
 
 export interface LureSaveData {
@@ -317,7 +323,9 @@ export interface JournalSaveData {
 export interface FishSaveData {
   affection: number;
   drift: DriftState;
-  peakValue: number;
-  lastChangeSessionId: string;
-  lastChangeDelta: number;
+  // peakValue, lastChangeSessionId, lastChangeDelta removed — diagnostic only, not needed for gameplay
+  // Legacy fields (read for backward compat, never written)
+  peakValue?: number;
+  lastChangeSessionId?: string;
+  lastChangeDelta?: number;
 }

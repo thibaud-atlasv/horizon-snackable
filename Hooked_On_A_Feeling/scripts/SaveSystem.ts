@@ -30,6 +30,18 @@ export class SaveSystem {
     console.log('[SaveSystem] Save requested');
   }
 
+  /**
+   * Immediately flush a save to persistent storage, bypassing the delay timer.
+   * Use at critical moments (departure, ending) to prevent data loss on reload.
+   */
+  flushImmediate(getData: () => SaveData): void {
+    this.pendingSave = false;
+    this.saveTimer = 0;
+    const data = getData();
+    this.writeSave(data);
+    console.log('[SaveSystem] Immediate flush complete');
+  }
+
   /** Update timer, execute save when ready. Returns true if save was executed. */
   update(dt: number, getData: () => SaveData): boolean {
     if (!this.pendingSave) return false;
