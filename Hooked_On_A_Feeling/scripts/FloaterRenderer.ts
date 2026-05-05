@@ -39,7 +39,6 @@ import { Vec3D } from './Vec3D';
 import {
   bgLilyShallowsTexture,
   titleBackgroundTexture,
-  nereiaNeutralTexture,
   emotionCuriosityTexture, emotionSurpriseTexture, emotionWarmthTexture,
   emotionShockTexture, emotionHesitationTexture, emotionContentmentTexture,
   emotionSadnessTexture, emotionBoredomTexture, emotionDelightTexture,
@@ -93,7 +92,7 @@ export class FloaterRenderer {
     this.builder.drawRect(this.titleBgBrush, null, { x: 0, y: 0, width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
   }
 
-  drawFishPortrait(alpha: number, offsetX: number = 0, offsetY: number = 0, portraitTexture: TextureAsset = nereiaNeutralTexture): void {
+  drawFishPortrait(alpha: number, offsetX: number, offsetY: number, portraitTexture: TextureAsset): void {
     if (alpha <= 0) return;
     const size = FISH_PORTRAIT_SIZE;
     const x = FISH_PORTRAIT_X + offsetX;

@@ -119,6 +119,16 @@ The game uses a **modular character system** where each fish is a self-contained
 - **Zones:** Mid, Far (contrasts with Nereia's Near/Mid)
 - **Catch Sequence:** Choice is "Reel" or "Aki" (her real name)
 
+#### Fugu — Poisson-Globe / Pufferfish (Primary, 5-tier ROMANCE_5ACT arc)
+- **Species reputation:** Dangerous, toxic, avoided
+- **Actual personality:** Desperately lonely, abandoned by family due to toxic spines. Frenetic energy hides deep sadness. Talks nonstop to fill the silence.
+- **Arc:** Overexcited first contact → Reveals toxic nature → Shares childhood abandonment → First comfortable silence → The friendship choice
+- **Voice:** Short energetic bursts, repetitions ("Vraiment !"), self-interruptions, "crois-moi !" as verbal signature, sudden silences when loneliness surfaces
+- **Lure affinity:** Feather Fly, Red Spinner; dislikes Gold Teardrop, Bare Hook
+- **Accent colour:** Warm orange #FFB84D
+- **Zones:** Mid, Far (avoids shallow exposed waters)
+- **Catch Sequence:** Choice is "Reel" or "Fugu" (let him swim free)
+
 ### Future Characters (Not Yet Implemented)
 The architecture supports up to 6 fish characters (3 primary arcs, 2 secondary, 1 hidden). Additional characters can be added by:
 1. Creating a single `CharacterData_<Name>.ts` file containing ALL content (metadata, dialogue for all tiers, lure preferences, quest hints, catch sequence, endings)

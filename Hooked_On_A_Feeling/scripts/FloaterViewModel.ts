@@ -61,6 +61,30 @@ export class DotViewModel extends UiViewModel {
 }
 
 @uiViewModel()
+export class CharacterCardViewModel extends UiViewModel {
+  id: string = '';
+  name: string = '???';
+  species: string = 'Unknown';
+  tier: string = '';
+  casts: string = '0';
+  unlocked: boolean = false;
+  spritePath: string = '';
+  /** TextureAsset variant for sprite-source bindings; falls back to spritePath. */
+  texture?: TextureAsset;
+  accentColor: string = '#3A4A5A';
+}
+
+@uiViewModel()
+export class CGCardViewModel extends UiViewModel {
+  id: string = '';
+  name: string = '???';
+  unlocked: boolean = false;
+  locked: boolean = true;
+  spritePath: string = '';
+  texture?: TextureAsset;
+}
+
+@uiViewModel()
 export class StatItemViewModel extends UiViewModel {
   icon: string = '';
   label: string = '';
@@ -123,8 +147,6 @@ export class FloaterViewModel extends UiViewModel {
 
   // Redesigned HUD: portrait icon + name/mood + progress dots
   hudPortrait?: TextureAsset;
-  hudShowNereia: boolean = true;
-  hudShowKasha: boolean = false;
   hudNameMoodText: string = '';
   hudNameText: string = '';
   hudMoodText: string = '';
@@ -231,43 +253,16 @@ export class FloaterViewModel extends UiViewModel {
   charDetailQuestName: string = '';
   charDetailQuestHint: string = '';
   charDetailAccentColor: string = '#9B7FCC';
-  charDetailPortrait: string = 'sprites/nereia_neutral.png';
-  charDetailShowNereia: boolean = false;
-  charDetailShowKasha: boolean = false;
+  charDetailTierColor: string = '#8A9AB0';
+  /** TextureAsset for the detail portrait — bound directly to Image.Source. */
+  charDetailPortrait?: TextureAsset;
 
-  // === Character Cards (Fish tab) ===
-  // Nereia card
-  nereiaCardVisible: boolean = false;
-  nereiaCardName: string = '???';
-  nereiaCardSpecies: string = 'Unknown';
-  nereiaCardTier: string = '';
-  nereiaCardCasts: string = '0';
-  nereiaCardUnlocked: boolean = false;
-  // Kasha card
-  kashaCardVisible: boolean = true;
-  kashaCardName: string = '???';
-  kashaCardSpecies: string = 'Unknown';
-  kashaCardTier: string = '';
-  kashaCardCasts: string = '0';
-  kashaCardUnlocked: boolean = false;
+  // === Character Cards (Fish tab) — dynamic collection bound to ItemsControl ===
+  characterCards: readonly CharacterCardViewModel[] = [];
 
-  // === CG Gallery Cards (Collection tab grid) ===
-  // Portrait CGs
-  cgPortraitNereiaUnlocked: boolean = false;
-  cgPortraitNereiaLocked: boolean = true;
-  cgPortraitNereiaName: string = '???';
-  cgPortraitKashaUnlocked: boolean = false;
-  cgPortraitKashaLocked: boolean = true;
-  cgPortraitKashaName: string = '???';
-  // Ending CGs
-  cgEndingNereiaReelUnlocked: boolean = false;
-  cgEndingNereiaReelLocked: boolean = true;
-  cgEndingNereiaReelName: string = '???';
-  cgEndingNereiaReleaseUnlocked: boolean = false;
-  cgEndingNereiaReleaseLocked: boolean = true;
-  cgEndingNereiaReleaseName: string = '???';
-  // Collection progress text
-  cgCollectionProgress: string = 'Collection (0/4)';
+  // === CG Gallery Cards (Collection tab grid) — dynamic collection ===
+  cgCards: readonly CGCardViewModel[] = [];
+  cgCollectionProgress: string = 'Collection (0/0)';
 
   // === Inventory (Tackle Box) State ===
   inventoryVisible: boolean = false;
@@ -410,6 +405,57 @@ export class FloaterViewModel extends UiViewModel {
     this.lure1Equipped = lures[0]?.isEquipped ?? false;
     this.lure2Equipped = lures[1]?.isEquipped ?? false;
     this.lure3Equipped = lures[2]?.isEquipped ?? false;
+  }
+
+  /** Replace the journal character-card collection (Fish tab grid). */
+  setCharacterCards(cards: Array<{
+    id: string;
+    name: string;
+    species: string;
+    tier: string;
+    casts: string;
+    unlocked: boolean;
+    spritePath: string;
+    texture?: TextureAsset;
+    accentColor: string;
+  }>): void {
+    const vms: CharacterCardViewModel[] = [];
+    for (const c of cards) {
+      const vm = new CharacterCardViewModel();
+      vm.id = c.id;
+      vm.name = c.name;
+      vm.species = c.species;
+      vm.tier = c.tier;
+      vm.casts = c.casts;
+      vm.unlocked = c.unlocked;
+      vm.spritePath = c.spritePath;
+      vm.texture = c.texture;
+      vm.accentColor = c.accentColor;
+      vms.push(vm);
+    }
+    this.characterCards = vms;
+  }
+
+  /** Replace the CG gallery card collection (Collection tab grid). */
+  setCGCards(cards: Array<{
+    id: string;
+    name: string;
+    unlocked: boolean;
+    spritePath: string;
+    texture?: TextureAsset;
+  }>): void {
+    const vms: CGCardViewModel[] = [];
+    for (const c of cards) {
+      const vm = new CGCardViewModel();
+      vm.id = c.id;
+      vm.name = c.unlocked ? c.name : '???';
+      vm.unlocked = c.unlocked;
+      vm.locked = !c.unlocked;
+      vm.spritePath = c.spritePath;
+      vm.texture = c.texture;
+      vms.push(vm);
+    }
+    this.cgCards = vms;
   }
 
   /** Update per-lure equipped border state and display name/description */

@@ -8,16 +8,28 @@
  * 2. Import and register here with characterRegistry.register(YOUR_CHARACTER)
  */
 
-import type { CharacterConfig, CastData, Beat, CatchSequenceData, LakeZone } from './Types';
+import type { CharacterConfig, CastData, Beat, CatchSequenceData, CGData, LakeZone } from './Types';
+import type { TextureAsset } from 'meta/worlds';
 import { NEREIA_CHARACTER } from './CharacterData_Nereia';
 import { KASHA_CHARACTER } from './CharacterData_Kasha';
+import { FUGU_CHARACTER } from './CharacterData_Fugu';
 
 class CharacterRegistry {
   private characters: Map<string, CharacterConfig> = new Map();
+  private orderedIds: string[] = [];
 
-  /** Register a character configuration */
+  /** Register a character configuration. Insertion order is preserved. */
   register(config: CharacterConfig): void {
+    if (!this.characters.has(config.id)) this.orderedIds.push(config.id);
     this.characters.set(config.id, config);
+  }
+
+  /** First-registered character id, used as the default starting fish. */
+  getDefaultCharacterId(): string {
+    if (this.orderedIds.length === 0) {
+      throw new Error('[CharacterRegistry] No characters registered');
+    }
+    return this.orderedIds[0];
   }
 
   /** Get a character by ID */
@@ -25,14 +37,19 @@ class CharacterRegistry {
     return this.characters.get(id);
   }
 
-  /** Get all registered character IDs */
+  /** Get all registered character IDs (registration order). */
   getAllCharacterIds(): string[] {
-    return Array.from(this.characters.keys());
+    return this.orderedIds.slice();
   }
 
-  /** Get all registered characters */
+  /** Get all registered characters (registration order). */
   getAllCharacters(): CharacterConfig[] {
-    return Array.from(this.characters.values());
+    const out: CharacterConfig[] = [];
+    for (const id of this.orderedIds) {
+      const c = this.characters.get(id);
+      if (c) out.push(c);
+    }
+    return out;
   }
 
   /**
@@ -122,6 +139,24 @@ class CharacterRegistry {
   getQuestName(characterId: string): string {
     return this.characters.get(characterId)?.questName ?? 'Unknown Quest';
   }
+
+  /** Get every CG declared by every registered character. */
+  getAllCGs(): CGData[] {
+    const out: CGData[] = [];
+    for (const c of this.getAllCharacters()) {
+      if (c.cgs) out.push(...c.cgs);
+    }
+    return out;
+  }
+
+  /** Map from CG id → TextureAsset (for fullscreen viewer + thumbnails). */
+  getCGTextureMap(): Record<string, TextureAsset> {
+    const map: Record<string, TextureAsset> = {};
+    for (const cg of this.getAllCGs()) {
+      map[cg.id] = cg.thumbnailTexture;
+    }
+    return map;
+  }
 }
 
 // === Singleton Registry ===
@@ -130,3 +165,4 @@ export const characterRegistry = new CharacterRegistry();
 // === Register all implemented characters ===
 characterRegistry.register(NEREIA_CHARACTER);
 characterRegistry.register(KASHA_CHARACTER);
+characterRegistry.register(FUGU_CHARACTER);

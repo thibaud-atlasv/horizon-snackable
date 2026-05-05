@@ -2,63 +2,28 @@
  * CGGallerySystem — Manages CG (Computer Graphics) gallery unlocks and state.
  * Handles: CG unlock tracking, serialization for save/load, gallery display data.
  *
- * CGs are defined per-character in CharacterData files and registered here.
+ * CGs are declared per-character on each CharacterConfig (see CharacterData_*.ts)
+ * and aggregated here via the CharacterRegistry, so adding a new character
+ * auto-registers their CGs without touching this file.
  */
 
 import type { CGData, CGGalleryCard } from './Types';
 import type { TextureAsset } from 'meta/worlds';
-import { nereiaNeutralTexture, kashaNeutralTexture, cgNereiaLoveEndTexture, cgNereiaReleaseEndTexture } from './Assets';
+import { characterRegistry } from './CharacterRegistry';
 
-// === CG Registry: All CGs in the game ===
-const CG_REGISTRY: CGData[] = [
-  // Portrait CGs (unlocked on first encounter)
-  {
-    id: 'portrait_nereia',
-    characterId: 'nereia',
-    name: 'Nereia',
-    description: 'First encounter with the midnight koi.',
-    unlockCondition: 'Meet Nereia for the first time',
-    thumbnailPath: 'sprites/nereia_neutral.png',
-  },
-  {
-    id: 'portrait_kasha',
-    characterId: 'kasha',
-    name: 'Kasha',
-    description: 'First encounter with the crimson veiltail.',
-    unlockCondition: 'Meet Kasha for the first time',
-    thumbnailPath: 'sprites/char_veiltail_neutral.png',
-  },
-  // Ending CGs (unlocked via catch sequences)
-  {
-    id: 'ending_nereia_reel',
-    characterId: 'nereia',
-    name: 'The Last Morning',
-    description: 'The data ends here. The lake remembers.',
-    unlockCondition: 'Choose "Reel" in Nereia\'s catch sequence',
-    thumbnailPath: 'sprites/nereia_love_end.png',
-  },
-  {
-    id: 'ending_nereia_release',
-    characterId: 'nereia',
-    name: 'The File Is Closed',
-    description: 'The lake remembers. You will remember. It is more than enough.',
-    unlockCondition: 'Choose Nereia\'s name in the catch sequence',
-    thumbnailPath: 'sprites/nereia_release_end.png',
-  },
-];
-
-// Map from old CG IDs to new IDs (backward compat)
+// Map from old CG IDs to new IDs (backward compat for legacy saves).
 const CG_ID_MIGRATION: Record<string, string> = {
   'nereia_love_end': 'ending_nereia_reel',
 };
 
-// Map from CG ID to TextureAsset for XAML image binding
-export const CG_TEXTURE_MAP: Record<string, TextureAsset> = {
-  'portrait_nereia': nereiaNeutralTexture,
-  'portrait_kasha': kashaNeutralTexture,
-  'ending_nereia_reel': cgNereiaLoveEndTexture,
-  'ending_nereia_release': cgNereiaReleaseEndTexture,
-};
+/**
+ * CG ID → TextureAsset, derived dynamically from the character registry.
+ * Always reflects current registry contents — adding a new character with CGs
+ * immediately works without touching this file.
+ */
+export function getCGTextureMap(): Record<string, TextureAsset> {
+  return characterRegistry.getCGTextureMap();
+}
 
 export class CGGallerySystem {
   private unlockedCGs: Set<string> = new Set();
@@ -68,9 +33,14 @@ export class CGGallerySystem {
 
   // === CG Unlock Management ===
 
-  /** Unlock a CG by ID. Returns true if newly unlocked. */
+  /**
+   * Unlock a CG by ID. Returns true if newly unlocked.
+   * Silently no-ops if the CG isn't declared by any registered character
+   * (so NPCs without portrait/ending CGs don't pollute the unlock set).
+   */
   unlockCG(cgId: string): boolean {
     if (this.unlockedCGs.has(cgId)) return false;
+    if (!this.getCG(cgId)) return false;
     this.unlockedCGs.add(cgId);
     console.log(`[CGGallerySystem] CG unlocked: ${cgId}`);
     return true;
@@ -87,32 +57,45 @@ export class CGGallerySystem {
     return this.unlockedCGs.has(cgId);
   }
 
-  /** Get all CG definitions */
+  /** Get all CG definitions (aggregated from every registered character). */
   getAllCGs(): CGData[] {
-    return CG_REGISTRY;
+    return characterRegistry.getAllCGs();
   }
 
   /** Get CGs for a specific character */
   getCGsForCharacter(characterId: string): CGData[] {
-    return CG_REGISTRY.filter(cg => cg.characterId === characterId);
+    return characterRegistry.getCharacter(characterId)?.cgs ?? [];
   }
 
-  /** Get total and unlocked counts */
+  /** Look up a single CG definition by id. */
+  getCG(cgId: string): CGData | undefined {
+    return this.getAllCGs().find(cg => cg.id === cgId);
+  }
+
+  /** Get the texture for a CG id, falling back to the default character's portrait. */
+  getCGTexture(cgId: string): TextureAsset {
+    const tex = characterRegistry.getCGTextureMap()[cgId];
+    if (tex) return tex;
+    return characterRegistry.getCharacter(characterRegistry.getDefaultCharacterId())!.portraitTexture;
+  }
+
+  /** Get total and unlocked counts (counts only CGs declared in the registry). */
   getProgress(): { total: number; unlocked: number } {
-    return {
-      total: CG_REGISTRY.length,
-      unlocked: this.unlockedCGs.size,
-    };
+    const all = this.getAllCGs();
+    let unlocked = 0;
+    for (const cg of all) if (this.unlockedCGs.has(cg.id)) unlocked++;
+    return { total: all.length, unlocked };
   }
 
   /** Get gallery cards for XAML grid display */
   getGalleryCards(): CGGalleryCard[] {
-    return CG_REGISTRY.map(cg => ({
+    return this.getAllCGs().map(cg => ({
       id: cg.id,
       name: cg.name,
       characterId: cg.characterId,
       isUnlocked: this.unlockedCGs.has(cg.id),
       thumbnailPath: cg.thumbnailPath,
+      thumbnailTexture: cg.thumbnailTexture,
     }));
   }
 
@@ -164,7 +147,6 @@ export class CGGallerySystem {
     this.unlockedCGs = new Set();
     if (!data) return;
     for (const id of data) {
-      // Migrate old IDs to new IDs
       const migratedId = CG_ID_MIGRATION[id] ?? id;
       this.unlockedCGs.add(migratedId);
     }
