@@ -19,18 +19,12 @@ export class FloaterLureSelectedPayload {
   readonly parameter: string = "";
 }
 
-@serializable()
-export class FloaterCatchChoicePayload {
-  readonly parameter: string = "";
-}
-
 // === Events ===
 export const onFloaterStartGame = new UiEvent('onFloaterStartGame');
 export const onFloaterActionSelected = new UiEvent('onFloaterActionSelected', FloaterActionSelectedPayload);
 export const onFloaterNewCast = new UiEvent('onFloaterNewCast');
 export const onFloaterSkipBeat = new UiEvent('onFloaterSkipBeat');
 export const onFloaterCastStart = new UiEvent('onFloaterCastStart');
-export const onFloaterCatchChoice = new UiEvent('onFloaterCatchChoice', FloaterCatchChoicePayload);
 
 // Journal events
 export const onJournalOpen = new UiEvent('onJournalOpen');
@@ -68,6 +62,7 @@ export class CharacterCardViewModel extends UiViewModel {
   tier: string = '';
   casts: string = '0';
   unlocked: boolean = false;
+  completed: boolean = false;
   spritePath: string = '';
   /** TextureAsset variant for sprite-source bindings; falls back to spritePath. */
   texture?: TextureAsset;
@@ -178,13 +173,11 @@ export class FloaterViewModel extends UiViewModel {
   departureText: string = '';
   idlePromptText: string = 'Tap to Cast again';
 
-  // Catch Sequence
-  catchChoiceVisible: boolean = false;
-  catchChoiceReleaseLabel: string = 'Release';
-
   // Ending overlay
   endingVisible: boolean = false;
   endingText: string = '';
+  endingOverlayOpacity: number = 0;
+  endingTapVisible: boolean = false;
 
   // Events
   override readonly events = {
@@ -193,7 +186,6 @@ export class FloaterViewModel extends UiViewModel {
     onFloaterNewCast,
     onFloaterSkipBeat,
     onFloaterCastStart,
-    onFloaterCatchChoice,
     onJournalOpen,
     onJournalClose,
     onJournalTabSwitch,
@@ -331,15 +323,11 @@ export class FloaterViewModel extends UiViewModel {
     const clamped = Math.max(GAUGE_MIN, Math.min(GAUGE_MAX, affectionValue));
     // Normalize: 0 = bottom (Low), 1 = top (High)
     const normalized = (clamped - GAUGE_MIN) / (GAUGE_MAX - GAUGE_MIN);
-    // Gauge inner height (210px border - 2*1px border thickness = 208px),
-    // capped to 196px to respect corner radius padding.
-    const GAUGE_TRACK = 196;
-    // Fill height: gradient portion from bottom, 0-196px
+    // Inner content area = 210 outer - 2*1.5 border = 207px. Use the full
+    // track so AFFECTION_MAX (50) visually reaches the top of the gauge.
+    const GAUGE_TRACK = 207;
     this.gaugeFillHeight = normalized * GAUGE_TRACK;
-    // Cursor translateY: aligns cursor center with fill top edge.
-    // Cursor (10px tall) at VerticalAlignment=Bottom, Margin bottom=12 → center at y=203 from top.
-    // Inner gauge bottom at y=219 from top. Fill top = 219 - gaugeFillHeight.
-    // To match: 203 + translateY = 219 - gaugeFillHeight → translateY = 16 - gaugeFillHeight.
+    // Cursor translateY aligns cursor center with fill top edge.
     this.gaugeMarkerTranslateY = 16 - this.gaugeFillHeight;
   }
 
@@ -415,6 +403,7 @@ export class FloaterViewModel extends UiViewModel {
     tier: string;
     casts: string;
     unlocked: boolean;
+    completed: boolean;
     spritePath: string;
     texture?: TextureAsset;
     accentColor: string;
@@ -428,6 +417,7 @@ export class FloaterViewModel extends UiViewModel {
       vm.tier = c.tier;
       vm.casts = c.casts;
       vm.unlocked = c.unlocked;
+      vm.completed = c.completed;
       vm.spritePath = c.spritePath;
       vm.texture = c.texture;
       vm.accentColor = c.accentColor;

@@ -258,7 +258,7 @@
       <local:DrawingSurface x:Name="GameCanvas" Width="480" Height="800" Commands="{Binding drawCommands}" />
 
       <!-- Layer 2: HUD overlay (top-left) — Circular portrait icon + name/mood -->
-      <StackPanel x:Name="HudOverlay" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="16,16,16,0" Visibility="Collapsed">
+      <StackPanel x:Name="HudOverlay" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="16,16,16,0" Visibility="Collapsed" d:IsHidden="True">
         <!-- Row: Portrait icon + Name + Mood -->
         <StackPanel Orientation="Horizontal">
           <!-- Circular portrait icon with border — uses visibility toggle for each character -->
@@ -313,7 +313,7 @@
               Command="{Binding events.onFloaterSkipBeat}"
               Style="{StaticResource MenuButtonStyle}"
               Opacity="{Binding skipButtonOpacity}"
-              IsEnabled="{Binding skipButtonVisible}" Content="SKIP" />
+              IsEnabled="{Binding skipButtonVisible}" Content="SKIP" d:IsHidden="True" />
 
       <!-- Layer 4: Dialogue Panel (XAML-based) — below portrait area -->
       <Grid x:Name="DialoguePanel" VerticalAlignment="Top" Visibility="{Binding dialogueVisible, Converter={StaticResource BoolToVis}}" Margin="20,175,20,0">
@@ -358,7 +358,7 @@
       <!-- Layer 4b: Affection Gauge (right side, during dialogue) -->
       <Grid x:Name="GaugeRoot" HorizontalAlignment="Right" VerticalAlignment="Center"
             Visibility="{Binding gaugeVisible, Converter={StaticResource BoolToVis}}"
-            Margin="0,0,10,0" Width="60" Height="260" Opacity="0.95">
+            Margin="0,0,10,0" Width="60" Height="260" Opacity="0.95" d:IsHidden="True">
         <!-- Gauge container with labels to the right -->
         <Grid x:Name="GaugeContainer" VerticalAlignment="Center" HorizontalAlignment="Left" Width="60" Height="220">
           <!-- "Bond" label above gauge bar -->
@@ -409,8 +409,8 @@
           <!-- Labels: High / Ideal / Low — with 1px black stroke -->
           <TextBlock x:Name="LabelHigh" Text="High" FontSize="9" Foreground="#EE6688" FontWeight="Normal"
                      HorizontalAlignment="Left" VerticalAlignment="Bottom" Stroke="#FF000000" StrokeThickness="1" Margin="28,0,0,190"/>
-          <TextBlock x:Name="LabelIdeal" Text="Ideal" FontSize="9" Foreground="#C8A0FF" FontWeight="Normal"
-                     HorizontalAlignment="Left" VerticalAlignment="Bottom" Stroke="#FF000000" StrokeThickness="1" Margin="28,0,0,98" />
+          <TextBlock x:Name="LabelIdeal" FontSize="9" Foreground="#C8A0FF" FontWeight="Normal"
+                     HorizontalAlignment="Left" VerticalAlignment="Bottom" Stroke="#FF000000" StrokeThickness="1" Margin="28,0,0,98" Text="Mid" />
           <TextBlock x:Name="LabelLow" Text="Low" FontSize="9" Foreground="#77BBEE" FontWeight="Normal"
                      HorizontalAlignment="Left" VerticalAlignment="Bottom" Stroke="#FF000000" StrokeThickness="1" Margin="28,0,0,6" />
 
@@ -430,7 +430,7 @@
 
       <!-- Layer 5: Action Buttons (XAML circular buttons with ground strip) -->
       <Grid x:Name="ActionMenu" VerticalAlignment="Bottom" Visibility="{Binding actionMenuVisible, Converter={StaticResource BoolToVis}}"
-            Opacity="{Binding actionMenuOpacity}" Height="135">
+            Opacity="{Binding actionMenuOpacity}" Height="135" d:IsHidden="True">
         <Grid.RenderTransform>
           <TranslateTransform Y="{Binding actionMenuTranslateY}" />
         </Grid.RenderTransform>
@@ -474,6 +474,7 @@
                     </Trigger>
                     <Trigger Property="IsEnabled" Value="False">
                       <Setter TargetName="BtnBorder" Property="Opacity" Value="0.4" />
+                      <Setter Property="IsHitTestVisible" Value="False" />
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -512,6 +513,7 @@
                     </Trigger>
                     <Trigger Property="IsEnabled" Value="False">
                       <Setter TargetName="BtnBorder" Property="Opacity" Value="0.4" />
+                      <Setter Property="IsHitTestVisible" Value="False" />
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -550,6 +552,7 @@
                     </Trigger>
                     <Trigger Property="IsEnabled" Value="False">
                       <Setter TargetName="BtnBorder" Property="Opacity" Value="0.4" />
+                      <Setter Property="IsHitTestVisible" Value="False" />
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -588,6 +591,7 @@
                     </Trigger>
                     <Trigger Property="IsEnabled" Value="False">
                       <Setter TargetName="BtnBorder" Property="Opacity" Value="0.4" />
+                      <Setter Property="IsHitTestVisible" Value="False" />
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -728,7 +732,7 @@
         <Button Content="Start" Width="200" Height="54" FontSize="20" FontWeight="Bold"
                 Foreground="#FFFFFF" BorderThickness="0"
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,60"
-                Command="{Binding events.onFloaterStartGame}">
+                Command="{Binding events.onFloaterStartGame}" d:IsHidden="True">
           <Button.Template>
             <ControlTemplate TargetType="Button">
               <Border x:Name="OuterGlow" BorderBrush="#884A627A" BorderThickness="2" CornerRadius="12" Padding="0">
@@ -760,11 +764,21 @@
             </ControlTemplate>
           </Button.Template>
         </Button>
+        <Image x:Name="rod" Source="/Root;component/sprites/rod.png" RenderTransformOrigin="0.5,0.5">
+          <Image.RenderTransform>
+            <TransformGroup>
+              <ScaleTransform/>
+              <SkewTransform/>
+              <RotateTransform Angle="42"/>
+              <TranslateTransform Y="113" X="188"/>
+            </TransformGroup>
+          </Image.RenderTransform>
+        </Image>
       </Grid>
 
       <!-- Layer 7: Departure overlay -->
       <Grid x:Name="DepartureOverlay" Visibility="{Binding departureVisible, Converter={StaticResource BoolToVis}}"
-            Background="#AA080D14">
+            Background="#AA080D14" d:IsHidden="True">
         <TextBlock Text="{Binding departureText}" FontSize="18" FontFamily="Roboto"
                    Foreground="#C8D8E8" HorizontalAlignment="Center" VerticalAlignment="Center"
                    TextWrapping="Wrap" TextAlignment="Center" Margin="40" />
@@ -775,7 +789,7 @@
               Background="#CC0D1520" BorderBrush="#9B7FCC" BorderThickness="1"
               CornerRadius="12" Padding="20,12"
               HorizontalAlignment="Center" VerticalAlignment="Center"
-              MaxWidth="320">
+              MaxWidth="320" d:IsHidden="True">
         <TextBlock Text="{Binding tierTransitionText}"
                    Foreground="#E8EAD8" FontSize="16" FontFamily="Roboto"
                    TextAlignment="Center" TextWrapping="Wrap" />
@@ -783,36 +797,22 @@
 
       <!-- Layer 7c: No-Lure Warning -->
 
-      <!-- Layer 7d: Catch Sequence (2-choice overlay) -->
-      <Grid x:Name="CatchChoiceOverlay" Visibility="{Binding catchChoiceVisible, Converter={StaticResource BoolToVis}}"
-            Background="#CC080D14">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-          <Button Content="Reel" Width="240" Height="56" Margin="0,8"
-                  Command="{Binding events.onFloaterCatchChoice}" CommandParameter="reel"
-                  Foreground="White" FontSize="22" FontWeight="Bold"
-                  Style="{StaticResource MenuButtonStyle}" />
-          <Button Content="{Binding catchChoiceReleaseLabel}" Width="240" Height="56" Margin="0,8"
-                  Command="{Binding events.onFloaterCatchChoice}" CommandParameter="release"
-                  Foreground="White" FontSize="22" FontWeight="Bold"
-                  Style="{StaticResource MenuButtonStyle}" />
-        </StackPanel>
-      </Grid>
-
-      <!-- Layer 7e: Ending Overlay -->
+      <!-- Layer 7d: Ending Overlay -->
       <Grid x:Name="EndingOverlay" Visibility="{Binding endingVisible, Converter={StaticResource BoolToVis}}"
-            Background="#EE080D14">
+            Background="#EE080D14" Opacity="{Binding endingOverlayOpacity}" d:IsHidden="True">
         <TextBlock Text="{Binding endingText}" FontSize="16" FontFamily="Roboto"
                    Foreground="#C8D8E8" HorizontalAlignment="Center" VerticalAlignment="Center"
                    TextWrapping="Wrap" TextAlignment="Center" Margin="40"
                    LineHeight="24" />
         <TextBlock Text="Tap to continue" FontSize="13" FontFamily="Roboto"
                    Foreground="#6888A8" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                   Margin="0,0,0,48" />
+                   Margin="0,0,0,48"
+                   Visibility="{Binding endingTapVisible, Converter={StaticResource BoolToVis}}" />
       </Grid>
 
       <!-- Layer 8: Idle (between casts) -->
       <Grid x:Name="IdleOverlay" Visibility="{Binding idleVisible, Converter={StaticResource BoolToVis}}"
-            Background="#88080D14">
+            Background="#88080D14" d:IsHidden="True">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
           <TextBlock Text="{Binding idlePromptText}" FontSize="18" FontFamily="Roboto"
                      Foreground="#C8D8E8" HorizontalAlignment="Center" Margin="0,0,0,20" />
@@ -824,7 +824,7 @@
 
       <!-- Layer 9: Inventory (Tackle Box) Overlay - Simplified Grid Layout -->
       <Grid x:Name="InventoryOverlay" Visibility="{Binding inventoryVisible, Converter={StaticResource BoolToVis}}"
-            Background="#F5080D14">
+            Background="#F5080D14" d:IsHidden="True">
         <Grid Margin="12,36,12,36">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -1062,7 +1062,7 @@
 
       <!-- Layer 10: Journal Overlay (Redesigned - 3 tabs: Fish, Collection, Stats) -->
       <Grid x:Name="JournalOverlay" Visibility="{Binding journalVisible, Converter={StaticResource BoolToVis}}"
-            Background="#F5080D14">
+            Background="#F5080D14" d:IsHidden="True">
         <Grid Margin="12,36,12,36">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -1132,30 +1132,43 @@
                           <Button.Template>
                             <ControlTemplate TargetType="Button">
                               <StackPanel HorizontalAlignment="Center">
-                                <Border Width="70" Height="70" CornerRadius="35"
-                                        BorderBrush="{Binding accentColor}" BorderThickness="2" ClipToBounds="True"
-                                        HorizontalAlignment="Center">
-                                  <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                      <GradientStop Color="#1A3A5C" Offset="0" />
-                                      <GradientStop Color="#0D1E35" Offset="1" />
-                                    </LinearGradientBrush>
-                                  </Border.Background>
-                                  <Grid Margin="-2,-2,-2,-2">
-                                    <Grid.Clip>
-                                      <EllipseGeometry Center="35,35" RadiusX="33" RadiusY="33" />
-                                    </Grid.Clip>
-                                    <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <Image Stretch="UniformToFill"
-                                           Width="70" Height="70" Margin="0,8,0,0"
-                                           Visibility="{Binding unlocked, Converter={StaticResource BoolToVis}}">
-                                      <Image.Source>
-                                        <Binding Path="texture" />
-                                      </Image.Source>
-                                    </Image>
-                                  </Grid>
-                                </Border>
+                                <!-- Portrait with diagonal "Complete" overlay -->
+                                <Grid Width="70" Height="70" HorizontalAlignment="Center">
+                                  <Border Width="70" Height="70" CornerRadius="35"
+                                          BorderBrush="{Binding accentColor}" BorderThickness="2" ClipToBounds="True">
+                                    <Border.Background>
+                                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#1A3A5C" Offset="0" />
+                                        <GradientStop Color="#0D1E35" Offset="1" />
+                                      </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Grid Margin="-2,-2,-2,-2">
+                                      <Grid.Clip>
+                                        <EllipseGeometry Center="35,35" RadiusX="33" RadiusY="33" />
+                                      </Grid.Clip>
+                                      <TextBlock Text="?" FontSize="28" FontWeight="Bold" Foreground="#3A4A5A"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                      <Image Stretch="UniformToFill"
+                                             Width="70" Height="70" Margin="0,8,0,0"
+                                             Visibility="{Binding unlocked, Converter={StaticResource BoolToVis}}">
+                                        <Image.Source>
+                                          <Binding Path="texture" />
+                                        </Image.Source>
+                                      </Image>
+                                    </Grid>
+                                  </Border>
+                                  <!-- Diagonal "Complete" banner overlaid on portrait -->
+                                  <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Background="#CC000000" CornerRadius="3" Padding="6,2"
+                                          Visibility="{Binding completed, Converter={StaticResource BoolToVis}}"
+                                          RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                      <RotateTransform Angle="-30" />
+                                    </Border.RenderTransform>
+                                    <TextBlock Text="★ Complete" FontSize="9" FontWeight="Bold"
+                                               Foreground="#E8A84C" HorizontalAlignment="Center" />
+                                  </Border>
+                                </Grid>
                                 <TextBlock Text="{Binding name}" FontSize="13" FontWeight="Bold"
                                            Foreground="{Binding accentColor}" HorizontalAlignment="Center" Margin="0,6,0,0" />
                               </StackPanel>
@@ -1342,7 +1355,7 @@
 
       <!-- Layer 10a: Character Detail Overlay -->
       <Grid x:Name="CharacterDetailOverlay" Visibility="{Binding charDetailVisible, Converter={StaticResource BoolToVis}}"
-            Background="#F5080D14">
+            Background="#F5080D14" d:IsHidden="True">
         <Grid Margin="20,50,20,50">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -1449,7 +1462,7 @@
 
       <!-- Layer 10b: Reset Save Confirmation Overlay -->
       <Grid x:Name="ResetConfirmOverlay" Visibility="{Binding resetConfirmVisible, Converter={StaticResource BoolToVis}}"
-            Background="#DD080D14">
+            Background="#DD080D14" d:IsHidden="True">
         <Border Background="#FF1A1020" BorderBrush="#9B7FCC" BorderThickness="2"
                 CornerRadius="12" Padding="24,20"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -1457,7 +1470,7 @@
           <StackPanel HorizontalAlignment="Center">
             <TextBlock Text="Reset Save Data?" FontSize="20" FontWeight="Bold"
                        Foreground="#E8EAD8" HorizontalAlignment="Center" Margin="0,0,0,12" />
-            <TextBlock Text="This will permanently erase all progress, affection, journal entries, and unlocks. This cannot be undone."
+            <TextBlock Text="This will permanently erase all progress, affection, journal entries, and unlocks. Your CG collection will be preserved. This cannot be undone."
                        FontSize="13" Foreground="#AA9999" TextWrapping="Wrap"
                        HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,20" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -1473,7 +1486,7 @@
       </Grid>
       <!-- Layer 11: CG Fullscreen Viewer -->
       <Grid x:Name="CGViewerOverlay" Visibility="{Binding cgViewerVisible, Converter={StaticResource BoolToVis}}"
-            Background="#EE000000">
+            Background="#EE000000" d:IsHidden="True">
         <!-- Tap outside to close -->
         <Button Width="480" Height="800" Opacity="0"
                 Command="{Binding events.onCGViewerDismiss}" />

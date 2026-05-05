@@ -57,14 +57,14 @@ T-2313.
 The mist will lift in eleven minutes.
 You will want to remember this light.
 
-* [WAIT] #delta:1 #expr:curious #icon:hesitation
+* [WAIT] #delta:1 #expr:curious #icon:hesitation #flag:fact.nereia.ancient
     I was already here.
     ...
     That is a different statement.
     I will let you decide which is true.
     -> nereia_t1_c1_b2
 
-* [TWITCH] #delta:1 #expr:curious #icon:curiosity
+* [TWITCH] #delta:1 #expr:curious #icon:curiosity #flag:fact.nereia.ancient #flag:fact.nereia.ornamental
     Apologies.
     ...
     In 1847 a heron landed on my back.
@@ -73,7 +73,7 @@ You will want to remember this light.
     I am told I am unsettling in general.
     -> nereia_t1_c1_b2
 
-* [DRIFT] #delta:2 #expr:curious #icon:hesitation #flag:secret.nereia.first_anomaly
+* [DRIFT] #delta:2 #expr:curious #icon:hesitation #flag:secret.nereia.first_anomaly #flag:fact.nereia.ancient #flag:fact.nereia.ornamental
     Calculation.
     ...
     And the wind.
@@ -99,7 +99,7 @@ It is the name I give.
 Nereia.
 Use that one.
 
-* [WAIT] #delta:3 #expr:curious #icon:hesitation #flag:mood.nereia.fourth_person
+* [WAIT] #delta:3 #expr:curious #icon:hesitation #flag:mood.nereia.fourth_person #flag:fact.nereia.formal
     ...
     You pronounced it correctly.
     ...
@@ -110,7 +110,7 @@ Use that one.
     I am noting.
     -> nereia_t1_c1_b3
 
-* [TWITCH] #delta:1 #expr:curious #icon:curiosity #flag:secret.nereia.chosen_name
+* [TWITCH] #delta:1 #expr:curious #icon:curiosity #flag:secret.nereia.chosen_name #flag:fact.nereia.formal
     Thank you.
     ...
     I chose it.
@@ -119,7 +119,7 @@ Use that one.
     It took time.
     -> nereia_t1_c1_b3
 
-* [DRIFT] #delta:2 #expr:curious #icon:hesitation
+* [DRIFT] #delta:2 #expr:curious #icon:hesitation #flag:fact.nereia.formal
     Nereia.
     ...
     In this space-time.
@@ -198,7 +198,7 @@ I considered not surfacing.
 For approximately 1.8 seconds.
 I had never considered that.
 
-* [WAIT] #delta:2 #expr:curious #icon:hesitation
+* [WAIT] #delta:2 #expr:curious #icon:hesitation #flag:fact.nereia.counter
     ...
     Curiosity is younger than I am.
     It catches me off guard.
@@ -209,7 +209,7 @@ I had never considered that.
     I do not mind.
     -> nereia_t1_c2_b2
 
-* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:secret.nereia.knows_him
+* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:secret.nereia.knows_him #flag:fact.nereia.counter
     Humour.
     ...
     I am mastering this concept.
@@ -221,7 +221,7 @@ I had never considered that.
     Was that the wrong answer?
     -> nereia_t1_c2_b2
 
-* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.casual_compliment
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.casual_compliment #flag:fact.nereia.counter
     You are the most interesting person I have encountered.
     ...
     The mist is denser to the south.
@@ -253,7 +253,7 @@ This one is titled with a question mark.
 ...
 It is your fault.
 
-* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.first_crack
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.first_crack #flag:fact.nereia.file
     No.
     ...
     It is the right answer regardless.
@@ -265,7 +265,7 @@ It is your fault.
     I am keeping it.
     -> END
 
-* [TWITCH] #delta:3 #expr:curious #icon:curiosity #flag:mood.nereia.first_crack #flag:secret.nereia.november_14_seed
+* [TWITCH] #delta:3 #expr:curious #icon:curiosity #flag:mood.nereia.first_crack #flag:secret.nereia.november_14_seed #flag:fact.nereia.file
     You.
     ...
     Also: the morning of November 14th, 1923.
@@ -281,7 +281,7 @@ It is your fault.
     The fourth is you.
     -> END
 
-* [DRIFT] #delta:2 #expr:curious #icon:curiosity
+* [DRIFT] #delta:2 #expr:curious #icon:curiosity #flag:fact.nereia.file
     No.
     ...
     But you can be it.
@@ -699,13 +699,13 @@ It concerns your presence.
 ...
 I did not follow it.
 
-* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:secret.nereia.directive_refused
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:secret.nereia.directive_refused #flag:fact.nereia.directive
     To leave.
     ...
     I am here.
     -> END
 
-* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:secret.nereia.directive_refused
+* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:secret.nereia.directive_refused #flag:fact.nereia.directive
     No.
     ...
     I am something.
@@ -778,7 +778,7 @@ None could remain.
 ...
 It was the rule.
 
-* [WAIT] #delta:2 #expr:warm #icon:hesitation
+* [WAIT] #delta:2 #expr:warm #icon:hesitation #flag:fact.nereia.340years
     You are the 2848th.
     ...
     You will not remain either.
@@ -786,7 +786,7 @@ It was the rule.
     But not for the same reasons.
     -> END
 
-* [TWITCH] #delta:3 #expr:warm #icon:curiosity #flag:mood.nereia.gave_name
+* [TWITCH] #delta:3 #expr:warm #icon:curiosity #flag:mood.nereia.gave_name #flag:fact.nereia.340years
     You had one before.
     ...
     You have a name now.
@@ -795,7 +795,7 @@ It was the rule.
     None of the others had a name.
     -> END
 
-* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.changed
+* [DRIFT] #delta:3 #expr:warm #icon:hesitation #flag:mood.nereia.changed #flag:fact.nereia.340years
     It is not you that is different.
     ...
     It is me.

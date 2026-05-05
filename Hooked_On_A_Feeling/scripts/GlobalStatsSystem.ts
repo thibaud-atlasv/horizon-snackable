@@ -90,7 +90,7 @@ export class GlobalStatsSystem {
   };
 
   /** Record a completed Cast and update stats from current journal entries */
-  recordCast(fishEntries: JournalFishEntry[]): string[] {
+  recordCast(fishEntries: JournalFishEntry[], flags: Record<string, boolean | number> = {}): string[] {
     this.stats.totalCasts++;
 
     // Recalculate derived stats from entries
@@ -99,7 +99,13 @@ export class GlobalStatsSystem {
     for (const entry of fishEntries) {
       if (entry.unlocked) {
         met++;
-        facts += entry.knownFacts.length;
+        // Count only facts with flags set
+        const character = characterRegistry.getCharacter(entry.fishId);
+        if (character?.facts) {
+          for (const factDef of character.facts) {
+            if (flags[factDef.flagKey]) facts++;
+          }
+        }
       }
     }
     this.stats.totalCharactersMet = met;

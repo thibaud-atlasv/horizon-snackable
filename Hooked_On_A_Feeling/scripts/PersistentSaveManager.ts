@@ -36,11 +36,15 @@ import {
   OnSaveDataRequested,
   OnResetSaveRequested,
   OnResetComplete,
+  OnCGDataLoaded,
+  OnCGSaveRequested,
   SaveDataRequestPayload,
   ResetSavePayload,
+  CGSaveRequestPayload,
 } from './SaveEvents';
 
 const PVAR_NAME = 'floater_save_v1';
+const CG_PVAR_NAME = 'floater_cg_v1';
 
 @component()
 export class PersistentSaveManager extends Component {
@@ -82,6 +86,20 @@ export class PersistentSaveManager extends Component {
       // Send empty data so client knows load attempt completed
       EventService.sendGlobally(OnSaveDataLoaded, { data: '' });
     }
+
+    // Fetch CG data from separate PVar
+    try {
+      const cgData = await PlayerVariablesService.get().fetchVariable<{cg: string}>(
+        this.playerEntity,
+        CG_PVAR_NAME,
+      );
+      const cgJson = cgData?.cg ?? '';
+      console.log(`[PersistentSaveManager] Fetched CG PVar: ${cgJson.length} chars`);
+      EventService.sendGlobally(OnCGDataLoaded, { data: cgJson });
+    } catch (e) {
+      console.log('[PersistentSaveManager] ERROR fetching CG PVar:', e);
+      EventService.sendGlobally(OnCGDataLoaded, { data: '' });
+    }
   }
 
   // Server: Handle save requests from client
@@ -116,16 +134,38 @@ export class PersistentSaveManager extends Component {
     if (!this.playerEntity) return;
 
     try {
+      // Only clear main save PVar — CG PVar is preserved across resets
       await PlayerVariablesService.get().setVariable(
         this.playerEntity,
         PVAR_NAME,
         { save: '' },
       );
-      console.log('[PersistentSaveManager] PVar cleared (reset)');
+      console.log('[PersistentSaveManager] PVar cleared (reset) — CG data preserved');
       EventService.sendGlobally(OnResetComplete, { success: true });
     } catch (e) {
       console.log('[PersistentSaveManager] ERROR resetting PVar:', e);
       EventService.sendGlobally(OnResetComplete, { success: false });
+    }
+  }
+
+  // Server: Handle CG save requests from client (separate PVar)
+  @subscribe(OnCGSaveRequested, { execution: ExecuteOn.Everywhere })
+  async onCGSaveRequested(payload: CGSaveRequestPayload): Promise<void> {
+    if (!NetworkingService.get().isServerContext()) return;
+    if (!this.playerEntity) {
+      console.log('[PersistentSaveManager] No player entity for CG save');
+      return;
+    }
+
+    try {
+      await PlayerVariablesService.get().setVariable(
+        this.playerEntity,
+        CG_PVAR_NAME,
+        { cg: payload.data },
+      );
+      console.log('[PersistentSaveManager] CG data persisted to separate PVar');
+    } catch (e) {
+      console.log('[PersistentSaveManager] ERROR persisting CG data:', e);
     }
   }
 

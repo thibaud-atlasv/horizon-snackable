@@ -16,7 +16,6 @@ export enum GamePhase {
   FishReaction = 'fish_reaction',
   Departure = 'departure',
   Idle = 'idle',
-  CatchSequence = 'catch_sequence',
   Ending = 'ending',
   NothingBites = 'nothing_bites',
 }
@@ -47,12 +46,6 @@ export interface FloatingEmotionIcon {
   timer: number;
   maxDuration: number;
   anchor: EmotionIconAnchor;
-}
-
-// === Catch Choice ===
-export enum CatchChoice {
-  Reel = 'reel',
-  Release = 'release',
 }
 
 // === Ending Types ===
@@ -133,15 +126,13 @@ export interface CastData {
 }
 
 // === Catch Sequence Data ===
+// REEL action triggers the Reel ending directly; reaching the end of dialogue
+// of an ending-eligible cast (release_ready or catch_available flag) triggers
+// the Release ending. Both epitaphs are optional — when omitted, the ending
+// overlay is skipped entirely (NPC-friendly).
 export interface CatchSequenceData {
-  silenceDialogue: string[];
-  reelEndingDialogue: string[];
-  releaseDialogue: string[];
-  /** Optional — when omitted, the Reel ending screen is skipped (NPC-friendly). */
   reelEpitaph?: string;
-  /** Optional — when omitted, the Release ending screen is skipped (NPC-friendly). */
   releaseEpitaph?: string;
-  releaseChoiceLabel: string;
 }
 
 // === Fish Character ===
@@ -194,7 +185,6 @@ export interface JournalFishEntry {
   fishId: string;
   unlocked: boolean;
   species: string;
-  knownFacts: string[];
   expressionsSeen: ExpressionState[];
   castsMade: number;
 }
@@ -220,6 +210,13 @@ export interface QuestSaveData {
   luresUsed: string[];         // lure IDs that have been used in a cast
 }
 
+// === Fact Definitions (Flag-based journal observations) ===
+export interface FactDefinition {
+  flagKey: string;        // Flag that unlocks this fact (e.g. 'fact.nereia.ancient')
+  text: string;           // The fact text shown when unlocked
+  hintText?: string;      // Optional hint shown when locked (defaults to '???')
+}
+
 // === Character Configuration (Modular Character System) ===
 export interface CharacterPortraitAssets {
   neutral: string;
@@ -231,6 +228,10 @@ export interface CharacterPortraitAssets {
 export interface CharacterConfig {
   id: string;
   name: string;
+  /** If set, this name replaces `name` once the trueNameFlag is active. */
+  trueName?: string;
+  /** Flag key that, when true, causes trueName to be displayed instead of name. */
+  trueNameFlag?: string;
   species: string;
   accentColor: string;
   portraitAssets: CharacterPortraitAssets;
@@ -250,7 +251,7 @@ export interface CharacterConfig {
   initialState: () => FishCharacter;
   catchSequenceData?: CatchSequenceData;
   driftAwayJournalText?: string;
-  staticFacts: string[];
+  facts: FactDefinition[];
   /** CGs owned by this character (portraits, endings). Aggregated by registry. */
   cgs?: CGData[];
 }

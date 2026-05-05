@@ -55,28 +55,28 @@ Another one.
 You picked the wrong corner, you know.
 This one is taken.
 
-* [WAIT] #delta:0 #expr:curious #icon:curiosity
+* [WAIT] #delta:0 #expr:curious #icon:curiosity #flag:fact.kasha.appearance #flag:fact.kasha.champion
     ...What.
     What is that. That face.
     Don't just stand there looking— ugh, whatever. Stay if you want.
     Not like I care.
     -> kasha_t1_c1_b2
 
-* [TWITCH] #delta:3 #expr:curious #icon:surprise #flag:kasha.first_nickname
+* [TWITCH] #delta:3 #expr:curious #icon:surprise #flag:kasha.first_nickname #flag:fact.kasha.appearance #flag:fact.kasha.champion
     Hah—
     Oh, you've got a mouth. Good.
     I was getting bored.
     Don't disappoint me, baka.
     -> kasha_t1_c1_b2
 
-* [DRIFT] #delta:1 #expr:curious #icon:hesitation
+* [DRIFT] #delta:1 #expr:curious #icon:hesitation #flag:fact.kasha.appearance #flag:fact.kasha.champion
     Wait— no, wait.
     I didn't say leave.
     I said it was taken. That's different.
     ...Tch. Forget it. Stay.
     -> kasha_t1_c1_b2
 
-* [REEL] #delta:3 #expr:warm #icon:warmth #flag:kasha.first_test_passed
+* [REEL] #delta:3 #expr:warm #icon:warmth #flag:kasha.first_test_passed #flag:fact.kasha.appearance #flag:fact.kasha.champion
     ...
     Heh.
     You're either brave or you're stupid.
@@ -91,7 +91,7 @@ Everyone's been whispering about it.
 Pff. As if that's interesting.
 ...It's a little interesting.
 
-* [WAIT] #delta:1 #expr:curious #icon:hesitation #flag:kasha.knows_nereia
+* [WAIT] #delta:1 #expr:curious #icon:hesitation #flag:kasha.knows_nereia #flag:fact.kasha.baka
     The usual ones.
     The silent one keeps a— she's got a list or something. Files, whatever.
     Creepy. Don't talk to her.
@@ -99,7 +99,7 @@ Pff. As if that's interesting.
     ...She'll answer you. She doesn't answer me.
     -> END
 
-* [TWITCH] #delta:3 #expr:curious #icon:curiosity #flag:mood.kasha.third_person_slip
+* [TWITCH] #delta:3 #expr:curious #icon:curiosity #flag:mood.kasha.third_person_slip #flag:fact.kasha.baka #flag:fact.kasha.third_person
     HAH—
     Of who. The walking statue?
     Please.
@@ -116,7 +116,7 @@ Pff. As if that's interesting.
     Tch.
     -> END
 
-* [REEL] #delta:2 #expr:curious #icon:curiosity
+* [REEL] #delta:2 #expr:curious #icon:curiosity #flag:fact.kasha.baka
     Wow. Direct.
     I like that.
     ...Wait, no. Bad. Boring question.
@@ -335,7 +335,7 @@ About people challenging me constantly.
 That was a slight exaggeration.
 Slight.
 
-* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:secret.kasha.never_challenged_truth
+* [WAIT] #delta:3 #expr:warm #icon:hesitation #flag:secret.kasha.never_challenged_truth #flag:fact.kasha.origin
     ...
     Significantly slight.
     ...
@@ -345,7 +345,7 @@ Slight.
     I'm the champion because I'm the only one playing.
     -> END
 
-* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:secret.kasha.lonely
+* [TWITCH] #delta:2 #expr:curious #icon:curiosity #flag:secret.kasha.lonely #flag:fact.kasha.origin
     EXCUSE me. It is not bluffing.
     It is — strategic positioning.
     I am a strategist.
@@ -411,7 +411,7 @@ It shouldn't be hard. It's a story.
     Stop being kind. It's making it worse.
     -> kasha_t3_c5_b2
 
-* [REEL] #delta:2 #expr:warm #icon:warmth #flag:secret.kasha.came_from_elsewhere
+* [REEL] #delta:2 #expr:warm #icon:warmth #flag:secret.kasha.came_from_elsewhere #flag:fact.kasha.origin
     ...
     I came from somewhere else.
     Before here.
@@ -846,7 +846,7 @@ I'm going to say a thing. And then another thing. And then a third thing.
 Don't interrupt me. Please.
 ...Yeah, I said please. We are past that, you and I.
 
-* [WAIT] #delta:5 #expr:warm #icon:warmth #flag:secret.kasha.real_name_given
+* [WAIT] #delta:5 #expr:warm #icon:warmth #flag:secret.kasha.real_name_given #flag:fact.kasha.real_name
     ...
     Good.
     Thank you.
@@ -875,7 +875,7 @@ Don't interrupt me. Please.
     That's the first thing.
     -> kasha_t5_c10_b2
 
-* [DRIFT] #delta:5 #expr:warm #icon:warmth #flag:secret.kasha.real_name_given
+* [DRIFT] #delta:5 #expr:warm #icon:warmth #flag:secret.kasha.real_name_given #flag:fact.kasha.real_name
     ...
     I will.
     Thank you.
@@ -886,7 +886,7 @@ Don't interrupt me. Please.
     Aki is what I was first.
     -> kasha_t5_c10_b2
 
-* [REEL] #delta:5 #expr:warm #icon:warmth #flag:secret.kasha.real_name_given
+* [REEL] #delta:5 #expr:warm #icon:warmth #flag:secret.kasha.real_name_given #flag:fact.kasha.real_name
     ...
     Aki.
     That's my name.

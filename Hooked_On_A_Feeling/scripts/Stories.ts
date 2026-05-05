@@ -18,6 +18,12 @@ import { InkRunner } from './InkRunner';
 import { KASHA_STORY } from './Story_Kasha';
 import { FUGU_STORY } from './Story_Fugu';
 import { NEREIA_STORY } from './Story_Nereia';
+import { CATFISH_STORY } from './Story_Catfish';
+import { CARP_STORY } from './Story_Carp';
+import { PERCH_STORY } from './Story_Perch';
+import { EEL_STORY } from './Story_Eel';
+import { PIKE_STORY } from './Story_Pike';
+import { TROUT_STORY } from './Story_Trout';
 
 // ============================================================
 // Source registry
@@ -27,6 +33,12 @@ const STORY_SOURCES: Record<string, string> = {
   kasha: KASHA_STORY,
   fugu: FUGU_STORY,
   nereia: NEREIA_STORY,
+  catfish: CATFISH_STORY,
+  carp: CARP_STORY,
+  perch: PERCH_STORY,
+  eel: EEL_STORY,
+  pike: PIKE_STORY,
+  trout: TROUT_STORY,
 };
 
 const STORY_CACHE: Record<string, Story> = {};

@@ -332,6 +332,50 @@ tasks:
       - xaml/floater.xaml
       - scripts/FloaterGame.ts
 
+  - name: Kasha Ending CGs
+    status: done
+    summary: Added 2 ending CGs for Kasha (love_end, drift_away) to gallery system
+    files:
+      - scripts/Assets.ts
+      - scripts/CharacterData_Kasha.ts
+
+  - name: Flag-Based Facts System
+    status: done
+    summary: Replaced static facts with flag-driven discovery system. Facts appear as "???" until revealed through dialogue choices. Each fact tied to specific flag (fact.character.name). Stats counter tracks only discovered facts. Optimized save data by removing knownFacts array - facts are rebuilt on-demand from flags.
+    files:
+      - scripts/Types.ts
+      - scripts/JournalSystem.ts
+      - scripts/GlobalStatsSystem.ts
+      - scripts/FloaterGame.ts
+      - scripts/FlagSystem.ts
+      - scripts/CharacterData_Nereia.ts
+      - scripts/CharacterData_Kasha.ts
+      - scripts/CharacterData_Fugu.ts
+      - ink/Story_Nereia.ink
+      - ink/Story_Kasha.ink
+      - ink/Story_Fugu.ink
+    subtasks:
+      - name: Add FactDefinition interface to Types
+        status: done
+      - name: Update JournalSystem with checkFactUnlocks()
+        status: done
+      - name: Update GlobalStatsSystem to count flag-unlocked facts
+        status: done
+      - name: Convert Nereia facts to flag-based (7 facts)
+        status: done
+      - name: Convert Kasha facts to flag-based (6 facts)
+        status: done
+      - name: Convert Fugu facts to flag-based (6 facts)
+        status: done
+      - name: Add fact flags to Nereia dialogue (Casts 1-6)
+        status: done
+      - name: Add fact flags to Kasha dialogue (Casts 1-10)
+        status: done
+      - name: Add fact flags to Fugu dialogue (Casts 1-10)
+        status: done
+      - name: Optimize save data - remove knownFacts array
+        status: done
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []

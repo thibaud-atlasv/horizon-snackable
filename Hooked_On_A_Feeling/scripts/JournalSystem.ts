@@ -12,6 +12,13 @@ import { QuestSystem } from './QuestSystem';
 import { FlagSystem } from './FlagSystem';
 import { AffectionSystem } from './AffectionSystem';
 
+/**
+ * Get the display name for a character, using the trueName if its flag is set.
+ */
+function getCharDisplayName(charId: string, flags: Record<string, boolean | number>): string {
+  return characterRegistry.getDisplayName(charId, flags);
+}
+
 // === Character Card Data (for journal teasing display) ===
 export interface CharacterCardData {
   id: string;
@@ -39,7 +46,6 @@ export class JournalSystem {
         fishId,
         unlocked: false,
         species: character?.species ?? 'Unknown',
-        knownFacts: [],
         expressionsSeen: [],
         castsMade: 0,
       });
@@ -55,10 +61,6 @@ export class JournalSystem {
 
     if (!entry.unlocked) {
       entry.unlocked = true;
-      const character = characterRegistry.getCharacter(fishId);
-      if (character) {
-        entry.knownFacts = [...character.staticFacts];
-      }
       console.log(`[JournalSystem] Unlocked fish entry: ${fishId}`);
     }
 
@@ -71,13 +73,27 @@ export class JournalSystem {
     }
   }
 
-  addFact(fishId: string, fact: string): void {
-    const entry = this.fishEntries.get(fishId);
-    if (!entry) return;
-    if (!entry.knownFacts.includes(fact)) {
-      entry.knownFacts.push(fact);
-      console.log(`[JournalSystem] New fact for ${fishId}: ${fact}`);
+  /**
+   * Check all characters' fact flags and return newly discovered flag keys.
+   * Does NOT store facts - they are rebuilt on demand from flags.
+   */
+  checkFactUnlocks(flags: Record<string, boolean | number>, previousFlags: Record<string, boolean | number>): string[] {
+    const newlyDiscovered: string[] = [];
+
+    for (const fishId of characterRegistry.getAllCharacterIds()) {
+      const character = characterRegistry.getCharacter(fishId);
+      if (!character?.facts) continue;
+
+      for (const factDef of character.facts) {
+        // Check if flag is newly set (wasn't set before, is set now)
+        if (flags[factDef.flagKey] && !previousFlags[factDef.flagKey]) {
+          newlyDiscovered.push(`${getCharDisplayName(fishId, flags)}: ${factDef.text}`);
+          console.log(`[JournalSystem] Fact discovered for ${fishId}: ${factDef.text}`);
+        }
+      }
     }
+
+    return newlyDiscovered;
   }
 
 
@@ -109,24 +125,31 @@ export class JournalSystem {
 
   // === Formatted Display Text (for ViewModel binding) ===
 
-  getPondNotesText(fishId: string): string {
+  getPondNotesText(fishId: string, flags: Record<string, boolean | number> = {}): string {
     const entry = this.fishEntries.get(fishId);
     if (!entry || !entry.unlocked) {
       return '[ Unknown Fish ]\n\nA dark shape seen beneath the surface.\nNot yet approached.';
     }
 
+    const character = characterRegistry.getCharacter(fishId);
     const lines: string[] = [];
-    lines.push(`${fishId.charAt(0).toUpperCase() + fishId.slice(1)} — ${entry.species}`);
+    lines.push(`${fishId.charAt(0).toUpperCase() + fishId.slice(1)} \u2014 ${entry.species}`);
     lines.push(`Casts: ${entry.castsMade}`);
     lines.push('');
 
-    lines.push('— Observations —');
-    for (const fact of entry.knownFacts) {
-      lines.push(`• ${fact}`);
+    lines.push('\u2014 Observations \u2014');
+    if (character?.facts) {
+      for (const factDef of character.facts) {
+        if (flags[factDef.flagKey]) {
+          lines.push(`\u2022 ${factDef.text}`);
+        } else {
+          lines.push(`\u2022 ${factDef.hintText ?? '???'}`);
+        }
+      }
     }
     lines.push('');
 
-    lines.push(`— Personal Quest: ${this.getQuestNameForFish(fishId)} —`);
+    lines.push(`\u2014 Personal Quest: ${this.getQuestNameForFish(fishId)} \u2014`);
     lines.push(this.getQuestHintForFish(fishId));
 
     return lines.join('\n');
@@ -134,18 +157,19 @@ export class JournalSystem {
 
   getQuestStatusText(questSystem: QuestSystem, flagSystem: FlagSystem): string {
     const allCharacters = characterRegistry.getAllCharacters();
+    const flags = flagSystem.serialize();
     const lines: string[] = [];
-    lines.push('— Active Quests —');
+    lines.push('\u2014 Active Quests \u2014');
     lines.push('');
 
     let hasActiveQuests = false;
     for (const char of allCharacters) {
       if (!char.questRequirement) continue;
       const progressText = questSystem.getQuestProgressText(char.id, char.questRequirement, flagSystem);
-      const isComplete = progressText.startsWith('✓');
+      const isComplete = progressText.startsWith('\u2713');
       if (!isComplete) {
         hasActiveQuests = true;
-        lines.push(`◆ ${char.name}`);
+        lines.push(`\u25c6 ${getCharDisplayName(char.id, flags)}`);
         lines.push(`  ${progressText}`);
         lines.push('');
       }
@@ -160,13 +184,13 @@ export class JournalSystem {
     for (const char of allCharacters) {
       if (!char.questRequirement) continue;
       const progressText = questSystem.getQuestProgressText(char.id, char.questRequirement, flagSystem);
-      if (progressText.startsWith('✓')) {
-        completedLines.push(`✓ ${char.name} — ${progressText.substring(2)}`);
+      if (progressText.startsWith('\u2713')) {
+        completedLines.push(`\u2713 ${getCharDisplayName(char.id, flags)} \u2014 ${progressText.substring(2)}`);
       }
     }
 
     if (completedLines.length > 0) {
-      lines.push('— Completed —');
+      lines.push('\u2014 Completed \u2014');
       for (const cl of completedLines) {
         lines.push(cl);
       }
@@ -175,13 +199,13 @@ export class JournalSystem {
     return lines.join('\n');
   }
 
-  getAllPondNotesText(): string {
+  getAllPondNotesText(flags: Record<string, boolean | number> = {}): string {
     const allIds = characterRegistry.getAllCharacterIds();
     const sections: string[] = [];
     for (const fishId of allIds) {
-      sections.push(this.getPondNotesText(fishId));
+      sections.push(this.getPondNotesText(fishId, flags));
     }
-    return sections.join('\n\n━━━━━━━━━━━━━━━\n\n');
+    return sections.join('\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n');
   }
 
   getLureBoxText(ownedLureIds: string[], reactions: LureReaction[]): string {
@@ -201,7 +225,7 @@ export class JournalSystem {
     const lines: string[] = [];
     for (const lureId of ownedLureIds) {
       const name = lureNames[lureId] ?? lureId;
-      lines.push(`◆ ${name}`);
+      lines.push(`\u25c6 ${name}`);
 
       const lureReactions = reactions.filter(r => r.lureId === lureId);
       if (lureReactions.length === 0) {
@@ -211,7 +235,7 @@ export class JournalSystem {
           const fishName = r.fishId.charAt(0).toUpperCase() + r.fishId.slice(1);
           const sentiment = r.positiveActions > r.negativeActions ? '(positive)' :
                            r.negativeActions > r.positiveActions ? '(wary)' : '(neutral)';
-          lines.push(`  • Used with ${fishName} ×${r.castCount} ${sentiment}`);
+          lines.push(`  \u2022 Used with ${fishName} \u00d7${r.castCount} ${sentiment}`);
         }
       }
       lines.push('');
@@ -223,7 +247,7 @@ export class JournalSystem {
 
   // === Character Teasing System ===
 
-  getCharacterCardsData(affectionValues?: Record<string, number>): CharacterCardData[] {
+  getCharacterCardsData(affectionValues?: Record<string, number>, flags?: Record<string, boolean | number>): CharacterCardData[] {
     const allCharacters = characterRegistry.getAllCharacters();
     const cards: CharacterCardData[] = [];
     const affectionSystem = new AffectionSystem();
@@ -234,14 +258,22 @@ export class JournalSystem {
       const affectionValue = affectionValues?.[char.id] ?? 0;
       const tierInfo = affectionSystem.getTierInfo(affectionValue);
 
+      // Count only unlocked facts
+      let unlockedFactCount = 0;
+      if (flags && char.facts) {
+        for (const factDef of char.facts) {
+          if (flags[factDef.flagKey]) unlockedFactCount++;
+        }
+      }
+
       cards.push({
         id: char.id,
-        name: unlocked ? char.name : '???',
+        name: unlocked ? getCharDisplayName(char.id, flags ?? {}) : '???',
         species: unlocked ? char.species : 'Unknown',
         accentColor: unlocked ? char.accentColor : '#3A4A5A',
         unlocked,
         castsMade: entry?.castsMade ?? 0,
-        observationCount: entry?.knownFacts.length ?? 0,
+        observationCount: unlockedFactCount,
         questHint: unlocked ? this.getQuestHintForFish(char.id) : '???',
         questName: unlocked ? this.getQuestNameForFish(char.id) : '???',
         teaserHint: this.getTeaserHint(char),
@@ -284,18 +316,18 @@ export class JournalSystem {
     const cards = this.getCharacterCardsData();
     const lines: string[] = [];
 
-    lines.push(`— ${this.getMetCounterText()} —`);
+    lines.push(`\u2014 ${this.getMetCounterText()} \u2014`);
     lines.push('');
 
     for (const card of cards) {
       if (card.unlocked) {
         const nameCapitalized = card.name.charAt(0).toUpperCase() + card.name.slice(1);
-        lines.push(`◈ ${nameCapitalized} — ${card.species}`);
-        lines.push(`  ${card.castsMade} casts · ${card.observationCount} observations`);
+        lines.push(`\u25c8 ${nameCapitalized} \u2014 ${card.species}`);
+        lines.push(`  ${card.castsMade} casts \u00b7 ${card.observationCount} observations`);
         lines.push(`  Quest: ${card.questName}`);
-        lines.push(`  ↳ ${card.questHint}`);
+        lines.push(`  \u21b3 ${card.questHint}`);
       } else {
-        lines.push('🔒 ??? — Unknown');
+        lines.push('\ud83d\udd12 ??? \u2014 Unknown');
         lines.push(`  ${card.teaserHint}`);
       }
       lines.push('');
@@ -309,7 +341,13 @@ export class JournalSystem {
   serialize(): JournalSaveData {
     const fishEntries: Record<string, JournalFishEntry> = {};
     for (const [id, entry] of this.fishEntries) {
-      fishEntries[id] = { ...entry };
+      fishEntries[id] = {
+        fishId: entry.fishId,
+        unlocked: entry.unlocked,
+        species: entry.species,
+        expressionsSeen: [...entry.expressionsSeen],
+        castsMade: entry.castsMade,
+      };
     }
     return {
       fishEntries,
@@ -319,7 +357,14 @@ export class JournalSystem {
   deserialize(data: JournalSaveData): void {
     if (data.fishEntries) {
       for (const [id, entry] of Object.entries(data.fishEntries)) {
-        this.fishEntries.set(id, { ...entry });
+        this.fishEntries.set(id, {
+          fishId: entry.fishId,
+          unlocked: entry.unlocked,
+          species: entry.species,
+          // knownFacts removed - old saves may have it, ignore it
+          expressionsSeen: entry.expressionsSeen ?? [],
+          castsMade: entry.castsMade ?? 0,
+        });
       }
     }
     // Old saves may have data.keepsakes — ignored (deprecated)

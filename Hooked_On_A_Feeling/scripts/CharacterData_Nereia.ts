@@ -124,12 +124,8 @@ const NEREIA_DEPARTURES: Record<string, CastData['departures']> = {
 // ============================================================
 
 const NEREIA_CATCH_SEQUENCE_DATA: CatchSequenceData = {
-  silenceDialogue: ['...', 'I left you data.', 'November 14th.', 'Four minutes.', 'You will know what to do.'],
-  reelEndingDialogue: ['The data ends here.', '', 'The lake remembers.', '', 'She had said it would be enough.'],
-  releaseDialogue: ['...', 'You did not reel.', '...', 'I am noting.', '...', 'It is in the file.', 'The file I am no longer sending.'],
   reelEpitaph: 'The data ends here.\n\nThe lake remembers.\n\nShe had said it would be enough.',
   releaseEpitaph: 'The file is closed.\n\nThe lake remembers.\n\nYou will remember.\n\nIt is more than enough.',
-  releaseChoiceLabel: 'Nereia',
 };
 
 const NEREIA_DRIFT_AWAY_JOURNAL_TEXT =
@@ -221,10 +217,35 @@ export const NEREIA_CHARACTER: CharacterConfig = {
   catchSequenceData: NEREIA_CATCH_SEQUENCE_DATA,
   driftAwayJournalText: NEREIA_DRIFT_AWAY_JOURNAL_TEXT,
 
-  staticFacts: [
-    'Ancient resident of the pond.',
-    'Ornamental scales that shimmer purple and gold.',
-    'Speaks with formal precision.',
+  facts: [
+    {
+      flagKey: 'fact.nereia.ancient',
+      text: 'Ancient resident of the pond.',
+    },
+    {
+      flagKey: 'fact.nereia.ornamental',
+      text: 'Ornamental scales that shimmer purple and gold.',
+    },
+    {
+      flagKey: 'fact.nereia.formal',
+      text: 'Speaks with formal precision.',
+    },
+    {
+      flagKey: 'fact.nereia.counter',
+      text: 'Maintains a counter system (T-XXXX) tracking something.',
+    },
+    {
+      flagKey: 'fact.nereia.340years',
+      text: 'Has been in the pond for 340 years.',
+    },
+    {
+      flagKey: 'fact.nereia.directive',
+      text: 'Received a directive she refuses to follow.',
+    },
+    {
+      flagKey: 'fact.nereia.file',
+      text: 'Keeps detailed files on pond visitors.',
+    },
   ],
 
   cgs: NEREIA_CGS,

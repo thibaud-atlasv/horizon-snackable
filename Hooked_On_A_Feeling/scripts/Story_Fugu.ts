@@ -36,7 +36,7 @@ Nobody ever looks at me! Never!
 I'm Fugu! Fugu the pufferfish!
 You're staying? Please say you're staying!
 
-* [WAIT] #delta:3 #expr:warm #icon:warmth #drift:CHARMED
+* [WAIT] #delta:3 #expr:warm #icon:warmth #drift:CHARMED #flag:fact.fugu.appearance
     You... you're waiting?
     For me?
     ...
@@ -44,7 +44,7 @@ You're staying? Please say you're staying!
     Thank you. Really. Thank you, trust me!
     -> fugu_t1_c1_b2
 
-* [TWITCH] #delta:5 #expr:warm #icon:delight #drift:CHARMED
+* [TWITCH] #delta:5 #expr:warm #icon:delight #drift:CHARMED #flag:fact.fugu.appearance
     Oh! You moved! You're playing?!
     We're playing together?! For real?!
     Wait I'm gonna... *puffs up with excitement*
@@ -52,7 +52,7 @@ You're staying? Please say you're staying!
     But it's cool, right? We're having fun, trust me!
     -> fugu_t1_c1_b2
 
-* [DRIFT] #delta:-2 #expr:alarmed #icon:sadness #drift:TROUBLED
+* [DRIFT] #delta:-2 #expr:alarmed #icon:sadness #drift:TROUBLED #flag:fact.fugu.appearance
     Huh? You... you're drifting away?
     Already?
     But... but we just met...
@@ -60,7 +60,7 @@ You're staying? Please say you're staying!
     Wait! Come back! Please!
     -> fugu_t1_c1_b2
 
-* [REEL] #delta:-5 #expr:alarmed #icon:shock #drift:SCARED
+* [REEL] #delta:-5 #expr:alarmed #icon:shock #drift:SCARED #flag:fact.fugu.appearance
     NO! Not that!
     You... you wanna grab me?!
     Already?! But we don't even know each other!
@@ -81,7 +81,7 @@ But you're still here.
 ...
 That's... that's good.
 
-* [WAIT] #delta:3 #expr:warm #icon:warmth #drift:CHARMED
+* [WAIT] #delta:3 #expr:warm #icon:warmth #drift:CHARMED #flag:fact.fugu.talks
     ...
     You're not saying anything.
     That's... actually restful.
@@ -90,7 +90,7 @@ That's... that's good.
     Thank you.
     -> END
 
-* [TWITCH] #delta:2 #expr:curious #icon:curiosity #drift:WARM
+* [TWITCH] #delta:2 #expr:curious #icon:curiosity #drift:WARM #flag:fact.fugu.talks
     Oh! You want me to keep going?
     I've got tons of stuff to tell!
     Like yesterday I found a piece of seaweed that looked like a face!
@@ -98,7 +98,7 @@ That's... that's good.
     But I can show you where it was!
     -> END
 
-* [DRIFT] #delta:0 #expr:neutral #icon:hesitation #drift:WARY
+* [DRIFT] #delta:0 #expr:neutral #icon:hesitation #drift:WARY #flag:fact.fugu.talks
     ...
     Ok.
     It's fine.
@@ -138,7 +138,7 @@ I'm not very good at being normal.
     Nobody.
     -> fugu_t1_c2_b2
 
-* [TWITCH] #delta:4 #expr:warm #icon:delight #drift:CHARMED #flag:mood.fugu.first_play
+* [TWITCH] #delta:4 #expr:warm #icon:delight #drift:CHARMED #flag:mood.fugu.first_play #flag:fact.fugu.puffs
     Ha! You wanna play again?!
     I learned a new trick! Watch!
     *puffs up and does little circles*
@@ -235,7 +235,7 @@ They come out. With poison.
 ...
 A lot of poison.
 
-* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.showed_spines
+* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.showed_spines #flag:fact.fugu.toxic
     ...
     You didn't move.
     I showed my spines and you didn't move.
@@ -247,7 +247,7 @@ A lot of poison.
     Why do you stay?
     -> fugu_t2_c3_b2
 
-* [TWITCH] #delta:3 #expr:curious #icon:curiosity #drift:WARM
+* [TWITCH] #delta:3 #expr:curious #icon:curiosity #drift:WARM #flag:fact.fugu.toxic
     Ha! You think it's cool?!
     Really?!
     Nobody ever said it was cool!
@@ -360,7 +360,7 @@ Look! I'm happy right now. And nothing's coming out!
     Trust me.
     -> fugu_t2_c4_b2
 
-* [TWITCH] #delta:4 #expr:warm #icon:delight #drift:CHARMED
+* [TWITCH] #delta:4 #expr:warm #icon:delight #drift:CHARMED #flag:fact.fugu.puffs
     Ha! You're clapping?! Well... you're moving like it!
     THANK YOU!
     ...
@@ -369,7 +369,7 @@ Look! I'm happy right now. And nothing's coming out!
     And I want you to keep coming back!
     -> fugu_t2_c4_b2
 
-* [DRIFT] #delta:-1 #expr:neutral #icon:hesitation #drift:WARY
+* [DRIFT] #delta:-1 #expr:neutral #icon:hesitation #drift:WARY #flag:fact.fugu.puffs
     ...you don't care?
     ...
     I worked so hard...
@@ -460,7 +460,7 @@ Bizu, Plop, and Big Algae.
 I talked to them every day.
 For... a long time.
 
-* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:secret.fugu.imaginary_friends
+* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:secret.fugu.imaginary_friends #flag:fact.fugu.alone
     ...
     You're not judging?
     ...
@@ -482,7 +482,7 @@ For... a long time.
     It's pathetic right?
     -> fugu_t3_c5_b2
 
-* [DRIFT] #delta:0 #expr:neutral #icon:sadness #drift:TROUBLED
+* [DRIFT] #delta:0 #expr:neutral #icon:sadness #drift:TROUBLED #flag:fact.fugu.alone
     ...
     Yeah. I know.
     ...
@@ -514,7 +514,7 @@ You're real.
 Right?
 You're real?
 
-* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.confirmed_real
+* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.confirmed_real #flag:fact.fugu.alone
     ...
     Ok.
     ...
@@ -804,7 +804,7 @@ A real one.
 ...
 You.
 
-* [WAIT] #delta:5 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.said_friend
+* [WAIT] #delta:5 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.said_friend #flag:fact.fugu.dream
     ...
     ...
     There.
@@ -816,7 +816,7 @@ You.
     And you're staying.
     -> fugu_t4_c8_b2
 
-* [TWITCH] #delta:4 #expr:warm #icon:delight #drift:CHARMED
+* [TWITCH] #delta:4 #expr:warm #icon:delight #drift:CHARMED #flag:fact.fugu.dream
     Ha! You... you're doing the joy dance too?!
     ...
     No? Just me?
@@ -868,7 +868,7 @@ You do exactly that.
 ...
 Trust me. It's more than I deserve.
 
-* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.dream_fulfilled
+* [WAIT] #delta:4 #expr:warm #icon:warmth #drift:CHARMED #flag:mood.fugu.dream_fulfilled #flag:fact.fugu.dream
     ...
     ...
     *little bubbles rising*
@@ -880,7 +880,7 @@ Trust me. It's more than I deserve.
     Well I think. I'd never cried from happiness before.
     -> END
 
-* [TWITCH] #delta:3 #expr:warm #icon:delight #drift:CHARMED
+* [TWITCH] #delta:3 #expr:warm #icon:delight #drift:CHARMED #flag:fact.fugu.dream
     More than you deserve?! NO!
     ...
     You deserve a million friends!
@@ -899,7 +899,7 @@ Trust me. It's more than I deserve.
     Please.
     -> END
 
-* [REEL] #delta:-2 #expr:alarmed #icon:sadness #drift:WARY
+* [REEL] #delta:-2 #expr:alarmed #icon:sadness #drift:WARY #flag:fact.fugu.dream
     ...
     See that's exactly it.
     ...

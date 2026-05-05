@@ -2,7 +2,7 @@
     "class": "horizon::AssetMetadata",
     "version": 1,
     "data": {
-        "id": "12543261607763043373",
+        "id": "15886192465119970990",
         "pipelineVersion": 1,
         "assetBuilderSettings": [
             {
@@ -19,7 +19,7 @@
                         "data": {
                             "equirectangularToCube": false,
                             "enableRoughnessConvolution": false,
-                            "premultiplyAlpha": false,
+                            "premultiplyAlpha": true,
                             "preserveAlphaCoverage": false,
                             "alphaCutoff": 0.5,
                             "renormalizeNormals": false,

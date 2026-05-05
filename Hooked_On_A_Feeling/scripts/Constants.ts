@@ -170,6 +170,11 @@ export const POV_LINE_START_Y = -80;  // Off-screen above (creates "held from ou
 export const LINE_START_X = CANVAS_WIDTH + 60; // Off-screen right (rod held outside frame)
 export const LINE_START_Y = -80; // Off-screen above top edge
 
+// === Title Screen Rod Tip (calculated from XAML transforms on rod.png) ===
+// rod.png attachment point (2,12) after RenderTransformOrigin=0.5,0.5, Rotate 42°, Translate(188,113)
+export const TITLE_LINE_START_X = 341;
+export const TITLE_LINE_START_Y = 254;
+
 // === Timing (seconds) ===
 export const APPROACH_DURATION = 2.0;
 export const DEPARTURE_DURATION = 2.0;

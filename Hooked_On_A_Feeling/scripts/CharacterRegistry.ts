@@ -13,6 +13,12 @@ import type { TextureAsset } from 'meta/worlds';
 import { NEREIA_CHARACTER } from './CharacterData_Nereia';
 import { KASHA_CHARACTER } from './CharacterData_Kasha';
 import { FUGU_CHARACTER } from './CharacterData_Fugu';
+import { CATFISH_CHARACTER } from './CharacterData_Catfish';
+import { CARP_CHARACTER } from './CharacterData_Carp';
+import { PERCH_CHARACTER } from './CharacterData_Perch';
+import { EEL_CHARACTER } from './CharacterData_Eel';
+import { PIKE_CHARACTER } from './CharacterData_Pike';
+import { TROUT_CHARACTER } from './CharacterData_Trout';
 
 class CharacterRegistry {
   private characters: Map<string, CharacterConfig> = new Map();
@@ -157,6 +163,20 @@ class CharacterRegistry {
     }
     return map;
   }
+
+  /**
+   * Get the display name for a character, taking into account
+   * the trueName/trueNameFlag system. If the character has a trueName
+   * and the associated flag is set, returns trueName; otherwise returns name.
+   */
+  getDisplayName(characterId: string, flags: Record<string, boolean | number>): string {
+    const char = this.characters.get(characterId);
+    if (!char) return '???';
+    if (char.trueName && char.trueNameFlag && flags[char.trueNameFlag]) {
+      return char.trueName;
+    }
+    return char.name;
+  }
 }
 
 // === Singleton Registry ===
@@ -166,3 +186,9 @@ export const characterRegistry = new CharacterRegistry();
 characterRegistry.register(NEREIA_CHARACTER);
 characterRegistry.register(KASHA_CHARACTER);
 characterRegistry.register(FUGU_CHARACTER);
+characterRegistry.register(CATFISH_CHARACTER);
+characterRegistry.register(CARP_CHARACTER);
+characterRegistry.register(PERCH_CHARACTER);
+characterRegistry.register(EEL_CHARACTER);
+characterRegistry.register(PIKE_CHARACTER);
+characterRegistry.register(TROUT_CHARACTER);

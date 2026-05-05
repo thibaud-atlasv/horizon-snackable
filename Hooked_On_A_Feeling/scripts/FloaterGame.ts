@@ -41,7 +41,6 @@ import {
   onFloaterNewCast,
   onFloaterSkipBeat,
   onFloaterCastStart,
-  onFloaterCatchChoice,
   onJournalOpen,
   onJournalClose,
   onJournalTabSwitch,
@@ -59,7 +58,6 @@ import {
   FloaterActionSelectedPayload,
   FloaterTabSelectedPayload,
   FloaterLureSelectedPayload,
-  FloaterCatchChoicePayload,
 } from './FloaterViewModel';
 import { FloaterRenderer } from './FloaterRenderer';
 
@@ -79,8 +77,11 @@ import {
   OnSaveDataRequested,
   OnResetSaveRequested,
   OnResetComplete,
+  OnCGDataLoaded,
+  OnCGSaveRequested,
   SaveDataLoadedPayload,
   ResetCompletePayload,
+  CGDataLoadedPayload,
 } from './SaveEvents';
 import {
   CANVAS_WIDTH, CANVAS_HEIGHT, GAME_ASPECT_RATIO,
@@ -120,11 +121,12 @@ import {
   NOTHING_BITES_DURATION,
   FADE_OUT_DURATION, FADE_IN_DURATION,
   CHAR_RIPPLE_SPAWN_INTERVAL, CHAR_RIPPLE_MAX_RADIUS, CHAR_RIPPLE_EXPAND_SPEED,
+  TITLE_LINE_START_X, TITLE_LINE_START_Y,
 } from './Constants';
 import { Vec3D } from './Vec3D';
 import {
   GamePhase, DriftState, ExpressionState,
-  EmotionIconType, CatchChoice, EndingType,
+  EmotionIconType, EndingType,
 } from './Types';
 import type { Beat, ActionEffect, FishCharacter, FishAffection, SaveData, SplashRipple, FloatingEmotionIcon, EmotionIconAnchor, CharacterConfig, FishSaveData, LureReaction } from './Types';
 
@@ -135,6 +137,11 @@ export class FloaterGame extends Component {
   private renderer: Maybe<FloaterRenderer> = null;
 
   private flagSystem: FlagSystem = new FlagSystem();
+
+  /** Get the current fish's display name, respecting the trueName/trueNameFlag system. */
+  private getFishDisplayName(): string {
+    return characterRegistry.getDisplayName(this.fish.id, this.flagSystem.serialize());
+  }
   private saveSystem: SaveSystem = new SaveSystem();
   private affectionSystem: AffectionSystem = new AffectionSystem();
   private questSystem: QuestSystem = new QuestSystem();
@@ -249,6 +256,9 @@ export class FloaterGame extends Component {
   // Pre-determined encounter result (resolved at bounce start, consumed by startCast)
   private pendingEncounterCharacter: CharacterConfig | null = null;
 
+  // Flag snapshot at cast start (for detecting newly discovered facts)
+  private flagsAtCastStart: Record<string, boolean | number> = {};
+
   // Dynamic landing target (varies with power)
   private landingTargetX: number = FLOAT_X;
   private landingTargetY: number = FLOAT_Y;
@@ -289,12 +299,14 @@ export class FloaterGame extends Component {
   private progressDotsTotal: number = 0;
   private progressDotsFilled: number = 0;
 
-  // Catch Sequence
-  private catchDialogueIndex: number = 0;
-  private catchDialogueShown: boolean = false;
-
   // Ending
   private currentEnding: EndingType = EndingType.Reel;
+  private epitaphFadeTimer: number = 0;
+  private epitaphFullText: string = '';
+  private epitaphTextProgress: number = 0;
+  private epitaphTextComplete: boolean = false;
+  private readonly EPITAPH_FADE_DURATION: number = 1.0; // seconds to fade in overlay
+  private readonly EPITAPH_TEXT_SPEED: number = 0.03; // seconds per character (typewriter)
 
   @subscribe(OnEntityCreateEvent)
   onCreate(): void {
@@ -348,6 +360,11 @@ export class FloaterGame extends Component {
   @subscribe(onFloaterStartGame)
   onStartGame(): void {
     console.log('[FloaterGame] Start game → fade to black');
+
+    // Increment play session counter
+    this.globalStatsSystem.incrementPlaySession();
+    this.saveSystem.requestSave();
+
     this.fadeState = 'fading_out';
     this.fadeTimer = 0;
     this.fadeAlpha = 0;
@@ -387,20 +404,6 @@ export class FloaterGame extends Component {
     floaterVM.idleJournalBtnEnabled = false;
     // Hide idle bar immediately when cast starts (animate out)
     this.hideIdleBar();
-  }
-
-  @subscribe(onFloaterCatchChoice)
-  onCatchChoiceEvent(payload: FloaterCatchChoicePayload): void {
-    if (this.phase !== GamePhase.CatchSequence) return;
-    const choice = payload.parameter as CatchChoice;
-    console.log(`[FloaterGame] Catch choice: ${choice}`);
-    floaterVM.catchChoiceVisible = false;
-
-    if (choice === CatchChoice.Reel) {
-      this.triggerEnding(EndingType.Reel);
-    } else {
-      this.triggerEnding(EndingType.Release);
-    }
   }
 
   // === Journal/Inventory Events ===
@@ -472,7 +475,7 @@ export class FloaterGame extends Component {
   onCharacterDetailOpenEvent(payload: FloaterTabSelectedPayload): void {
     const charId = payload.parameter;
     const affectionValues = this.buildAffectionValuesMap();
-    const cards = this.journalSystem.getCharacterCardsData(affectionValues);
+    const cards = this.journalSystem.getCharacterCardsData(affectionValues, this.flagSystem.serialize());
     const card = cards.find(c => c.id === charId);
     if (!card || !card.unlocked) return;
 
@@ -488,10 +491,15 @@ export class FloaterGame extends Component {
     floaterVM.charDetailQuestName = card.questName;
     floaterVM.charDetailQuestHint = card.questHint;
 
-    // Get observations text
-    const entry = this.journalSystem.getFishEntry(charId);
-    if (entry && entry.knownFacts.length > 0) {
-      floaterVM.charDetailObservations = entry.knownFacts.map(f => `• ${f}`).join('\n');
+    // Get observations text (show only facts with flags set)
+    const currentFlags = this.flagSystem.serialize();
+    if (character?.facts) {
+      const unlockedFacts = character.facts
+        .filter(f => currentFlags[f.flagKey])
+        .map(f => f.text);
+      floaterVM.charDetailObservations = unlockedFacts.length > 0
+        ? unlockedFacts.map(t => `\u2022 ${t}`).join('\n')
+        : 'No observations yet.';
     } else {
       floaterVM.charDetailObservations = 'No observations yet.';
     }
@@ -508,7 +516,7 @@ export class FloaterGame extends Component {
   /** Refresh all journal data from current game state */
   private refreshJournalData(): void {
     // Pond Notes (observations per fish)
-    floaterVM.journalPondNotesText = this.journalSystem.getAllPondNotesText();
+    floaterVM.journalPondNotesText = this.journalSystem.getAllPondNotesText(this.flagSystem.serialize());
     // Characters tab (teasing list)
     floaterVM.journalCharactersText = this.journalSystem.getCharacterListText();
     // Lure Box
@@ -527,7 +535,7 @@ export class FloaterGame extends Component {
     floaterVM.journalMetCounter = this.journalSystem.getMetCounterText();
 
     // Character cards (Fish tab) — built from registry, no per-id branching.
-    const cards = this.journalSystem.getCharacterCardsData(this.buildAffectionValuesMap());
+    const cards = this.journalSystem.getCharacterCardsData(this.buildAffectionValuesMap(), this.flagSystem.serialize());
     floaterVM.setCharacterCards(cards.map(card => {
       const config = characterRegistry.getCharacter(card.id);
       return {
@@ -537,6 +545,7 @@ export class FloaterGame extends Component {
         tier: card.tierName,
         casts: String(card.castsMade),
         unlocked: card.unlocked,
+        completed: this.flagSystem.check(`${card.id}.ending_complete`),
         spritePath: config?.portraitSpritePath ?? '',
         texture: config?.portraitTexture,
         accentColor: card.accentColor,
@@ -553,6 +562,14 @@ export class FloaterGame extends Component {
       texture: cg.thumbnailTexture,
     })));
     floaterVM.cgCollectionProgress = this.cgGallerySystem.getCollectionText();
+  }
+
+  /** Persist CG unlocks to separate PVar (survives save resets) */
+  private persistCGData(): void {
+    const cgArray = this.cgGallerySystem.serialize();
+    const cgJson = JSON.stringify(cgArray);
+    EventService.sendGlobally(OnCGSaveRequested, { data: cgJson });
+    console.log(`[FloaterGame] Persisting ${cgArray.length} CG unlocks to separate PVar`);
   }
 
   /** Get owned lure IDs for journal display */
@@ -617,6 +634,24 @@ export class FloaterGame extends Component {
     }
   }
 
+  @subscribe(OnCGDataLoaded, { execution: ExecuteOn.Everywhere })
+  onCGDataLoaded(payload: CGDataLoadedPayload): void {
+    if (NetworkingService.get().isServerContext()) return; // Client-only
+    console.log(`[FloaterGame] Received persistent CG data: ${payload.data.length} chars`);
+    if (payload.data && payload.data.length > 0) {
+      try {
+        const cgArray = JSON.parse(payload.data) as string[];
+        // Merge persistent CG unlocks into cgGallerySystem (union with existing)
+        const existingSerialized = this.cgGallerySystem.serialize();
+        const merged = Array.from(new Set([...existingSerialized, ...cgArray]));
+        this.cgGallerySystem.deserialize(merged);
+        console.log(`[FloaterGame] Merged ${merged.length} CG unlocks from persistent storage`);
+      } catch (e) {
+        console.log('[FloaterGame] ERROR parsing persistent CG data:', e);
+      }
+    }
+  }
+
   @subscribe(OnResetComplete, { execution: ExecuteOn.Everywhere })
   onResetComplete(payload: ResetCompletePayload): void {
     if (NetworkingService.get().isServerContext()) return; // Client-only
@@ -639,7 +674,7 @@ export class FloaterGame extends Component {
     floaterVM.journalVisible = false;
     // Send reset request to server
     EventService.sendGlobally(OnResetSaveRequested, { confirm: true });
-    // Also clear local state immediately
+    // Also clear local state immediately (preserving CG)
     this.resetAllGameState();
   }
 
@@ -651,6 +686,9 @@ export class FloaterGame extends Component {
   private resetAllGameState(): void {
     // Clear local save
     this.saveSystem.clearSave();
+
+    // Preserve CG unlocks across reset
+    const preservedCGUnlocks = this.cgGallerySystem.serialize();
 
     // Reset all game state to initial
     this.phase = GamePhase.Title;
@@ -669,6 +707,12 @@ export class FloaterGame extends Component {
     this.cgGallerySystem = new CGGallerySystem();
     this.journalSystem = new JournalSystem();
     this.globalStatsSystem = new GlobalStatsSystem();
+
+    // Restore preserved CG unlocks (CGs persist across resets)
+    if (preservedCGUnlocks.length > 0) {
+      this.cgGallerySystem.deserialize(preservedCGUnlocks);
+      console.log(`[FloaterGame] Restored ${preservedCGUnlocks.length} CG unlocks after reset`);
+    }
     this.currentLines = [];
     this.displayedText = '';
     this.isTextComplete = false;
@@ -683,7 +727,6 @@ export class FloaterGame extends Component {
     floaterVM.castButtonVisible = false;
     floaterVM.endingVisible = false;
     floaterVM.dialogueVisible = false;
-    floaterVM.catchChoiceVisible = false;
     floaterVM.inventoryVisible = false;
     floaterVM.journalVisible = false;
     floaterVM.inventoryButtonVisible = false;
@@ -725,7 +768,16 @@ export class FloaterGame extends Component {
     if (payload.interactionIndex !== 0) return;
 
     if (this.phase === GamePhase.Ending) {
-      // Tap to dismiss ending screen and return to gameplay
+      if (!this.epitaphTextComplete) {
+        // First tap during typewriter: complete the text instantly
+        floaterVM.endingText = this.epitaphFullText;
+        this.epitaphTextComplete = true;
+        floaterVM.endingTapVisible = true;
+        floaterVM.endingOverlayOpacity = 1;
+        console.log('[FloaterGame] Ending text completed via tap');
+        return;
+      }
+      // Second tap: dismiss ending screen and return to gameplay
       console.log('[FloaterGame] Ending dismissed via tap → returning to LakeIdle');
       floaterVM.endingVisible = false;
       floaterVM.cgViewerVisible = false;
@@ -740,13 +792,6 @@ export class FloaterGame extends Component {
     if (this.phase === GamePhase.CastCharging) {
       this.castPower = this.powerGaugeValue;
       this.launchFloat();
-      return;
-    }
-
-    if (this.phase === GamePhase.CatchSequence && !this.catchDialogueShown) {
-      // Advance catch dialogue
-      if (this.isTextComplete) { this.advanceCatchDialogue(); }
-      else { this.completeCurrentText(); }
       return;
     }
 
@@ -843,7 +888,6 @@ export class FloaterGame extends Component {
           }
         }
         break;
-      case GamePhase.CatchSequence: this.updateTypewriter(dt); break;
       case GamePhase.Departure:
         this.phaseTimer += dt;
         this.updateTypewriter(dt);
@@ -855,6 +899,9 @@ export class FloaterGame extends Component {
         } else {
           this.fishAlpha = 1;
         }
+        break;
+      case GamePhase.Ending:
+        this.updateEpitaphAnimation(dt);
         break;
       default: break;
     }
@@ -896,6 +943,27 @@ export class FloaterGame extends Component {
     if (this.floatDip > 0) this.floatDip = Math.max(0, this.floatDip - dt * 20);
   }
 
+  /** Update epitaph overlay: fade-in + typewriter text effect */
+  private updateEpitaphAnimation(dt: number): void {
+    // Fade in the overlay
+    this.epitaphFadeTimer += dt;
+    const fadeProgress = Math.min(1, this.epitaphFadeTimer / this.EPITAPH_FADE_DURATION);
+    floaterVM.endingOverlayOpacity = fadeProgress;
+
+    // Typewriter: only start after fade reaches 30% so text doesn't appear too early
+    if (fadeProgress >= 0.3 && !this.epitaphTextComplete) {
+      this.epitaphTextProgress += dt;
+      const charsToShow = Math.floor(this.epitaphTextProgress / this.EPITAPH_TEXT_SPEED);
+      if (charsToShow >= this.epitaphFullText.length) {
+        floaterVM.endingText = this.epitaphFullText;
+        this.epitaphTextComplete = true;
+        floaterVM.endingTapVisible = true;
+      } else {
+        floaterVM.endingText = this.epitaphFullText.substring(0, charsToShow);
+      }
+    }
+  }
+
   // === Character Ripples (expansion + fade) ===
   private updateCharacterRipples(dt: number): void {
     // Only spawn/update when portrait is visible
@@ -935,7 +1003,6 @@ export class FloaterGame extends Component {
       || this.phase === GamePhase.ActionSelect
       || this.phase === GamePhase.FishReaction
       || this.phase === GamePhase.Departure
-      || this.phase === GamePhase.CatchSequence
       || this.phase === GamePhase.NothingBites;
 
     if (!showStaticFloat) {
@@ -1018,6 +1085,9 @@ export class FloaterGame extends Component {
     this.castCount++;
     this.currentBeatIndex = 0;
 
+    // Snapshot flags at cast start for detecting newly discovered facts later
+    this.flagsAtCastStart = { ...this.flagSystem.serialize() };
+
     // Use pre-determined encounter result from enterFloatBounce()
     const selectedCharacter = this.pendingEncounterCharacter;
     this.pendingEncounterCharacter = null;
@@ -1091,7 +1161,7 @@ export class FloaterGame extends Component {
     this.hideIdleBar();
 
     floaterVM.hudVisible = true;
-    floaterVM.fishNameText = this.fish.name;
+    floaterVM.fishNameText = this.getFishDisplayName();
     this.syncAffectionDisplay();
 
     console.log(`[FloaterGame] Cast #${this.castCount}, castIdx ${this.currentCastIndex}`);
@@ -1104,10 +1174,9 @@ export class FloaterGame extends Component {
 
   private startNextBeat(): void {
     if (this.currentBeatIndex >= this.beats.length) {
-      if (this.flagSystem.check(`${this.fish.id}.release_ready`)) {
+      if (this.flagSystem.check(`${this.fish.id}.release_ready`)
+       || this.flagSystem.check(`${this.fish.id}.catch_available`)) {
         this.triggerEnding(EndingType.Release);
-      } else if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
-        this.enterCatchSequence();
       } else {
         this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
       }
@@ -1164,10 +1233,9 @@ export class FloaterGame extends Component {
         this.saveSystem.requestSave();
 
         if (this.currentBeatIndex >= this.beats.length) {
-          if (this.flagSystem.check(`${this.fish.id}.release_ready`)) {
+          if (this.flagSystem.check(`${this.fish.id}.release_ready`)
+           || this.flagSystem.check(`${this.fish.id}.catch_available`)) {
             this.triggerEnding(EndingType.Release);
-          } else if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
-            this.enterCatchSequence();
           } else {
             this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
           }
@@ -1193,10 +1261,9 @@ export class FloaterGame extends Component {
         this.saveSystem.requestSave();
         this.currentBeatIndex++;
         if (this.currentBeatIndex >= this.beats.length) {
-          if (this.flagSystem.check(`${this.fish.id}.release_ready`)) {
+          if (this.flagSystem.check(`${this.fish.id}.release_ready`)
+           || this.flagSystem.check(`${this.fish.id}.catch_available`)) {
             this.triggerEnding(EndingType.Release);
-          } else if (this.flagSystem.check(`${this.fish.id}.catch_available`)) {
-            this.enterCatchSequence();
           } else {
             this.enterDeparture(this.fish.currentDrift || DriftState.Warm);
           }
@@ -1238,9 +1305,9 @@ export class FloaterGame extends Component {
   }
 
   private handleAction(actionId: ActionId): void {
-    // REEL at max affection → trigger catch sequence regardless of beat effects
+    // REEL at max affection → trigger Reel ending directly, regardless of beat effects.
     if (actionId === ActionId.Reel && this.affectionSystem.isCatchReady(this.fishAffection)) {
-      this.enterCatchSequence();
+      this.triggerEnding(EndingType.Reel);
       return;
     }
 
@@ -1373,7 +1440,18 @@ export class FloaterGame extends Component {
       );
       // Unlock portrait CG on first encounter (silently)
       this.cgGallerySystem.unlockPortraitCG(this.fish.id);
-      this.globalStatsSystem.recordCast(this.journalSystem.getAllFishEntries());
+      this.persistCGData();
+
+      // Check for newly unlocked facts based on flags
+      const newFacts = this.journalSystem.checkFactUnlocks(this.flagSystem.serialize(), this.flagsAtCastStart);
+      if (newFacts.length > 0) {
+        console.log('[FloaterGame] New facts discovered:', newFacts);
+      }
+
+      this.globalStatsSystem.recordCast(
+        this.journalSystem.getAllFishEntries(),
+        this.flagSystem.serialize()
+      );
 
       // Update affection label at cast boundary (not mid-cast)
       this.displayedAffectionLabel = this.affectionSystem.getAffectionLabel(this.fishAffection.value);
@@ -1387,38 +1465,6 @@ export class FloaterGame extends Component {
 
 
 
-  // === Catch Sequence ===
-  private enterCatchSequence(): void {
-    this.phase = GamePhase.CatchSequence;
-    this.catchDialogueIndex = 0;
-    this.catchDialogueShown = false;
-    this.hideActionButtons();
-    floaterVM.skipButtonVisible = false;
-
-    // Show silence dialogue
-    const catchData = characterRegistry.getCatchSequenceData(this.fish.id);
-    this.currentLines = catchData?.silenceDialogue ?? ['...'];
-    this.currentLineIndex = 0;
-    this.startNewLine();
-
-    // Set dynamic catch choice label from character data
-    floaterVM.catchChoiceReleaseLabel = catchData?.releaseChoiceLabel ?? this.fish.name;
-
-    console.log('[FloaterGame] Entering Catch Sequence');
-  }
-
-  private advanceCatchDialogue(): void {
-    this.currentLineIndex++;
-    if (this.currentLineIndex >= this.currentLines.length) {
-      // Dialogue done, show choice
-      this.catchDialogueShown = true;
-      floaterVM.catchChoiceVisible = true;
-      floaterVM.dialogueVisible = false;
-    } else {
-      this.startNewLine();
-    }
-  }
-
   // === Endings ===
   /**
    * Trigger the ending for the current fish. Each piece (CG, text screen) is
@@ -1426,6 +1472,21 @@ export class FloaterGame extends Component {
    * endings just have their state advanced without any visual.
    */
   private triggerEnding(type: EndingType): void {
+    // Track journal/CG/stats (same as advanceDepartureDialogue — endings bypass departure)
+    this.questSystem.recordTalkedToFish(this.fish.id);
+    this.questSystem.recordFishLeft(this.fish.id);
+    this.journalSystem.recordCast(this.fish.id, [this.fish.currentExpression]);
+    this.cgGallerySystem.unlockPortraitCG(this.fish.id);
+    this.persistCGData();
+    const newFacts = this.journalSystem.checkFactUnlocks(this.flagSystem.serialize(), this.flagsAtCastStart);
+    if (newFacts.length > 0) {
+      console.log('[FloaterGame] New facts discovered (ending):', newFacts);
+    }
+    this.globalStatsSystem.recordCast(
+      this.journalSystem.getAllFishEntries(),
+      this.flagSystem.serialize()
+    );
+
     const character = characterRegistry.getCharacter(this.fish.id);
     const catchData = character?.catchSequenceData;
 
@@ -1444,7 +1505,7 @@ export class FloaterGame extends Component {
         break;
       case EndingType.DriftAway:
         epitaphText = character?.driftAwayJournalText;
-        cgId = `${this.fish.id}_drift_away`;
+        cgId = `ending_${this.fish.id}_drift_away`;
         break;
     }
 
@@ -1464,6 +1525,7 @@ export class FloaterGame extends Component {
         floaterVM.cgViewerImage = this.cgGallerySystem.getCGTexture(cgId);
         cgShown = true;
         console.log(`[FloaterGame] CG unlocked and displayed: ${cgId}`);
+        this.persistCGData();
       }
     }
 
@@ -1471,7 +1533,14 @@ export class FloaterGame extends Component {
     // has no epitaph for this ending type.
     const textShown = !!epitaphText;
     if (textShown) {
-      floaterVM.endingText = epitaphText!;
+      // Initialize epitaph animation state (fade-in + typewriter)
+      this.epitaphFullText = epitaphText!;
+      this.epitaphFadeTimer = 0;
+      this.epitaphTextProgress = 0;
+      this.epitaphTextComplete = false;
+      floaterVM.endingText = ''; // Start empty, typewriter fills it
+      floaterVM.endingOverlayOpacity = 0; // Start transparent, fades in
+      floaterVM.endingTapVisible = false; // Hidden until typewriter completes
       floaterVM.endingVisible = true;
     } else {
       floaterVM.endingVisible = false;
@@ -1491,7 +1560,6 @@ export class FloaterGame extends Component {
     this.phase = GamePhase.Ending;
     this.currentEnding = type;
     floaterVM.departureVisible = false;
-    floaterVM.catchChoiceVisible = false;
     floaterVM.hudVisible = false;
     this.hideActionButtons();
 
@@ -1931,10 +1999,10 @@ export class FloaterGame extends Component {
     // HUD: portrait, name, no mood/tier text anymore
     floaterVM.hudPortrait = this.fish.portrait ?? this.getPortraitTexture();
     floaterVM.hudNameColor = this.fish.accentColor;
-    floaterVM.hudNameText = this.fish.name;
+    floaterVM.hudNameText = this.getFishDisplayName();
     floaterVM.hudMoodText = this.displayedAffectionLabel;
     floaterVM.hudMoodColor = this.fish.accentColor;
-    floaterVM.hudNameMoodText = this.fish.name;
+    floaterVM.hudNameMoodText = this.getFishDisplayName();
     floaterVM.emotionName = '';
     floaterVM.tierText = this.displayedAffectionLabel;
 
@@ -2555,7 +2623,7 @@ export class FloaterGame extends Component {
       const titleFloatX = CANVAS_WIDTH / 2;
       const titleBobOffset = Math.sin(this.time * FLOAT_BOB_SPEED) * FLOAT_BOB_AMPLITUDE;
       const titleFloatY = 570 + titleBobOffset;
-      this.renderer.drawCastFishingLine(titleFloatX, titleFloatY, 1.0, USE_POV_CAST_ANIMATION);
+      this.renderer.drawCastFishingLine(titleFloatX, titleFloatY, 1.0, USE_POV_CAST_ANIMATION, TITLE_LINE_START_X, TITLE_LINE_START_Y, this.time);
       // Draw bobbing float
       this.renderer.drawFloatAtScaled(titleFloatX, titleFloatY, 1.0, true);
     }
@@ -2567,7 +2635,6 @@ export class FloaterGame extends Component {
       || this.phase === GamePhase.ActionSelect
       || this.phase === GamePhase.FishReaction
       || this.phase === GamePhase.Departure
-      || this.phase === GamePhase.CatchSequence
       || this.phase === GamePhase.NothingBites;
     if (showStaticFloat) {
       // Use the same Bézier curve as the cast line (consistent appearance)
@@ -2578,7 +2645,7 @@ export class FloaterGame extends Component {
       const floatDrawY = this.landingTargetY + bobOffset + dipOffset + this.actionAnimOffsetY;
       // Draw periodic idle ripples FIRST (behind float)
       this.renderer.drawSplashRipples(this.floatIdleRipples);
-      this.renderer.drawCastFishingLine(floatDrawX, floatDrawY, 1.0, USE_POV_CAST_ANIMATION);
+      this.renderer.drawCastFishingLine(floatDrawX, floatDrawY, 1.0, USE_POV_CAST_ANIMATION, undefined, undefined, this.time);
       // During FloatBounce, draw float with bounce offset
       if (this.phase === GamePhase.FloatBounce && !this.showingSurpriseEmoji) {
         const t = this.floatBounceTimer / FLOAT_BOUNCE_DURATION;
@@ -2594,7 +2661,7 @@ export class FloaterGame extends Component {
       if (USE_3D_PHYSICS_CAST) {
         this.renderer.drawSegmentedLine3D(this.lineSegments3D, (v: Vec3D) => this.project3Dto2D(v));
       } else {
-        this.renderer.drawCastFishingLine(this.castFloatX, this.castFloatY, this.castFlightT, USE_POV_CAST_ANIMATION);
+        this.renderer.drawCastFishingLine(this.castFloatX, this.castFloatY, this.castFlightT, USE_POV_CAST_ANIMATION, undefined, undefined, this.time);
       }
       this.renderer.drawFloatAtScaled(this.castFloatX, this.castFloatY, this.castFloatScale);
     }
@@ -2604,7 +2671,7 @@ export class FloaterGame extends Component {
         const progress = Math.min(1.0, this.floatLandedTimer / FLOAT_LANDED_PAUSE);
         this.renderer.drawTransitionLine(this.landingLineSnapshot, this.castFloatX, this.castFloatY, progress, USE_POV_CAST_ANIMATION);
       } else {
-        this.renderer.drawCastFishingLine(this.castFloatX, this.castFloatY, 1.0, USE_POV_CAST_ANIMATION);
+        this.renderer.drawCastFishingLine(this.castFloatX, this.castFloatY, 1.0, USE_POV_CAST_ANIMATION, undefined, undefined, this.time);
       }
       this.renderer.drawFloatAt(this.castFloatX, this.castFloatY, true);
       this.renderer.drawSplashRipples(this.splashRipples);
@@ -2613,6 +2680,14 @@ export class FloaterGame extends Component {
     if (this.fishAlpha > 0) {
       this.renderer.drawCharacterRipples(this.characterRipples, this.fishAlpha);
       this.renderer.drawFishPortrait(this.fishAlpha, this.portraitOffsetX, this.portraitOffsetY, this.getPortraitTexture());
+    }
+
+    // Draw semi-transparent portrait as background during Ending phase
+    if (this.phase === GamePhase.Ending) {
+      const endingPortraitAlpha = 0.2 * Math.min(1, this.epitaphFadeTimer / this.EPITAPH_FADE_DURATION);
+      if (endingPortraitAlpha > 0) {
+        this.renderer.drawEndingPortrait(endingPortraitAlpha, this.getPortraitTexture());
+      }
     }
 
 
@@ -2625,29 +2700,35 @@ export class FloaterGame extends Component {
     const isDialoguePhase = this.phase === GamePhase.Exchange
       || this.phase === GamePhase.FishReaction
       || this.phase === GamePhase.ActionSelect
-      || this.phase === GamePhase.CatchSequence
       || this.phase === GamePhase.Departure
       || this.phase === GamePhase.NothingBites;
-    const showDialogue = isDialoguePhase && !this.catchDialogueShown;
+    const showDialogue = isDialoguePhase;
     floaterVM.dialogueVisible = showDialogue;
-    // Affection gauge visible when dialogue is active (not during NothingBites or Departure)
-    const showGauge = (this.phase === GamePhase.Exchange
+    // Affection gauge visible during dialogue exchange phases (not Departure or NothingBites).
+    const showGauge = this.phase === GamePhase.Exchange
       || this.phase === GamePhase.FishReaction
-      || this.phase === GamePhase.ActionSelect
-      || this.phase === GamePhase.CatchSequence) && !this.catchDialogueShown;
+      || this.phase === GamePhase.ActionSelect;
     floaterVM.gaugeVisible = showGauge;
 
-    // Scenery/narration mode: triggered by asterisk prefix in dialogue text
-    // OR forced during NothingBites phase (no fish present, never show character name)
-    const isScenery = this.displayedText.startsWith('*') || this.phase === GamePhase.NothingBites;
+    // Scenery/narration mode: triggered by asterisk prefix on the line
+    // OR forced during NothingBites phase (no fish present, never show character name).
+    // Detection uses the full line (not displayedText) so styling is stable through
+    // the typewriter and not delayed by the first character render.
+    // FIX: When currentLineIndex is past the end (e.g., ActionSelect after last scenery line),
+    // use the last valid line to preserve the scenery/dialogue mode.
+    const lineIdx = this.currentLineIndex < this.currentLines.length
+      ? this.currentLineIndex
+      : Math.max(0, this.currentLines.length - 1);
+    const fullLine = this.currentLines[lineIdx] ?? '';
+    const isScenery = fullLine.startsWith('*') || this.phase === GamePhase.NothingBites;
     floaterVM.speakerNameVisible = !isScenery;
     floaterVM.dialogueTextAlignment = isScenery ? 'Center' : 'Left';
     floaterVM.dialogueTextFontStyle = isScenery ? 'Italic' : 'Normal';
 
     if (showDialogue) {
-      floaterVM.speakerName = isScenery ? '' : this.fish.name;
+      floaterVM.speakerName = isScenery ? '' : this.getFishDisplayName();
       floaterVM.speakerColor = this.fish.accentColor;
-      floaterVM.dialogueText = this.displayedText;
+      floaterVM.dialogueText = isScenery ? this.displayedText.replace(/^\*+|\*+$/g, '') : this.displayedText;
       floaterVM.showContinue = this.isTextComplete;
       floaterVM.tapIndicatorVisible = this.isTextComplete;
     } else {
@@ -2741,12 +2822,17 @@ export class FloaterGame extends Component {
     floaterVM.castButtonVisible = false;
     floaterVM.inventoryButtonVisible = false;
     floaterVM.journalButtonVisible = false;
-    floaterVM.fishNameText = this.fish.name;
+    floaterVM.fishNameText = this.getFishDisplayName();
     floaterVM.inventoryVisible = false;
     floaterVM.journalVisible = false;
     floaterVM.noLureWarningVisible = false;
-    floaterVM.catchChoiceVisible = false;
     floaterVM.endingVisible = this.phase === GamePhase.Ending;
+    if (this.phase === GamePhase.Ending) {
+      floaterVM.endingOverlayOpacity = 1;
+      floaterVM.endingText = this.epitaphFullText;
+      floaterVM.endingTapVisible = true;
+      this.epitaphTextComplete = true;
+    }
     // Idle bar visibility sync — only visible during LakeIdle (hides when cast starts)
     const showIdleBarSync = this.phase === GamePhase.LakeIdle;
     floaterVM.idleBarVisible = showIdleBarSync;
@@ -2763,26 +2849,29 @@ export class FloaterGame extends Component {
     this.syncAffectionDisplay();
 
     const isDialoguePhaseSync = this.phase === GamePhase.Exchange || this.phase === GamePhase.FishReaction
-      || this.phase === GamePhase.ActionSelect || this.phase === GamePhase.Departure || this.phase === GamePhase.CatchSequence
+      || this.phase === GamePhase.ActionSelect || this.phase === GamePhase.Departure
       || this.phase === GamePhase.NothingBites;
-    const showDialogueSync = isDialoguePhaseSync && !this.catchDialogueShown;
+    const showDialogueSync = isDialoguePhaseSync;
     floaterVM.dialogueVisible = showDialogueSync;
-    // Gauge visible during exchange/reaction/action/catch phases
-    const showGaugeSync = (this.phase === GamePhase.Exchange
+    // Gauge visible during exchange/reaction/action phases.
+    const showGaugeSync = this.phase === GamePhase.Exchange
       || this.phase === GamePhase.FishReaction
-      || this.phase === GamePhase.ActionSelect
-      || this.phase === GamePhase.CatchSequence) && !this.catchDialogueShown;
+      || this.phase === GamePhase.ActionSelect;
     floaterVM.gaugeVisible = showGaugeSync;
 
-    const isScenerySync = this.displayedText.startsWith('*') || this.phase === GamePhase.NothingBites;
+    const lineIdxSync = this.currentLineIndex < this.currentLines.length
+      ? this.currentLineIndex
+      : Math.max(0, this.currentLines.length - 1);
+    const fullLineSync = this.currentLines[lineIdxSync] ?? '';
+    const isScenerySync = fullLineSync.startsWith('*') || this.phase === GamePhase.NothingBites;
     floaterVM.speakerNameVisible = !isScenerySync;
     floaterVM.dialogueTextAlignment = isScenerySync ? 'Center' : 'Left';
     floaterVM.dialogueTextFontStyle = isScenerySync ? 'Italic' : 'Normal';
 
     if (showDialogueSync) {
-      floaterVM.speakerName = isScenerySync ? '' : this.fish.name;
+      floaterVM.speakerName = isScenerySync ? '' : this.getFishDisplayName();
       floaterVM.speakerColor = this.fish.accentColor;
-      floaterVM.dialogueText = this.displayedText;
+      floaterVM.dialogueText = isScenerySync ? this.displayedText.replace(/^\*+|\*+$/g, '') : this.displayedText;
       floaterVM.showContinue = this.isTextComplete;
       floaterVM.tapIndicatorVisible = this.isTextComplete;
     } else {

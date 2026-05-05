@@ -37,3 +37,19 @@ export class ResetCompletePayload {
   readonly success: boolean = false;
 }
 export const OnResetComplete = new NetworkEvent('FloaterResetComplete', ResetCompletePayload);
+
+/** Server → Client: loaded CG data from separate PVar */
+@serializable()
+export class CGDataLoadedPayload {
+  @property({maxLength: 10000})
+  readonly data: string = '';
+}
+export const OnCGDataLoaded = new NetworkEvent('FloaterCGDataLoaded', CGDataLoadedPayload);
+
+/** Client → Server: request to persist CG data separately */
+@serializable()
+export class CGSaveRequestPayload {
+  @property({maxLength: 10000})
+  readonly data: string = '';
+}
+export const OnCGSaveRequested = new NetworkEvent('FloaterCGSaveRequested', CGSaveRequestPayload);

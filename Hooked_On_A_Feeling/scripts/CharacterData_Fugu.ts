@@ -117,12 +117,8 @@ const FUGU_DEPARTURES: Record<string, CastData['departures']> = {
 // ============================================================
 
 const FUGU_CATCH_SEQUENCE_DATA: CatchSequenceData = {
-  silenceDialogue: ['...', 'You know...', 'If you take me... at least I\'ll have known friendship.', 'Even if it\'s just once.', '...', 'So... what do you choose?'],
-  reelEndingDialogue: ['In a round bowl, Fugu swims in circles.', 'He smiles.', 'For the first time, he\'s not alone.', '', 'Even if it\'s forever.'],
-  releaseDialogue: ['...', 'You... you\'re letting me go?', '...', '*swims in joyful circles*', 'You didn\'t take me!', 'You let me CHOOSE!', '...', 'Thank you. Trust me. THANK YOU!'],
   reelEpitaph: 'In a round bowl, Fugu swims in circles.\n\nHe smiles.\n\nFor the first time, he\'s not alone.\n\nEven if it\'s forever.',
   releaseEpitaph: 'Fugu dives into the depths, then surfaces again.\n\nHe swims in joyful circles at the surface.\n\nHe learned that you can be loved without being possessed.\n\nHe comes back every morning. Every morning.',
-  releaseChoiceLabel: 'Fugu',
 };
 
 const FUGU_DRIFT_AWAY_JOURNAL_TEXT =
@@ -198,7 +194,7 @@ export const FUGU_CHARACTER: CharacterConfig = {
   preferredLures: ['feather_fly', 'red_spinner'],
   dislikedLures: ['gold_teardrop', 'bare_hook'],
 
-  lakeZones: ['mid', 'far'],
+  lakeZones: ['near', 'far'],
 
   unlockCondition: () => true,
 
@@ -223,13 +219,31 @@ export const FUGU_CHARACTER: CharacterConfig = {
   catchSequenceData: FUGU_CATCH_SEQUENCE_DATA,
   driftAwayJournalText: FUGU_DRIFT_AWAY_JOURNAL_TEXT,
 
-  staticFacts: [
-    'Warm-colored pufferfish in orange and gold.',
-    'Talks nonstop to fill the silence.',
-    'His toxic spines scare away all other fish.',
-    'Grew up alone with imaginary friends.',
-    'Dreams of having a friend who isn\'t afraid of him.',
-    'Puffs up when excited or scared.',
+  facts: [
+    {
+      flagKey: 'fact.fugu.appearance',
+      text: 'Warm-colored pufferfish in orange and gold.',
+    },
+    {
+      flagKey: 'fact.fugu.talks',
+      text: 'Talks nonstop to fill the silence.',
+    },
+    {
+      flagKey: 'fact.fugu.toxic',
+      text: 'His toxic spines scare away all other fish.',
+    },
+    {
+      flagKey: 'fact.fugu.alone',
+      text: 'Grew up alone with imaginary friends.',
+    },
+    {
+      flagKey: 'fact.fugu.dream',
+      text: "Dreams of having a friend who isn't afraid of him.",
+    },
+    {
+      flagKey: 'fact.fugu.puffs',
+      text: 'Puffs up when excited or scared.',
+    },
   ],
 
   cgs: FUGU_CGS,

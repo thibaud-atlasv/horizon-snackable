@@ -26,6 +26,7 @@ import {
   FLOAT_WIDTH, FLOAT_HEIGHT,
   LINE_START_X, LINE_START_Y,
   POV_LINE_START_X, POV_LINE_START_Y,
+  TITLE_LINE_START_X, TITLE_LINE_START_Y,
   FISH_PORTRAIT_X, FISH_PORTRAIT_Y, FISH_PORTRAIT_SIZE,
   GAUGE_X, GAUGE_Y, GAUGE_WIDTH, GAUGE_HEIGHT,
   GAUGE_BORDER_RADIUS, GAUGE_INDICATOR_HEIGHT,
@@ -115,6 +116,21 @@ export class FloaterRenderer {
       { x: drawX, y: drawY, width: scaledSize, height: scaledSize });
   }
 
+  /** Draw a large semi-transparent portrait centered on canvas during ending phase. */
+  drawEndingPortrait(alpha: number, portraitTexture: TextureAsset): void {
+    if (alpha <= 0) return;
+    // Layer order: dark filter BELOW, portrait ABOVE (no frame on top)
+    // 1. Draw semi-transparent dark overlay on full canvas to darken background
+    const darkenBrush = new SolidBrush(new Color(0.03, 0.05, 0.08, 1 - alpha));
+    this.builder.drawRect(darkenBrush, null, { x: 0, y: 0, width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
+    // 2. Draw portrait centered on top of the darkened background
+    const size = CANVAS_WIDTH * 0.65;
+    const x = (CANVAS_WIDTH - size) / 2;
+    const y = (CANVAS_HEIGHT - size) / 2 - 40; // Slightly above center
+    const portraitBrush = new ImageBrush(portraitTexture);
+    this.builder.drawRect(portraitBrush, null, { x, y, width: size, height: size });
+  }
+
   /** Draw expanding + fading character ripples (same technique as splash ripples).
    *  Positioned at the middle of the portrait (water line). */
   drawCharacterRipples(ripples: SplashRipple[], portraitAlpha: number): void {
@@ -131,10 +147,10 @@ export class FloaterRenderer {
   }
 
 
-  drawCastFishingLine(floaterX: number, floaterY: number, flightProgress: number, usePOV: boolean = false): void {
-    // Choose line origin based on animation style
-    const startX = usePOV ? POV_LINE_START_X : LINE_START_X;
-    const startY = usePOV ? POV_LINE_START_Y : LINE_START_Y;
+  drawCastFishingLine(floaterX: number, floaterY: number, flightProgress: number, usePOV: boolean = false, overrideStartX?: number, overrideStartY?: number, time: number = 0): void {
+    // Choose line origin based on animation style (or use override for title screen)
+    const startX = overrideStartX ?? (usePOV ? POV_LINE_START_X : LINE_START_X);
+    const startY = overrideStartY ?? (usePOV ? POV_LINE_START_Y : LINE_START_Y);
 
     // Calculate midpoint
     const midX = (startX + floaterX) / 2;
@@ -159,7 +175,45 @@ export class FloaterRenderer {
 
     // Connect line to top center of float (where the brass ring is) instead of center
     const lineEndY = floaterY - FLOAT_HEIGHT / 2 + 5;
-    const pathData = `M ${startX.toFixed(1)} ${startY.toFixed(1)} Q ${controlX.toFixed(1)} ${controlY.toFixed(1)} ${floaterX.toFixed(1)} ${lineEndY.toFixed(1)}`;
+
+    // --- Wind effect: sample points along the base Bézier, apply sinusoidal displacement ---
+    const NUM_WIND_POINTS = 8;
+    const WIND_AMPLITUDE = 3.0;  // Max horizontal displacement in pixels
+    const WIND_SPEED = 1.8;      // Oscillation speed
+    const WIND_WAVE_LENGTH = 2.5; // Spatial frequency along the line
+
+    const points: { x: number; y: number }[] = [];
+    for (let i = 0; i <= NUM_WIND_POINTS; i++) {
+      const t = i / NUM_WIND_POINTS;
+      // Quadratic Bézier: B(t) = (1-t)²·P0 + 2·(1-t)·t·P1 + t²·P2
+      const oneMinusT = 1 - t;
+      const bx = oneMinusT * oneMinusT * startX + 2 * oneMinusT * t * controlX + t * t * floaterX;
+      const by = oneMinusT * oneMinusT * startY + 2 * oneMinusT * t * controlY + t * t * lineEndY;
+
+      // Wind displacement: strongest in the middle, zero at endpoints
+      const windEnvelope = Math.sin(t * Math.PI); // 0 at ends, 1 at middle
+      const windOffset = Math.sin(time * WIND_SPEED + t * WIND_WAVE_LENGTH * Math.PI) * WIND_AMPLITUDE * windEnvelope;
+
+      points.push({ x: bx + windOffset, y: by + windOffset * 0.3 });
+    }
+
+    // Draw as Catmull-Rom spline for smooth curve through wind-displaced points
+    const tension = 0.5;
+    let pathData = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+
+      const cp1x = p1.x + (p2.x - p0.x) * tension / 3;
+      const cp1y = p1.y + (p2.y - p0.y) * tension / 3;
+      const cp2x = p2.x - (p3.x - p1.x) * tension / 3;
+      const cp2y = p2.y - (p3.y - p1.y) * tension / 3;
+
+      pathData += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)} ${cp2x.toFixed(1)} ${cp2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
     this.builder.drawPath(null, this.linePen, pathData);
   }
 

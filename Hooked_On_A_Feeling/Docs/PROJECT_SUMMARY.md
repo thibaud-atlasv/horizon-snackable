@@ -126,7 +126,7 @@ The game uses a **modular character system** where each fish is a self-contained
 - **Voice:** Short energetic bursts, repetitions ("Vraiment !"), self-interruptions, "crois-moi !" as verbal signature, sudden silences when loneliness surfaces
 - **Lure affinity:** Feather Fly, Red Spinner; dislikes Gold Teardrop, Bare Hook
 - **Accent colour:** Warm orange #FFB84D
-- **Zones:** Mid, Far (avoids shallow exposed waters)
+- **Zones:** Near, Far (found in shallows and deep waters)
 - **Catch Sequence:** Choice is "Reel" or "Fugu" (let him swim free)
 
 ### Future Characters (Not Yet Implemented)

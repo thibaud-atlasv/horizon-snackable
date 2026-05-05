@@ -11,7 +11,7 @@
 import type { CharacterConfig, CGData, CastData, FishCharacter, CatchSequenceData } from './Types';
 import { DriftState, EmotionIconType, ExpressionState } from './Types';
 import { inkCast } from './InkBeatAdapter';
-import { kashaNeutralTexture } from './Assets';
+import { kashaNeutralTexture, cgKashaLoveEndTexture, cgKashaDriftAwayTexture } from './Assets';
 
 const CHARACTER_ID = 'kasha';
 const KASHA_PORTRAIT_SPRITE = 'sprites/char_veiltail_neutral.png';
@@ -117,12 +117,8 @@ const KASHA_DEPARTURES: Record<string, CastData['departures']> = {
 // ============================================================
 
 const KASHA_CATCH_SEQUENCE_DATA: CatchSequenceData = {
-  silenceDialogue: ['...', 'Whatever you choose.', 'I picked you.', "Don't forget that.", 'Hikaru.'],
-  reelEndingDialogue: ['She wanted to be chosen.', '', 'Chosen is not the same as taken.', '', 'She had told you the difference.'],
-  releaseDialogue: ['...', 'Hah.', '...', 'Took you long enough.', 'Baka.', '...', 'Hikaru.'],
   reelEpitaph: 'She wanted to be chosen.\n\nChosen is not the same as taken.\n\nShe had told you the difference.',
   releaseEpitaph: 'She wanted to be a person.\n\nNot a prize.\n\nYou let her be the person she was.\n\nShe comes back tomorrow.\n\nShe will keep coming back.',
-  releaseChoiceLabel: 'Aki',
 };
 
 const KASHA_DRIFT_AWAY_JOURNAL_TEXT =
@@ -154,11 +150,31 @@ const KASHA_CGS: CGData[] = [
     thumbnailPath: KASHA_PORTRAIT_SPRITE,
     thumbnailTexture: kashaNeutralTexture,
   },
+  {
+    id: 'ending_kasha_love_end',
+    characterId: CHARACTER_ID,
+    name: 'The Trophy',
+    description: 'She wanted to be chosen.',
+    unlockCondition: "Complete Kasha's Reel ending",
+    thumbnailPath: '@sprites/kasha_love_end.png',
+    thumbnailTexture: cgKashaLoveEndTexture,
+  },
+  {
+    id: 'ending_kasha_drift_away',
+    characterId: CHARACTER_ID,
+    name: 'The Empty Corner',
+    description: 'The corner is empty.',
+    unlockCondition: 'Kasha leaves after repeated DRIFT_SCARED',
+    thumbnailPath: '@sprites/kasha_drift_away.png',
+    thumbnailTexture: cgKashaDriftAwayTexture,
+  },
 ];
 
 export const KASHA_CHARACTER: CharacterConfig = {
   id: CHARACTER_ID,
   name: 'Kasha',
+  trueName: 'Aki',
+  trueNameFlag: 'secret.kasha.real_name_given',
   species: 'Siamese Fighting Fish (Betta)',
   accentColor: '#D33A2C',
 
@@ -196,12 +212,31 @@ export const KASHA_CHARACTER: CharacterConfig = {
   catchSequenceData: KASHA_CATCH_SEQUENCE_DATA,
   driftAwayJournalText: KASHA_DRIFT_AWAY_JOURNAL_TEXT,
 
-  staticFacts: [
-    'A vivid red betta with orange-gold fin tips.',
-    'Claims to be the champion of her corner.',
-    'Calls Floater "baka" as a term of endearment.',
-    'Refers to herself in third person when stressed.',
-    'Came from somewhere else. Left because she was second.',
+  facts: [
+    {
+      flagKey: 'fact.kasha.appearance',
+      text: 'A vivid red betta with orange-gold fin tips.',
+    },
+    {
+      flagKey: 'fact.kasha.champion',
+      text: 'Claims to be the champion of her corner.',
+    },
+    {
+      flagKey: 'fact.kasha.baka',
+      text: 'Calls Floater "baka" as a term of endearment.',
+    },
+    {
+      flagKey: 'fact.kasha.third_person',
+      text: 'Refers to herself in third person when stressed.',
+    },
+    {
+      flagKey: 'fact.kasha.origin',
+      text: 'Came from somewhere else. Left because she was second.',
+    },
+    {
+      flagKey: 'fact.kasha.real_name',
+      text: 'Her real name is Aki (revealed in final cast).',
+    },
   ],
 
   cgs: KASHA_CGS,

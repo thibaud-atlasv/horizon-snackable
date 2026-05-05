@@ -5,7 +5,7 @@
  */
 
 // Valid namespace prefixes
-const VALID_NAMESPACES = ['met.', 'secret.', 'quest.', 'mood.', 'count.', 'cross.', 'run.', 'time.'];
+const VALID_NAMESPACES = ['met.', 'secret.', 'quest.', 'mood.', 'count.', 'cross.', 'run.', 'time.', 'fact.'];
 
 export class FlagSystem {
   private flags: Map<string, boolean | number> = new Map();

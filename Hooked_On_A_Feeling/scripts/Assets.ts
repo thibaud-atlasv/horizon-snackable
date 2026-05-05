@@ -9,6 +9,24 @@ export const fuguNeutralTexture: TextureAsset = new TextureAsset("@sprites/char_
 // === Kasha Sprites ===
 export const kashaNeutralTexture: TextureAsset = new TextureAsset("@sprites/char_veiltail_neutral.png");
 
+// === Catfish (NPC) Sprites ===
+export const catfishNeutralTexture: TextureAsset = new TextureAsset("@sprites/char_catfish_neutral.png");
+
+// === Carp (NPC) Sprites ===
+export const carpNeutralTexture: TextureAsset = new TextureAsset("@sprites/carp_neutral.png");
+
+// === Perch (NPC) Sprites ===
+export const perchNeutralTexture: TextureAsset = new TextureAsset("@sprites/perch_neutral.png");
+
+// === Eel (NPC) Sprites ===
+export const eelNeutralTexture: TextureAsset = new TextureAsset("@sprites/eel_neutral.png");
+
+// === Pike (NPC) Sprites ===
+export const pikeNeutralTexture: TextureAsset = new TextureAsset("@sprites/pike_neutral.png");
+
+// === Trout (NPC) Sprites ===
+export const troutNeutralTexture: TextureAsset = new TextureAsset("@sprites/trout_neutral.png");
+
 // === Fishing Float ===
 export const fishingFloatTexture: TextureAsset = new TextureAsset("@sprites/float_bobber.png");
 
@@ -51,4 +69,6 @@ export const cgNereiaReleaseEndTexture: TextureAsset = new TextureAsset("@sprite
 export const cgFuguDriftAwayTexture: TextureAsset = new TextureAsset("@sprites/fugu_drift_away.png");
 export const cgFuguLoveEndTexture: TextureAsset = new TextureAsset("@sprites/fugu_love_end.png");
 export const cgFuguReleaseEndTexture: TextureAsset = new TextureAsset("@sprites/fugu_release_end.png");
+export const cgKashaLoveEndTexture: TextureAsset = new TextureAsset("@sprites/kasha_love_end.png");
+export const cgKashaDriftAwayTexture: TextureAsset = new TextureAsset("@sprites/kasha_drift_away.png");
 
