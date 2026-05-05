@@ -8,12 +8,13 @@
  * Casts progress in the order declared in NEREIA_CAST_DEFS — no tiers.
  */
 
-import type { CharacterConfig, CastData, FishCharacter, CatchSequenceData } from './Types';
+import type { CharacterConfig, CGData, CastData, FishCharacter, CatchSequenceData } from './Types';
 import { DriftState, EmotionIconType, ExpressionState } from './Types';
 import { inkCast } from './InkBeatAdapter';
-import { nereiaNeutralTexture } from './Assets';
+import { nereiaNeutralTexture, cgNereiaLoveEndTexture, cgNereiaReleaseEndTexture } from './Assets';
 
 const CHARACTER_ID = 'nereia';
+const NEREIA_PORTRAIT_SPRITE = 'sprites/nereia_neutral.png';
 
 // ============================================================
 // Cast definitions — dialogue pulled from Ink, departures shared from a side table
@@ -150,6 +151,36 @@ function getCasts(): CastData[] {
 // Character configuration (exported)
 // ============================================================
 
+const NEREIA_CGS: CGData[] = [
+  {
+    id: 'portrait_nereia',
+    characterId: CHARACTER_ID,
+    name: 'Nereia',
+    description: 'First encounter with the midnight koi.',
+    unlockCondition: 'Meet Nereia for the first time',
+    thumbnailPath: NEREIA_PORTRAIT_SPRITE,
+    thumbnailTexture: nereiaNeutralTexture,
+  },
+  {
+    id: 'ending_nereia_reel',
+    characterId: CHARACTER_ID,
+    name: 'The Last Morning',
+    description: 'The data ends here. The lake remembers.',
+    unlockCondition: 'Choose "Reel" in Nereia\'s catch sequence',
+    thumbnailPath: 'sprites/nereia_love_end.png',
+    thumbnailTexture: cgNereiaLoveEndTexture,
+  },
+  {
+    id: 'ending_nereia_release',
+    characterId: CHARACTER_ID,
+    name: 'The File Is Closed',
+    description: 'The lake remembers. You will remember. It is more than enough.',
+    unlockCondition: 'Choose Nereia\'s name in the catch sequence',
+    thumbnailPath: 'sprites/nereia_release_end.png',
+    thumbnailTexture: cgNereiaReleaseEndTexture,
+  },
+];
+
 export const NEREIA_CHARACTER: CharacterConfig = {
   id: CHARACTER_ID,
   name: 'Nereia',
@@ -159,6 +190,8 @@ export const NEREIA_CHARACTER: CharacterConfig = {
   portraitAssets: {
     neutral: '@sprites/nereia_neutral.png',
   },
+  portraitTexture: nereiaNeutralTexture,
+  portraitSpritePath: NEREIA_PORTRAIT_SPRITE,
 
   preferredLures: ['gold_teardrop', 'shell_hook'],
   dislikedLures: ['red_spinner'],
@@ -193,4 +226,6 @@ export const NEREIA_CHARACTER: CharacterConfig = {
     'Ornamental scales that shimmer purple and gold.',
     'Speaks with formal precision.',
   ],
+
+  cgs: NEREIA_CGS,
 };

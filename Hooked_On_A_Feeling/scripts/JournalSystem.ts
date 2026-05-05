@@ -10,6 +10,7 @@ import type { JournalFishEntry, JournalSaveData, LureReaction } from './Types';
 import { characterRegistry } from './CharacterRegistry';
 import { QuestSystem } from './QuestSystem';
 import { FlagSystem } from './FlagSystem';
+import { AffectionSystem } from './AffectionSystem';
 
 // === Character Card Data (for journal teasing display) ===
 export interface CharacterCardData {
@@ -23,6 +24,7 @@ export interface CharacterCardData {
   questHint: string;
   questName: string;
   tierName: string;
+  tierColor: string;
   teaserHint: string; // Hint shown for locked characters
 }
 
@@ -220,18 +222,17 @@ export class JournalSystem {
 
 
   // === Character Teasing System ===
-  
-  getTierName(fishId: string) : string {
-    return "unaware";
-  }
 
-  getCharacterCardsData(): CharacterCardData[] {
+  getCharacterCardsData(affectionValues?: Record<string, number>): CharacterCardData[] {
     const allCharacters = characterRegistry.getAllCharacters();
     const cards: CharacterCardData[] = [];
+    const affectionSystem = new AffectionSystem();
 
     for (const char of allCharacters) {
       const entry = this.fishEntries.get(char.id);
       const unlocked = entry?.unlocked ?? false;
+      const affectionValue = affectionValues?.[char.id] ?? 0;
+      const tierInfo = affectionSystem.getTierInfo(affectionValue);
 
       cards.push({
         id: char.id,
@@ -244,7 +245,8 @@ export class JournalSystem {
         questHint: unlocked ? this.getQuestHintForFish(char.id) : '???',
         questName: unlocked ? this.getQuestNameForFish(char.id) : '???',
         teaserHint: this.getTeaserHint(char),
-        tierName: unlocked ? this.getTierName(char.id) : '???',
+        tierName: unlocked ? tierInfo.name : '???',
+        tierColor: unlocked ? tierInfo.color : '#3A4A5A',
       });
     }
 

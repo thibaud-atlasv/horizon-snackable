@@ -66,15 +66,14 @@ import { FloaterRenderer } from './FloaterRenderer';
 import { FlagSystem } from './FlagSystem';
 import { SaveSystem } from './SaveSystem';
 import { AffectionSystem } from './AffectionSystem';
-import { createNereia, getBeats, getCast, getCastCount } from './CastData';
+import { createDefaultCharacter, getBeats, getCast, getCastCount } from './CastData';
 import { characterRegistry } from './CharacterRegistry';
 import { QuestSystem } from './QuestSystem';
 import { EncounterSystem } from './EncounterSystem';
 import { ALL_LURES } from './LureData';
-import { CGGallerySystem, CG_TEXTURE_MAP } from './CGGallerySystem';
+import { CGGallerySystem } from './CGGallerySystem';
 import { JournalSystem } from './JournalSystem';
 import { GlobalStatsSystem } from './GlobalStatsSystem';
-import { nereiaNeutralTexture, kashaNeutralTexture } from './Assets';
 import {
   OnSaveDataLoaded,
   OnSaveDataRequested,
@@ -144,14 +143,14 @@ export class FloaterGame extends Component {
   private journalSystem: JournalSystem = new JournalSystem();
   private globalStatsSystem: GlobalStatsSystem = new GlobalStatsSystem();
 
-  // Affection data
-  private fishAffection: FishAffection = this.affectionSystem.createAffection('nereia'); // Re-initialized in loadGame()
+  // Affection data — re-initialized in loadGame()
+  private fishAffection: FishAffection = this.affectionSystem.createAffection(characterRegistry.getDefaultCharacterId());
   private sessionId: string = `session_${Date.now()}`;
   private displayedAffectionLabel: string = 'Indifferent'; // Updated at cast boundaries only
 
   // Game state
   private phase: GamePhase = GamePhase.Title;
-  private fish: FishCharacter = createNereia();
+  private fish: FishCharacter = createDefaultCharacter();
   private beats: Beat[] = [];
   private currentBeatIndex: number = 0;
   private seenBeats: Set<string> = new Set();
@@ -452,35 +451,40 @@ export class FloaterGame extends Component {
     if (this.cgGallerySystem.isCGUnlocked(cgId)) {
       this.cgGallerySystem.openViewer(cgId);
       floaterVM.cgViewerVisible = true;
-      floaterVM.cgViewerImage = CG_TEXTURE_MAP[cgId] ?? nereiaNeutralTexture;
+      floaterVM.cgViewerImage = this.cgGallerySystem.getCGTexture(cgId);
       console.log(`[FloaterGame] CG viewer opened: ${cgId}`);
     }
+  }
+
+  /** Build a map of characterId -> affection value for all fish (current + saved). */
+  private buildAffectionValuesMap(): Record<string, number> {
+    const values: Record<string, number> = {};
+    // Current fish
+    values[this.fish.id] = this.fishAffection.value;
+    // Other fish from saved records
+    for (const [id, data] of Object.entries(this.savedFishRecords)) {
+      values[id] = data.affection;
+    }
+    return values;
   }
 
   @subscribe(onCharacterDetailOpen)
   onCharacterDetailOpenEvent(payload: FloaterTabSelectedPayload): void {
     const charId = payload.parameter;
-    const cards = this.journalSystem.getCharacterCardsData();
+    const affectionValues = this.buildAffectionValuesMap();
+    const cards = this.journalSystem.getCharacterCardsData(affectionValues);
     const card = cards.find(c => c.id === charId);
     if (!card || !card.unlocked) return;
 
-    const portraitMap: Record<string, string> = {
-      'nereia': 'sprites/nereia_neutral.png',
-      'kasha': 'sprites/char_veiltail_neutral.png',
-    };
-    const accentMap: Record<string, string> = {
-      'nereia': '#9B7FCC',
-      'kasha': '#D33A2C',
-    };
+    const character = characterRegistry.getCharacter(charId);
 
     floaterVM.charDetailName = card.name;
     floaterVM.charDetailSpecies = card.species;
     floaterVM.charDetailTierName = card.tierName;
     floaterVM.charDetailCasts = String(card.castsMade);
-    floaterVM.charDetailAccentColor = accentMap[charId] ?? card.accentColor;
-    floaterVM.charDetailPortrait = portraitMap[charId] ?? 'sprites/nereia_neutral.png';
-    floaterVM.charDetailShowNereia = charId === 'nereia';
-    floaterVM.charDetailShowKasha = charId === 'kasha';
+    floaterVM.charDetailAccentColor = card.accentColor;
+    floaterVM.charDetailTierColor = card.tierColor;
+    floaterVM.charDetailPortrait = character?.portraitTexture;
     floaterVM.charDetailQuestName = card.questName;
     floaterVM.charDetailQuestHint = card.questHint;
 
@@ -522,45 +526,32 @@ export class FloaterGame extends Component {
     // Met counter
     floaterVM.journalMetCounter = this.journalSystem.getMetCounterText();
 
-    // Character cards data
-    const cards = this.journalSystem.getCharacterCardsData();
-    for (const card of cards) {
-      if (card.id === 'nereia') {
-        floaterVM.nereiaCardUnlocked = card.unlocked;
-        floaterVM.nereiaCardName = card.name;
-        floaterVM.nereiaCardSpecies = card.species;
-        floaterVM.nereiaCardTier = card.tierName;
-        floaterVM.nereiaCardCasts = String(card.castsMade);
-      } else if (card.id === 'kasha') {
-        floaterVM.kashaCardUnlocked = card.unlocked;
-        floaterVM.kashaCardName = card.name;
-        floaterVM.kashaCardSpecies = card.species;
-        floaterVM.kashaCardTier = card.tierName;
-        floaterVM.kashaCardCasts = String(card.castsMade);
-      }
-    }
+    // Character cards (Fish tab) — built from registry, no per-id branching.
+    const cards = this.journalSystem.getCharacterCardsData(this.buildAffectionValuesMap());
+    floaterVM.setCharacterCards(cards.map(card => {
+      const config = characterRegistry.getCharacter(card.id);
+      return {
+        id: card.id,
+        name: card.name,
+        species: card.species,
+        tier: card.tierName,
+        casts: String(card.castsMade),
+        unlocked: card.unlocked,
+        spritePath: config?.portraitSpritePath ?? '',
+        texture: config?.portraitTexture,
+        accentColor: card.accentColor,
+      };
+    }));
 
-    // CG Gallery unlock states (Collection tab)
+    // CG Gallery (Collection tab) — built from registry-aggregated CG data.
     const cgCards = this.cgGallerySystem.getGalleryCards();
-    for (const cgCard of cgCards) {
-      if (cgCard.id === 'portrait_nereia') {
-        floaterVM.cgPortraitNereiaUnlocked = cgCard.isUnlocked;
-        floaterVM.cgPortraitNereiaLocked = !cgCard.isUnlocked;
-        floaterVM.cgPortraitNereiaName = cgCard.isUnlocked ? cgCard.name : '???';
-      } else if (cgCard.id === 'portrait_kasha') {
-        floaterVM.cgPortraitKashaUnlocked = cgCard.isUnlocked;
-        floaterVM.cgPortraitKashaLocked = !cgCard.isUnlocked;
-        floaterVM.cgPortraitKashaName = cgCard.isUnlocked ? cgCard.name : '???';
-      } else if (cgCard.id === 'ending_nereia_reel') {
-        floaterVM.cgEndingNereiaReelUnlocked = cgCard.isUnlocked;
-        floaterVM.cgEndingNereiaReelLocked = !cgCard.isUnlocked;
-        floaterVM.cgEndingNereiaReelName = cgCard.isUnlocked ? cgCard.name : '???';
-      } else if (cgCard.id === 'ending_nereia_release') {
-        floaterVM.cgEndingNereiaReleaseUnlocked = cgCard.isUnlocked;
-        floaterVM.cgEndingNereiaReleaseLocked = !cgCard.isUnlocked;
-        floaterVM.cgEndingNereiaReleaseName = cgCard.isUnlocked ? cgCard.name : '???';
-      }
-    }
+    floaterVM.setCGCards(cgCards.map(cg => ({
+      id: cg.id,
+      name: cg.name,
+      unlocked: cg.isUnlocked,
+      spritePath: cg.thumbnailPath,
+      texture: cg.thumbnailTexture,
+    })));
     floaterVM.cgCollectionProgress = this.cgGallerySystem.getCollectionText();
   }
 
@@ -663,8 +654,8 @@ export class FloaterGame extends Component {
 
     // Reset all game state to initial
     this.phase = GamePhase.Title;
-    this.fish = createNereia();
-    this.fishAffection = this.affectionSystem.createAffection('nereia');
+    this.fish = createDefaultCharacter();
+    this.fishAffection = this.affectionSystem.createAffection(characterRegistry.getDefaultCharacterId());
     this.beats = [];
     this.currentBeatIndex = 0;
     this.seenBeats = new Set();
@@ -732,6 +723,19 @@ export class FloaterGame extends Component {
   @subscribe(OnFocusedInteractionInputStartedEvent)
   onTouchStart(payload: OnFocusedInteractionInputEventPayload): void {
     if (payload.interactionIndex !== 0) return;
+
+    if (this.phase === GamePhase.Ending) {
+      // Tap to dismiss ending screen and return to gameplay
+      console.log('[FloaterGame] Ending dismissed via tap → returning to LakeIdle');
+      floaterVM.endingVisible = false;
+      floaterVM.cgViewerVisible = false;
+      // Increment cast index for the character whose ending just completed
+      this.currentCastIndex++;
+      this.perFishCastIndex[this.fish.id] = this.currentCastIndex;
+      this.saveSystem.requestSave();
+      this.enterLakeIdle();
+      return;
+    }
 
     if (this.phase === GamePhase.CastCharging) {
       this.castPower = this.powerGaugeValue;
@@ -1023,7 +1027,7 @@ export class FloaterGame extends Component {
       console.log('[FloaterGame] Nothing bites — entering NothingBites phase');
       this.phase = GamePhase.NothingBites;
       this.nothingBitesTimer = NOTHING_BITES_DURATION;
-      this.currentLines = ['*Nothing bites...'];
+      this.currentLines = ['Nothing bites...'];
       this.currentLineIndex = 0;
       this.startNewLine();
       floaterVM.dialogueVisible = true;
@@ -1416,66 +1420,82 @@ export class FloaterGame extends Component {
   }
 
   // === Endings ===
+  /**
+   * Trigger the ending for the current fish. Each piece (CG, text screen) is
+   * optional and shown only if the character declares it — NPCs without
+   * endings just have their state advanced without any visual.
+   */
   private triggerEnding(type: EndingType): void {
-    this.phase = GamePhase.Ending;
-    this.currentEnding = type;
+    const character = characterRegistry.getCharacter(this.fish.id);
+    const catchData = character?.catchSequenceData;
 
-    const endingCatchData = characterRegistry.getCatchSequenceData(this.fish.id);
+    // Resolve epitaph text + CG id per ending type.
+    let epitaphText: string | undefined;
+    let cgId: string | undefined;
     switch (type) {
       case EndingType.Reel:
-        floaterVM.endingText = endingCatchData?.reelEpitaph ?? 'End.';
-        // Unlock the CG for this character's Reel ending
-        const cgId = `ending_${this.fish.id}_reel`;
-        const newlyUnlocked = this.cgGallerySystem.unlockCG(cgId);
-        if (newlyUnlocked) {
-          // Show fullscreen CG viewer with fade-in
-          this.cgGallerySystem.openViewer(cgId);
-          floaterVM.cgViewerVisible = true;
-          floaterVM.cgViewerImage = CG_TEXTURE_MAP[cgId] ?? nereiaNeutralTexture;
-          console.log(`[FloaterGame] CG unlocked and displayed: ${cgId}`);
-        }
+        epitaphText = catchData?.reelEpitaph;
+        cgId = `ending_${this.fish.id}_reel`;
         break;
       case EndingType.Release:
-        floaterVM.endingText = endingCatchData?.releaseEpitaph ?? 'Released.';
+        epitaphText = catchData?.releaseEpitaph;
+        cgId = `ending_${this.fish.id}_release`;
         this.flagSystem.set(`cross.${this.fish.id}.released`, true);
-        // Unlock the CG for this character's Release ending
-        const releaseCgId = `ending_${this.fish.id}_release`;
-        const releaseNewlyUnlocked = this.cgGallerySystem.unlockCG(releaseCgId);
-        if (releaseNewlyUnlocked) {
-          // Show fullscreen CG viewer with fade-in
-          this.cgGallerySystem.openViewer(releaseCgId);
-          floaterVM.cgViewerVisible = true;
-          floaterVM.cgViewerImage = CG_TEXTURE_MAP[releaseCgId] ?? nereiaNeutralTexture;
-          console.log(`[FloaterGame] Release CG unlocked and displayed: ${releaseCgId}`);
-        }
         break;
       case EndingType.DriftAway:
-        const driftCgId = `${this.fish.id}_drift_away`;
-        const driftCgUnlocked = this.cgGallerySystem.unlockCG(driftCgId);
-        if (driftCgUnlocked) {
-          this.cgGallerySystem.openViewer(driftCgId);
-          floaterVM.cgViewerVisible = true;
-          floaterVM.cgViewerImage = CG_TEXTURE_MAP[driftCgId] ?? nereiaNeutralTexture;
-          console.log(`[FloaterGame] Drift-Away CG unlocked and displayed: ${driftCgId}`);
-        }
-        floaterVM.endingText = characterRegistry.getCharacter(this.fish.id)?.driftAwayJournalText
-          ?? 'She was not there.\n\nThe file was closed.\n\n7:14. The surface was empty.';
+        epitaphText = character?.driftAwayJournalText;
+        cgId = `${this.fish.id}_drift_away`;
         break;
     }
 
-    floaterVM.endingVisible = true;
+    // Bookkeeping always runs — the ending logically happened.
+    this.flagSystem.set(`${this.fish.id}.catch_available`, false);
+    this.flagSystem.set(`${this.fish.id}.ending_complete`, true);
+    this.saveSystem.requestSave();
+
+    // Optional fullscreen CG — shown only if the character declares one
+    // for this ending (and only on first unlock, preserving prior behavior).
+    let cgShown = false;
+    if (cgId && this.cgGallerySystem.getCG(cgId)) {
+      const newlyUnlocked = this.cgGallerySystem.unlockCG(cgId);
+      if (newlyUnlocked) {
+        this.cgGallerySystem.openViewer(cgId);
+        floaterVM.cgViewerVisible = true;
+        floaterVM.cgViewerImage = this.cgGallerySystem.getCGTexture(cgId);
+        cgShown = true;
+        console.log(`[FloaterGame] CG unlocked and displayed: ${cgId}`);
+      }
+    }
+
+    // Optional ending text overlay — skipped entirely if the character
+    // has no epitaph for this ending type.
+    const textShown = !!epitaphText;
+    if (textShown) {
+      floaterVM.endingText = epitaphText!;
+      floaterVM.endingVisible = true;
+    } else {
+      floaterVM.endingVisible = false;
+    }
+
+    // Nothing to display → advance straight back to lake idle.
+    if (!cgShown && !textShown) {
+      console.log(`[FloaterGame] No ending visuals for ${this.fish.id}/${type} — skipping ending phase`);
+      this.currentCastIndex++;
+      this.perFishCastIndex[this.fish.id] = this.currentCastIndex;
+      this.saveSystem.requestSave();
+      this.enterLakeIdle();
+      return;
+    }
+
+    // Enter the ending phase — wait for the player tap to dismiss.
+    this.phase = GamePhase.Ending;
+    this.currentEnding = type;
     floaterVM.departureVisible = false;
     floaterVM.catchChoiceVisible = false;
     floaterVM.hudVisible = false;
     this.hideActionButtons();
 
-    // Mark catch as used
-    this.flagSystem.set(`${this.fish.id}.catch_available`, false);
-    // Mark character ending as complete — permanently removes from encounter pool
-    this.flagSystem.set(`${this.fish.id}.ending_complete`, true);
-    this.saveSystem.requestSave();
-
-    console.log(`[FloaterGame] Ending triggered: ${type}, ${this.fish.id}.ending_complete set`);
+    console.log(`[FloaterGame] Ending triggered: ${type}, cg=${cgShown}, text=${textShown}`);
   }
 
   // === Emotion Icons ===
@@ -1894,13 +1914,11 @@ export class FloaterGame extends Component {
   }
 
   // === Affection Display ===
-  /** Get the correct portrait texture for the current fish character */
-  private getPortraitTexture(): typeof nereiaNeutralTexture {
-    switch (this.fish.id) {
-      case 'kasha': return kashaNeutralTexture;
-      case 'nereia':
-      default: return nereiaNeutralTexture;
-    }
+  /** Get the correct portrait texture for the current fish character. */
+  private getPortraitTexture() {
+    const config = characterRegistry.getCharacter(this.fish.id);
+    if (config) return config.portraitTexture;
+    return characterRegistry.getCharacter(characterRegistry.getDefaultCharacterId())!.portraitTexture;
   }
 
   private syncAffectionDisplay(): void {
@@ -1911,9 +1929,7 @@ export class FloaterGame extends Component {
     floaterVM.updateGaugeMarker(this.fishAffection.value);
 
     // HUD: portrait, name, no mood/tier text anymore
-    floaterVM.hudShowNereia = this.fish.id === 'nereia';
-    floaterVM.hudShowKasha = this.fish.id === 'kasha';
-    floaterVM.hudPortrait = this.fish.portrait;
+    floaterVM.hudPortrait = this.fish.portrait ?? this.getPortraitTexture();
     floaterVM.hudNameColor = this.fish.accentColor;
     floaterVM.hudNameText = this.fish.name;
     floaterVM.hudMoodText = this.displayedAffectionLabel;
@@ -2622,13 +2638,14 @@ export class FloaterGame extends Component {
     floaterVM.gaugeVisible = showGauge;
 
     // Scenery/narration mode: triggered by asterisk prefix in dialogue text
-    const isScenery = this.displayedText.startsWith('*');
+    // OR forced during NothingBites phase (no fish present, never show character name)
+    const isScenery = this.displayedText.startsWith('*') || this.phase === GamePhase.NothingBites;
     floaterVM.speakerNameVisible = !isScenery;
     floaterVM.dialogueTextAlignment = isScenery ? 'Center' : 'Left';
     floaterVM.dialogueTextFontStyle = isScenery ? 'Italic' : 'Normal';
 
     if (showDialogue) {
-      floaterVM.speakerName = this.fish.name;
+      floaterVM.speakerName = isScenery ? '' : this.fish.name;
       floaterVM.speakerColor = this.fish.accentColor;
       floaterVM.dialogueText = this.displayedText;
       floaterVM.showContinue = this.isTextComplete;
@@ -2757,13 +2774,13 @@ export class FloaterGame extends Component {
       || this.phase === GamePhase.CatchSequence) && !this.catchDialogueShown;
     floaterVM.gaugeVisible = showGaugeSync;
 
-    const isScenerySync = this.displayedText.startsWith('*');
+    const isScenerySync = this.displayedText.startsWith('*') || this.phase === GamePhase.NothingBites;
     floaterVM.speakerNameVisible = !isScenerySync;
     floaterVM.dialogueTextAlignment = isScenerySync ? 'Center' : 'Left';
     floaterVM.dialogueTextFontStyle = isScenerySync ? 'Italic' : 'Normal';
 
     if (showDialogueSync) {
-      floaterVM.speakerName = this.fish.name;
+      floaterVM.speakerName = isScenerySync ? '' : this.fish.name;
       floaterVM.speakerColor = this.fish.accentColor;
       floaterVM.dialogueText = this.displayedText;
       floaterVM.showContinue = this.isTextComplete;

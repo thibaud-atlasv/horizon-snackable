@@ -17,10 +17,6 @@ export const COLOR_UI_TEXT_PRIMARY = '#E8EAD8';
 export const COLOR_UI_TEXT_SECONDARY = '#8A9AB0';
 export const COLOR_UI_SEPARATOR = '#1A3A5C';
 
-// === Nereia accent colors ===
-export const COLOR_NEREIA_ACCENT = '#9B7FCC';
-export const COLOR_NEREIA_GOLD = '#E8A84C';
-
 // === Float ===
 export const FLOAT_X = CANVAS_WIDTH / 2;
 export const FLOAT_Y = CANVAS_HEIGHT * 0.58;

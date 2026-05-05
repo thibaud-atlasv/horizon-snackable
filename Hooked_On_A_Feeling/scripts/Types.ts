@@ -137,8 +137,10 @@ export interface CatchSequenceData {
   silenceDialogue: string[];
   reelEndingDialogue: string[];
   releaseDialogue: string[];
-  reelEpitaph: string;
-  releaseEpitaph: string;
+  /** Optional — when omitted, the Reel ending screen is skipped (NPC-friendly). */
+  reelEpitaph?: string;
+  /** Optional — when omitted, the Release ending screen is skipped (NPC-friendly). */
+  releaseEpitaph?: string;
   releaseChoiceLabel: string;
 }
 
@@ -232,6 +234,10 @@ export interface CharacterConfig {
   species: string;
   accentColor: string;
   portraitAssets: CharacterPortraitAssets;
+  /** Loaded TextureAsset for the neutral portrait — used by HUD, journal, CG viewer. */
+  portraitTexture: TextureAsset;
+  /** Sprite path string for XAML Image.Source bindings (e.g. 'sprites/foo.png'). */
+  portraitSpritePath: string;
   preferredLures: string[];
   dislikedLures: string[];
   lakeZones: LakeZone[];
@@ -245,6 +251,8 @@ export interface CharacterConfig {
   catchSequenceData?: CatchSequenceData;
   driftAwayJournalText?: string;
   staticFacts: string[];
+  /** CGs owned by this character (portraits, endings). Aggregated by registry. */
+  cgs?: CGData[];
 }
 
 // === CG (Computer Graphics) Gallery ===
@@ -255,6 +263,8 @@ export interface CGData {
   description: string;
   unlockCondition: string;
   thumbnailPath: string;
+  /** Loaded TextureAsset for fullscreen viewer + thumbnail rendering. */
+  thumbnailTexture: TextureAsset;
 }
 
 // === CG Gallery Card (for XAML grid display) ===
@@ -264,6 +274,7 @@ export interface CGGalleryCard {
   characterId: string;
   isUnlocked: boolean;
   thumbnailPath: string;
+  thumbnailTexture: TextureAsset;
 }
 
 // === Save Data ===

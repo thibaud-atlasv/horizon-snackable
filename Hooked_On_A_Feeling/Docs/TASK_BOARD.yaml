@@ -318,6 +318,20 @@ tasks:
       - name: Remove CG_IMAGE_MAP from CGGallerySystem.ts
         status: done
 
+  - name: Fugu Ending CGs
+    status: done
+    summary: Added 3 ending CGs for Fugu (drift_away, love_end, release_end) to gallery system. Affection range calculated - MIN -48, MAX +79 across all 10 casts.
+    files:
+      - scripts/Assets.ts
+      - scripts/CharacterData_Fugu.ts
+
+  - name: Fish Name Colors
+    status: done
+    summary: Fish names now use their accent color in Fish tab and Character Detail overlay
+    files:
+      - xaml/floater.xaml
+      - scripts/FloaterGame.ts
+
 chopping_block:
   disabled_systems: []
   temp_scaffolding: []

@@ -16,6 +16,7 @@
 import { parseInk, type Story, type Stmt } from './InkParser';
 import { InkRunner } from './InkRunner';
 import { KASHA_STORY } from './Story_Kasha';
+import { FUGU_STORY } from './Story_Fugu';
 import { NEREIA_STORY } from './Story_Nereia';
 
 // ============================================================
@@ -24,6 +25,7 @@ import { NEREIA_STORY } from './Story_Nereia';
 
 const STORY_SOURCES: Record<string, string> = {
   kasha: KASHA_STORY,
+  fugu: FUGU_STORY,
   nereia: NEREIA_STORY,
 };
 

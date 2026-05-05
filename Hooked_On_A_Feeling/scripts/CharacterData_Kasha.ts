@@ -8,12 +8,13 @@
  * Casts progress in the order declared in KASHA_CAST_DEFS — no tiers.
  */
 
-import type { CharacterConfig, CastData, FishCharacter, CatchSequenceData } from './Types';
+import type { CharacterConfig, CGData, CastData, FishCharacter, CatchSequenceData } from './Types';
 import { DriftState, EmotionIconType, ExpressionState } from './Types';
 import { inkCast } from './InkBeatAdapter';
 import { kashaNeutralTexture } from './Assets';
 
 const CHARACTER_ID = 'kasha';
+const KASHA_PORTRAIT_SPRITE = 'sprites/char_veiltail_neutral.png';
 
 // ============================================================
 // Cast definitions (start node + display name) — dialogue from Ink
@@ -143,6 +144,18 @@ function getCasts(): CastData[] {
 // Character configuration (exported)
 // ============================================================
 
+const KASHA_CGS: CGData[] = [
+  {
+    id: 'portrait_kasha',
+    characterId: CHARACTER_ID,
+    name: 'Kasha',
+    description: 'First encounter with the crimson veiltail.',
+    unlockCondition: 'Meet Kasha for the first time',
+    thumbnailPath: KASHA_PORTRAIT_SPRITE,
+    thumbnailTexture: kashaNeutralTexture,
+  },
+];
+
 export const KASHA_CHARACTER: CharacterConfig = {
   id: CHARACTER_ID,
   name: 'Kasha',
@@ -152,6 +165,8 @@ export const KASHA_CHARACTER: CharacterConfig = {
   portraitAssets: {
     neutral: '@sprites/char_veiltail_neutral.png',
   },
+  portraitTexture: kashaNeutralTexture,
+  portraitSpritePath: KASHA_PORTRAIT_SPRITE,
 
   preferredLures: ['red_spinner', 'bone_whistle'],
   dislikedLures: ['gold_teardrop'],
@@ -188,4 +203,6 @@ export const KASHA_CHARACTER: CharacterConfig = {
     'Refers to herself in third person when stressed.',
     'Came from somewhere else. Left because she was second.',
   ],
+
+  cgs: KASHA_CGS,
 };
